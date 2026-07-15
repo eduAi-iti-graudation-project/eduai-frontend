@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduAI - Submit Assignment</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Quicksand:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface-variant": "#3d4944",
+                    "error": "#ba1a1a",
+                    "on-background": "#0a1842",
+                    "outline-variant": "#bccac2",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed": "#410001",
+                    "secondary-fixed-dim": "#ffb4aa",
+                    "on-secondary-fixed-variant": "#8c1714",
+                    "tertiary-container": "#976d00",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#d0d8ff",
+                    "on-surface": "#0a1842",
+                    "surface-variant": "#dce1ff",
+                    "surface-container": "#ebedff",
+                    "inverse-surface": "#212e58",
+                    "tertiary-fixed-dim": "#f4be4e",
+                    "inverse-primary": "#6adab6",
+                    "on-primary-fixed-variant": "#00513e",
+                    "on-primary-fixed": "#002117",
+                    "tertiary": "#785600",
+                    "on-tertiary-fixed": "#261900",
+                    "on-error": "#ffffff",
+                    "surface-container-low": "#f3f2ff",
+                    "secondary-fixed": "#ffdad5",
+                    "on-primary-container": "#f5fff8",
+                    "inverse-on-surface": "#eff0ff",
+                    "background": "#faf8ff",
+                    "secondary-container": "#fc695b",
+                    "primary": "#006951",
+                    "surface-container-highest": "#dce1ff",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#008467",
+                    "on-tertiary-fixed-variant": "#5d4200",
+                    "secondary": "#ae3028",
+                    "primary-fixed-dim": "#6adab6",
+                    "on-tertiary-container": "#fffbff",
+                    "primary-fixed": "#87f7d1",
+                    "on-secondary-container": "#690004",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#faf8ff",
+                    "surface": "#faf8ff",
+                    "surface-tint": "#006c53",
+                    "on-secondary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "3xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "48px",
+                    "sm": "12px",
+                    "margin-desktop": "40px",
+                    "margin-mobile": "16px",
+                    "base": "8px",
+                    "xl": "80px",
+                    "gutter": "24px",
+                    "md": "24px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter"],
+                    "headline-xl": ["Quicksand"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Quicksand"],
+                    "label-sm": ["Inter"],
+                    "headline-md": ["Quicksand"],
+                    "body-md": ["Inter"],
+                    "headline-lg-mobile": ["Quicksand"]
+            },
+            "fontSize": {
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #faf8ff;
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-active {
+            background-color: #008467;
+            color: #f5fff8;
+            border-radius: 9999px;
+            font-weight: 700;
+        }
+        .file-upload-gradient {
+            background: linear-gradient(135deg, #6366F1 0%, #14B8A6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .submit-button-gradient {
+            background: linear-gradient(135deg, #6366F1 0%, #14B8A6 100%);
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+        }
+        .submit-button-gradient:hover {
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+            transform: translateY(-1px);
+        }
+        .sparkle-icon-gradient {
+            background: linear-gradient(135deg, #FF6B5D 0%, #785600 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .blur-blob {
+            filter: blur(40px);
+            opacity: 0.15;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar (Shared Component Identity) -->
+<aside class="hidden md:flex flex-col h-screen w-64 docked left-0 bg-surface-container-low dark:bg-surface-container-lowest py-md px-sm gap-base sticky top-0 shrink-0">
+<div class="flex flex-col gap-xs px-2 mb-lg">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim leading-none">EduAI Admin</h1>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Teacher Portal</p>
+</div>
+</div>
+</div>
+<nav class="flex-grow space-y-1">
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-label-md text-label-md">Classes</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+<span class="font-label-md text-label-md">Rubrics</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 bg-primary-container text-on-primary-container rounded-full font-bold scale-98 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">list_alt</span>
+<span class="font-label-md text-label-md">Submissions</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">notifications_active</span>
+<span class="font-label-md text-label-md">Alerts</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-label-md text-label-md">Assistant</span>
+</a>
+</nav>
+<div class="mt-auto space-y-1 pt-base border-t border-outline-variant/30">
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-grow relative flex items-center justify-center p-md lg:p-lg overflow-hidden">
+<!-- Background Decorations -->
+<div class="absolute top-0 left-0 w-64 h-64 bg-primary-container blur-blob rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute bottom-0 right-0 w-96 h-96 bg-secondary-container blur-blob rounded-full translate-x-1/3 translate-y-1/3"></div>
+<!-- Assignment Card -->
+<section class="relative z-10 w-full max-w-2xl bg-surface-container-lowest rounded-3xl shadow-xl shadow-on-background/5 border border-on-surface/5 p-8 lg:p-[32px]">
+<!-- Header -->
+<div class="mb-8">
+<div class="flex items-center gap-base mb-2">
+<span class="material-symbols-outlined text-4xl sparkle-icon-gradient" style="font-variation-settings: 'FILL' 1;">auto_awesome_motion</span>
+<h2 class="font-headline-lg text-headline-lg text-on-background">Submit Your Assignment</h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Add your notes and upload your file below to complete this task.</p>
+</div>
+<!-- Form -->
+<form action="#" class="space-y-6">
+<!-- Notes Area -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-background ml-1" for="notes">Notes &amp; Comments</label>
+<textarea class="w-full bg-surface-container-low border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-2xl p-4 font-body-md text-body-md transition-all placeholder:text-on-surface-variant/50 min-h-[140px]" id="notes" name="notes" placeholder="Add any notes or comments about your assignment..." rows="5"></textarea>
+</div>
+<!-- File Upload Zone -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-background ml-1">File Upload</label>
+<div class="relative group cursor-pointer">
+<div class="flex flex-col items-center justify-center w-full min-h-[180px] bg-[#F5F7FF] border-2 border-dashed border-[#6366F1]/30 rounded-2xl hover:border-[#14B8A6]/50 hover:bg-[#F0F2FF] transition-all p-6 text-center">
+<span class="material-symbols-outlined text-5xl mb-3 file-upload-gradient" style="font-variation-settings: 'FILL' 1;">cloud_upload</span>
+<p class="font-headline-md text-[18px] text-on-background">Drag &amp; drop your PDF here, or <span class="text-[#6366F1] font-bold">click to browse</span></p>
+<p class="font-label-sm text-label-sm text-on-surface-variant/70 mt-1">PDF only, max 10MB</p>
+<input accept=".pdf" class="absolute inset-0 opacity-0 cursor-pointer" type="file"/>
+</div>
+</div>
+</div>
+<!-- Selected File Pill -->
+<div class="flex flex-wrap items-center gap-sm">
+<div class="flex items-center gap-xs bg-surface-variant/50 border border-outline-variant rounded-full py-1.5 pl-3 pr-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+<span class="material-symbols-outlined text-red-500" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-label-md text-label-md text-on-surface">industrial_revolution_essay.pdf</span>
+<button class="ml-1 w-6 h-6 flex items-center justify-center rounded-full hover:bg-error/10 text-on-surface-variant hover:text-error transition-colors" type="button">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+</div>
+<!-- Action Button -->
+<div class="pt-4 flex justify-end">
+<button class="submit-button-gradient text-white flex items-center gap-sm px-8 py-4 rounded-full font-bold transition-all group" type="submit">
+<span class="font-label-md text-label-md">Submit Assignment</span>
+<span class="material-symbols-outlined transition-transform group-hover:translate-x-1 group-hover:-translate-y-0.5">send</span>
+</button>
+</div>
+</form>
+<!-- Decorative low-opacity blobs for internal depth -->
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-primary-container/20 blur-3xl rounded-full pointer-events-none"></div>
+<div class="absolute -bottom-10 -left-10 w-40 h-40 bg-secondary-container/10 blur-3xl rounded-full pointer-events-none"></div>
+</section>
+</main>
+<!-- Mobile Navigation (Responsive Pivot) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface border-t border-outline-variant/30 py-base px-margin-mobile pb-safe shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-label-sm text-[10px]">Classes</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 scale-90" href="#">
+<span class="material-symbols-outlined">list_alt</span>
+<span class="font-label-sm text-[10px]">Submits</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-label-sm text-[10px]">AI Bot</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for the upload zone
+        const dropzone = document.querySelector('.relative.group');
+        if (dropzone) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.add('scale-[1.02]');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.remove('scale-[1.02]');
+                }, false);
+            });
+        }
+
+        // Form submission animation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalContent = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = `<span class="material-symbols-outlined animate-spin">progress_activity</span> <span class="font-label-md text-label-md">Sending...</span>`;
+            
+            setTimeout(() => {
+                btn.innerHTML = `<span class="material-symbols-outlined">check_circle</span> <span class="font-label-md text-label-md">Success!</span>`;
+                btn.classList.replace('submit-button-gradient', 'bg-primary');
+                
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                    btn.classList.replace('bg-primary', 'submit-button-gradient');
+                }, 2000);
+            }, 1500);
+        });
+    </script>
+</body></html>
