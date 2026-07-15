@@ -49,86 +49,59 @@
   }
 }
 
-/* Custom CSS for gradients and animations from HTML design */
 body {
   background-color: #faf8ff;
   font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
 }
 
-.sidebar-active {
-  background-color: #008467;
-  color: #f5fff8;
-  border-radius: 9999px;
-  font-weight: 700;
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
 }
 
-.file-upload-gradient {
+.text-gradient {
   background: linear-gradient(135deg, #6366F1 0%, #14B8A6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.submit-button-gradient {
+.bg-gradient-submit {
   background: linear-gradient(135deg, #6366F1 0%, #14B8A6 100%);
-  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
 }
 
-.submit-button-gradient:hover {
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
-  transform: translateY(-1px);
-}
-
-.sparkle-icon-gradient {
-  background: linear-gradient(135deg, #FF6B5D 0%, #785600 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.blur-blob {
+.blurred-blob {
+  position: absolute;
+  width: 120px;
+  height: 120px;
   filter: blur(40px);
   opacity: 0.15;
   z-index: 0;
+  pointer-events: none;
 }
 
-/* Animation keyframes */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) translateX(0) scale(1);
-  }
-  33% {
-    transform: translateY(-30px) translateX(20px) scale(1.05);
-  }
-  66% {
-    transform: translateY(15px) translateX(-15px) scale(0.98);
-  }
+.blob-1 { top: -20px; right: -20px; background-color: #6366F1; }
+.blob-2 { bottom: -20px; left: -20px; background-color: #14B8A6; }
+
+.upload-zone {
+  border: 2px dashed #bccac2;
+  background-color: #F5F7FF;
+  transition: all 0.3s ease;
 }
 
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
+.upload-zone:hover {
+  border-color: #1F9D7C;
+  background-color: #f0f3ff;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.glow-button {
+  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
 }
 
-.animate-float {
-  animation: float 8s ease-in-out infinite;
+.glow-button:active {
+  transform: scale(0.98);
 }
 
-.animate-bounce {
-  animation: bounce 2s ease-in-out infinite;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
+body {
+  min-height: max(884px, 100dvh);
 }
