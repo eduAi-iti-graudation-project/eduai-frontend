@@ -80,6 +80,7 @@ export default {
         "on-primary": "#ffffff",
         "surface-bright": "#faf8ff",
         "surface-tint": "#006c53",
+        "surface-container-high": "#e0e2ff",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -101,6 +102,7 @@ export default {
         "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
         "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "700" }],
         "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+        "label-sm-mobile": ["11px", { lineHeight: "14px", fontWeight: "500" }],
         "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
         "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
       },
