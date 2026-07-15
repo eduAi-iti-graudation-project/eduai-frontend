@@ -11,34 +11,38 @@ const assignmentSchema = z
     notes: z
       .string()
       .trim()
-      .min(10, "Notes must be at least 10 characters")
       .max(1000, "Notes must be 1000 characters or fewer"),
     file: z.instanceof(File).nullable(),
   })
   .superRefine((value, context) => {
-    if (!value.file) {
+    const hasNotes = value.notes.length >= 10
+    const hasFile = value.file !== null
+
+    if (!hasNotes && !hasFile) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["file"],
-        message: "Please upload a PDF file",
+        path: ["notes"],
+        message: "Either add notes (min 10 characters) or upload a PDF file",
       })
       return
     }
 
-    if (value.file.type !== "application/pdf") {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["file"],
-        message: "Only PDF files are allowed",
-      })
-    }
+    if (hasFile && value.file) {
+      if (value.file.type !== "application/pdf") {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["file"],
+          message: "Only PDF files are allowed",
+        })
+      }
 
-    if (value.file.size > MAX_FILE_SIZE) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["file"],
-        message: "File size must be 10MB or less",
-      })
+      if (value.file.size > MAX_FILE_SIZE) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["file"],
+          message: "File size must be 10MB or less",
+        })
+      }
     }
   })
 
