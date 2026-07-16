@@ -205,6 +205,34 @@
   transform: scale(0.98);
 }
 
+.blur-blob {
+  filter: blur(80px);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.submit-button-gradient {
+  background: linear-gradient(135deg, #6366f1 0%, #14b8a6 100%);
+}
+
+.submit-button-gradient:hover {
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+}
+
+.sparkle-icon-gradient {
+  background: linear-gradient(135deg, #6366f1, #14b8a6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.file-upload-gradient {
+  background: linear-gradient(135deg, #6366f1, #14b8a6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* ── Font weight utilities for headline/body tokens ──────────── */
 .font-headline-xl,
 .font-headline-lg,
