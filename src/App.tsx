@@ -1,10 +1,10 @@
 import { Toaster } from "sonner"
-import { StudentAssignmentForm } from "./components/StudentAssignmentForm"
+import { InstructorAssignmentForm } from "./components/InstructorAssignmentForm"
 
 function App() {
   return (
     <>
-      <StudentAssignmentForm />
+      <InstructorAssignmentForm />
       <Toaster richColors position="top-right" />
     </>
   )
