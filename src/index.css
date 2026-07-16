@@ -232,13 +232,6 @@
   font-weight: 400;
 }
 
-/* ── Responsive adjustments ──────────────────────────────────── */
-@media (min-width: 768px) {
-  .md\:hidden {
-    display: none !important;
-  }
-}
-
 /* Safe area padding for mobile bottom nav */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
