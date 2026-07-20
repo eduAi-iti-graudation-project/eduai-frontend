@@ -52,6 +52,7 @@
   --color-on-error: #ffffff;
   --color-on-error-container: #93000a;
 
+  --color-outline: #6d7a74;
   --color-outline-variant: #bccac2;
 
   /* ── Font families ── */
@@ -270,4 +271,34 @@
 /* Safe area padding for mobile bottom nav */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Stitch Signup animations ──────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 4.5s ease-in-out infinite 0.5s;
+}
+
+.tactile-card {
+  border: 1.5px solid rgba(35, 48, 90, 0.08);
+}
+
+/* Custom scrollbar for clean UI */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #faf8ff;
+}
+::-webkit-scrollbar-thumb {
+  background: #bccac2;
+  border-radius: 10px;
 }
