@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sign Up | EduAI</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "outline": "#6d7a74",
+                  "tertiary-fixed-dim": "#f4be4e",
+                  "inverse-surface": "#212e58",
+                  "surface-bright": "#faf8ff",
+                  "secondary": "#ae3028",
+                  "error-container": "#ffdad6",
+                  "error": "#ba1a1a",
+                  "surface-container-highest": "#dce1ff",
+                  "secondary-fixed-dim": "#ffb4aa",
+                  "primary-container": "#008467",
+                  "on-secondary-fixed-variant": "#8c1714",
+                  "on-error-container": "#93000a",
+                  "tertiary": "#785600",
+                  "tertiary-container": "#976d00",
+                  "on-error": "#ffffff",
+                  "on-primary": "#ffffff",
+                  "on-background": "#0a1842",
+                  "on-secondary-fixed": "#410001",
+                  "primary": "#006951",
+                  "on-tertiary-fixed": "#261900",
+                  "surface-dim": "#d0d8ff",
+                  "primary-fixed": "#87f7d1",
+                  "on-tertiary": "#ffffff",
+                  "surface": "#faf8ff",
+                  "outline-variant": "#bccac2",
+                  "on-tertiary-fixed-variant": "#5d4200",
+                  "on-surface": "#0a1842",
+                  "secondary-container": "#fc695b",
+                  "on-tertiary-container": "#fffbff",
+                  "background": "#faf8ff",
+                  "surface-variant": "#dce1ff",
+                  "inverse-on-surface": "#eff0ff",
+                  "secondary-fixed": "#ffdad5",
+                  "tertiary-fixed": "#ffdea4",
+                  "on-primary-fixed": "#002117",
+                  "on-primary-fixed-variant": "#00513e",
+                  "on-surface-variant": "#3d4944",
+                  "surface-container": "#ebedff",
+                  "surface-container-high": "#e3e7ff",
+                  "on-primary-container": "#f5fff8",
+                  "primary-fixed-dim": "#6adab6",
+                  "on-secondary": "#ffffff",
+                  "on-secondary-container": "#690004",
+                  "inverse-primary": "#6adab6",
+                  "surface-container-lowest": "#ffffff",
+                  "surface-tint": "#006c53",
+                  "surface-container-low": "#f3f2ff"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "2xl": "1rem",
+                  "3xl": "1.5rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "margin-mobile": "16px",
+                  "sm": "12px",
+                  "md": "24px",
+                  "margin-desktop": "40px",
+                  "gutter": "24px",
+                  "base": "8px",
+                  "xs": "4px",
+                  "xl": "80px",
+                  "lg": "48px"
+          },
+          "fontFamily": {
+                  "headline-lg": ["Quicksand"],
+                  "headline-xl": ["Quicksand"],
+                  "headline-md": ["Quicksand"],
+                  "label-md": ["Inter"],
+                  "label-sm": ["Inter"],
+                  "headline-lg-mobile": ["Quicksand"],
+                  "body-md": ["Inter"],
+                  "body-lg": ["Inter"]
+          },
+          "fontSize": {
+                  "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                  "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                  "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                  "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                  "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                  "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+    }
+    .animate-float {
+      animation: float 4s ease-in-out infinite;
+    }
+    .animate-float-delayed {
+      animation: float 4.5s ease-in-out infinite 0.5s;
+    }
+
+    .form-input-focus:focus-within {
+      border-color: #006951;
+      box-shadow: 0 0 0 4px rgba(0, 105, 81, 0.1);
+    }
+    
+    .tactile-card {
+      border: 1.5px solid rgba(35, 48, 90, 0.08);
+    }
+
+    /* Custom scrollbar for clean UI */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #faf8ff;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #bccac2;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen overflow-x-hidden">
+<main class="flex min-h-screen flex-col md:flex-row">
+<!-- Left Branding Side -->
+<section class="hidden md:flex md:w-1/2 bg-surface relative flex-col justify-between p-margin-desktop overflow-hidden">
+<!-- Logo -->
+<div class="z-10">
+<span class="font-headline-lg text-headline-lg text-primary tracking-tight">EduAI</span>
+</div>
+<!-- Main Content Center -->
+<div class="relative flex-1 flex flex-col items-center justify-center">
+<!-- Floating Badges -->
+<div class="absolute top-1/4 left-1/4 animate-float bg-surface-container-lowest tactile-card p-4 rounded-2xl flex items-center gap-3 z-20">
+<span class="material-symbols-outlined text-primary-container text-3xl">smart_toy</span>
+<div class="flex flex-col">
+<span class="font-label-md text-on-surface">Assistant</span>
+<span class="text-xs text-on-surface-variant">Ready to help</span>
+</div>
+</div>
+<div class="absolute bottom-1/4 right-1/4 animate-float-delayed bg-surface-container-lowest tactile-card p-4 rounded-2xl flex items-center gap-3 z-20">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-3xl" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<div class="flex flex-col">
+<span class="font-label-md text-on-surface">Insight</span>
+<span class="text-xs text-on-surface-variant">New suggestion</span>
+</div>
+</div>
+<!-- 3D Illustration -->
+<div class="w-full max-w-md relative z-10 transition-transform duration-700 hover:scale-105">
+<img alt="EduAI" class="w-full h-auto drop-shadow-2xl" src="https://lh3.googleusercontent.com/aida/AP1WRLt9HJKH-lwtn2dFJvnDHn6htm1MKtHUIIlGtSUxPU3foL6CxC6kHZ8kem8HQwY1OXrTRJSZHrJHyURPtsVcUWK3BTB0HcrLrzAwAnBkGkMghjNZ_VeyMAVFax9E8ruSJUzpegKn9k2I-fS3qcaXqIwrcpEmFDRKrVeG-yDtIeAVJoWsq-VRd8V0rcP_mD3HUqwkfzimOwMBMgTIbMhnJeo0cDeg8F5TbF2tFAImQfzq9Mul2PUD9yJSfZE"/>
+</div>
+</div>
+<!-- Tagline -->
+<div class="z-10 text-center">
+<p class="font-body-lg text-body-lg text-on-background opacity-80 max-w-sm mx-auto">
+          Empowering education through artificial intelligence
+        </p>
+</div>
+<!-- Subtle background blobs -->
+<div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-fixed opacity-10 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-24 -right-24 w-80 h-80 bg-secondary-fixed opacity-10 rounded-full blur-3xl"></div>
+</section>
+<!-- Right Form Side -->
+<section class="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 lg:p-24 bg-surface-container-low">
+<div class="w-full max-w-md bg-surface-container-lowest rounded-3xl p-8 md:p-10 shadow-[0_20px_50px_rgba(10,24,66,0.05)] tactile-card">
+<!-- Mobile Logo -->
+<div class="md:hidden mb-8 text-center">
+<span class="font-headline-lg text-headline-lg text-primary">EduAI</span>
+</div>
+<header class="mb-8">
+<h1 class="font-headline-lg text-headline-lg text-on-background mb-2">Create Account</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Join the future of classroom management.</p>
+</header>
+<!-- Role Toggle -->
+<div class="flex p-1 bg-surface-variant rounded-full mb-8 relative">
+<button class="flex-1 py-2 rounded-full font-label-md transition-all duration-300 z-10 text-on-primary-container bg-primary-container" id="teacherBtn" onclick="setRole('teacher')">
+            Teacher
+          </button>
+<button class="flex-1 py-2 rounded-full font-label-md transition-all duration-300 z-10 text-on-surface-variant" id="studentBtn" onclick="setRole('student')">
+            Student
+          </button>
+</div>
+<form class="space-y-5" onsubmit="return false;">
+<!-- Full Name -->
+<div class="space-y-1.5">
+<label class="font-label-md text-on-background ml-1">Full Name</label>
+<div class="flex items-center gap-3 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl form-input-focus transition-all">
+<span class="material-symbols-outlined text-outline">person</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-body-md placeholder:text-outline-variant" placeholder="John Doe" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-1.5">
+<label class="font-label-md text-on-background ml-1">Email Address</label>
+<div class="flex items-center gap-3 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl form-input-focus transition-all">
+<span class="material-symbols-outlined text-outline">mail</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-body-md placeholder:text-outline-variant" placeholder="name@school.edu" type="email"/>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-1.5">
+<label class="font-label-md text-on-background ml-1">Password</label>
+<div class="flex items-center gap-3 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl form-input-focus transition-all">
+<span class="material-symbols-outlined text-outline">lock</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-body-md placeholder:text-outline-variant" id="passwordInput" placeholder="••••••••" type="password"/>
+<button class="flex items-center justify-center hover:text-primary transition-colors" onclick="togglePassword()" type="button">
+<span class="material-symbols-outlined text-outline" id="passToggleIcon">visibility</span>
+</button>
+</div>
+</div>
+<!-- CTA Button -->
+<button class="w-full mt-4 py-4 bg-secondary-container text-white font-headline-md rounded-full shadow-lg shadow-secondary-container/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group">
+            Get Started
+            <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-4 my-8">
+<div class="h-[1px] flex-1 bg-surface-container-highest"></div>
+<span class="font-label-sm text-outline-variant tracking-widest uppercase">OR SIGN UP WITH</span>
+<div class="h-[1px] flex-1 bg-surface-container-highest"></div>
+</div>
+<!-- Social Logins -->
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-3 py-3 border-2 border-surface-container-highest rounded-xl hover:bg-surface transition-colors font-label-md text-on-surface">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+            Google
+          </button>
+<button class="flex items-center justify-center gap-3 py-3 border-2 border-surface-container-highest rounded-xl hover:bg-surface transition-colors font-label-md text-on-surface">
+<svg class="w-5 h-5" viewbox="0 0 23 23">
+<rect fill="#f35325" height="11" width="11"></rect>
+<rect fill="#81bc06" height="11" width="11" x="12"></rect>
+<rect fill="#05a6f0" height="11" width="11" y="12"></rect>
+<rect fill="#ffba08" height="11" width="11" x="12" y="12"></rect>
+</svg>
+            Microsoft
+          </button>
+</div>
+<!-- Footer -->
+<footer class="mt-8 text-center">
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Already have an account? 
+            <a class="text-primary font-bold hover:underline ml-1" href="#">Log in</a>
+</p>
+</footer>
+</div>
+</section>
+</main>
+<script>
+    function togglePassword() {
+      const input = document.getElementById('passwordInput');
+      const icon = document.getElementById('passToggleIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerText = 'visibility_off';
+      } else {
+        input.type = 'password';
+        icon.innerText = 'visibility';
+      }
+    }
+
+    function setRole(role) {
+      const teacherBtn = document.getElementById('teacherBtn');
+      const studentBtn = document.getElementById('studentBtn');
+      
+      if (role === 'teacher') {
+        teacherBtn.classList.add('bg-primary-container', 'text-on-primary-container');
+        teacherBtn.classList.remove('text-on-surface-variant');
+        studentBtn.classList.remove('bg-primary-container', 'text-on-primary-container');
+        studentBtn.classList.add('text-on-surface-variant');
+      } else {
+        studentBtn.classList.add('bg-primary-container', 'text-on-primary-container');
+        studentBtn.classList.remove('text-on-surface-variant');
+        teacherBtn.classList.remove('bg-primary-container', 'text-on-primary-container');
+        teacherBtn.classList.add('text-on-surface-variant');
+      }
+    }
+
+    // Add subtle hover effect to icons
+    document.querySelectorAll('.form-input-focus').forEach(container => {
+      container.addEventListener('mouseenter', () => {
+        container.querySelector('.material-symbols-outlined').style.color = '#006951';
+      });
+      container.addEventListener('mouseleave', () => {
+        if (!container.querySelector('input').matches(':focus')) {
+          container.querySelector('.material-symbols-outlined').style.color = '#6d7a74';
+        }
+      });
+    });
+  </script>
+</body></html>
