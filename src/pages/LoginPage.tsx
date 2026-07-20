@@ -6,9 +6,20 @@ import { toast } from "sonner"
 import { useAuth } from "@/providers/use-auth"
 import { loginSchema, type LoginFormData } from "@/lib/validations"
 import { cn } from "@/lib/utils"
+import authImg from "@/assets/auth.png"
+
+type Role = "teacher" | "student"
+
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h < 12) return "Good morning! Time to start the class."
+  if (h < 18) return "Good afternoon! Your AI assistant is ready."
+  return "Good evening! Wrapping up the school day?"
+}
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [role, setRole] = useState<Role>("teacher")
   const { login } = useAuth()
   const navigate = useNavigate()
 
@@ -36,28 +47,106 @@ export function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-surface-bright flex items-center justify-center p-margin-mobile md:p-margin-desktop">
-      <div className="w-full max-w-[450px]">
-        <div className="text-center mb-lg">
-          <h1 className="font-headline-xl text-headline-xl text-primary mb-md">EduAI</h1>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs">Welcome Back</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">Sign in to your account to continue.</p>
+    <main className="flex min-h-screen flex-col md:flex-row">
+      {/* Left Side: Branding & Illustration */}
+      <section className="relative w-full md:w-1/2 bg-surface flex flex-col items-center justify-center p-8 md:p-10 overflow-hidden">
+        {/* Decorative Blobs */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary-fixed/20 blur-3xl rounded-full pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary-fixed/20 blur-3xl rounded-full pointer-events-none" />
+
+        {/* Logo */}
+        <div className="absolute top-8 left-8 z-20">
+          <span className="font-headline-lg text-headline-lg text-primary font-bold">EduAI</span>
         </div>
 
-        <div className="w-full bg-surface-container-lowest rounded-3xl p-8 md:p-10 shadow-[0_20px_50px_rgba(10,24,66,0.05)] tactile-card">
-          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-            <div className="space-y-1.5">
-              <label className="font-label-md text-on-background ml-1" htmlFor="email">Email Address</label>
-              <div className={cn(
-                "flex items-center gap-3 px-4 py-3 bg-white border-2 rounded-xl transition-all",
-                "focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)]",
-                errors.email ? "border-error" : "border-surface-container-highest"
-              )}>
-                <span className="material-symbols-outlined text-outline shrink-0">mail</span>
+        {/* Floating Badges */}
+        <div className="absolute top-1/4 left-[6%] z-20 animate-float hidden lg:block" style={{ animationDelay: "0.5s" }}>
+          <div className="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-xl flex items-center gap-3 border border-surface-variant">
+            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container shrink-0">
+              <span className="material-symbols-outlined">smart_toy</span>
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-1/4 right-[6%] z-20 animate-float hidden lg:block" style={{ animationDelay: "1.2s" }}>
+          <div className="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-xl flex items-center gap-3 border border-surface-variant">
+            <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+              <span className="material-symbols-outlined">insights</span>
+            </div>
+            <div>
+              <p className="text-[12px] font-bold text-on-surface-variant leading-none">Insight</p>
+              <p className="text-[10px] text-outline">Real-time Data</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Central Content */}
+        <div className="relative z-10 text-center w-[85%] max-w-2xl">
+          <div className="mb-4 shadow-2xl rounded-2xl overflow-hidden">
+            <img
+              alt="3D graduation cap resting on a stack of books"
+              className="w-full h-auto object-contain drop-shadow-2xl"
+              src={authImg}
+            />
+          </div>
+          <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed max-w-sm mx-auto">
+            Empowering education through artificial intelligence
+          </p>
+        </div>
+      </section>
+
+      {/* Right Side: Login Form */}
+      <section className="w-full md:w-1/2 flex items-center justify-center p-margin-mobile md:p-margin-desktop bg-surface-container-low">
+        <div className="w-full max-w-[460px] bg-surface-container-lowest p-6 md:p-8 lg:p-10 rounded-[32px] tactile-card">
+          {/* Header */}
+          <header className="mb-md text-center">
+            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1">Welcome Back</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant" id="greeting">{getGreeting()}</p>
+          </header>
+
+          {/* Role Toggle */}
+          <div className="mb-md p-1 bg-surface-variant rounded-full flex">
+            <button
+              type="button"
+              className={cn(
+                "flex-1 py-2 rounded-full font-label-md flex items-center justify-center gap-2 transition-all duration-300",
+                role === "teacher"
+                  ? "bg-primary-container text-on-primary-container shadow-sm"
+                  : "text-on-surface-variant"
+              )}
+              onClick={() => setRole("teacher")}
+            >
+              <span className="material-symbols-outlined text-[20px]">school</span>
+              Teacher
+            </button>
+            <button
+              type="button"
+              className={cn(
+                "flex-1 py-2 rounded-full font-label-md flex items-center justify-center gap-2 transition-all duration-300",
+                role === "student"
+                  ? "bg-primary-container text-on-primary-container shadow-sm"
+                  : "text-on-surface-variant"
+              )}
+              onClick={() => setRole("student")}
+            >
+              <span className="material-symbols-outlined text-[20px]">face</span>
+              Student
+            </button>
+          </div>
+
+          {/* Form Fields */}
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+            {/* Email */}
+            <div className="space-y-xs">
+              <label className="font-label-md text-label-md text-on-surface ml-base" htmlFor="email">Email Address</label>
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none">mail</span>
                 <input
                   id="email"
-                  className="bg-transparent border-none focus:ring-0 w-full text-body-md placeholder:text-outline-variant outline-none"
-                  placeholder="name@school.edu"
+                  className={cn(
+                    "form-input-focus w-full pl-12 pr-md py-4 rounded-xl border-2 bg-white text-on-surface placeholder:text-outline-variant font-body-md transition-all outline-none",
+                    errors.email ? "border-error" : "border-surface-container-highest"
+                  )}
+                  placeholder="e.g. name@school.edu"
                   type="email"
                   {...register("email")}
                 />
@@ -67,20 +156,20 @@ export function LoginPage() {
               )}
             </div>
 
-            <div className="space-y-1">
-              <div className="flex justify-between items-center ml-1">
+            {/* Password */}
+            <div className="space-y-xs">
+              <div className="flex justify-between items-center px-base">
                 <label className="font-label-md text-label-md text-on-surface" htmlFor="password">Password</label>
-                <button type="button" className="font-label-sm text-label-sm text-primary hover:underline">Forgot?</button>
+                <button type="button" className="font-label-sm text-label-sm text-primary hover:underline font-bold">Forgot password?</button>
               </div>
-              <div className={cn(
-                "flex items-center gap-3 px-4 py-3 bg-white border-2 rounded-xl transition-all",
-                "focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)]",
-                errors.password ? "border-error" : "border-surface-container-highest"
-              )}>
-                <span className="material-symbols-outlined text-outline shrink-0">lock</span>
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none">lock</span>
                 <input
                   id="password"
-                  className="bg-transparent border-none focus:ring-0 w-full text-body-md placeholder:text-outline-variant outline-none"
+                  className={cn(
+                    "form-input-focus w-full pl-12 pr-md py-4 rounded-xl border-2 bg-white text-on-surface placeholder:text-outline-variant font-body-md transition-all outline-none",
+                    errors.password ? "border-error" : "border-surface-container-highest"
+                  )}
                   placeholder="••••••••"
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
@@ -88,11 +177,11 @@ export function LoginPage() {
                 <button
                   type="button"
                   tabIndex={-1}
-                  onClick={() => setShowPassword(prev => !prev)}
-                  className="flex items-center justify-center hover:text-primary transition-colors shrink-0"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center hover:text-primary transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  <span className="material-symbols-outlined text-outline">
+                  <span className="material-symbols-outlined text-outline-variant">
                     {showPassword ? "visibility_off" : "visibility"}
                   </span>
                 </button>
@@ -102,63 +191,63 @@ export function LoginPage() {
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={login.isPending}
-              className="w-full py-4 bg-secondary-container text-white font-headline-md rounded-full shadow-lg shadow-secondary-container/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
-            >
-              {login.isPending ? (
-                "Logging in..."
-              ) : (
-                <>
-                  Login to Dashboard
-                  <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
-                </>
-              )}
-            </button>
+            {/* CTA Button + Social + Footer (inside form in Stitch) */}
+            <div className="pt-lg space-y-4">
+              <button
+                type="submit"
+                disabled={login.isPending}
+                className="btn-hover-arrow w-full py-4 bg-secondary-container text-white font-label-md text-label-md rounded-full shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {login.isPending ? (
+                  "Logging in..."
+                ) : (
+                  <>
+                    Login to Dashboard
+                    <span className="material-symbols-outlined transition-transform duration-300" data-icon="arrow_forward">arrow_forward</span>
+                  </>
+                )}
+              </button>
+
+              {/* Social Divider */}
+              <div className="flex items-center gap-4 py-4">
+                <div className="h-px flex-1 bg-surface-container-highest" />
+                <span className="font-label-sm text-label-sm text-outline-variant uppercase tracking-wider whitespace-nowrap">OR CONTINUE WITH</span>
+                <div className="h-px flex-1 bg-surface-container-highest" />
+              </div>
+
+              {/* Social Login */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 py-3 px-4 border-2 border-surface-container-highest rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container transition-colors"
+                >
+                  <img
+                    alt="Google Logo"
+                    className="w-5 h-5"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJkzg9rDLE7XZdaUozY_15Wi43RZS2kgdG0eeCJ9pkLVFuDyNSoaWsi8H4h5t8CXZuG6cKkJHO1jt9hzxmRrbOn6crP1dWEvxsNkk0l5YV66sOKe88wd3ygQgQ8d8snOpgDfXJ9rNqdEUYXf0jOZfG39mEp6mOVu1GVKWWZWwezFrTACmZQcEGKPJlURa_mU5Pk7xVSrajlsEXdnZ5kRzXUs2POOXh4n7ffNCKS6oqeG1B0eZYPg5M"
+                  />
+                  Google
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 py-3 px-4 border-2 border-surface-container-highest rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container transition-colors"
+                >
+                  <span className="material-symbols-outlined text-primary" data-icon="grid_view">grid_view</span>
+                  Microsoft
+                </button>
+              </div>
+
+              {/* Footer Links */}
+              <footer className="mt-md text-center">
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Don&apos;t have an account?{" "}
+                  <Link className="text-primary font-bold hover:underline" to="/signup">Sign up for free</Link>
+                </p>
+              </footer>
+            </div>
           </form>
-
-          <div className="flex items-center gap-4 my-8">
-            <div className="h-[1px] flex-1 bg-surface-container-highest" />
-            <span className="font-label-sm text-label-sm text-outline-variant tracking-widest uppercase whitespace-nowrap">OR SIGN IN WITH</span>
-            <div className="h-[1px] flex-1 bg-surface-container-highest" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              type="button"
-              className="flex items-center justify-center gap-3 py-3 border-2 border-surface-container-highest rounded-xl hover:bg-surface transition-colors font-label-md text-on-surface"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-              </svg>
-              Google
-            </button>
-            <button
-              type="button"
-              className="flex items-center justify-center gap-3 py-3 border-2 border-surface-container-highest rounded-xl hover:bg-surface transition-colors font-label-md text-on-surface"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 23 23">
-                <rect fill="#f35325" height="11" width="11" />
-                <rect fill="#81bc06" height="11" width="11" x="12" />
-                <rect fill="#05a6f0" height="11" width="11" y="12" />
-                <rect fill="#ffba08" height="11" width="11" x="12" y="12" />
-              </svg>
-              Microsoft
-            </button>
-          </div>
-
-          <footer className="mt-8 text-center">
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              Don&apos;t have an account?{" "}
-              <Link className="text-primary font-bold hover:underline ml-1" to="/signup">Sign up for free</Link>
-            </p>
-          </footer>
         </div>
-      </div>
+      </section>
     </main>
   )
 }
