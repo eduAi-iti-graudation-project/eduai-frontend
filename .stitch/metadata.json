@@ -1,0 +1,15 @@
+{
+  "projectId": "5189699912508134907",
+  "title": "EduAI Management Assistant",
+  "deviceType": "DESKTOP",
+  "Last Sync Time": "2026-07-20T13:39:53.256468Z",
+  "screens": {
+    "signup-desktop": {
+      "id": "4694c805475a434cb960aa5073c95508",
+      "label": "Signup - Desktop (Split Layout)",
+      "sourceScreen": "projects/5189699912508134907/screens/4694c805475a434cb960aa5073c95508",
+      "width": 2560,
+      "height": 2134
+    }
+  }
+}
