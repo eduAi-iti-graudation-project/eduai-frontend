@@ -3,6 +3,22 @@
 /* ── Tailwind v4 Theme Tokens ────────────────────────────────── */
 @theme {
   /* ── Colors ── */
+  --color-background: #faf8ff;
+  --color-foreground: #0a1842;
+  --color-card: #ffffff;
+  --color-card-foreground: #0a1842;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0a1842;
+  --color-primary-foreground: #ffffff;
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #f3f2ff;
+  --color-muted-foreground: #3d4944;
+  --color-accent: #ebedff;
+  --color-accent-foreground: #0a1842;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #dce1ff;
+  --color-input: #dce1ff;
+  --color-ring: #006951;
   --color-surface-container-lowest: #ffffff;
   --color-surface-container-low: #f3f2ff;
   --color-surface-container: #ebedff;
@@ -116,28 +132,28 @@
   --radius-3xl: 1.5rem;
 }
 
-/* ── Base styles ─────────────────────────────────────────────── */
+/* ── shadcn theme variables ──────────────────────────────────── */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 249 100% 99%;
+    --foreground: 226 74% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 226 74% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary-hsl: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
-    --secondary-hsl: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 262.1 83.3% 57.8%;
+    --popover-foreground: 226 74% 15%;
+    --primary-hsl: 168 100% 21%;
+    --primary-foreground: 0 0% 100%;
+    --secondary-hsl: 3 63% 42%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 243 100% 97%;
+    --muted-foreground: 160 9% 26%;
+    --accent: 234 100% 96%;
+    --accent-foreground: 226 74% 15%;
+    --destructive: 0 75% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 231 100% 93%;
+    --input: 231 100% 93%;
+    --ring: 168 100% 21%;
     --radius: 0.5rem;
   }
 
