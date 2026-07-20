@@ -72,10 +72,7 @@ export function LoginPage() {
             <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
               <span className="material-symbols-outlined">insights</span>
             </div>
-            <div>
-              <p className="text-[12px] font-bold text-on-surface-variant leading-none">Insight</p>
-              <p className="text-[10px] text-outline">Real-time Data</p>
-            </div>
+            
           </div>
         </div>
 
@@ -88,7 +85,7 @@ export function LoginPage() {
               src={authImg}
             />
           </div>
-          <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed max-w-sm mx-auto">
+          <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed text-balance ">
             Empowering education through artificial intelligence
           </p>
         </div>
