@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { useAuth } from "@/providers/use-auth"
 import { signupSchema, type SignupFormData } from "@/lib/validations"
@@ -13,7 +13,6 @@ export function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [role, setRole] = useState<Role>("teacher")
   const { signup } = useAuth()
-  const navigate = useNavigate()
 
   const {
     register,
@@ -33,8 +32,7 @@ export function SignupPage() {
       },
       {
         onSuccess: () => {
-          toast.success("Account created! Please log in.")
-          navigate("/login")
+          toast.success("Account created!")
         },
         onError: (error) => {
           toast.error(error.message)
@@ -123,8 +121,8 @@ export function SignupPage() {
           <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-1.5">
               <label className="font-label-md text-on-background ml-1" htmlFor="name">Full Name</label>
-              <div className="flex items-center gap-3 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)] transition-all">
-                <span className="material-symbols-outlined text-outline shrink-0">person</span>
+              <div className="group/input flex items-center gap-3 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)] transition-all">
+                <span className="material-symbols-outlined text-outline group-hover/input:text-primary shrink-0">person</span>
                 <input
                   id="name"
                   className="bg-transparent border-none focus:ring-0 w-full text-body-md placeholder:text-outline-variant outline-none"
@@ -140,8 +138,8 @@ export function SignupPage() {
 
             <div className="space-y-1.5">
               <label className="font-label-md text-on-background ml-1" htmlFor="email">Email Address</label>
-              <div className="flex items-center gap-3 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)] transition-all">
-                <span className="material-symbols-outlined text-outline shrink-0">mail</span>
+              <div className="group/input flex items-center gap-3 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)] transition-all">
+                <span className="material-symbols-outlined text-outline group-hover/input:text-primary shrink-0">mail</span>
                 <input
                   id="email"
                   className="bg-transparent border-none focus:ring-0 w-full text-body-md placeholder:text-outline-variant outline-none"
@@ -157,8 +155,8 @@ export function SignupPage() {
 
             <div className="space-y-1.5">
               <label className="font-label-md text-on-background ml-1" htmlFor="password">Password</label>
-              <div className="flex items-center gap-3 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)] transition-all">
-                <span className="material-symbols-outlined text-outline shrink-0">lock</span>
+              <div className="group/input flex items-center gap-3 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)] transition-all">
+                <span className="material-symbols-outlined text-outline group-hover/input:text-primary shrink-0">lock</span>
                 <input
                   id="password"
                   className="bg-transparent border-none focus:ring-0 w-full text-body-md placeholder:text-outline-variant outline-none"
