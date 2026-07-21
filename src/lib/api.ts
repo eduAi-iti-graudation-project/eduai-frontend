@@ -126,3 +126,70 @@ export async function getAlerts(status?: string): Promise<components["schemas"][
   const params = status ? `?status=${encodeURIComponent(status)}` : ""
   return request(`/alerts${params}`)
 }
+
+// ── Class CRUD ─────────────────────────────────────────────────
+
+export interface ClassDetailEnriched extends ClassEnriched {
+  enrollments: ({
+    id: string
+    classId: string
+    studentId: string
+    createdAt: string
+    student: { id: string; email: string; name: string; role: string }
+  })[]
+}
+
+export async function getClass(id: string): Promise<ClassDetailEnriched> {
+  return request(`/classes/${id}`)
+}
+
+export async function createClass(data: components["schemas"]["CreateClassDto"]): Promise<components["schemas"]["ClassDto"]> {
+  return request("/classes", {
+    method: "POST",
+    body: JSON.stringify(data),
+  })
+}
+
+export async function updateClass(id: string, data: components["schemas"]["UpdateClassDto"]): Promise<components["schemas"]["ClassDto"]> {
+  return request(`/classes/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  })
+}
+
+export async function deleteClass(id: string): Promise<void> {
+  return request(`/classes/${id}`, { method: "DELETE" })
+}
+
+// ── Enrollments ─────────────────────────────────────────────────
+
+export async function addEnrollment(classId: string, studentId: string): Promise<unknown> {
+  return request(`/classes/${classId}/enrollments`, {
+    method: "POST",
+    body: JSON.stringify({ studentId }),
+  })
+}
+
+export async function removeEnrollment(classId: string, studentId: string): Promise<void> {
+  return request(`/classes/${classId}/enrollments/${studentId}`, { method: "DELETE" })
+}
+
+// ── Assignment CRUD ─────────────────────────────────────────────
+
+export async function createAssignment(data: components["schemas"]["CreateAssignmentDto"]): Promise<components["schemas"]["AssignmentDto"]> {
+  return request("/assignments", {
+    method: "POST",
+    body: JSON.stringify(data),
+  })
+}
+
+export async function updateAssignment(id: string, data: components["schemas"]["UpdateAssignmentDto"]): Promise<components["schemas"]["AssignmentDto"]> {
+  return request(`/assignments/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  })
+}
+
+export async function deleteAssignment(id: string): Promise<void> {
+  return request(`/assignments/${id}`, { method: "DELETE" })
+}
