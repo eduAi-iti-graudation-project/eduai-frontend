@@ -5,6 +5,7 @@ import { SignupPage } from "./pages/SignupPage"
 import { TeacherDashboardPage } from "./pages/TeacherDashboardPage"
 import { StudentPortalPage } from "./pages/StudentPortalPage"
 import { ClassesPage } from "./pages/teacher/ClassesPage"
+import { ClassDetailPage } from "./pages/teacher/ClassDetailPage"
 import { RubricsPage } from "./pages/teacher/RubricsPage"
 import { SubmissionsPage } from "./pages/teacher/SubmissionsPage"
 import { AlertsPage } from "./pages/teacher/AlertsPage"
@@ -66,6 +67,7 @@ function App() {
         {/* Teacher Portal */}
         <Route path="/dashboard" element={<TeacherRoute><TeacherDashboardPage /></TeacherRoute>} />
         <Route path="/classes" element={<TeacherRoute><ClassesPage /></TeacherRoute>} />
+        <Route path="/classes/:id" element={<TeacherRoute><ClassDetailPage /></TeacherRoute>} />
         <Route path="/rubrics" element={<TeacherRoute><RubricsPage /></TeacherRoute>} />
         <Route path="/submissions" element={<TeacherRoute><SubmissionsPage /></TeacherRoute>} />
         <Route path="/alerts" element={<TeacherRoute><AlertsPage /></TeacherRoute>} />
