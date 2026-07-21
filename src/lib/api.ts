@@ -118,8 +118,16 @@ export async function getAssignments(classId?: string): Promise<components["sche
   return request(`/assignments${params}`)
 }
 
-export async function getSubmissions(): Promise<SubmissionEnriched[]> {
-  return request("/submissions")
+export async function getSubmissions(status?: string, assignmentId?: string): Promise<SubmissionEnriched[]> {
+  const params = new URLSearchParams()
+  if (status) params.set("status", status)
+  if (assignmentId) params.set("assignmentId", assignmentId)
+  const qs = params.toString()
+  return request(`/submissions${qs ? `?${qs}` : ""}`)
+}
+
+export async function getSubmission(id: string): Promise<SubmissionEnriched & { assignment?: components["schemas"]["AssignmentDto"]; chunks?: { id: string; content: string }[] }> {
+  return request(`/submissions/${id}`)
 }
 
 export async function getAlerts(status?: string): Promise<components["schemas"]["AlertDto"][]> {
@@ -192,4 +200,123 @@ export async function updateAssignment(id: string, data: components["schemas"]["
 
 export async function deleteAssignment(id: string): Promise<void> {
   return request(`/assignments/${id}`, { method: "DELETE" })
+}
+
+// ── Assistant Chat ──────────────────────────────────────────────
+
+export interface ChatMessage {
+  role: "user" | "assistant"
+  content: string
+}
+
+export interface ChatResponse {
+  reply: string
+  quiz?: {
+    title: string
+    questions: {
+      type: "mcq" | "short_answer"
+      question: string
+      options?: string[]
+      correctAnswer: string
+      explanation?: string
+    }[]
+  }
+}
+
+export async function sendChatMessage(
+  classId: string,
+  messages: ChatMessage[],
+  newMessage: string,
+): Promise<ChatResponse> {
+  return request("/assistant/chat", {
+    method: "POST",
+    body: JSON.stringify({ classId, messages, newMessage }),
+  })
+}
+
+// ── Rubrics ─────────────────────────────────────────────────────
+
+export interface RubricCriterion {
+  id: string
+  description: string
+  maxPoints: number
+  rubricId: string
+  embedding?: number[] | null
+}
+
+export interface RubricEnriched {
+  id: string
+  title: string
+  assignmentId: string
+  isConfirmed: boolean
+  criteria: RubricCriterion[]
+  createdAt: string
+  updatedAt: string
+}
+
+export async function getRubrics(assignmentId?: string): Promise<RubricEnriched[]> {
+  const params = assignmentId ? `?assignmentId=${encodeURIComponent(assignmentId)}` : ""
+  return request(`/rubrics${params}`)
+}
+
+export async function getRubric(id: string): Promise<RubricEnriched> {
+  return request(`/rubrics/${id}`)
+}
+
+export async function createRubric(data: components["schemas"]["CreateRubricDto"]): Promise<RubricEnriched> {
+  return request("/rubrics", {
+    method: "POST",
+    body: JSON.stringify(data),
+  })
+}
+
+export async function createRubricFromPdf(formData: FormData): Promise<{ title?: string; criteria: { description: string; maxPoints: number }[] }> {
+  const token = getStoredToken()
+  const res = await fetch(`${API_URL}/rubrics/import-pdf`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  })
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: "Import failed" }))
+    throw new Error(error.message ?? `HTTP ${res.status}`)
+  }
+  return res.json()
+}
+
+export async function confirmRubric(id: string): Promise<RubricEnriched> {
+  return request(`/rubrics/${id}/confirm`, { method: "PATCH" })
+}
+
+// ── Grading ─────────────────────────────────────────────────────
+
+export async function gradeSubmission(submissionId: string): Promise<unknown> {
+  return request(`/grades/submissions/${submissionId}/grade`, { method: "POST" })
+}
+
+export async function confirmGrade(id: string, data: components["schemas"]["ConfirmGradeDto"]): Promise<unknown> {
+  return request(`/grades/${id}/confirm`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  })
+}
+
+// ── Materials ───────────────────────────────────────────────────
+
+export async function uploadMaterial(title: string, classId: string, file: File): Promise<unknown> {
+  const token = getStoredToken()
+  const fd = new FormData()
+  fd.append("file", file)
+  fd.append("title", title)
+  fd.append("classId", classId)
+  const res = await fetch(`${API_URL}/materials/upload`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: fd,
+  })
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: "Upload failed" }))
+    throw new Error(error.message ?? `HTTP ${res.status}`)
+  }
+  return res.json()
 }

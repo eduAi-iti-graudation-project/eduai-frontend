@@ -14,7 +14,7 @@ export function useDashboardData() {
 
   const submissions = useQuery({
     queryKey: ["submissions"],
-    queryFn: api.getSubmissions,
+    queryFn: () => api.getSubmissions(),
   })
 
   const alerts = useQuery({
