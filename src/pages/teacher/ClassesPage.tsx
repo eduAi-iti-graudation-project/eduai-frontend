@@ -62,7 +62,7 @@ export function ClassesPage() {
       <div className="flex min-h-screen bg-surface">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center p-xl relative z-10">
-          <div className="text-center max-w-md">
+          <div className="text-center w-full">
             <span className="material-symbols-outlined text-[48px] text-error mb-md">error</span>
             <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Something went wrong</h2>
             <p className="font-body-md text-on-surface-variant mb-lg">{error instanceof Error ? error.message : "Failed to load classes"}</p>
