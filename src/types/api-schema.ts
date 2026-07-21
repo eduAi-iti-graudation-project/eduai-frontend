@@ -351,6 +351,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/attendance/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import attendance records in batch */
+        post: operations["AttendanceController_importBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/students/{id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get attendance records for a student */
+        get: operations["AttendanceController_getByStudent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/classes/{id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get attendance records for a class */
+        get: operations["AttendanceController_getByClass"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assistant/chat": {
         parameters: {
             query?: never;
@@ -464,7 +515,23 @@ export interface components {
             password: string;
             name: string;
             /** @enum {string} */
-            role: "TEACHER" | "STUDENT";
+            role: "TEACHER" | "STUDENT" | "GUARDIAN" | "ADMIN";
+        };
+        AuthResponseDto: {
+            accessToken: string;
+            user: {
+                /** Format: uuid */
+                id: string;
+                email: string;
+                name: string;
+                /** @enum {string} */
+                role: "TEACHER" | "STUDENT" | "GUARDIAN" | "ADMIN";
+            };
+        };
+        LoginDto: {
+            /** Format: email */
+            email: string;
+            password: string;
         };
         UserDto: {
             /** Format: uuid */
@@ -472,12 +539,7 @@ export interface components {
             email: string;
             name: string;
             /** @enum {string} */
-            role: "TEACHER" | "STUDENT";
-        };
-        LoginDto: {
-            /** Format: email */
-            email: string;
-            password: string;
+            role: "TEACHER" | "STUDENT" | "GUARDIAN" | "ADMIN";
         };
         CreateClassDto: {
             name: string;
@@ -569,6 +631,30 @@ export interface components {
             studentId: string;
             createdAt: string;
         };
+        ImportAttendanceDto: {
+            records: {
+                /** Format: uuid */
+                studentId: string;
+                /** Format: uuid */
+                classId: string;
+                date: string;
+                /** @enum {string} */
+                status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
+            }[];
+        };
+        AttendanceResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            studentId: string;
+            /** Format: uuid */
+            classId: string;
+            date: string;
+            /** @enum {string} */
+            status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
+            createdAt: string;
+            updatedAt: string;
+        };
         ChatDto: {
             /** Format: uuid */
             classId: string;
@@ -650,7 +736,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserDto"];
+                    "application/json": components["schemas"]["AuthResponseDto"];
                 };
             };
         };
@@ -673,7 +759,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserDto"];
+                    "application/json": components["schemas"]["AuthResponseDto"];
                 };
             };
         };
@@ -1207,6 +1293,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AlertDto"][];
+                };
+            };
+        };
+    };
+    AttendanceController_importBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportAttendanceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceResponseDto"][];
+                };
+            };
+        };
+    };
+    AttendanceController_getByStudent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceResponseDto"][];
+                };
+            };
+        };
+    };
+    AttendanceController_getByClass: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceResponseDto"][];
                 };
             };
         };
