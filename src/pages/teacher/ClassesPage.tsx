@@ -2,8 +2,8 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { MobileNav } from "@/components/layout/MobileNav"
+import { TopNavBar } from "@/components/layout/TopNavBar"
 import { useClasses } from "@/hooks/use-classes"
-import { useAuth } from "@/providers/use-auth"
 
 const iconOptions = [
   { icon: "functions", bg: "bg-surface-container", color: "text-primary-container" },
@@ -30,7 +30,6 @@ function getInitials(name: string): string {
 }
 
 export function ClassesPage() {
-  const { user } = useAuth()
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
@@ -109,30 +108,7 @@ export function ClassesPage() {
       <Sidebar />
 
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
-        {/* TopNavBar */}
-        <header className="flex justify-between items-center h-16 px-md bg-surface sticky top-0 z-40">
-          <div className="flex items-center gap-md">
-            <div className="relative w-96 group">
-              <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-              <input
-                className="w-full pl-10 pr-md py-xs bg-surface-container-lowest border-2 border-outline-variant rounded-full text-body-md focus:ring-2 focus:ring-primary-container outline-none transition-all"
-                placeholder="Search classes, students, or rubrics..."
-                type="text"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-md">
-            <button type="button" className="text-on-surface-variant hover:text-primary transition-colors focus:ring-2 focus:ring-primary-container rounded-full p-1">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button type="button" className="text-on-surface-variant hover:text-primary transition-colors focus:ring-2 focus:ring-primary-container rounded-full p-1">
-              <span className="material-symbols-outlined">help_outline</span>
-            </button>
-            <div className="h-10 w-10 rounded-full border-2 border-primary-fixed overflow-hidden bg-primary-container flex items-center justify-center text-white font-label-md">
-              {user?.name ? getInitials(user.name) : <span className="material-symbols-outlined text-[20px]">person</span>}
-            </div>
-          </div>
-        </header>
+        <TopNavBar />
 
         {/* Canvas */}
         <div className="flex-1 overflow-y-auto p-xl max-w-7xl mx-auto w-full">
@@ -382,10 +358,10 @@ export function ClassesPage() {
 
       {/* Floating AI Assistant FAB */}
       <div className="fixed bottom-md right-md z-50">
-        <button type="button" className="flex items-center gap-sm bg-inverse-surface text-inverse-on-surface px-md py-sm rounded-full shadow-2xl hover:scale-105 transition-transform">
+        <Link to="/assistant" className="flex items-center gap-sm bg-inverse-surface text-inverse-on-surface px-md py-sm rounded-full shadow-2xl hover:scale-105 transition-transform">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
           <span className="font-label-md text-label-md">Ask EduAI Assistant</span>
-        </button>
+        </Link>
       </div>
 
       <MobileNav />

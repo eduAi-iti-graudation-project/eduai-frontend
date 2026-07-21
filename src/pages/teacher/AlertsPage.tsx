@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { MobileNav } from "@/components/layout/MobileNav"
+import { TopNavBar } from "@/components/layout/TopNavBar"
 import { useAlerts } from "@/hooks/use-alerts"
 
 export function AlertsPage() {
@@ -25,8 +26,9 @@ export function AlertsPage() {
     <div className="flex min-h-screen bg-surface">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20 sticky top-0 z-30">
-          <h1 className="font-headline-lg text-headline-lg text-on-surface">Alerts</h1>
+        <TopNavBar />
+        <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
+          <h1 className="font-headline-lg text-headline-lg text-primary">Alerts</h1>
           <div className="flex items-center gap-3">
             <select
               value={statusFilter}
@@ -52,7 +54,7 @@ export function AlertsPage() {
                 <div className="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mx-auto mb-4">
                   <span className="material-symbols-outlined text-on-surface-variant text-3xl">notifications</span>
                 </div>
-                <h2 className="font-headline-md text-headline-md text-on-surface mb-2">All clear</h2>
+                <h2 className="font-headline-md text-headline-md text-primary mb-2">All clear</h2>
                 <p className="font-body-md text-body-md text-on-surface-variant">
                   No alerts to show right now.
                 </p>
