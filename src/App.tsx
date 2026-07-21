@@ -71,7 +71,9 @@ function App() {
         <Route path="/classes/:id" element={<TeacherRoute><ClassDetailPage /></TeacherRoute>} />
         <Route path="/assignments/new" element={<TeacherRoute><InstructorAssignmentForm /></TeacherRoute>} />
         <Route path="/rubrics" element={<TeacherRoute><RubricsPage /></TeacherRoute>} />
+        <Route path="/rubrics/new" element={<TeacherRoute><RubricsPage /></TeacherRoute>} />
         <Route path="/submissions" element={<TeacherRoute><SubmissionsPage /></TeacherRoute>} />
+        <Route path="/submissions/:id" element={<TeacherRoute><SubmissionsPage /></TeacherRoute>} />
         <Route path="/alerts" element={<TeacherRoute><AlertsPage /></TeacherRoute>} />
         <Route path="/assistant" element={<TeacherRoute><AssistantPage /></TeacherRoute>} />
         <Route path="/settings" element={<TeacherRoute><SettingsPage /></TeacherRoute>} />
