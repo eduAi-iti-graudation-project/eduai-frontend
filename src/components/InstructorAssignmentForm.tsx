@@ -1,8 +1,10 @@
 import { useRef, useState } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useForm, type SubmitErrorHandler, type SubmitHandler } from "react-hook-form"
 import { toast } from "sonner"
+import * as api from "@/lib/api"
 import { Sidebar } from "./layout/Sidebar"
 import { MobileNav } from "./layout/MobileNav"
 
@@ -71,6 +73,10 @@ const defaultValues: InstructorAssignmentFormData = {
 }
 
 export function InstructorAssignmentForm() {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const classId = searchParams.get("classId")
+
   const [isDragging, setIsDragging] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -85,19 +91,41 @@ export function InstructorAssignmentForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
     setValue,
   } = form
 
   const onSubmit: SubmitHandler<InstructorAssignmentFormData> = async (data) => {
+    if (!classId) {
+      toast.error("No class selected. Please go back and try again.")
+      return
+    }
     try {
-      console.log(data)
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const description = [
+        data.description,
+        `Subject: ${data.subject}`,
+        `Category: ${data.category}`,
+        `Difficulty: ${data.difficulty}`,
+        data.instructorNotes ? `Instructor notes: ${data.instructorNotes}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n\n")
+
+      await api.createAssignment({
+        title: data.title,
+        description,
+        dueDate: new Date(data.dueDate).toISOString(),
+        totalPoints: data.totalMarks,
+        classId,
+      })
+
+      if (data.file) {
+        await api.uploadMaterial(data.title, classId, data.file)
+      }
+
       toast.success("Assignment created successfully")
-      reset(defaultValues)
-      setSelectedFile(null)
-    } catch {
-      toast.error("Something went wrong while creating the assignment")
+      navigate(`/classes/${classId}`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong while creating the assignment")
     }
   }
 
