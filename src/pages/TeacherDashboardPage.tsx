@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { MobileNav } from "@/components/layout/MobileNav"
+import { TopNavBar } from "@/components/layout/TopNavBar"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
-import { useAuth } from "@/providers/use-auth"
 
 const iconOptions = [
   { icon: "calculate", bg: "bg-primary-container/10", color: "text-primary" },
@@ -23,7 +23,6 @@ function getInitials(name: string): string {
 }
 
 export function TeacherDashboardPage() {
-  const { user } = useAuth()
   const { isLoading, isError, error, classCards, submissionRate, avgGrade, totalSubmissions, alerts } = useDashboardData()
 
   if (isError) {
@@ -77,32 +76,10 @@ export function TeacherDashboardPage() {
       <Sidebar />
 
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* Top Bar */}
-        <header className="flex justify-between items-center w-full px-margin-desktop py-base max-w-full bg-surface-bright z-10">
-          <div className="flex items-center gap-md">
-            <h2 className="font-headline-lg text-headline-lg font-bold text-primary">Dashboard</h2>
-            <div className="relative hidden sm:block">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-              <input
-                className="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-xl text-body-md focus:ring-2 focus:ring-primary w-64 transition-all"
-                placeholder="Search students, classes..."
-                type="text"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-md">
-            <div className="flex items-center gap-base">
-              <button type="button" className="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
-                <span className="material-symbols-outlined">notifications</span>
-              </button>
-              <button type="button" className="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
-                <span className="material-symbols-outlined">help_outline</span>
-              </button>
-            </div>
-            <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-outline-variant/20 bg-primary flex items-center justify-center text-white text-label-sm font-bold">
-              {user?.name ? getInitials(user.name) : <span className="material-symbols-outlined text-[20px]">person</span>}
-            </div>
-          </div>
+        <TopNavBar />
+
+        <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
+          <h1 className="font-headline-lg text-headline-lg text-primary">Dashboard</h1>
         </header>
 
         {/* Content Grid */}

@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { MobileNav } from "@/components/layout/MobileNav"
+import { TopNavBar } from "@/components/layout/TopNavBar"
 import { useRubrics } from "@/hooks/use-rubrics"
 import * as api from "@/lib/api"
 import { toast } from "sonner"
@@ -108,11 +109,11 @@ export function RubricsPage() {
     <div className="flex min-h-screen bg-surface">
       <Sidebar />
       <div className="flex-1 flex flex-col min-h-screen">
-        <header className="bg-surface sticky top-0 z-40 flex justify-between items-center w-full px-margin-desktop py-base border-b border-outline-variant/10">
+        <TopNavBar />
+        <header className="flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
           <div className="flex items-center gap-md">
-            <h1 className="font-headline-lg text-headline-lg font-bold text-primary">Rubric Builder</h1>
+            <h1 className="font-headline-lg text-headline-lg text-primary">Rubric Builder</h1>
             <div className="hidden lg:flex items-center gap-md">
- 
               {!assignmentId && (
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-on-surface-variant text-sm">assignment</span>
@@ -132,17 +133,6 @@ export function RubricsPage() {
                   </select>
                 </div>
               )}
-            </div>
-          </div>
-          <div className="flex items-center gap-sm">
-            <button className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary transition-colors">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary transition-colors">
-              <span className="material-symbols-outlined">help_outline</span>
-            </button>
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container bg-primary-container/20 flex items-center justify-center text-primary font-label-md font-bold">
-              T
             </div>
           </div>
         </header>
