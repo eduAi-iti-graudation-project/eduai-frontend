@@ -312,12 +312,10 @@ export function InstructorAssignmentForm() {
                   className="w-full bg-surface-container-low border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-2xl p-4 font-body-md text-body-md transition-all"
                   {...register("description")}
                 />
-                <div className="flex justify-between items-center">
-                  {errors.description && (
-                    <p className="text-error text-sm">{errors.description.message}</p>
-                  )}
-                  <p className="text-right text-label-sm text-on-surface-variant/70 ml-auto">Min 20 characters</p>
-                </div>
+                {errors.description && (
+                  <p className="text-error text-sm">{errors.description.message}</p>
+                )}
+                <p className="text-right text-label-sm text-on-surface-variant/70">Min 20 characters</p>
               </div>
 
               {/* Instructor Notes */}
