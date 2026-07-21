@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { MobileNav } from "@/components/layout/MobileNav"
+import { TopNavBar } from "@/components/layout/TopNavBar"
 import { useClasses } from "@/hooks/use-classes"
 import { useAssistantChat } from "@/hooks/use-assistant"
 
@@ -33,8 +34,9 @@ export function AssistantPage() {
     <div className="flex min-h-screen bg-surface">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20 sticky top-0 z-30">
-          <h1 className="font-headline-lg text-headline-lg text-on-surface">AI Assistant</h1>
+        <TopNavBar />
+        <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
+          <h1 className="font-headline-lg text-headline-lg text-primary">AI Assistant</h1>
           <div className="flex items-center gap-3">
             <select
               value={selectedClassId}
@@ -60,11 +62,11 @@ export function AssistantPage() {
         <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full p-md gap-4 overflow-y-auto">
           {messages.length === 0 && (
             <div className="flex-1 flex items-center justify-center">
-              <div className="text-center max-w-md">
+              <div className="text-center ">
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <span className="material-symbols-outlined text-primary text-3xl">psychology</span>
                 </div>
-                <h2 className="font-headline-md text-headline-md text-on-surface mb-2">How can I help you?</h2>
+                <h2 className="font-headline-md text-headline-md text-primary mb-2">How can I help you?</h2>
                 <p className="font-body-md text-body-md text-on-surface-variant">
                   Select a class and ask me anything — create quizzes, summarize materials, or get teaching suggestions.
                 </p>
