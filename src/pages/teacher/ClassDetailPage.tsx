@@ -2,8 +2,8 @@ import { useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { MobileNav } from "@/components/layout/MobileNav"
+import { TopNavBar } from "@/components/layout/TopNavBar"
 import { useClassDetail } from "@/hooks/use-classes"
-import { useAuth } from "@/providers/use-auth"
 
 function getInitials(name: string): string {
   return name
@@ -17,7 +17,6 @@ function getInitials(name: string): string {
 export function ClassDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user } = useAuth()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const {
@@ -87,30 +86,7 @@ export function ClassDetailPage() {
       <Sidebar />
 
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
-        {/* TopNavBar */}
-        <header className="flex justify-between items-center h-16 px-md bg-surface sticky top-0 z-40">
-          <div className="flex items-center gap-md">
-            <Link to="/classes" className="text-on-surface-variant hover:text-primary transition-colors p-1">
-              <span className="material-symbols-outlined">arrow_back</span>
-            </Link>
-            <div className="relative w-96 group">
-              <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-              <input
-                className="w-full pl-10 pr-md py-xs bg-surface-container-lowest border-2 border-outline-variant rounded-full text-body-md focus:ring-2 focus:ring-primary-container outline-none transition-all"
-                placeholder="Search students, assignments..."
-                type="text"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-md">
-            <button type="button" className="text-on-surface-variant hover:text-primary transition-colors rounded-full p-1">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <div className="h-10 w-10 rounded-full border-2 border-primary-fixed overflow-hidden bg-primary-container flex items-center justify-center text-white font-label-md">
-              {user?.name ? getInitials(user.name) : <span className="material-symbols-outlined text-[20px]">person</span>}
-            </div>
-          </div>
-        </header>
+        <TopNavBar />
 
         {/* Canvas */}
         <div className="flex-1 overflow-y-auto p-xl max-w-7xl mx-auto w-full">
@@ -135,7 +111,7 @@ export function ClassDetailPage() {
             </div>
             <div className="flex items-center gap-sm">
               <Link
-                to={`/assignments?classId=${cls.id}`}
+                to={`/submissions?assignmentId=${cls.id}`}
                 className="px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover"
               >
                 View Submissions
@@ -299,10 +275,10 @@ export function ClassDetailPage() {
 
       {/* Floating AI Assistant FAB */}
       <div className="fixed bottom-md right-md z-50">
-        <button type="button" className="flex items-center gap-sm bg-inverse-surface text-inverse-on-surface px-md py-sm rounded-full shadow-2xl hover:scale-105 transition-transform">
+        <Link to="/assistant" className="flex items-center gap-sm bg-inverse-surface text-inverse-on-surface px-md py-sm rounded-full shadow-2xl hover:scale-105 transition-transform">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
           <span className="font-label-md text-label-md">Ask EduAI Assistant</span>
-        </button>
+        </Link>
       </div>
 
       <MobileNav />
