@@ -149,7 +149,7 @@ export function InstructorAssignmentForm() {
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar activeItem="submissions" />
+      <Sidebar />
 
       {/* Main Content */}
       <main className="flex-grow relative flex items-center justify-center p-md lg:p-lg overflow-hidden">
@@ -393,7 +393,7 @@ export function InstructorAssignmentForm() {
         </section>
       </main>
 
-      <MobileNav activeItem="submissions" />
+      <MobileNav />
     </div>
   )
 }

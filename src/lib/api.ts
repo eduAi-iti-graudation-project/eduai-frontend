@@ -19,8 +19,14 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY)
 }
 
-interface LoginResponse extends UserDto {
-  access_token?: string
+interface LoginResponse {
+  accessToken: string
+  user: UserDto
+}
+
+interface SignupResponse {
+  accessToken: string
+  user: UserDto
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -45,19 +51,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json()
 }
 
-function extractUser(raw: LoginResponse): UserDto {
-  if (raw.access_token) {
-    storeToken(raw.access_token)
-  }
-  return { id: raw.id, email: raw.email, name: raw.name, role: raw.role }
-}
-
 export async function signup(data: SignupDto): Promise<UserDto> {
-  const raw = await request<LoginResponse>("/auth/signup", {
+  const raw = await request<SignupResponse>("/auth/signup", {
     method: "POST",
     body: JSON.stringify(data),
   })
-  return extractUser(raw)
+  storeToken(raw.accessToken)
+  return raw.user
 }
 
 export async function login(data: LoginDto): Promise<UserDto> {
@@ -65,7 +65,8 @@ export async function login(data: LoginDto): Promise<UserDto> {
     method: "POST",
     body: JSON.stringify(data),
   })
-  return extractUser(raw)
+  storeToken(raw.accessToken)
+  return raw.user
 }
 
 export async function getMe(): Promise<UserDto> {
