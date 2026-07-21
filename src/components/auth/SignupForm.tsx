@@ -35,7 +35,8 @@ export function SignupForm() {
       {
         onSuccess: (user) => {
           toast.success("Account created!")
-          navigate(user.role === "TEACHER" ? "/dashboard" : "/student-portal")
+          const teacherRoles = new Set(["TEACHER", "ADMIN"])
+          navigate(teacherRoles.has(user.role) ? "/dashboard" : "/student-portal")
         },
         onError: (error) => {
           toast.error(error.message)
