@@ -31,7 +31,7 @@ export function TeacherDashboardPage() {
       <div className="flex min-h-screen bg-background">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center p-margin-desktop">
-          <div className="text-center max-w-md">
+          <div className="text-center w-full">
             <span className="material-symbols-outlined text-[48px] text-error mb-md">error</span>
             <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Something went wrong</h2>
             <p className="font-body-md text-on-surface-variant mb-lg">{error}</p>
