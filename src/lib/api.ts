@@ -72,3 +72,57 @@ export async function login(data: LoginDto): Promise<UserDto> {
 export async function getMe(): Promise<UserDto> {
   return request<UserDto>("/auth/me")
 }
+
+// Dashboard data
+
+export interface ClassEnriched {
+  id: string
+  name: string
+  description: string | null
+  teacherId: string
+  teacher: {
+    id: string
+    email: string
+    name: string
+    role: string
+  }
+  enrollments: { id: string; classId: string; studentId: string; createdAt: string }[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SubmissionEnriched {
+  id: string
+  assignmentId: string
+  studentId: string
+  status: "SUBMITTED" | "GRADING_IN_PROGRESS" | "REVIEW_READY" | "CONFIRMED"
+  student?: { id: string; email: string; name: string; role: string }
+  scores?: {
+    id: string
+    pointsAwarded: number
+    aiFeedback: string | null
+    teacherNotes: string | null
+    isConfirmed: boolean
+    criteria: { id: string; description: string; maxPoints: number }
+  }[]
+  createdAt: string
+  updatedAt: string
+}
+
+export async function getClasses(): Promise<ClassEnriched[]> {
+  return request("/classes")
+}
+
+export async function getAssignments(classId?: string): Promise<components["schemas"]["AssignmentDto"][]> {
+  const params = classId ? `?classId=${encodeURIComponent(classId)}` : ""
+  return request(`/assignments${params}`)
+}
+
+export async function getSubmissions(): Promise<SubmissionEnriched[]> {
+  return request("/submissions")
+}
+
+export async function getAlerts(status?: string): Promise<components["schemas"]["AlertDto"][]> {
+  const params = status ? `?status=${encodeURIComponent(status)}` : ""
+  return request(`/alerts${params}`)
+}
