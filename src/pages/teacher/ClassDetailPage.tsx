@@ -73,7 +73,8 @@ export function ClassDetailPage() {
     )
   }
 
-  const students = cls.enrollments?.map((e) => e.student) ?? []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+const students = (cls as any).enrollments?.map((e: any) => e.student) ?? []
 
   return (
     <div className="flex min-h-screen bg-surface">
@@ -195,7 +196,7 @@ export function ClassDetailPage() {
                   <p className="font-body-md text-body-md text-on-surface-variant text-center py-md">No students enrolled</p>
                 )}
                 <div className="space-y-sm">
-                  {students.map((s) => (
+                  {students.map((s: { id: string; name: string; email: string }) => (
                     <div key={s.id} className="flex items-center gap-sm p-sm rounded-2xl hover:bg-surface-container transition-colors">
                       <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant font-label-sm font-bold shrink-0">
                         {getInitials(s.name)}
