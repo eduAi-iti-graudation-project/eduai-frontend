@@ -83,21 +83,22 @@ export function SubmissionStatusPage() {
           </div>
         ) : isConfirmed && submission.scores ? (
           <div className="space-y-4">
+            {/* Hard rule: Only confirmed grades are shown — unconfirmed scores are never visible to students */}
             <div className="rounded-[32px] bg-white p-xl border border-outline-variant/10 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-headline-md text-headline-md text-primary">Results</h2>
                 <div className="text-right">
                   <p className="font-headline-lg text-headline-lg text-primary">
-                    {submission.scores.reduce((sum, s) => sum + s.pointsAwarded, 0)}
+                    {submission.scores.filter(s => s.isConfirmed).reduce((sum, s) => sum + s.pointsAwarded, 0)}
                     <span className="font-body-md text-body-md text-on-surface-variant">
-                      /{submission.scores.reduce((sum, s) => sum + s.criterion.maxPoints, 0)}
+                      /{submission.scores.filter(s => s.isConfirmed).reduce((sum, s) => sum + s.criterion.maxPoints, 0)}
                     </span>
                   </p>
                 </div>
               </div>
 
               <div className="space-y-3">
-                {submission.scores.map((score) => (
+                {submission.scores.filter(s => s.isConfirmed).map((score) => (
                   <div key={score.id} className="rounded-3xl bg-surface-container-low p-md border border-outline-variant/10">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
