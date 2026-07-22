@@ -145,7 +145,7 @@ export function StudentAssignmentsPage() {
                                   {a.totalPoints} pts
                                 </span>
                               </div>
-                            </div>
+                          </div>
                             <div className="shrink-0">
                               {isSubmitted ? (
                                 sub?.status === "CONFIRMED" ? (
@@ -167,6 +167,12 @@ export function StudentAssignmentsPage() {
                               )}
                             </div>
                           </div>
+                          {isSubmitted && sub && sub.status !== "CONFIRMED" && (
+                            <p className="font-label-sm text-label-sm text-on-surface-variant mt-2 flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[16px]">hourglass_empty</span>
+                              Submitted — awaiting teacher review
+                            </p>
+                          )}
                         </div>
                       )
                     })}
