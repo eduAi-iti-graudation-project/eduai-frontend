@@ -3,7 +3,7 @@ import { useAlerts } from "@/hooks/use-alerts"
 
 export function AlertsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("")
-  const { alerts, isLoading } = useAlerts(statusFilter || undefined)
+  const { alerts, isLoading, resolve } = useAlerts(statusFilter || undefined)
 
   const typeIcons: Record<string, string> = {
     ATTENDANCE: "person_off",
@@ -38,7 +38,7 @@ export function AlertsPage() {
           <div className="flex items-center justify-center h-full">
             <p className="font-body-md text-body-md text-on-surface-variant">Loading alerts...</p>
           </div>
-        ) : alerts.data?.length === 0 ? (
+        ) : alerts.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mx-auto mb-4">
@@ -50,7 +50,7 @@ export function AlertsPage() {
           </div>
         ) : (
           <div className="space-y-3 max-w-4xl mx-auto">
-            {alerts.data?.map((alert) => (
+            {alerts.map((alert) => (
               <div key={alert.id} className="tactile-card rounded-[24px] bg-surface-container-lowest p-4 flex items-start gap-4">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${alert.status === "NEW" ? "bg-red-100 text-red-600" : "bg-surface-container-low text-on-surface-variant"}`}>
                   <span className="material-symbols-outlined text-[20px]">{typeIcons[alert.type] ?? "notifications_active"}</span>
@@ -63,6 +63,14 @@ export function AlertsPage() {
                   <p className="font-body-md text-body-md text-on-surface">{alert.reason}</p>
                   <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">{new Date(alert.createdAt).toLocaleString()}</p>
                 </div>
+                {alert.status !== "RESOLVED" && (
+                  <button
+                    onClick={() => resolve.mutate({ id: alert.id, status: "RESOLVED" })}
+                    className="shrink-0 bg-secondary-container text-white px-4 py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                  >
+                    Resolve
+                  </button>
+                )}
               </div>
             ))}
           </div>

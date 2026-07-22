@@ -9,6 +9,7 @@ import { StudentPortalPage } from "./pages/StudentPortalPage"
 import { ClassesPage } from "./pages/teacher/ClassesPage"
 import { ClassDetailPage } from "./pages/teacher/ClassDetailPage"
 import { InstructorAssignmentForm } from "./components/InstructorAssignmentForm"
+import { AssignmentDetailPage } from "./pages/teacher/AssignmentDetailPage"
 import { RubricsPage } from "./pages/teacher/RubricsPage"
 import { SubmissionsPage } from "./pages/teacher/SubmissionsPage"
 import { AlertsPage } from "./pages/teacher/AlertsPage"
@@ -16,12 +17,17 @@ import { AssistantPage } from "./pages/teacher/AssistantPage"
 import { SettingsPage } from "./pages/teacher/SettingsPage"
 import { SupportPage } from "./pages/teacher/SupportPage"
 import { NotificationsListPage } from "./pages/teacher/NotificationsListPage"
+import { StudentDetailPage } from "./pages/teacher/StudentDetailPage"
+import { AttendanceImportPage } from "./pages/teacher/AttendanceImportPage"
+import { ReportsPage } from "./pages/ReportsPage"
 
 export const TEACHER_ROUTES = [
   { path: "/dashboard", element: <TeacherDashboardPage /> },
   { path: "/classes", element: <ClassesPage /> },
   { path: "/classes/:id", element: <ClassDetailPage /> },
   { path: "/assignments/new", element: <InstructorAssignmentForm /> },
+  { path: "/assignments/:id", element: <AssignmentDetailPage /> },
+  { path: "/students/:id", element: <StudentDetailPage /> },
   { path: "/rubrics", element: <RubricsPage /> },
   { path: "/rubrics/new", element: <RubricsPage /> },
   { path: "/submissions", element: <SubmissionsPage /> },
@@ -29,6 +35,8 @@ export const TEACHER_ROUTES = [
   { path: "/alerts", element: <AlertsPage /> },
   { path: "/assistant", element: <AssistantPage /> },
   { path: "/notifications", element: <NotificationsListPage /> },
+  { path: "/reports", element: <ReportsPage /> },
+  { path: "/attendance/import", element: <AttendanceImportPage /> },
   { path: "/settings", element: <SettingsPage /> },
   { path: "/support", element: <SupportPage /> },
 ]
@@ -59,7 +67,7 @@ export function guardianRoutes() {
     children: [
       { index: true, element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Guardian Dashboard</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
       { path: "children", element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Children</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
-      { path: "reports", element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Reports</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
+      { path: "reports", element: <ReportsPage /> },
       { path: "notifications", element: <NotificationsListPage /> },
     ],
   }
@@ -72,7 +80,7 @@ export function adminRoutes() {
     children: [
       { index: true, element: <Navigate to="/admin/teachers" replace /> },
       { path: "teachers", element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Teacher Management</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
-      { path: "reports", element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Reports</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
+      { path: "reports", element: <ReportsPage /> },
       { path: "alerts", element: <AlertsPage /> },
       { path: "notifications", element: <NotificationsListPage /> },
     ],
@@ -101,5 +109,3 @@ export const router = createBrowserRouter([
     element: <Navigate to="/" replace />,
   },
 ])
-
-
