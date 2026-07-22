@@ -317,7 +317,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/grades/{id}/confirm": {
+    "/grades/confirm-all/{submissionId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -330,8 +330,76 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Confirm a grade (teacher review) */
-        patch: operations["GradingController_confirm"];
+        /** Confirm all grades in a submission */
+        patch: operations["GradingController_confirmAll"];
+        trace?: never;
+    };
+    "/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List reports, optionally filtered by student */
+        get: operations["ReportsController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a single report by ID */
+        get: operations["ReportsController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List notifications for current user */
+        get: operations["NotificationsController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Mark notification as read */
+        patch: operations["NotificationsController_markRead"];
         trace?: never;
     };
     "/alerts": {
@@ -351,7 +419,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/attendance/import": {
+    "/alerts/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -360,46 +428,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Import attendance records in batch */
-        post: operations["AttendanceController_importBatch"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/students/{id}/attendance": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get attendance records for a student */
-        get: operations["AttendanceController_getByStudent"];
-        put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/classes/{id}/attendance": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get attendance records for a class */
-        get: operations["AttendanceController_getByClass"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
+        /** Resolve or dismiss an alert */
+        patch: operations["AlertsController_resolve"];
         trace?: never;
     };
     "/assistant/chat": {
@@ -505,6 +539,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/attendance/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import attendance records in batch */
+        post: operations["AttendanceController_importBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/students/{id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get attendance records for a student */
+        get: operations["AttendanceController_getByStudent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/classes/{id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get attendance records for a class */
+        get: operations["AttendanceController_getByClass"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Role-aware dashboard overview */
+        get: operations["DashboardController_getOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -518,15 +620,12 @@ export interface components {
             role: "TEACHER" | "STUDENT" | "GUARDIAN" | "ADMIN";
         };
         AuthResponseDto: {
-            accessToken: string;
-            user: {
-                /** Format: uuid */
-                id: string;
-                email: string;
-                name: string;
-                /** @enum {string} */
-                role: "TEACHER" | "STUDENT" | "GUARDIAN" | "ADMIN";
-            };
+            /** Format: uuid */
+            id: string;
+            email: string;
+            name: string;
+            /** @enum {string} */
+            role: "TEACHER" | "STUDENT" | "GUARDIAN" | "ADMIN";
         };
         LoginDto: {
             /** Format: email */
@@ -617,9 +716,32 @@ export interface components {
             createdAt: string;
             updatedAt: string;
         };
-        ConfirmGradeDto: {
-            pointsAwarded: number;
-            teacherNotes?: string;
+        ReportDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            studentId: string;
+            /** Format: uuid */
+            alertId: string;
+            parentSection: string;
+            teacherSection: string;
+            managementSection: string;
+            createdAt: string;
+        };
+        NotificationDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            userId: string;
+            type: string;
+            /** @enum {string} */
+            channel: "EMAIL" | "PUSH";
+            title: string;
+            body: string | null;
+            /** Format: date-time */
+            readAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
         };
         AlertDto: {
             /** Format: uuid */
@@ -631,29 +753,9 @@ export interface components {
             studentId: string;
             createdAt: string;
         };
-        ImportAttendanceDto: {
-            records: {
-                /** Format: uuid */
-                studentId: string;
-                /** Format: uuid */
-                classId: string;
-                date: string;
-                /** @enum {string} */
-                status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
-            }[];
-        };
-        AttendanceResponseDto: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            studentId: string;
-            /** Format: uuid */
-            classId: string;
-            date: string;
+        ResolveAlertDto: {
             /** @enum {string} */
-            status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
-            createdAt: string;
-            updatedAt: string;
+            status: "RESOLVED" | "DISMISSED";
         };
         ChatDto: {
             /** Format: uuid */
@@ -691,6 +793,30 @@ export interface components {
             teacherNotes: string | null;
             isConfirmed: boolean;
             createdAt: string;
+        };
+        ImportAttendanceDto: {
+            records: {
+                /** Format: uuid */
+                studentId: string;
+                /** Format: uuid */
+                classId: string;
+                date: string;
+                /** @enum {string} */
+                status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
+            }[];
+        };
+        AttendanceResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            studentId: string;
+            /** Format: uuid */
+            classId: string;
+            date: string;
+            /** @enum {string} */
+            status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
+            createdAt: string;
+            updatedAt: string;
         };
     };
     responses: never;
@@ -1253,7 +1379,47 @@ export interface operations {
             };
         };
     };
-    GradingController_confirm: {
+    GradingController_confirmAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                submissionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportsController_findAll: {
+        parameters: {
+            query?: {
+                studentId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDto"][];
+                };
+            };
+        };
+    };
+    ReportsController_findOne: {
         parameters: {
             query?: never;
             header?: never;
@@ -1262,11 +1428,49 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConfirmGradeDto"];
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDto"];
+                };
             };
         };
+    };
+    NotificationsController_findAll: {
+        parameters: {
+            query?: {
+                userId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationDto"][];
+                };
+            };
+        };
+    };
+    NotificationsController_markRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {
@@ -1297,16 +1501,18 @@ export interface operations {
             };
         };
     };
-    AttendanceController_importBatch: {
+    AlertsController_resolve: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ImportAttendanceDto"];
+                "application/json": components["schemas"]["ResolveAlertDto"];
             };
         };
         responses: {
@@ -1315,49 +1521,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AttendanceResponseDto"][];
-                };
-            };
-        };
-    };
-    AttendanceController_getByStudent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AttendanceResponseDto"][];
-                };
-            };
-        };
-    };
-    AttendanceController_getByClass: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AttendanceResponseDto"][];
+                    "application/json": components["schemas"]["AlertDto"];
                 };
             };
         };
@@ -1509,6 +1673,89 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["GradeDto"][];
                 };
+            };
+        };
+    };
+    AttendanceController_importBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportAttendanceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceResponseDto"][];
+                };
+            };
+        };
+    };
+    AttendanceController_getByStudent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceResponseDto"][];
+                };
+            };
+        };
+    };
+    AttendanceController_getByClass: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceResponseDto"][];
+                };
+            };
+        };
+    };
+    DashboardController_getOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Role-aware dashboard data — shape varies by role */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
