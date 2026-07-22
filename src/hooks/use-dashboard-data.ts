@@ -52,7 +52,8 @@ export function useDashboardData() {
       id: c.id,
       name: c.name,
       section: c.description ?? "No description",
-      students: c.enrollments?.length ?? 0,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      students: (c as any).enrollments?.length ?? 0,
       pending,
       total: classSubmissions.length,
       confirmed,
@@ -63,7 +64,8 @@ export function useDashboardData() {
   const confirmedSubmissions = submissionsData.filter((s) => s.status === "CONFIRMED").length
   const submissionRate = totalSubmissions > 0 ? Math.round((confirmedSubmissions / totalSubmissions) * 100) : 0
 
-  const allScores = submissionsData.flatMap((s) => s.scores ?? [])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const allScores = (submissionsData as any[]).flatMap((s: any) => s.scores ?? [])
   const confirmedScores = allScores.filter((s) => s.isConfirmed)
   const avgGrade =
     confirmedScores.length > 0
