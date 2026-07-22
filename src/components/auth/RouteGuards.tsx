@@ -33,6 +33,14 @@ export function StudentRoute({ children }: { children: React.ReactNode }) {
   return <Navigate to="/" replace />
 }
 
+export function GuardianRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, user } = useAuth()
+  if (isLoading) return <LoadingScreen />
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (user?.role === "GUARDIAN") return <>{children}</>
+  return <Navigate to="/" replace />
+}
+
 export function RootRedirect() {
   const { isAuthenticated, isLoading, user } = useAuth()
   if (isLoading) return <LoadingScreen />
