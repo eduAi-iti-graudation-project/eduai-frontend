@@ -5,8 +5,6 @@ import { z } from "zod"
 import { useForm, type SubmitErrorHandler, type SubmitHandler } from "react-hook-form"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
-import { Sidebar } from "./layout/Sidebar"
-import { MobileNav } from "./layout/MobileNav"
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
@@ -176,11 +174,7 @@ export function InstructorAssignmentForm() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-
-      {/* Main Content */}
-      <main className="flex-grow relative flex items-center justify-center p-md lg:p-lg overflow-hidden">
+    <main className="flex-grow relative flex items-center justify-center p-md lg:p-lg overflow-hidden">
         {/* Background Decorations */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-primary-container blur-blob rounded-full -translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary-container blur-blob rounded-full translate-x-1/3 translate-y-1/3"></div>
@@ -417,9 +411,6 @@ export function InstructorAssignmentForm() {
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-container/20 blur-3xl rounded-full pointer-events-none"></div>
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-secondary-container/10 blur-3xl rounded-full pointer-events-none"></div>
         </section>
-      </main>
-
-      <MobileNav />
-    </div>
+    </main>
   )
 }
