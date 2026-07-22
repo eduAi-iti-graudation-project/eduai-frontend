@@ -1,11 +1,10 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom"
 import { TeacherLayout } from "./components/layout/TeacherLayout"
 import { StudentLayout } from "./components/layout/StudentLayout"
-import { TeacherRoute, StudentRoute, RootRedirect } from "./components/auth/RouteGuards"
+import { TeacherRoute, StudentRoute, GuardianRoute, RootRedirect } from "./components/auth/RouteGuards"
 import { LoginPage } from "./pages/LoginPage"
 import { SignupPage } from "./pages/SignupPage"
 import { TeacherDashboardPage } from "./pages/TeacherDashboardPage"
-import { StudentPortalPage } from "./pages/StudentPortalPage"
 import { ClassesPage } from "./pages/teacher/ClassesPage"
 import { ClassDetailPage } from "./pages/teacher/ClassDetailPage"
 import { InstructorAssignmentForm } from "./components/InstructorAssignmentForm"
@@ -20,6 +19,14 @@ import { NotificationsListPage } from "./pages/teacher/NotificationsListPage"
 import { StudentDetailPage } from "./pages/teacher/StudentDetailPage"
 import { AttendanceImportPage } from "./pages/teacher/AttendanceImportPage"
 import { ReportsPage } from "./pages/ReportsPage"
+import { StudentDashboardPage } from "./pages/student/StudentDashboardPage"
+import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage"
+import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
+import { MyGradesPage } from "./pages/student/MyGradesPage"
+import { MyAttendancePage } from "./pages/student/MyAttendancePage"
+import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
+import { ChildDetailPage } from "./pages/guardian/ChildDetailPage"
+import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage"
 
 export const TEACHER_ROUTES = [
   { path: "/dashboard", element: <TeacherDashboardPage /> },
@@ -42,8 +49,12 @@ export const TEACHER_ROUTES = [
 ]
 
 export const STUDENT_ROUTES = [
-  { path: "/student-portal", element: <StudentPortalPage /> },
-  { path: "/student-portal/*", element: <StudentPortalPage /> },
+  { path: "/student", element: <StudentDashboardPage /> },
+  { path: "/student/assignments", element: <StudentAssignmentsPage /> },
+  { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
+  { path: "/student/grades", element: <MyGradesPage /> },
+  { path: "/student/attendance", element: <MyAttendancePage /> },
+  { path: "/student/notifications", element: <NotificationsListPage /> },
 ]
 
 export function teacherRoutes() {
@@ -63,10 +74,10 @@ export function studentRoutes() {
 export function guardianRoutes() {
   return {
     path: "/guardian",
-    element: <div className="min-h-screen bg-surface"><div className="flex-1 p-xl"><Outlet /></div></div>,
+    element: <GuardianRoute><div className="min-h-screen bg-surface"><div className="flex-1 p-xl"><Outlet /></div></div></GuardianRoute>,
     children: [
-      { index: true, element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Guardian Dashboard</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
-      { path: "children", element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Children</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
+      { index: true, element: <GuardianDashboardPage /> },
+      { path: "children/:id", element: <ChildDetailPage /> },
       { path: "reports", element: <ReportsPage /> },
       { path: "notifications", element: <NotificationsListPage /> },
     ],
@@ -78,7 +89,7 @@ export function adminRoutes() {
     path: "/admin",
     element: <div className="min-h-screen bg-surface"><div className="flex-1 p-xl"><Outlet /></div></div>,
     children: [
-      { index: true, element: <Navigate to="/admin/teachers" replace /> },
+      { index: true, element: <AdminDashboardPage /> },
       { path: "teachers", element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Teacher Management</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
       { path: "reports", element: <ReportsPage /> },
       { path: "alerts", element: <AlertsPage /> },

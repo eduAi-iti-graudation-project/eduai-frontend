@@ -33,12 +33,21 @@ export function StudentRoute({ children }: { children: React.ReactNode }) {
   return <Navigate to="/" replace />
 }
 
+export function GuardianRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, user } = useAuth()
+  if (isLoading) return <LoadingScreen />
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (user?.role === "GUARDIAN") return <>{children}</>
+  return <Navigate to="/" replace />
+}
+
 export function RootRedirect() {
   const { isAuthenticated, isLoading, user } = useAuth()
   if (isLoading) return <LoadingScreen />
   if (isAuthenticated && user?.role) {
     if (TEACHER_ROLES.has(user.role)) return <Navigate to="/dashboard" replace />
-    if (STUDENT_ROLES.has(user.role)) return <Navigate to="/student-portal" replace />
+    if (user.role === "GUARDIAN") return <Navigate to="/guardian" replace />
+    if (user.role === "STUDENT") return <Navigate to="/student" replace />
   }
   return <Navigate to="/login" replace />
 }
