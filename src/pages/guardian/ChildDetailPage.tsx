@@ -93,7 +93,7 @@ export function ChildDetailPage() {
           ) : !grades.data || grades.data.length === 0 ? (
             <EmptyState icon="grade" title="No grades yet" description="Confirmed grades will appear here." />
           ) : (
-            grades.data.map((g) => (
+            grades.data.filter((g) => g.isConfirmed).map((g) => (
               <div key={g.id} className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
                 <div className="flex items-start justify-between mb-2">
                   <p className="font-label-sm text-label-sm text-on-surface-variant">Points Awarded</p>
