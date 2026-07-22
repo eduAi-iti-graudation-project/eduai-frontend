@@ -13,6 +13,8 @@ import { AlertsPage } from "./pages/teacher/AlertsPage"
 import { AssistantPage } from "./pages/teacher/AssistantPage"
 import { SettingsPage } from "./pages/teacher/SettingsPage"
 import { SupportPage } from "./pages/teacher/SupportPage"
+import { NotificationsListPage } from "./pages/teacher/NotificationsListPage"
+import { TeacherLayout } from "./components/layout/TeacherLayout"
 import { useAuth } from "./providers/use-auth"
 
 const TEACHER_ROLES = new Set(["TEACHER", "ADMIN"])
@@ -76,6 +78,11 @@ function App() {
         <Route path="/submissions/:id" element={<TeacherRoute><SubmissionsPage /></TeacherRoute>} />
         <Route path="/alerts" element={<TeacherRoute><AlertsPage /></TeacherRoute>} />
         <Route path="/assistant" element={<TeacherRoute><AssistantPage /></TeacherRoute>} />
+
+        {/* Teacher Layout Routes */}
+        <Route element={<TeacherRoute><TeacherLayout /></TeacherRoute>}>
+          <Route path="/notifications" element={<NotificationsListPage />} />
+        </Route>
         <Route path="/settings" element={<TeacherRoute><SettingsPage /></TeacherRoute>} />
         <Route path="/support" element={<TeacherRoute><SupportPage /></TeacherRoute>} />
 
