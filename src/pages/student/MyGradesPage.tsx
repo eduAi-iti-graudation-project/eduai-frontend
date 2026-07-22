@@ -29,8 +29,9 @@ export function MyGradesPage() {
     )
   }
 
+  const confirmedGrades = (grades ?? []).filter((g) => g.isConfirmed)
   const gradesBySubmission = new Map<string, NonNullable<typeof grades>>()
-  for (const g of grades ?? []) {
+  for (const g of confirmedGrades) {
     const key = g.submissionId
     const list = gradesBySubmission.get(key) ?? []
     list.push(g)
