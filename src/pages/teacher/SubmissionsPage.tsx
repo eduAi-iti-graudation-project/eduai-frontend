@@ -36,7 +36,8 @@ export function SubmissionsPage() {
         completed++
         setBulkState({ pending: completed, total: submittedSubs.length })
       } catch {
-        toast.error(`Failed to grade ${sub.student?.name ?? "unknown"}`)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        toast.error(`Failed to grade ${(sub as any).student?.name ?? "unknown"}`)
       }
     }
     setBulkState(null)
