@@ -77,7 +77,8 @@ export function useClasses() {
       id: c.id,
       name: c.name,
       section: c.description ?? "No description",
-      students: c.enrollments?.length ?? 0,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      students: (c as any).enrollments?.length ?? 0,
     })),
     createClass,
     updateClass,
