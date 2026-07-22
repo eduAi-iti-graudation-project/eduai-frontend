@@ -3,11 +3,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { FileDropzone } from "@/components/ui/FileDropzone"
 
 export function StudentAssignmentsPage() {
   const queryClient = useQueryClient()
   const [submitModal, setSubmitModal] = useState<{ assignmentId: string; assignmentTitle: string } | null>(null)
   const [textContent, setTextContent] = useState("")
+  const [uploadMode, setUploadMode] = useState<"text" | "file">("text")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   const classes = useQuery({
     queryKey: ["classes"],
@@ -33,6 +36,17 @@ export function StudentAssignmentsPage() {
       toast.success("Assignment submitted successfully")
       setSubmitModal(null)
       setTextContent("")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+
+  const createSubmissionPdf = useMutation({
+    mutationFn: (formData: FormData) => api.createSubmissionFromPdf(formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["submissions"] })
+      toast.success("PDF submitted successfully")
+      setSubmitModal(null)
+      setSelectedFile(null)
     },
     onError: (err: Error) => toast.error(err.message),
   })
@@ -175,12 +189,34 @@ export function StudentAssignmentsPage() {
             </div>
             <p className="font-body-md text-body-md text-on-surface-variant mb-4">{submitModal.assignmentTitle}</p>
 
-            <textarea
-              value={textContent}
-              onChange={(e) => setTextContent(e.target.value)}
-              placeholder="Type your submission here..."
-              className="w-full min-h-[200px] p-md rounded-2xl border border-outline-variant/20 font-body-md text-body-md text-on-surface bg-surface-container-low resize-none outline-none focus:border-primary"
-            />
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => setUploadMode("text")}
+                className={`flex-1 px-md py-sm rounded-full font-label-md transition-all ${uploadMode === "text" ? "bg-primary-container text-white" : "bg-surface-container text-on-surface-variant"}`}
+              >
+                Type
+              </button>
+              <button
+                onClick={() => setUploadMode("file")}
+                className={`flex-1 px-md py-sm rounded-full font-label-md transition-all ${uploadMode === "file" ? "bg-primary-container text-white" : "bg-surface-container text-on-surface-variant"}`}
+              >
+                Upload PDF
+              </button>
+            </div>
+
+            {uploadMode === "text" ? (
+              <textarea
+                value={textContent}
+                onChange={(e) => setTextContent(e.target.value)}
+                placeholder="Type your submission here..."
+                className="w-full min-h-[200px] p-md rounded-2xl border border-outline-variant/20 font-body-md text-body-md text-on-surface bg-surface-container-low resize-none outline-none focus:border-primary"
+              />
+            ) : (
+              <FileDropzone
+                onFileSelect={(file) => setSelectedFile(file)}
+                isUploading={createSubmissionPdf.isPending}
+              />
+            )}
 
             <div className="flex justify-end gap-3 mt-6">
               <button
@@ -191,16 +227,27 @@ export function StudentAssignmentsPage() {
               </button>
               <button
                 onClick={() => {
-                  if (!textContent.trim()) {
-                    toast.error("Please enter your submission content")
-                    return
+                  if (uploadMode === "text") {
+                    if (!textContent.trim()) {
+                      toast.error("Please enter your submission content")
+                      return
+                    }
+                    createSubmission.mutate({ assignmentId: submitModal.assignmentId, content: textContent })
+                  } else {
+                    if (!selectedFile) {
+                      toast.error("Please select a PDF file")
+                      return
+                    }
+                    const formData = new FormData()
+                    formData.append("file", selectedFile)
+                    formData.append("assignmentId", submitModal.assignmentId)
+                    createSubmissionPdf.mutate(formData)
                   }
-                  createSubmission.mutate({ assignmentId: submitModal.assignmentId, content: textContent })
                 }}
-                disabled={createSubmission.isPending}
+                disabled={createSubmission.isPending || createSubmissionPdf.isPending}
                 className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md disabled:opacity-50"
               >
-                {createSubmission.isPending ? "Submitting..." : "Submit"}
+                {createSubmission.isPending || createSubmissionPdf.isPending ? "Submitting..." : "Submit"}
               </button>
             </div>
           </div>
