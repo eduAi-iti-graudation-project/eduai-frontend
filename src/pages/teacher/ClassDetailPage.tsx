@@ -1,6 +1,19 @@
 import { useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { useClassDetail } from "@/hooks/use-classes"
+import { useMaterials } from "@/hooks/use-materials"
+import { useClassAttendance } from "@/hooks/use-attendance"
+import { FileDropzone } from "@/components/ui/FileDropzone"
+import { EmptyState } from "@/components/ui/EmptyState"
+
+type TabId = "students" | "assignments" | "materials" | "attendance"
+
+const TABS: { id: TabId; label: string; icon: string }[] = [
+  { id: "students", label: "Students", icon: "group" },
+  { id: "assignments", label: "Assignments", icon: "assignment" },
+  { id: "materials", label: "Materials", icon: "folder" },
+  { id: "attendance", label: "Attendance", icon: "calendar_month" },
+]
 
 function getInitials(name: string): string {
   return name
@@ -14,17 +27,225 @@ function getInitials(name: string): string {
 export function ClassDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState<TabId>("students")
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [addStudentOpen, setAddStudentOpen] = useState(false)
+  const [newStudentId, setNewStudentId] = useState("")
 
-  const { detail, assignments, isLoading, isError, error, deleteClass } = useClassDetail(id ?? "")
+  const { detail, assignments, isLoading, isError, error, deleteClass, addEnrollment, removeEnrollment } = useClassDetail(id ?? "")
+  const { materials, upload, remove: removeMaterial } = useMaterials(id ?? "")
+  const attendanceQuery = useClassAttendance(id ?? "")
 
   const cls = detail.data
   const assignmentsData = assignments.data ?? []
+  const attendanceRecords = attendanceQuery.data ?? []
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const students = (cls as any).enrollments?.map((e: any) => ({ ...e.student, enrollmentId: e.id })) ?? []
 
   const handleDelete = async () => {
     if (!id) return
     await deleteClass.mutateAsync()
     navigate("/classes", { replace: true })
+  }
+
+  const handleAddStudent = async () => {
+    if (!id || !newStudentId) return
+    await addEnrollment.mutateAsync(newStudentId)
+    setNewStudentId("")
+    setAddStudentOpen(false)
+  }
+
+  const handleRemoveStudent = async (studentId: string) => {
+    if (!id) return
+    await removeEnrollment.mutateAsync(studentId)
+  }
+
+  const handleUploadMaterial = async (file: File) => {
+    const title = prompt("Material title:") || file.name
+    if (title) {
+      await upload.mutateAsync({ title, file })
+    }
+  }
+
+  const tabContent = (tab: TabId) => {
+    switch (tab) {
+      case "students":
+        return (
+          <div className="space-y-md">
+            <div className="flex items-center justify-between">
+              <h3 className="font-headline-md text-headline-md text-primary">Class Roster</h3>
+              <button onClick={() => setAddStudentOpen(true)} className="flex items-center gap-xs px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover">
+                <span className="material-symbols-outlined text-[18px]">person_add</span>Add Student
+              </button>
+            </div>
+
+            {addStudentOpen && (
+              <div className="bg-white rounded-[24px] p-md shadow-sm border border-outline-variant/10 flex gap-sm">
+                <input
+                  value={newStudentId}
+                  onChange={(e) => setNewStudentId(e.target.value)}
+                  placeholder="Enter student ID..."
+                  className="flex-1 rounded-xl border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
+                />
+                <button onClick={handleAddStudent} disabled={!newStudentId} className="px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover disabled:opacity-50">
+                  Add
+                </button>
+              </div>
+            )}
+
+            {students.length === 0 ? (
+              <EmptyState icon="group" title="No students enrolled" description="Add a student to get started" />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-sm">
+                {students.map((s: { id: string; name: string; email: string; enrollmentId: string }) => (
+                  <div key={s.id} className="bg-white rounded-[24px] p-md shadow-sm border border-outline-variant/10 flex items-center gap-sm group">
+                    <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant font-label-sm font-bold shrink-0">{getInitials(s.name)}</div>
+                    <div className="flex-1 min-w-0">
+                      <Link to={`/students/${s.id}`} className="font-label-md text-label-md text-on-surface hover:text-primary transition-colors truncate block">{s.name}</Link>
+                      <p className="font-label-sm text-label-sm text-on-surface-variant truncate">{s.email}</p>
+                    </div>
+                    <button onClick={() => handleRemoveStudent(s.id)} className="p-1.5 rounded-full text-on-surface-variant hover:text-error hover:bg-error/10 opacity-0 group-hover:opacity-100 transition-all" title="Remove student">
+                      <span className="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+
+      case "assignments":
+        return (
+          <div className="space-y-md">
+            <div className="flex items-center justify-between">
+              <h3 className="font-headline-md text-headline-md text-primary">Assignments</h3>
+              <Link to={`/assignments/new?classId=${cls?.id}`} className="flex items-center gap-xs px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover">
+                <span className="material-symbols-outlined text-[18px]">add</span>New Assignment
+              </Link>
+            </div>
+
+            {assignmentsData.length === 0 ? (
+              <EmptyState icon="assignment" title="No assignments yet" description="Create an assignment to start grading" />
+            ) : (
+              <div className="space-y-sm">
+                {assignmentsData.map((a) => (
+                  <Link key={a.id} to={`/assignments/${a.id}`} className="block bg-white rounded-3xl p-md shadow-sm border border-outline-variant/10 flex items-center justify-between group hover:border-primary-container/30 hover:shadow-md transition-all">
+                    <div className="flex items-center gap-md">
+                      <div className="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined">description</span>
+                      </div>
+                      <div>
+                        <h4 className="font-label-md text-label-md text-on-surface">{a.title}</h4>
+                        <p className="font-label-sm text-label-sm text-on-surface-variant">Due {new Date(a.dueDate).toLocaleDateString()} &bull; {a.totalPoints} pts</p>
+                      </div>
+                    </div>
+                    <span onClick={(e) => { e.preventDefault(); navigate(`/submissions?assignmentId=${a.id}`) }} className="px-md py-2 bg-primary-container/10 text-primary font-label-sm text-label-sm rounded-2xl hover:bg-primary-container/20 transition-colors cursor-pointer">
+                      View Submissions
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+
+      case "materials":
+        return (
+          <div className="space-y-md">
+            <div className="flex items-center justify-between">
+              <h3 className="font-headline-md text-headline-md text-primary">Materials</h3>
+            </div>
+
+            <div className="bg-white rounded-[24px] p-md shadow-sm border border-outline-variant/10">
+              <h4 className="font-label-md text-label-md text-primary mb-sm">Upload Material</h4>
+              <FileDropzone accept=".pdf" onFileSelect={handleUploadMaterial} />
+            </div>
+
+            {materials.length === 0 ? (
+              <EmptyState icon="folder" title="No materials uploaded" description="Upload a PDF to make it searchable for students" />
+            ) : (
+              <div className="space-y-sm">
+                {materials.map((m) => (
+                  <div key={m.id} className="bg-white rounded-3xl p-md shadow-sm border border-outline-variant/10 flex items-center justify-between group">
+                    <div className="flex items-center gap-md">
+                      <div className="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined">description</span>
+                      </div>
+                      <div>
+                        <h4 className="font-label-md text-label-md text-on-surface">{m.title}</h4>
+                        <p className="font-label-sm text-label-sm text-on-surface-variant">{new Date(m.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-sm">
+                      {m.fileUrl && (
+                        <a href={m.fileUrl} target="_blank" rel="noreferrer" className="px-md py-2 bg-primary-container/10 text-primary font-label-sm text-label-sm rounded-2xl hover:bg-primary-container/20 transition-colors">View</a>
+                      )}
+                      <button onClick={() => removeMaterial.mutate(m.id)} className="p-2 text-on-surface-variant hover:text-error transition-colors" title="Delete">
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+
+      case "attendance":
+        return (
+          <div className="space-y-md">
+            <div className="flex items-center justify-between">
+              <h3 className="font-headline-md text-headline-md text-primary">Attendance</h3>
+              <Link to={`/attendance/import?classId=${id}`} className="flex items-center gap-xs px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover">
+                <span className="material-symbols-outlined text-[18px]">upload</span>Import
+              </Link>
+            </div>
+
+            {attendanceRecords.length === 0 ? (
+              <EmptyState icon="calendar_month" title="No attendance records" description="Import attendance to see the grid here" />
+            ) : (
+              <div className="overflow-x-auto bg-white rounded-[24px] shadow-sm border border-outline-variant/10">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-outline-variant/20">
+                      <th className="text-left px-4 py-3 font-label-md text-label-md text-on-surface-variant">Student</th>
+                      {[...new Set(attendanceRecords.map((r) => r.date))].sort().map((date) => (
+                        <th key={date} className="px-3 py-3 font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">{new Date(date).toLocaleDateString()}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {students.map((s: { id: string; name: string }) => (
+                      <tr key={s.id} className="border-b border-outline-variant/10 last:border-none">
+                        <td className="px-4 py-3 font-label-md text-label-md text-on-surface whitespace-nowrap">{s.name}</td>
+                        {[...new Set(attendanceRecords.map((r) => r.date))].sort().map((date) => {
+                          const record = attendanceRecords.find((r) => r.studentId === s.id && r.date === date)
+                          const statusColors: Record<string, string> = {
+                            PRESENT: "bg-green-100 text-green-700",
+                            ABSENT: "bg-red-100 text-red-700",
+                            LATE: "bg-yellow-100 text-yellow-700",
+                            EXCUSED: "bg-gray-100 text-gray-700",
+                          }
+                          return (
+                            <td key={date} className="px-3 py-3">
+                              {record ? (
+                                <span className={`inline-block px-2 py-0.5 rounded-full font-label-sm text-label-sm ${statusColors[record.status] ?? ""}`}>{record.status}</span>
+                              ) : (
+                                <span className="text-on-surface-variant/30">—</span>
+                              )}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )
+    }
   }
 
   if (isError) {
@@ -53,9 +274,6 @@ export function ClassDetailPage() {
     )
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const students = (cls as any).enrollments?.map((e: any) => e.student) ?? []
-
   return (
     <>
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -82,90 +300,24 @@ export function ClassDetailPage() {
             </div>
           </div>
           <div className="flex items-center gap-sm">
-            <Link to={`/submissions?assignmentId=${cls.id}`} className="px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover">View Submissions</Link>
             <button type="button" onClick={() => setShowDeleteConfirm(true)} className="px-md py-sm border-2 border-error text-error font-label-md text-label-md rounded-full hover:bg-error/10 transition-colors">Delete</button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-xl">
-          <div className="lg:col-span-2 space-y-md">
-            <div className="flex items-center justify-between">
-              <h3 className="font-headline-md text-headline-md text-primary">Assignments</h3>
-              <Link to={`/assignments/new?classId=${cls.id}`} className="flex items-center gap-xs px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover">
-                <span className="material-symbols-outlined text-[18px]">add</span>New Assignment
-              </Link>
-            </div>
-
-            {assignmentsData.length === 0 && (
-              <div className="bg-white rounded-[32px] p-xl shadow-sm border border-outline-variant/10 text-center">
-                <span className="material-symbols-outlined text-[40px] text-on-surface-variant mb-sm block">assignment</span>
-                <p className="font-body-md text-body-md text-on-surface-variant">No assignments yet</p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant/60 mt-xs">Create an assignment to start grading</p>
-              </div>
-            )}
-
-            <div className="space-y-sm">
-              {assignmentsData.map((a) => (
-                <div key={a.id} className="bg-white rounded-3xl p-md shadow-sm border border-outline-variant/10 flex items-center justify-between group hover:border-primary-container/30 transition-all">
-                  <div className="flex items-center gap-md">
-                    <div className="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined">description</span>
-                    </div>
-                    <div>
-                      <h4 className="font-label-md text-label-md text-on-surface">{a.title}</h4>
-                      <p className="font-label-sm text-label-sm text-on-surface-variant">Due {new Date(a.dueDate).toLocaleDateString()} &bull; {a.totalPoints} pts</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-sm">
-                    <Link to={`/submissions?assignmentId=${a.id}`} className="px-md py-2 bg-primary-container/10 text-primary font-label-sm text-label-sm rounded-2xl hover:bg-primary-container/20 transition-colors">View Submissions</Link>
-                    <button type="button" className="p-2 text-on-surface-variant hover:text-primary transition-colors">
-                      <span className="material-symbols-outlined text-[18px]">more_vert</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-md">
-            <div className="flex items-center justify-between">
-              <h3 className="font-headline-md text-headline-md text-primary">Class Roster</h3>
-              <span className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full">{students.length}</span>
-            </div>
-            <div className="bg-white rounded-[32px] p-md shadow-sm border border-outline-variant/10">
-              {students.length === 0 && <p className="font-body-md text-body-md text-on-surface-variant text-center py-md">No students enrolled</p>}
-              <div className="space-y-sm">
-                {students.map((s: { id: string; name: string; email: string }) => (
-                  <div key={s.id} className="flex items-center gap-sm p-sm rounded-2xl hover:bg-surface-container transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant font-label-sm font-bold shrink-0">{getInitials(s.name)}</div>
-                    <div className="min-w-0">
-                      <p className="font-label-md text-label-md text-on-surface truncate">{s.name}</p>
-                      <p className="font-label-sm text-label-sm text-on-surface-variant truncate">{s.email}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-[32px] p-md shadow-sm border border-outline-variant/10">
-              <h4 className="font-label-md text-label-md text-primary mb-sm">Quick Actions</h4>
-              <div className="space-y-sm">
-                <Link to={`/assignments/new?classId=${cls.id}`} className="flex items-center gap-sm px-sm py-sm rounded-2xl hover:bg-surface-container transition-colors text-on-surface-variant">
-                  <span className="material-symbols-outlined text-primary-container">add_circle</span>
-                  <span className="font-label-sm text-label-sm">New Assignment</span>
-                </Link>
-                <Link to={`/submissions?classId=${cls.id}`} className="flex items-center gap-sm px-sm py-sm rounded-2xl hover:bg-surface-container transition-colors text-on-surface-variant">
-                  <span className="material-symbols-outlined text-primary-container">list_alt</span>
-                  <span className="font-label-sm text-label-sm">All Submissions</span>
-                </Link>
-                <Link to={`/rubrics?classId=${cls.id}`} className="flex items-center gap-sm px-sm py-sm rounded-2xl hover:bg-surface-container transition-colors text-on-surface-variant">
-                  <span className="material-symbols-outlined text-primary-container">assignment</span>
-                  <span className="font-label-sm text-label-sm">Manage Rubrics</span>
-                </Link>
-              </div>
-            </div>
-          </div>
+        <div className="flex gap-1 mb-xl border-b border-outline-variant/20">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-xs px-md py-3 font-label-md text-label-md border-b-2 transition-colors ${activeTab === tab.id ? "border-primary-container text-primary" : "border-transparent text-on-surface-variant hover:text-primary"}`}
+            >
+              <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
         </div>
+
+        {tabContent(activeTab)}
       </div>
 
       {showDeleteConfirm && (
@@ -175,7 +327,7 @@ export function ClassDetailPage() {
               <span className="material-symbols-outlined text-error text-[28px]">warning</span>
               <h3 className="font-headline-md text-headline-md text-on-surface">Delete {cls.name}?</h3>
             </div>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-lg">This will permanently delete this class and all associated assignments, submissions, and rubrics. This action cannot be undone.</p>
+            <p className="font-body-md text-body-md text-on-surface-variant mb-lg">This will permanently delete this class and all associated assignments, submissions, and rubrics.</p>
             <div className="flex gap-md">
               <button type="button" onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full">Cancel</button>
               <button type="button" onClick={handleDelete} disabled={deleteClass.isPending} className="flex-1 py-sm bg-error text-on-error font-label-md text-label-md rounded-full disabled:opacity-50">{deleteClass.isPending ? "Deleting..." : "Delete"}</button>
