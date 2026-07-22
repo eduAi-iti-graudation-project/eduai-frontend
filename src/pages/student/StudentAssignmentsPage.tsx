@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
@@ -147,16 +148,21 @@ export function StudentAssignmentsPage() {
                               </div>
                           </div>
                             <div className="shrink-0">
-                              {isSubmitted ? (
-                                sub?.status === "CONFIRMED" ? (
-                                  <span className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-1 rounded-full">
-                                    Graded
-                                  </span>
-                                ) : (
-                                  <span className="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm px-sm py-1 rounded-full">
-                                    Submitted
-                                  </span>
-                                )
+                              {isSubmitted && sub ? (
+                                <Link
+                                  to={`/student/submissions/${sub.id}`}
+                                  className="inline-block"
+                                >
+                                  {sub.status === "CONFIRMED" ? (
+                                    <span className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-1 rounded-full cursor-pointer hover:opacity-80 transition-opacity">
+                                      Graded
+                                    </span>
+                                  ) : (
+                                    <span className="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm px-sm py-1 rounded-full cursor-pointer hover:opacity-80 transition-opacity">
+                                      Submitted
+                                    </span>
+                                  )}
+                                </Link>
                               ) : (
                                 <button
                                   onClick={() => setSubmitModal({ assignmentId: a.id, assignmentTitle: a.title })}
