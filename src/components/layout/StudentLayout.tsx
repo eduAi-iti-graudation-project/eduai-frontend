@@ -2,25 +2,29 @@ import { Outlet, Link, useLocation } from "react-router-dom"
 import { MobileNav } from "./MobileNav"
 
 const navItems = [
-  { icon: "assignment", label: "Assignments", id: "assignments", href: "/student-portal" },
-  { icon: "grade", label: "My Grades", id: "grades", href: "/student-portal/grades" },
-  { icon: "calendar_today", label: "Schedule", id: "schedule", href: "/student-portal/schedule" },
-  { icon: "forum", label: "Messages", id: "messages", href: "/student-portal/messages" },
+  { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/student" },
+  { icon: "assignment", label: "Assignments", id: "assignments", href: "/student/assignments" },
+  { icon: "grade", label: "My Grades", id: "grades", href: "/student/grades" },
+  { icon: "calendar_today", label: "Attendance", id: "attendance", href: "/student/attendance" },
+  { icon: "notifications", label: "Notifications", id: "notifications", href: "/student/notifications" },
 ]
 
 const bottomItems = [
-  { icon: "settings", label: "Settings", id: "settings", href: "/student-portal/settings" },
+  { icon: "settings", label: "Settings", id: "settings", href: "/student/settings" },
 ]
 
 export function StudentLayout() {
   const location = useLocation()
   const path = location.pathname
 
-  const activeItem = path === "/student-portal" ? "assignments"
-    : path.startsWith("/student-portal/grades") ? "grades"
-    : path.startsWith("/student-portal/schedule") ? "schedule"
-    : path.startsWith("/student-portal/messages") ? "messages"
-    : "assignments"
+  const activeItem = path === "/student" ? "dashboard"
+    : path.startsWith("/student/assignments") ? "assignments"
+    : path.startsWith("/student/submissions") ? "assignments"
+    : path.startsWith("/student/grades") ? "grades"
+    : path.startsWith("/student/attendance") ? "attendance"
+    : path.startsWith("/student/notifications") ? "notifications"
+    : path.startsWith("/student/settings") ? "settings"
+    : "dashboard"
 
   return (
     <div className="min-h-screen bg-surface">
