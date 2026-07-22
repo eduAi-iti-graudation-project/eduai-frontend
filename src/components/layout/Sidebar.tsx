@@ -9,6 +9,7 @@ export function Sidebar() {
     : path.startsWith("/rubrics") ? "rubrics"
     : path.startsWith("/submissions") ? "submissions"
     : path.startsWith("/alerts") ? "alerts"
+    : path.startsWith("/notifications") ? "notifications"
     : path.startsWith("/assistant") ? "assistant"
     : "dashboard"
 
@@ -18,6 +19,7 @@ export function Sidebar() {
     { icon: "assignment_turned_in", label: "Rubrics", id: "rubrics", href: "/rubrics" },
     { icon: "list_alt", label: "Submissions", id: "submissions", href: "/submissions" },
     { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/alerts" },
+    { icon: "notifications", label: "Notifications", id: "notifications", href: "/notifications" },
     { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/assistant" },
   ]
 
