@@ -41,7 +41,7 @@ export function ClassDetailPage() {
   const attendanceRecords = attendanceQuery.data ?? []
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const students = (cls as any).enrollments?.map((e: any) => ({ ...e.student, enrollmentId: e.id })) ?? []
+  const students = cls ? (cls as any).enrollments?.map((e: any) => ({ ...e.student, enrollmentId: e.id })) ?? [] : []
 
   const handleDelete = async () => {
     if (!id) return
