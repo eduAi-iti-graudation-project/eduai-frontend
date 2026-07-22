@@ -96,7 +96,7 @@ export function AdminDashboardPage() {
               </thead>
               <tbody>
                 {data.teachers.map((t) => (
-                  <tr key={t.id} className="border-b border-outline-variant/10 last:border-0 hover:bg-surface-container transition-colors">
+                  <tr key={t.id} className="border-b border-outline-variant/10 last:border-0 hover:bg-surface-container transition-colors cursor-pointer">
                     <td className="px-md py-3 font-body-md text-body-md text-on-surface">{t.name}</td>
                     <td className="px-md py-3 text-right font-body-md text-body-md text-on-surface">{t.classAverage}%</td>
                     <td className="px-md py-3 text-right font-body-md text-body-md text-on-surface">{t.studentCount}</td>
