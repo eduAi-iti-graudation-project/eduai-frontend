@@ -64,7 +64,7 @@ export function MyGradesPage() {
             {Array.from(gradesBySubmission.entries()).map(([submissionId, submissionGrades]) => {
               const totalEarned = submissionGrades.reduce((s, g) => s + g.pointsAwarded, 0)
               return (
-                <div key={submissionId} className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
+                <div key={submissionId} className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm hover:border-primary-container/30 hover:shadow-md transition-all">
                   <div className="flex items-center justify-between mb-3">
                     <p className="font-label-md text-label-md text-on-surface">Submission</p>
                     <span className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full">

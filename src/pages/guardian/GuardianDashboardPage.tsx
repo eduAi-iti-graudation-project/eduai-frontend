@@ -76,7 +76,7 @@ export function GuardianDashboardPage() {
             <button
               key={child.id}
               onClick={() => navigate(`/guardian/children/${child.id}`)}
-              className="w-full text-left rounded-[32px] bg-white p-xl border border-outline-variant/10 shadow-sm hover:border-primary-container/30 hover:shadow-md transition-all"
+              className="w-full text-left rounded-[32px] bg-white p-xl border border-outline-variant/10 shadow-sm hover:border-primary-container/30 hover:shadow-md transition-all hover:scale-[1.02]"
             >
               <div className="flex items-start justify-between mb-4">
                 <div>
