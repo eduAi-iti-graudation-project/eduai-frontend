@@ -1,0 +1,94 @@
+import { Outlet, Link, useLocation } from "react-router-dom"
+import { MobileNav } from "./MobileNav"
+
+const navItems = [
+  { icon: "assignment", label: "Assignments", id: "assignments", href: "/student-portal" },
+  { icon: "grade", label: "My Grades", id: "grades", href: "/student-portal/grades" },
+  { icon: "calendar_today", label: "Schedule", id: "schedule", href: "/student-portal/schedule" },
+  { icon: "forum", label: "Messages", id: "messages", href: "/student-portal/messages" },
+]
+
+const bottomItems = [
+  { icon: "settings", label: "Settings", id: "settings", href: "/student-portal/settings" },
+]
+
+export function StudentLayout() {
+  const location = useLocation()
+  const path = location.pathname
+
+  const activeItem = path === "/student-portal" ? "assignments"
+    : path.startsWith("/student-portal/grades") ? "grades"
+    : path.startsWith("/student-portal/schedule") ? "schedule"
+    : path.startsWith("/student-portal/messages") ? "messages"
+    : "assignments"
+
+  return (
+    <div className="min-h-screen bg-surface">
+      {/* Mobile Header */}
+      <header className="md:hidden flex items-center justify-between px-margin-mobile py-4 bg-surface-container-lowest border-b border-outline-variant/20">
+        <div className="flex items-center gap-2">
+          <div className="w-9 h-9 bg-primary-container rounded-lg flex items-center justify-center text-on-primary-container">
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
+          </div>
+          <h1 className="font-headline-md text-headline-md text-primary font-bold">EduAI</h1>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-on-surface-variant">search</span>
+          <Link to="/notifications" className="material-symbols-outlined text-on-surface-variant">notifications</Link>
+        </div>
+      </header>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex flex-col h-screen w-64 bg-surface-container-low pb-md px-sm gap-base sticky top-0 shrink-0 border-r border-surface-container-high/50 fixed left-0 top-0">
+        <div className="flex flex-col gap-xs px-3 pt-md pb-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-on-primary-container shrink-0">
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>school</span>
+            </div>
+            <div>
+              <h1 className="font-headline-md text-headline-md font-bold text-primary leading-none">EduAI</h1>
+              <p className="text-label-sm font-label-sm text-on-surface-variant mt-0.5">Student Portal</p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-grow space-y-0.5 px-2">
+          {navItems.map((item) => (
+            <Link
+              key={item.id}
+              to={item.href}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-full transition-all duration-200 ${
+                activeItem === item.id
+                  ? "bg-primary-container text-on-primary-container font-bold"
+                  : "text-on-surface-variant hover:bg-surface-container-high"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
+              <span className="font-label-md text-label-md">{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="mt-auto space-y-0.5 px-2 pt-base border-t border-outline-variant/20">
+          {bottomItems.map((item) => (
+            <Link
+              key={item.id}
+              to={item.href}
+              className="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all duration-200"
+            >
+              <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
+              <span className="font-label-md text-label-md">{item.label}</span>
+            </Link>
+          ))}
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="md:ml-64 flex-1">
+        <Outlet />
+      </div>
+
+      <MobileNav />
+    </div>
+  )
+}
