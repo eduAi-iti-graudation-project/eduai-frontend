@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, Outlet } from "react-router-dom"
+import { createBrowserRouter, Outlet } from "react-router-dom"
 import { TeacherLayout } from "./components/layout/TeacherLayout"
 import { StudentLayout } from "./components/layout/StudentLayout"
 import { TeacherRoute, StudentRoute, GuardianRoute, RootRedirect } from "./components/auth/RouteGuards"
@@ -27,6 +27,7 @@ import { MyAttendancePage } from "./pages/student/MyAttendancePage"
 import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
 import { ChildDetailPage } from "./pages/guardian/ChildDetailPage"
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage"
+import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const TEACHER_ROUTES = [
   { path: "/dashboard", element: <TeacherDashboardPage /> },
@@ -117,6 +118,6 @@ export const router = createBrowserRouter([
   adminRoutes(),
   {
     path: "*",
-    element: <Navigate to="/" replace />,
+    element: <NotFoundPage />,
   },
 ])
