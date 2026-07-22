@@ -37,9 +37,9 @@ export function NotFoundPage() {
           <span className="font-headline-md text-headline-md font-bold text-primary">EduAI</span>
         </div>
         <nav className="hidden md:flex gap-8 items-center">
-          <Link to="/dashboard" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md">Dashboard</Link>
-          <Link to="/classes" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md">Classroom</Link>
-          <Link to="/assistant" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md">Lessons</Link>
+          <Link to="/dashboard" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md no-underline">Dashboard</Link>
+          <Link to="/classes" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md no-underline">Classroom</Link>
+          <Link to="/assistant" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md no-underline">Lessons</Link>
         </nav>
         <div className="flex items-center gap-4">
           <button className="text-on-surface-variant hover:text-primary transition-colors active:scale-95">
@@ -76,14 +76,14 @@ export function NotFoundPage() {
             <div className="flex flex-col md:flex-row gap-4 w-full justify-center">
               <Link
                 to="/dashboard"
-                className="bg-secondary-container text-white px-8 py-3 rounded-full font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-95 shadow-sm nudge-hover"
+                className="bg-secondary-container text-white px-8 py-3 rounded-full font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-95 shadow-sm nudge-hover no-underline"
               >
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
                 Back to Dashboard
               </Link>
               <Link
                 to="/"
-                className="border-2 border-primary text-primary px-8 py-3 rounded-full font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:bg-primary/5 active:scale-95 nudge-hover"
+                className="border-2 border-primary text-primary px-8 py-3 rounded-full font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:bg-primary/5 active:scale-95 nudge-hover no-underline"
               >
                 <span className="material-symbols-outlined">home</span>
                 Go Home
@@ -94,14 +94,14 @@ export function NotFoundPage() {
               <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
               <div>
                 <p className="font-label-md text-label-md text-primary mb-1">Looking for a specific lesson?</p>
-                <p className="font-body-md text-body-md text-on-surface-variant">Our AI can help you find your teaching materials. Try searching in the main dashboard.</p>
+                <p className="font-body-md text-body-md text-on-surface-variant text-sm">Our AI can help you find your teaching materials. Try searching in the main dashboard.</p>
               </div>
             </div>
           </div>
 
           <div className="mt-8 flex gap-6 text-on-surface-variant/60 font-label-sm text-label-sm">
-            <span className="hover:text-primary transition-colors underline underline-offset-4 cursor-pointer">Report an issue</span>
-            <span className="hover:text-primary transition-colors underline underline-offset-4 cursor-pointer">Status Page</span>
+            <a href="#" className="hover:text-primary transition-colors underline underline-offset-4">Report an issue</a>
+            <a href="#" className="hover:text-primary transition-colors underline underline-offset-4">Status Page</a>
           </div>
         </div>
       </main>
