@@ -7,7 +7,6 @@ const filterOptions = [
   { value: "", label: "All Statuses" },
   { value: "SUBMITTED", label: "Submitted" },
   { value: "GRADING_IN_PROGRESS", label: "Grading in Progress" },
-  { value: "REVIEW_READY", label: "Review Ready" },
   { value: "CONFIRMED", label: "Confirmed" },
 ]
 
