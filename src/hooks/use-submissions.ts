@@ -8,6 +8,7 @@ export function useSubmissions(status?: string, assignmentId?: string) {
   const submissions = useQuery({
     queryKey: ["submissions", status, assignmentId],
     queryFn: () => api.getSubmissions(status, assignmentId),
+    staleTime: 0,
   })
 
   const gradeSubmission = useMutation({
