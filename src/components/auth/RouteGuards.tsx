@@ -41,6 +41,25 @@ export function GuardianRoute({ children }: { children: React.ReactNode }) {
   return <Navigate to="/" replace />
 }
 
+export function GuestRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, user } = useAuth()
+  if (isLoading) return <LoadingScreen />
+  if (isAuthenticated && user?.role) {
+    if (user.role === "TEACHER" || user.role === "ADMIN") return <Navigate to="/dashboard" replace />
+    if (user.role === "GUARDIAN") return <Navigate to="/guardian" replace />
+    if (user.role === "STUDENT") return <Navigate to="/student" replace />
+  }
+  return <>{children}</>
+}
+
+export function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, user } = useAuth()
+  if (isLoading) return <LoadingScreen />
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (user?.role === "ADMIN") return <>{children}</>
+  return <Navigate to="/" replace />
+}
+
 export function RootRedirect() {
   const { isAuthenticated, isLoading, user } = useAuth()
   if (isLoading) return <LoadingScreen />
