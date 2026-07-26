@@ -1,7 +1,7 @@
 import { createBrowserRouter, Outlet } from "react-router-dom"
 import { TeacherLayout } from "./components/layout/TeacherLayout"
 import { StudentLayout } from "./components/layout/StudentLayout"
-import { TeacherRoute, StudentRoute, GuardianRoute, RootRedirect } from "./components/auth/RouteGuards"
+import { TeacherRoute, StudentRoute, GuardianRoute, AdminRoute, GuestRoute, RootRedirect } from "./components/auth/RouteGuards"
 import { LoginPage } from "./pages/LoginPage"
 import { SignupPage } from "./pages/SignupPage"
 import { TeacherDashboardPage } from "./pages/TeacherDashboardPage"
@@ -88,7 +88,7 @@ export function guardianRoutes() {
 export function adminRoutes() {
   return {
     path: "/admin",
-    element: <div className="min-h-screen bg-surface"><div className="flex-1 p-xl"><Outlet /></div></div>,
+    element: <AdminRoute><div className="min-h-screen bg-surface"><div className="flex-1 p-xl"><Outlet /></div></div></AdminRoute>,
     children: [
       { index: true, element: <AdminDashboardPage /> },
       { path: "teachers", element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Teacher Management</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
@@ -106,11 +106,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <LoginPage />,
+    element: <GuestRoute><LoginPage /></GuestRoute>,
   },
   {
     path: "/signup",
-    element: <SignupPage />,
+    element: <GuestRoute><SignupPage /></GuestRoute>,
   },
   teacherRoutes(),
   studentRoutes(),
