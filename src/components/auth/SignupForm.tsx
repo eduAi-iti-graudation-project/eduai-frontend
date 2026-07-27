@@ -31,12 +31,13 @@ export function SignupForm() {
         email: data.email,
         password: data.password,
         role: role.toUpperCase() as "TEACHER" | "STUDENT",
+        ...(role === "student" && data.gradeLevel ? { gradeLevel: data.gradeLevel } : {}),
       },
       {
         onSuccess: (user) => {
           toast.success("Account created!")
           const teacherRoles = new Set(["TEACHER", "ADMIN"])
-          navigate(teacherRoles.has(user.role) ? "/dashboard" : "/student-portal")
+          navigate(teacherRoles.has(user.role) ? "/dashboard" : "/student")
         },
         onError: (error) => {
           toast.error(error.message)
@@ -120,6 +121,29 @@ export function SignupForm() {
             <p className="text-error text-label-sm ml-1 mt-1">{errors.password.message}</p>
           )}
         </div>
+
+        {role === "student" && (
+          <div className="space-y-1.5">
+            <label className="font-label-md text-on-background ml-1" htmlFor="gradeLevel">Grade Level</label>
+            <div className="group/input flex items-center gap-3 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)] transition-all">
+              <span className="material-symbols-outlined text-outline group-hover/input:text-primary shrink-0">school</span>
+              <select
+                id="gradeLevel"
+                className="bg-transparent border-none focus:ring-0 w-full text-body-md text-on-surface placeholder:text-outline-variant outline-none appearance-none cursor-pointer"
+                {...register("gradeLevel", { valueAsNumber: true })}
+              >
+                <option value="" className="text-outline-variant">Select your grade</option>
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((level) => (
+                  <option key={level} value={level} className="text-on-surface">Grade {level}</option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined text-outline pointer-events-none">expand_more</span>
+            </div>
+            {errors.gradeLevel && (
+              <p className="text-error text-label-sm ml-1 mt-1">{errors.gradeLevel.message}</p>
+            )}
+          </div>
+        )}
 
         <button
           type="submit"
