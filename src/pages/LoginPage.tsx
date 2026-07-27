@@ -38,7 +38,7 @@ export function LoginPage() {
         onSuccess: (user) => {
           toast.success("Welcome back!")
           const teacherRoles = new Set(["TEACHER", "ADMIN"])
-          navigate(teacherRoles.has(user.role) ? "/dashboard" : "/student-portal")
+          navigate(teacherRoles.has(user.role) ? "/dashboard" : "/student")
         },
         onError: (error) => {
           toast.error(error.message)
