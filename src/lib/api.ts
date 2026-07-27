@@ -329,6 +329,13 @@ export async function createRubricFromPdf(formData: FormData): Promise<{ title?:
   return res.data
 }
 
+export async function createRubricFromPdfDirect(formData: FormData): Promise<Rubric> {
+  const res = await api.post<Rubric>("/rubrics/from-pdf", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  })
+  return res.data
+}
+
 // ── Submissions ───────────────────────────────────────────────────
 
 export async function getSubmissions(status?: string, assignmentId?: string): Promise<components["schemas"]["SubmissionDto"][]> {
