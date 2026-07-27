@@ -1,18 +1,22 @@
 import { useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { useClassDetail } from "@/hooks/use-classes"
 import { useMaterials } from "@/hooks/use-materials"
 import { useClassAttendance } from "@/hooks/use-attendance"
 import { FileDropzone } from "@/components/ui/FileDropzone"
 import { EmptyState } from "@/components/ui/EmptyState"
+import * as api from "@/lib/api"
 
-type TabId = "students" | "assignments" | "materials" | "attendance"
+type TabId = "students" | "assignments" | "materials" | "attendance" | "requests"
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "students", label: "Students", icon: "group" },
   { id: "assignments", label: "Assignments", icon: "assignment" },
   { id: "materials", label: "Materials", icon: "folder" },
   { id: "attendance", label: "Attendance", icon: "calendar_month" },
+  { id: "requests", label: "Requests", icon: "person_add" },
 ]
 
 function getInitials(name: string): string {
@@ -27,12 +31,11 @@ function getInitials(name: string): string {
 export function ClassDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<TabId>("students")
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [addStudentOpen, setAddStudentOpen] = useState(false)
-  const [newStudentId, setNewStudentId] = useState("")
 
-  const { detail, assignments, isLoading, isError, error, deleteClass, addEnrollment, removeEnrollment } = useClassDetail(id ?? "")
+  const { detail, assignments, isLoading, isError, error, deleteClass, removeEnrollment } = useClassDetail(id ?? "")
   const { materials, upload, remove: removeMaterial } = useMaterials(id ?? "")
   const attendanceQuery = useClassAttendance(id ?? "")
 
@@ -49,17 +52,35 @@ export function ClassDetailPage() {
     navigate("/classes", { replace: true })
   }
 
-  const handleAddStudent = async () => {
-    if (!id || !newStudentId) return
-    await addEnrollment.mutateAsync(newStudentId)
-    setNewStudentId("")
-    setAddStudentOpen(false)
-  }
-
   const handleRemoveStudent = async (studentId: string) => {
     if (!id) return
     await removeEnrollment.mutateAsync(studentId)
   }
+
+  const requestsQuery = useQuery({
+    queryKey: ["class", "requests", id],
+    queryFn: () => api.getClassRequests(id!),
+    enabled: !!id,
+  })
+
+  const approveMutation = useMutation({
+    mutationFn: (enrollmentId: string) => api.approveEnrollment(enrollmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["class", "requests", id] })
+      queryClient.invalidateQueries({ queryKey: ["class", id] })
+      toast.success("Enrollment approved")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+
+  const rejectMutation = useMutation({
+    mutationFn: (enrollmentId: string) => api.rejectEnrollment(enrollmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["class", "requests", id] })
+      toast.success("Enrollment rejected")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
 
   const handleUploadMaterial = async (file: File) => {
     const title = prompt("Material title:") || file.name
@@ -75,24 +96,8 @@ export function ClassDetailPage() {
           <div className="space-y-md">
             <div className="flex items-center justify-between">
               <h3 className="font-headline-md text-headline-md text-primary">Class Roster</h3>
-              <button onClick={() => setAddStudentOpen(true)} className="flex items-center gap-xs px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover">
-                <span className="material-symbols-outlined text-[18px]">person_add</span>Add Student
-              </button>
+              <p className="font-label-sm text-label-sm text-on-surface-variant">Students join via self-enrollment</p>
             </div>
-
-            {addStudentOpen && (
-              <div className="bg-white rounded-[24px] p-md shadow-sm border border-outline-variant/10 flex gap-sm">
-                <input
-                  value={newStudentId}
-                  onChange={(e) => setNewStudentId(e.target.value)}
-                  placeholder="Enter student ID..."
-                  className="flex-1 rounded-xl border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
-                />
-                <button onClick={handleAddStudent} disabled={!newStudentId} className="px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover disabled:opacity-50">
-                  Add
-                </button>
-              </div>
-            )}
 
             {students.length === 0 ? (
               <EmptyState icon="group" title="No students enrolled" description="Add a student to get started" />
@@ -241,6 +246,55 @@ export function ClassDetailPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        )
+
+      case "requests":
+        return (
+          <div className="space-y-md">
+            <div className="flex items-center justify-between">
+              <h3 className="font-headline-md text-headline-md text-primary">Enrollment Requests</h3>
+            </div>
+
+            {requestsQuery.isLoading ? (
+              <div className="space-y-2">
+                {[1, 2].map((i) => (
+                  <div key={i} className="rounded-[24px] bg-white p-md border border-outline-variant/10 animate-pulse">
+                    <div className="h-5 w-48 bg-surface-container-high rounded-full mb-2" />
+                    <div className="h-4 w-32 bg-surface-container-high rounded-full" />
+                  </div>
+                ))}
+              </div>
+            ) : (requestsQuery.data ?? []).length === 0 ? (
+              <EmptyState icon="person_add" title="No pending requests" description="Students can request to join this class from their portal." />
+            ) : (
+              <div className="space-y-2">
+                {(requestsQuery.data ?? []).map((req) => (
+                  <div key={req.id} className="rounded-[24px] bg-white p-md border border-outline-variant/10 flex items-center justify-between">
+                    <div>
+                      <p className="font-label-md text-label-md text-on-surface">{req.student.name}</p>
+                      <p className="font-label-sm text-label-sm text-on-surface-variant">{req.student.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => rejectMutation.mutate(req.id)}
+                        disabled={rejectMutation.isPending}
+                        className="px-md py-sm border-2 border-error text-error font-label-sm text-label-sm rounded-full hover:bg-error/10 transition-colors disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        onClick={() => approveMutation.mutate(req.id)}
+                        disabled={approveMutation.isPending}
+                        className="px-md py-sm bg-secondary-container text-white font-label-sm text-label-sm rounded-full hover:opacity-90 transition-colors disabled:opacity-50"
+                      >
+                        Approve
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
