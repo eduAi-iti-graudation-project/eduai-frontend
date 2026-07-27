@@ -36,8 +36,11 @@ api.interceptors.response.use(
   (res) => res,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      clearToken()
-      window.location.href = "/login"
+      const url = error.config?.url ?? ""
+      if (!url.includes("/auth/login") && !url.includes("/auth/signup")) {
+        clearToken()
+        window.location.href = "/login"
+      }
     }
     return Promise.reject(error)
   },
