@@ -242,6 +242,27 @@ export async function removeEnrollment(classId: string, studentId: string): Prom
   await api.delete(`/classes/${classId}/enrollments/${studentId}`)
 }
 
+export async function getClassRequests(classId: string): Promise<{ id: string; studentId: string; status: string; student: { id: string; name: string; email: string } }[]> {
+  const res = await api.get(`/classes/${classId}/requests`)
+  return res.data
+}
+
+export async function approveEnrollment(enrollmentId: string): Promise<void> {
+  await api.patch(`/enrollments/${enrollmentId}/approve`)
+}
+
+export async function rejectEnrollment(enrollmentId: string): Promise<void> {
+  await api.patch(`/enrollments/${enrollmentId}/reject`)
+}
+
+export interface StudentClass {
+  id: string
+  name: string
+  description: string | null
+  teacherName: string
+  assignments: { id: string; title: string; description: string | null; dueDate: string; totalPoints: number }[]
+}
+
 // ── Assignments ───────────────────────────────────────────────────
 
 export async function getAssignments(classId?: string): Promise<components["schemas"]["AssignmentDto"][]> {
