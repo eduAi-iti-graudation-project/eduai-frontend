@@ -232,6 +232,15 @@ export async function deleteClass(id: string): Promise<void> {
   await api.delete(`/classes/${id}`)
 }
 
+export async function getAvailableClasses(): Promise<components["schemas"]["ClassDto"][]> {
+  const res = await api.get<components["schemas"]["ClassDto"][]>("/classes/available")
+  return res.data
+}
+
+export async function joinClass(classId: string): Promise<void> {
+  await api.post(`/classes/${classId}/join`)
+}
+
 // ── Enrollments ───────────────────────────────────────────────────
 
 export async function addEnrollment(classId: string, studentId: string): Promise<void> {
