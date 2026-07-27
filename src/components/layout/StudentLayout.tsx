@@ -3,6 +3,7 @@ import { MobileNav } from "./MobileNav"
 
 const navItems = [
   { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/student" },
+  { icon: "school", label: "Classes", id: "classes", href: "/student/classes" },
   { icon: "assignment", label: "Assignments", id: "assignments", href: "/student/assignments" },
   { icon: "grade", label: "My Grades", id: "grades", href: "/student/grades" },
   { icon: "calendar_today", label: "Attendance", id: "attendance", href: "/student/attendance" },
@@ -18,6 +19,7 @@ export function StudentLayout() {
   const path = location.pathname
 
   const activeItem = path === "/student" ? "dashboard"
+    : path.startsWith("/student/classes") ? "classes"
     : path.startsWith("/student/assignments") ? "assignments"
     : path.startsWith("/student/submissions") ? "assignments"
     : path.startsWith("/student/grades") ? "grades"
