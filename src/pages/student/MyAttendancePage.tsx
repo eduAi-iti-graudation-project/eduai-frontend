@@ -21,7 +21,7 @@ export function MyAttendancePage() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-full p-xl">
+      <div className="flex items-center justify-center h-full p-margin-desktop">
         <div className="text-center">
           <span className="material-symbols-outlined text-[48px] text-error mb-md">error_outline</span>
           <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Failed to load attendance</h2>
@@ -37,12 +37,8 @@ export function MyAttendancePage() {
   }
 
   return (
-    <>
-      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
-        <h1 className="font-headline-lg text-headline-lg text-primary">My Attendance</h1>
-      </header>
-
-      <div className="flex-1 p-xl max-w-4xl mx-auto w-full">
+    <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+      <h1 className="font-headline-lg text-headline-lg text-primary mb-4">My Attendance</h1>
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -87,6 +83,5 @@ export function MyAttendancePage() {
           </div>
         )}
       </div>
-    </>
   )
 }
