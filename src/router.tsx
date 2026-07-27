@@ -89,13 +89,13 @@ export function guardianRoutes() {
 export function adminRoutes() {
   return {
     path: "/admin",
-    element: <AdminRoute><div className="min-h-screen bg-surface"><div className="flex-1 p-xl"><Outlet /></div></div></AdminRoute>,
+    element: <AdminRoute><AdminLayout /></AdminRoute>,
     children: [
       { index: true, element: <AdminDashboardPage /> },
-      { path: "teachers", element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Teacher Management</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
-      { path: "reports", element: <ReportsPage /> },
-      { path: "alerts", element: <AlertsPage /> },
-      { path: "notifications", element: <NotificationsListPage /> },
+      { path: "grades", element: <GradeManagementPage /> },
+      { path: "students", element: <StudentManagementPage /> },
+      { path: "student-grades", element: <StudentGradesPage /> },
+      { path: "attendance", element: <AttendancePage /> },
     ],
   }
 }
