@@ -31,6 +31,7 @@ export function SignupForm() {
         email: data.email,
         password: data.password,
         role: role.toUpperCase() as "TEACHER" | "STUDENT",
+        ...(role === "student" && data.gradeLevel ? { gradeLevel: data.gradeLevel } : {}),
       },
       {
         onSuccess: (user) => {
