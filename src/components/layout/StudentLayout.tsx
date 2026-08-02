@@ -1,12 +1,13 @@
 import { Outlet, Link, useLocation } from "react-router-dom"
 import { MobileNav } from "./MobileNav"
+import { TopNavBar } from "./TopNavBar"
 
 const navItems = [
   { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/student" },
   { icon: "school", label: "Classes", id: "classes", href: "/student/classes" },
   { icon: "assignment", label: "Assignments", id: "assignments", href: "/student/assignments" },
-  { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/student/quizzes" },
   { icon: "auto_awesome", label: "Homework Help", id: "homework-help", href: "/student/homework-help" },
+  { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/student/quizzes" },
   { icon: "grade", label: "My Grades", id: "grades", href: "/student/grades" },
   { icon: "calendar_today", label: "Attendance", id: "attendance", href: "/student/attendance" },
   { icon: "notifications", label: "Notifications", id: "notifications", href: "/student/notifications" },
@@ -26,14 +27,14 @@ export function StudentLayout() {
     : path.startsWith("/student/submissions") ? "assignments"
     : path.startsWith("/student/grades") ? "grades"
     : path.startsWith("/student/attendance") ? "attendance"
-    : path.startsWith("/student/quizzes") ? "quizzes"
     : path.startsWith("/student/homework-help") ? "homework-help"
+    : path.startsWith("/student/quizzes") ? "quizzes"
     : path.startsWith("/student/notifications") ? "notifications"
     : path.startsWith("/student/settings") ? "settings"
     : "dashboard"
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="flex min-h-screen bg-surface">
       {/* Mobile Header */}
       <header className="md:hidden flex items-center justify-between px-margin-mobile py-4 bg-surface-container-lowest border-b border-outline-variant/20">
         <div className="flex items-center gap-2">
@@ -49,7 +50,7 @@ export function StudentLayout() {
       </header>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col h-screen w-64 bg-surface-container-low pb-md px-sm gap-base sticky top-0 shrink-0 border-r border-surface-container-high/50 fixed left-0 top-0">
+      <aside className="hidden md:flex flex-col h-screen w-64 bg-surface-container-low pb-md px-sm gap-base sticky top-0 shrink-0 border-r border-surface-container-high/50">
         <div className="flex flex-col gap-xs px-3 pt-md pb-lg">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-on-primary-container shrink-0">
@@ -79,7 +80,7 @@ export function StudentLayout() {
           ))}
         </nav>
 
-        <div className="mt-auto space-y-0.5 px-2 pt-base border-t border-outline-variant/20">
+        <div className="space-y-0.5 px-2 pt-base border-t border-outline-variant/20">
           {bottomItems.map((item) => (
             <Link
               key={item.id}
@@ -94,8 +95,11 @@ export function StudentLayout() {
       </aside>
 
       {/* Main Content */}
-      <div className="md:ml-64 flex-1">
-        <Outlet />
+      <div className="flex-1 flex flex-col min-h-screen">
+        <TopNavBar />
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
+        </main>
       </div>
 
       <MobileNav />
