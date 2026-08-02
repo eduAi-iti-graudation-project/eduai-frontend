@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import * as api from "@/lib/api"
+import { AttendanceHeatmap } from "@/components/attendance/AttendanceHeatmap"
+import { AttendanceDonut, MonthlyAttendanceBars } from "@/components/attendance/AttendanceCharts"
 
 interface AttendanceStats {
   total: number
@@ -144,6 +146,22 @@ export function AttendancePage() {
                   </div>
                 </div>
               )}
+
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                <div className="xl:col-span-2 bg-white rounded-[32px] p-xl border border-outline-variant/10 shadow-sm">
+                  <h3 className="font-headline-md text-headline-md text-primary mb-lg">Activity</h3>
+                  <AttendanceHeatmap records={allAttendance.data ?? []} />
+                </div>
+                <div className="bg-white rounded-[32px] p-xl border border-outline-variant/10 shadow-sm">
+                  <h3 className="font-headline-md text-headline-md text-primary mb-lg">Breakdown</h3>
+                  <AttendanceDonut records={allAttendance.data ?? []} />
+                </div>
+              </div>
+
+              <div className="bg-white rounded-[32px] p-xl border border-outline-variant/10 shadow-sm">
+                <h3 className="font-headline-md text-headline-md text-primary mb-lg">Last 6 months</h3>
+                <MonthlyAttendanceBars records={allAttendance.data ?? []} />
+              </div>
 
               <div className="bg-white rounded-[32px] border border-outline-variant/10 shadow-sm overflow-hidden">
                 <div className="px-xl py-4 border-b border-outline-variant/10 flex items-center justify-between">
