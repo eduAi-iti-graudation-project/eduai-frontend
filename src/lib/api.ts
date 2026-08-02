@@ -510,8 +510,27 @@ export async function getClassAttendance(classId: string): Promise<components["s
 
 // ── Student Grades ────────────────────────────────────────────────
 
-export async function getStudentGrades(studentId: string): Promise<components["schemas"]["GradeDto"][]> {
-  const res = await api.get<components["schemas"]["GradeDto"][]>(`/students/${studentId}/grades`)
+export interface StudentGrade {
+  id: string
+  submissionId: string
+  assignmentId: string
+  criteriaId: string
+  pointsAwarded: number
+  aiFeedback: string | null
+  teacherNotes: string | null
+  isConfirmed: boolean
+  createdAt: string
+  criterionDescription: string
+  criterionMaxPoints: number
+}
+
+export async function getStudentGrades(studentId: string): Promise<StudentGrade[]> {
+  const res = await api.get<StudentGrade[]>(`/students/${studentId}/grades`)
+  return res.data
+}
+
+export async function getStudentSubmissionGrades(studentId: string, submissionId: string): Promise<StudentGrade[]> {
+  const res = await api.get<StudentGrade[]>(`/students/${studentId}/grades/${submissionId}`)
   return res.data
 }
 
