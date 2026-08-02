@@ -34,7 +34,7 @@ export function ConfirmDialog({
     >
       <div
         className={cn(
-          "bg-white rounded-[32px] p-xl shadow-xl max-w-sm w-full mx-md border border-outline-variant/10",
+          "bg-white rounded-[32px] p-xl shadow-xl max-w-2xl w-full mx-md border border-outline-variant/10",
           className,
         )}
         onClick={(e) => e.stopPropagation()}

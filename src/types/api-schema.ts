@@ -71,6 +71,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Log out and revoke current session */
+        post: operations["AuthController_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/classes": {
         parameters: {
             query?: never;
@@ -81,8 +98,25 @@ export interface paths {
         /** List all classes */
         get: operations["ClassesController_findAll"];
         put?: never;
-        /** Create a class */
+        /** Create a class (admin only, specify teacherId) */
         post: operations["ClassesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/classes/available": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List available classes for self-enrollment */
+        get: operations["ClassesController_findAvailable"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -119,6 +153,40 @@ export interface paths {
         put?: never;
         /** Enroll a student */
         post: operations["ClassesController_addEnrollment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/classes/{id}/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Student self-join class */
+        post: operations["ClassesController_join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/classes/{id}/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List pending enrollment requests */
+        get: operations["ClassesController_getRequests"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -248,6 +316,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/rubrics/from-pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload a PDF rubric and create the rubric in one call */
+        post: operations["RubricsController_fromPdf"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/submissions": {
         parameters: {
             query?: never;
@@ -315,6 +400,40 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/grades/submissions/{submissionId}/scores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all scores with criteria for a submission */
+        get: operations["GradingController_getScores"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/grades/scores/{scoreId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update points awarded for a single score */
+        patch: operations["GradingController_updateScore"];
         trace?: never;
     };
     "/grades/confirm-all/{submissionId}": {
@@ -539,6 +658,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/students/{id}/classes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get enrolled classes for a student */
+        get: operations["StudentsController_getClasses"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/students/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update student details */
+        patch: operations["StudentsController_update"];
+        trace?: never;
+    };
+    "/students/{id}/guardian": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Link a guardian to a student */
+        post: operations["StudentsController_linkGuardian"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/attendance/import": {
         parameters: {
             query?: never;
@@ -607,6 +777,226 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/grades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all grades */
+        get: operations["GradesController_findAll"];
+        put?: never;
+        /** Create a grade */
+        post: operations["GradesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/grades/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get grade by ID with classes */
+        get: operations["GradesController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/grades/{id}/classes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List classes in a grade */
+        get: operations["GradesController_getClasses"];
+        put?: never;
+        /** Add a class to a grade */
+        post: operations["GradesController_addClass"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/grades/{gradeId}/classes/{classId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a class from a grade */
+        delete: operations["GradesController_removeClass"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/enrollments/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Approve a pending enrollment request */
+        patch: operations["EnrollmentsController_approve"];
+        trace?: never;
+    };
+    "/enrollments/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Reject a pending enrollment request */
+        patch: operations["EnrollmentsController_reject"];
+        trace?: never;
+    };
+    "/teachers/{id}/grades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List grades assigned to a teacher */
+        get: operations["TeachersController_getGrades"];
+        put?: never;
+        /** Assign a grade to a teacher */
+        post: operations["TeachersController_addGrade"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teachers/{teacherId}/grades/{gradeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a grade from a teacher */
+        delete: operations["TeachersController_removeGrade"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List/search users (ADMIN only) */
+        get: operations["UsersController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SystemController_health"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SystemController_ready"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SystemController_info"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/{path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MastraController_handleRequest_get"];
+        put: operations["MastraController_handleRequest_put"];
+        post: operations["MastraController_handleRequest_post"];
+        delete: operations["MastraController_handleRequest_delete"];
+        options: operations["MastraController_handleRequest_options"];
+        head: operations["MastraController_handleRequest_head"];
+        patch: operations["MastraController_handleRequest_patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -618,6 +1008,7 @@ export interface components {
             name: string;
             /** @enum {string} */
             role: "TEACHER" | "STUDENT" | "GUARDIAN" | "ADMIN";
+            gradeLevel?: number;
         };
         AuthResponseDto: {
             /** Format: uuid */
@@ -643,6 +1034,8 @@ export interface components {
         CreateClassDto: {
             name: string;
             description?: string;
+            /** Format: uuid */
+            teacherId: string;
         };
         ClassDto: {
             /** Format: uuid */
@@ -784,15 +1177,18 @@ export interface components {
         GradeDto: {
             /** Format: uuid */
             id: string;
-            /** Format: uuid */
-            submissionId: string;
-            /** Format: uuid */
-            criteriaId: string;
-            pointsAwarded: number;
-            aiFeedback: string | null;
-            teacherNotes: string | null;
-            isConfirmed: boolean;
+            level: number;
+            name: string;
             createdAt: string;
+        };
+        UpdateStudentDto: {
+            name?: string;
+            /** Format: email */
+            email?: string;
+            /** Format: uuid */
+            gradeId?: string;
+            /** Format: uuid */
+            guardianId?: string;
         };
         ImportAttendanceDto: {
             records: {
@@ -817,6 +1213,26 @@ export interface components {
             status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
             createdAt: string;
             updatedAt: string;
+        };
+        GradeClassDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            gradeId: string;
+            /** Format: uuid */
+            classId: string;
+        };
+        CreateGradeDto: {
+            level: number;
+            name: string;
+        };
+        AddGradeClassDto: {
+            /** Format: uuid */
+            classId: string;
+        };
+        AddTeacherGradeDto: {
+            /** Format: uuid */
+            gradeId: string;
         };
     };
     responses: never;
@@ -909,6 +1325,23 @@ export interface operations {
             };
         };
     };
+    AuthController_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ClassesController_findAll: {
         parameters: {
             query?: never;
@@ -948,6 +1381,23 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ClassDto"];
                 };
+            };
+        };
+    };
+    ClassesController_findAvailable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1032,6 +1482,44 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ClassesController_join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ClassesController_getRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1270,6 +1758,32 @@ export interface operations {
             };
         };
     };
+    RubricsController_fromPdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                    /** Format: uuid */
+                    assignmentId?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     SubmissionsController_findAll: {
         parameters: {
             query?: {
@@ -1372,6 +1886,44 @@ export interface operations {
         requestBody?: never;
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GradingController_getScores: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                submissionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GradingController_updateScore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scoreId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1676,6 +2228,74 @@ export interface operations {
             };
         };
     };
+    StudentsController_getClasses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StudentsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStudentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StudentsController_linkGuardian: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    guardianId?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     AttendanceController_importBatch: {
         parameters: {
             query?: never;
@@ -1751,6 +2371,429 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Role-aware dashboard data — shape varies by role */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GradesController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeDto"][];
+                };
+            };
+        };
+    };
+    GradesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateGradeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeDto"];
+                };
+            };
+        };
+    };
+    GradesController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeDto"];
+                };
+            };
+        };
+    };
+    GradesController_getClasses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeClassDto"][];
+                };
+            };
+        };
+    };
+    GradesController_addClass: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddGradeClassDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeClassDto"];
+                };
+            };
+        };
+    };
+    GradesController_removeClass: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gradeId: string;
+                classId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EnrollmentsController_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EnrollmentsController_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TeachersController_getGrades: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of grades */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TeachersController_addGrade: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddTeacherGradeDto"];
+            };
+        };
+        responses: {
+            /** @description Grade assigned */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TeachersController_removeGrade: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                teacherId: string;
+                gradeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Grade removed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_findAll: {
+        parameters: {
+            query?: {
+                role?: "TEACHER" | "STUDENT" | "GUARDIAN" | "ADMIN";
+                /** @description Free-text name search */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SystemController_health: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SystemController_ready: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SystemController_info: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MastraController_handleRequest_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MastraController_handleRequest_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MastraController_handleRequest_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MastraController_handleRequest_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MastraController_handleRequest_options: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MastraController_handleRequest_head: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MastraController_handleRequest_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             200: {
                 headers: {
                     [name: string]: unknown;

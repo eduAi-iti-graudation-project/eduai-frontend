@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import * as api from "@/lib/api"
+import { useAuth } from "@/providers/use-auth"
 import { toast } from "sonner"
 
 export function useClasses() {
@@ -10,8 +11,11 @@ export function useClasses() {
     queryFn: api.getClasses,
   })
 
+  const { user } = useAuth()
+
   const createClass = useMutation({
-    mutationFn: (data: { name: string; description?: string; teacherId: string }) => api.createClass(data),
+    mutationFn: (data: { name: string; description?: string }) =>
+      api.createClass({ ...data, teacherId: user?.id ?? "" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] })
       toast.success("Class created")

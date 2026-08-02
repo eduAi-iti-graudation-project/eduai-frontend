@@ -34,6 +34,9 @@ export function ClassDetailPage() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<TabId>("students")
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [uploadTitle, setUploadTitle] = useState("")
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const { detail, assignments, isLoading, isError, error, deleteClass, removeEnrollment } = useClassDetail(id ?? "")
   const { materials, upload, remove: removeMaterial } = useMaterials(id ?? "")
@@ -82,10 +85,33 @@ export function ClassDetailPage() {
     onError: (err: Error) => toast.error(err.message),
   })
 
-  const handleUploadMaterial = async (file: File) => {
-    const title = prompt("Material title:") || file.name
-    if (title) {
-      await upload.mutateAsync({ title, file })
+  const handleUploadMaterial = (file: File) => {
+    const base = file.name.replace(/\.pdf$/i, "")
+    setUploadTitle(base)
+    setPendingFile(file)
+    setUploadProgress(0)
+  }
+
+  const handleUpload = async () => {
+    if (!pendingFile || !uploadTitle.trim()) return
+    try {
+      await upload.mutateAsync({ title: uploadTitle.trim(), file: pendingFile, onProgress: setUploadProgress })
+      toast.success("Material uploaded")
+    } catch (err) {
+      toast.error(api.getErrorMessage(err))
+    } finally {
+      setPendingFile(null)
+      setUploadTitle("")
+      setUploadProgress(0)
+    }
+  }
+
+  const handleRemoveMaterial = async (id: string) => {
+    try {
+      await removeMaterial.mutateAsync(id)
+      toast.success("Material deleted")
+    } catch (err) {
+      toast.error(api.getErrorMessage(err))
     }
   }
 
@@ -164,7 +190,35 @@ export function ClassDetailPage() {
 
             <div className="bg-white rounded-[24px] p-md shadow-sm border border-outline-variant/10">
               <h4 className="font-label-md text-label-md text-primary mb-sm">Upload Material</h4>
-              <FileDropzone accept=".pdf" onFileSelect={handleUploadMaterial} />
+              <FileDropzone
+                accept=".pdf"
+                onFileSelect={handleUploadMaterial}
+                isUploading={upload.isPending}
+                uploadProgress={uploadProgress}
+              />
+              {pendingFile && (
+                <div className="mt-sm space-y-sm">
+                  <input
+                    type="text"
+                    value={uploadTitle}
+                    onChange={(e) => setUploadTitle(e.target.value)}
+                    placeholder="Material title"
+                    disabled={upload.isPending}
+                    className="w-full px-md py-sm rounded-2xl border border-outline-variant bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:outline-none disabled:opacity-60"
+                  />
+                  <div className="flex items-center gap-sm">
+                    <p className="font-label-sm text-label-sm text-on-surface-variant flex-1 truncate">{pendingFile.name}</p>
+                    <button
+                      type="button"
+                      onClick={handleUpload}
+                      disabled={upload.isPending || !uploadTitle.trim()}
+                      className="px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full hover:opacity-90 transition-colors disabled:opacity-50"
+                    >
+                      {upload.isPending ? "Uploading..." : "Upload"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {materials.length === 0 ? (
@@ -186,7 +240,12 @@ export function ClassDetailPage() {
                       {m.fileUrl && (
                         <a href={m.fileUrl} target="_blank" rel="noreferrer" className="px-md py-2 bg-primary-container/10 text-primary font-label-sm text-label-sm rounded-2xl hover:bg-primary-container/20 transition-colors">View</a>
                       )}
-                      <button onClick={() => removeMaterial.mutate(m.id)} className="p-2 text-on-surface-variant hover:text-error transition-colors" title="Delete">
+                      <button
+                        onClick={() => handleRemoveMaterial(m.id)}
+                        disabled={removeMaterial.isPending}
+                        className="p-2 text-on-surface-variant hover:text-error transition-colors disabled:opacity-50"
+                        title="Delete"
+                      >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
                       </button>
                     </div>
@@ -376,7 +435,7 @@ export function ClassDetailPage() {
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="bg-white rounded-[32px] p-xl shadow-xl max-w-sm w-full mx-md border border-outline-variant/10" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-[32px] p-xl shadow-xl max-w-2xl w-full mx-md border border-outline-variant/10" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-sm mb-md">
               <span className="material-symbols-outlined text-error text-[28px]">warning</span>
               <h3 className="font-headline-md text-headline-md text-on-surface">Delete {cls.name}?</h3>

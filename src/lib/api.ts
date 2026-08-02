@@ -105,7 +105,7 @@ export interface CriterionFeedback {
   teacherNotes: string | null
   isConfirmed: boolean
   createdAt: string
-  criterion: { id: string; description: string; maxPoints: number }
+  criterion?: { id: string; description: string; maxPoints: number }
 }
 
 export interface SubmissionDetail {
@@ -417,7 +417,30 @@ export async function getSubmissions(status?: string, assignmentId?: string): Pr
 
 export async function getSubmission(id: string): Promise<SubmissionDetail> {
   const res = await api.get<SubmissionDetail>(`/submissions/${id}`)
-  return res.data
+  const data = res.data
+
+  if (data.scores && data.scores.length > 0) {
+    try {
+      const rubrics = await getRubrics(data.assignmentId)
+      const criteriaMap = new Map<string, { id: string; description: string; maxPoints: number }>()
+      for (const rubric of rubrics) {
+        for (const c of rubric.criteria) {
+          criteriaMap.set(c.id, { id: c.id, description: c.description, maxPoints: c.maxPoints })
+        }
+      }
+      data.scores = data.scores.map((score) => {
+        const criterion = criteriaMap.get(score.criteriaId)
+        if (criterion) {
+          return { ...score, criterion }
+        }
+        return score
+      }) as CriterionFeedback[]
+    } catch {
+      // Rubric fetch failed — criterion will be missing, fallback UI handles it
+    }
+  }
+
+  return data
 }
 
 export async function createSubmission(data: components["schemas"]["CreateSubmissionDto"]): Promise<components["schemas"]["SubmissionDto"]> {
@@ -511,15 +534,37 @@ export async function searchMaterials(classId: string, q: string, topK?: number)
   return res.data
 }
 
-export async function uploadMaterial(title: string, classId: string, file: File): Promise<Material> {
+export async function uploadMaterial(
+  title: string,
+  classId: string,
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<Material> {
   const fd = new FormData()
   fd.append("file", file)
   fd.append("title", title)
   fd.append("classId", classId)
   const res = await api.post<Material>("/materials/upload", fd, {
     headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (e) => {
+      if (onProgress && e.total) onProgress(Math.round((e.loaded / e.total) * 100))
+    },
   })
   return res.data
+}
+
+export function getErrorMessage(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as { message?: string | string[] } | undefined
+    if (data?.message) {
+      return Array.isArray(data.message) ? data.message.join(", ") : data.message
+    }
+    if (err.message && err.message !== `Request failed with status code ${err.response?.status}`) {
+      return err.message
+    }
+  }
+  if (err instanceof Error) return err.message
+  return "Something went wrong"
 }
 
 export async function deleteMaterial(id: string): Promise<void> {

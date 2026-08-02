@@ -16,7 +16,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signupMutation = useMutation({
     mutationFn: api.signup,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ["auth", "me"] })
       queryClient.setQueryData(["auth", "me"], data)
       setToken(api.getStoredToken())
     },
@@ -24,7 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: api.login,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ["auth", "me"] })
       queryClient.setQueryData(["auth", "me"], data)
       setToken(api.getStoredToken())
     },

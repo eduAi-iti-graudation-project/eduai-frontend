@@ -69,7 +69,7 @@ export function NotFoundPage() {
 
             <h1 className="font-headline-xl text-headline-xl text-primary mb-2">404</h1>
 
-            <p className="font-headline-md text-headline-md text-on-surface-variant mb-8 max-w-md">
+            <p className="font-headline-md text-headline-md text-on-surface-variant mb-8 max-w-2xl">
               Oops! This page seems to have wandered off to recess without telling anyone.
             </p>
 
@@ -90,7 +90,7 @@ export function NotFoundPage() {
               </Link>
             </div>
 
-            <div className="mt-12 p-4 border-[1.5px] border-dashed border-primary bg-primary/5 rounded-xl flex items-start gap-3 text-left max-w-sm">
+            <div className="mt-12 p-4 border-[1.5px] border-dashed border-primary bg-primary/5 rounded-xl flex items-start gap-3 text-left max-w-2xl">
               <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
               <div>
                 <p className="font-label-md text-label-md text-primary mb-1">Looking for a specific lesson?</p>

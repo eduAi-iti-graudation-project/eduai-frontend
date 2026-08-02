@@ -44,7 +44,7 @@ export function SubmissionDetailPage() {
     const entry = Object.entries(edits)
     if (entry.length > 0) {
       for (const [scoreId, data] of entry) {
-        await api.updateGrade(scoreId, {
+        await api.confirmGrade(scoreId, {
           pointsAwarded: data.pointsAwarded,
           teacherNotes: data.teacherNotes || undefined,
         })
@@ -197,17 +197,14 @@ export function SubmissionDetailPage() {
 
             {(sub.status === "REVIEW_READY" || sub.status === "CONFIRMED") && mergedScores.length > 0 && (
               <div className="space-y-md">
-                {mergedScores.map((score) => {
-                  const criterionLabel = score.criterion?.description ?? `Criterion ${score.criteriaId.slice(0, 8)}`
-                  const maxPts = score.criterion?.maxPoints ?? 0
-                  return (
+                {mergedScores.map((score) => (
                   <div key={score.id} className="bg-surface-container-low rounded-2xl p-md border border-outline-variant/10 space-y-sm">
                     <div className="flex items-start justify-between gap-sm">
                       <div className="flex-1 min-w-0">
-                        <p className="font-label-md text-label-md text-on-surface">{criterionLabel}</p>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant">Max {maxPts} pts</p>
+                        <p className="font-label-md text-label-md text-on-surface">{score.criterion?.description ?? "Criterion"}</p>
+                        <p className="font-label-sm text-label-sm text-on-surface-variant">Max {score.criterion?.maxPoints ?? 0} pts</p>
                       </div>
-                      <span className="font-headline-sm text-headline-sm text-primary whitespace-nowrap">{score.pointsAwarded}/{maxPts}</span>
+                      <span className="font-headline-sm text-headline-sm text-primary whitespace-nowrap">{score.pointsAwarded}/{score.criterion?.maxPoints ?? 0}</span>
                     </div>
 
                     {score.aiFeedback && (
@@ -231,7 +228,7 @@ export function SubmissionDetailPage() {
                           <input
                             type="number"
                             min={0}
-                            max={maxPts}
+                            max={score.criterion?.maxPoints ?? 0}
                             value={score.pointsAwarded}
                             onChange={(e) => handlePointsChange(score.id, Number(e.target.value))}
                             className="w-full bg-white border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface form-input-focus"
@@ -250,8 +247,7 @@ export function SubmissionDetailPage() {
                       </div>
                     )}
                   </div>
-                  )
-                })}
+                ))}
 
                 {/* Total */}
                 <div className="bg-primary-container/10 rounded-2xl p-md border border-primary-container/20">
