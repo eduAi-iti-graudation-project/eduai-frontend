@@ -1,5 +1,7 @@
 import { useParams, Link } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 import { useSubmissionDetail } from "@/hooks/use-submissions"
+import * as api from "@/lib/api"
 import { StatusBadge } from "@/components/ui/StatusBadge"
 
 type ScoreLike = { criterion?: { description?: string; maxPoints?: number } }
@@ -7,8 +9,16 @@ type ScoreLike = { criterion?: { description?: string; maxPoints?: number } }
 export function SubmissionStatusPage() {
   const { id } = useParams<{ id: string }>()
   const { data: submission, isLoading, isError, error } = useSubmissionDetail(id ?? "")
+  const needsPolling = submission?.status === "CONFIRMED" && (submission.scores?.some((s) => !s.aiFeedback) ?? false)
+  const { data: polledSubmission } = useQuery({
+    queryKey: ["submission", id, "poll"],
+    queryFn: () => api.getSubmission(id!),
+    enabled: needsPolling,
+    refetchInterval: 10_000,
+  })
+  const submissionData = polledSubmission ?? submission
 
-  if (isLoading) {
+  if (isLoading && !submissionData) {
     return (
       <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
         <div className="space-y-4 animate-pulse">
@@ -19,7 +29,7 @@ export function SubmissionStatusPage() {
     )
   }
 
-  if (isError || !submission) {
+  if (isError || !submissionData) {
     return (
       <div className="flex items-center justify-center h-full p-margin-desktop">
         <div className="text-center">
@@ -36,7 +46,7 @@ export function SubmissionStatusPage() {
     )
   }
 
-  const status = submission.status
+  const status = submissionData.status
   const isConfirmed = status === "CONFIRMED"
 
   return (
@@ -50,11 +60,11 @@ export function SubmissionStatusPage() {
         </div>
         <StatusBadge status={status} />
       </div>
-        {submission.assignment && (
+        {submissionData.assignment && (
           <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm mb-6">
-            <h2 className="font-headline-md text-headline-md text-primary mb-2">{submission.assignment.title}</h2>
-            {submission.assignment.description && (
-              <p className="font-body-md text-body-md text-on-surface-variant">{submission.assignment.description}</p>
+            <h2 className="font-headline-md text-headline-md text-primary mb-2">{submissionData.assignment.title}</h2>
+            {submissionData.assignment.description && (
+              <p className="font-body-md text-body-md text-on-surface-variant">{submissionData.assignment.description}</p>
             )}
           </div>
         )}
@@ -81,7 +91,7 @@ export function SubmissionStatusPage() {
               The AI has completed grading. Your teacher will review and confirm the results.
             </p>
           </div>
-        ) : isConfirmed && submission.scores ? (
+        ) : isConfirmed && submissionData.scores ? (
           <div className="space-y-4">
             {/* Hard rule: Only confirmed grades are shown — unconfirmed scores are never visible to students */}
             <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
@@ -89,16 +99,16 @@ export function SubmissionStatusPage() {
                 <h2 className="font-headline-md text-headline-md text-primary">Results</h2>
                 <div className="text-right">
                   <p className="font-headline-lg text-headline-lg text-primary">
-                    {submission.scores.filter(s => s.isConfirmed).reduce((sum, s) => sum + s.pointsAwarded, 0)}
+                    {submissionData.scores.filter(s => s.isConfirmed).reduce((sum, s) => sum + s.pointsAwarded, 0)}
                     <span className="font-body-md text-body-md text-on-surface-variant">
-                      /{submission.scores.filter(s => s.isConfirmed).reduce((sum, s) => sum + ((s as ScoreLike).criterion?.maxPoints ?? 0), 0)}
+                      /{submissionData.scores.filter(s => s.isConfirmed).reduce((sum, s) => sum + ((s as ScoreLike).criterion?.maxPoints ?? 0), 0)}
                     </span>
                   </p>
                 </div>
               </div>
 
               <div className="space-y-3">
-                {submission.scores.filter(s => s.isConfirmed).map((score) => (
+                {submissionData.scores.filter(s => s.isConfirmed).map((score) => (
                   <div key={score.id} className="rounded-3xl bg-surface-container-low p-md border border-outline-variant/10">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
