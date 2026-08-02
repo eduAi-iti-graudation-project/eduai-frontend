@@ -24,6 +24,21 @@ export function clearToken(): void {
 
 const api = axios.create({ baseURL: API_URL })
 
+export function getErrorMessage(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as { message?: string | string[] } | undefined
+    if (data?.message) {
+      return Array.isArray(data.message) ? data.message.join(", ") : data.message
+    }
+    if (err.message && err.message !== `Request failed with status code ${err.response?.status}`) {
+      return err.message
+    }
+  }
+  return err instanceof Error ? err.message : "An unexpected error occurred"
+}
+
+
+
 api.interceptors.request.use((config) => {
   const token = getStoredToken()
   if (token) {
