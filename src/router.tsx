@@ -5,7 +5,8 @@ import { TeacherRoute, StudentRoute, GuardianRoute, AdminRoute, GuestRoute, Root
 import { LoginPage } from "./pages/LoginPage"
 import { SignupPage } from "./pages/SignupPage"
 import { TeacherDashboardPage } from "./pages/TeacherDashboardPage"
-import { ClassesPage } from "./pages/teacher/ClassesPage"
+import { GradeListPage } from "./pages/teacher/GradeListPage"
+import { ClassesInGradePage } from "./pages/teacher/ClassesInGradePage"
 import { ClassDetailPage } from "./pages/teacher/ClassDetailPage"
 import { InstructorAssignmentForm } from "./components/InstructorAssignmentForm"
 import { AssignmentDetailPage } from "./pages/teacher/AssignmentDetailPage"
@@ -28,12 +29,18 @@ import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
 import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
 import { ChildDetailPage } from "./pages/guardian/ChildDetailPage"
+import { AdminLayout } from "./components/layout/AdminLayout"
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage"
+import { GradeManagementPage } from "./pages/admin/GradeManagementPage"
+import { StudentManagementPage } from "./pages/admin/StudentManagementPage"
+import { StudentGradesPage } from "./pages/admin/StudentGradesPage"
+import { AttendancePage } from "./pages/admin/AttendancePage"
 import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const TEACHER_ROUTES = [
   { path: "/dashboard", element: <TeacherDashboardPage /> },
-  { path: "/classes", element: <ClassesPage /> },
+  { path: "/grades", element: <GradeListPage /> },
+  { path: "/grades/:gradeId", element: <ClassesInGradePage /> },
   { path: "/classes/:id", element: <ClassDetailPage /> },
   { path: "/assignments/new", element: <InstructorAssignmentForm /> },
   { path: "/assignments/:id", element: <AssignmentDetailPage /> },
@@ -91,13 +98,13 @@ export function guardianRoutes() {
 export function adminRoutes() {
   return {
     path: "/admin",
-    element: <AdminRoute><div className="min-h-screen bg-surface"><div className="flex-1 p-xl"><Outlet /></div></div></AdminRoute>,
+    element: <AdminRoute><AdminLayout /></AdminRoute>,
     children: [
       { index: true, element: <AdminDashboardPage /> },
-      { path: "teachers", element: <div className="text-center py-xl"><h1 className="font-headline-xl text-headline-xl text-primary">Teacher Management</h1><p className="font-body-md text-body-md text-on-surface-variant mt-md">Coming soon</p></div> },
-      { path: "reports", element: <ReportsPage /> },
-      { path: "alerts", element: <AlertsPage /> },
-      { path: "notifications", element: <NotificationsListPage /> },
+      { path: "grades", element: <GradeManagementPage /> },
+      { path: "students", element: <StudentManagementPage /> },
+      { path: "student-grades", element: <StudentGradesPage /> },
+      { path: "attendance", element: <AttendancePage /> },
     ],
   }
 }

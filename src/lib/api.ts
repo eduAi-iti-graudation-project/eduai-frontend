@@ -36,8 +36,11 @@ api.interceptors.response.use(
   (res) => res,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      clearToken()
-      window.location.href = "/login"
+      const url = error.config?.url ?? ""
+      if (!url.includes("/auth/login") && !url.includes("/auth/signup")) {
+        clearToken()
+        window.location.href = "/login"
+      }
     }
     return Promise.reject(error)
   },
@@ -248,6 +251,27 @@ export async function removeEnrollment(classId: string, studentId: string): Prom
   await api.delete(`/classes/${classId}/enrollments/${studentId}`)
 }
 
+export async function getClassRequests(classId: string): Promise<{ id: string; studentId: string; status: string; student: { id: string; name: string; email: string } }[]> {
+  const res = await api.get(`/classes/${classId}/requests`)
+  return res.data
+}
+
+export async function approveEnrollment(enrollmentId: string): Promise<void> {
+  await api.patch(`/enrollments/${enrollmentId}/approve`)
+}
+
+export async function rejectEnrollment(enrollmentId: string): Promise<void> {
+  await api.patch(`/enrollments/${enrollmentId}/reject`)
+}
+
+export interface StudentClass {
+  id: string
+  name: string
+  description: string | null
+  teacherName: string
+  assignments: { id: string; title: string; description: string | null; dueDate: string; totalPoints: number }[]
+}
+
 // ── Assignments ───────────────────────────────────────────────────
 
 export async function getAssignments(classId?: string): Promise<components["schemas"]["AssignmentDto"][]> {
@@ -305,6 +329,13 @@ export async function confirmRubric(id: string): Promise<Rubric> {
 
 export async function createRubricFromPdf(formData: FormData): Promise<{ title?: string; criteria: { description: string; maxPoints: number }[] }> {
   const res = await api.post("/rubrics/import-pdf", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  })
+  return res.data
+}
+
+export async function createRubricFromPdfDirect(formData: FormData): Promise<Rubric> {
+  const res = await api.post<Rubric>("/rubrics/from-pdf", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   })
   return res.data
@@ -476,6 +507,63 @@ export async function getStudentClasses(studentId: string): Promise<StudentClass
   return res.data
 }
 
+export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
+  const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
+  return res.data
+}
+
+// ── Grades ────────────────────────────────────────────────────────
+
+export interface TeacherGrade { id: string; level: number; name: string; createdAt: string }
+
+export async function getTeacherGrades(teacherId: string): Promise<TeacherGrade[]> {
+  const res = await api.get<TeacherGrade[]>(`/teachers/${teacherId}/grades`)
+  return res.data
+}
+
+export async function getGradeClasses(gradeId: string): Promise<components["schemas"]["ClassDto"][]> {
+  const res = await api.get<components["schemas"]["ClassDto"][]>(`/grades/${gradeId}/classes`)
+  return res.data
+}
+
+// ── Admin ─────────────────────────────────────────────────────────
+
+export interface AdminUser { id: string; email: string; name: string; role: string }
+
+export async function getUsers(params?: { role?: string; q?: string }): Promise<AdminUser[]> {
+  const res = await api.get<AdminUser[]>("/users", { params })
+  return res.data
+}
+
+export async function getAllGrades(): Promise<TeacherGrade[]> {
+  const res = await api.get<TeacherGrade[]>("/grades")
+  return res.data
+}
+
+export async function createGrade(data: { level: number; name: string }): Promise<void> {
+  await api.post("/grades", data)
+}
+
+export async function linkGuardianToStudent(studentId: string, guardianId: string): Promise<void> {
+  await api.post(`/students/${studentId}/guardian`, { guardianId })
+}
+
+export async function assignGradeToTeacher(teacherId: string, gradeId: string): Promise<void> {
+  await api.post(`/teachers/${teacherId}/grades`, { gradeId })
+}
+
+export async function removeGradeFromTeacher(teacherId: string, gradeId: string): Promise<void> {
+  await api.delete(`/teachers/${teacherId}/grades/${gradeId}`)
+}
+
+export async function addClassToGrade(gradeId: string, classId: string): Promise<void> {
+  await api.post(`/grades/${gradeId}/classes`, { classId })
+}
+
+export async function removeClassFromGrade(gradeId: string, classId: string): Promise<void> {
+  await api.delete(`/grades/${gradeId}/classes/${classId}`)
+}
+
 // ── Assistant Chat ────────────────────────────────────────────────
 
 export async function sendChatMessage(
@@ -485,6 +573,10 @@ export async function sendChatMessage(
 ): Promise<ChatResponse> {
   const res = await api.post<ChatResponse>("/assistant/chat", { classId, messages, newMessage })
   return res.data
+}
+
+export async function updateGrade(id: string, data: { pointsAwarded?: number; teacherNotes?: string }): Promise<void> {
+  await api.patch(`/grades/scores/${id}`, data)
 }
 
 // ── Re-export extractMessage for hooks ────────────────────────────

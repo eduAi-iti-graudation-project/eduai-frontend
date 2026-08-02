@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useClasses } from "@/hooks/use-classes"
+import { useAuth } from "@/providers/use-auth"
 
 const iconOptions = [
   { icon: "functions", bg: "bg-surface-container", color: "text-primary-container" },
@@ -33,6 +34,7 @@ export function ClassesPage() {
   const [newClassName, setNewClassName] = useState("")
   const [newClassDesc, setNewClassDesc] = useState("")
 
+  const { user } = useAuth()
   const { isLoading, isError, error, classCards, createClass, deleteClass } = useClasses()
 
   const totalActive = classCards.length
@@ -42,7 +44,7 @@ export function ClassesPage() {
 
   const handleCreate = async () => {
     if (!newClassName.trim()) return
-    await createClass.mutateAsync({ name: newClassName.trim(), description: newClassDesc.trim() || undefined })
+    await createClass.mutateAsync({ name: newClassName.trim(), description: newClassDesc.trim() || undefined, teacherId: user!.id })
     setNewClassName("")
     setNewClassDesc("")
     setShowCreateModal(false)
@@ -232,7 +234,7 @@ export function ClassesPage() {
                   </div>
                 </div>
                 <h3 className="font-headline-xl text-headline-xl text-white mb-md">{bestClass.name}</h3>
-                <p className="text-white/80 text-body-lg font-body-lg mb-lg max-w-md">
+                <p className="text-white/80 text-body-lg font-body-lg mb-lg max-w-2xl">
                   {bestClass.name} has {bestClass.students} enrolled student{bestClass.students !== 1 ? "s" : ""}. View their assignments and submissions.
                 </p>
                 <div className="flex flex-wrap gap-md items-center">
