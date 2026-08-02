@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
+import { Link } from "react-router-dom"
 import * as api from "@/lib/api"
+import { DashboardStatCard } from "@/components/communication/DashboardStatCard"
 
 interface AdminDashboardOverview {
   teacherCount: number
@@ -8,6 +10,8 @@ interface AdminDashboardOverview {
   flaggedStudentCount: number
   averagePassRate: number
   pendingReportCount: number
+  activeAlertCount: number
+  resolvedAlertCount: number
   teachers: { id: string; name: string; classAverage: number; studentCount: number }[]
 }
 
@@ -55,26 +59,31 @@ export function AdminDashboardPage() {
 
   const data = dashboard.data
 
-  const statCards = data ? [
-    { icon: "school", label: "Teachers", value: data.teacherCount, color: "text-primary" },
-    { icon: "group", label: "Students", value: data.studentCount, color: "text-primary" },
-    { icon: "meeting_room", label: "Classes", value: data.classCount, color: "text-primary" },
-    { icon: "flag", label: "Flagged Students", value: data.flaggedStudentCount, color: "text-error" },
-    { icon: "trending_up", label: "Avg Pass Rate", value: `${data.averagePassRate}%`, color: "text-primary" },
-    { icon: "description", label: "Pending Reports", value: data.pendingReportCount, color: "text-secondary" },
-  ] : []
-
   return (
     <div className="flex-1 p-xl max-w-6xl mx-auto w-full">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-        {statCards.map((stat) => (
-          <div key={stat.label} className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
-            <span className={`material-symbols-outlined text-[22px] ${stat.color} mb-2 block`}>{stat.icon}</span>
-            <p className="font-label-sm text-label-sm text-on-surface-variant">{stat.label}</p>
-            <p className="font-headline-lg text-headline-lg text-on-surface mt-1">{stat.value}</p>
-          </div>
-        ))}
+        <DashboardStatCard icon="school" label="Teachers" value={data?.teacherCount ?? 0} />
+        <DashboardStatCard icon="group" label="Students" value={data?.studentCount ?? 0} />
+        <DashboardStatCard icon="meeting_room" label="Classes" value={data?.classCount ?? 0} />
+        <DashboardStatCard icon="notifications_active" label="Active Alerts" value={data?.activeAlertCount ?? 0} color="text-error" />
+        <DashboardStatCard icon="trending_up" label="Avg Pass Rate" value={data ? `${data.averagePassRate}%` : "—"} />
+        <DashboardStatCard icon="description" label="Pending Reports" value={data?.pendingReportCount ?? 0} color="text-secondary" />
       </div>
+
+      {data && data.activeAlertCount > 0 && (
+        <div className="rounded-[32px] bg-white border border-outline-variant/10 shadow-sm p-md mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-[24px] text-error">notifications_active</span>
+            <div>
+              <p className="font-headline-md text-headline-md text-on-surface">{data.activeAlertCount} Active Alerts</p>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">{data.resolvedAlertCount} resolved this week</p>
+            </div>
+          </div>
+          <Link to="/admin/alerts" className="bg-primary text-white px-md py-sm rounded-full font-label-md text-label-sm hover:opacity-90 transition-all">
+            View All Alerts
+          </Link>
+        </div>
+      )}
 
       {data && data.teachers.length > 0 && (
         <div className="rounded-[32px] bg-white border border-outline-variant/10 shadow-sm overflow-hidden">

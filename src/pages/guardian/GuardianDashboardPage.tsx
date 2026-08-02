@@ -84,7 +84,8 @@ export function GuardianDashboardPage() {
                   <p className="font-body-md text-body-md text-on-surface-variant">{child.className}</p>
                 </div>
                 {child.activeAlerts > 0 && (
-                  <span className="bg-error-container text-error font-label-sm text-label-sm px-sm py-0.5 rounded-full">
+                  <span className="bg-error-container text-error font-label-sm text-label-sm px-sm py-0.5 rounded-full cursor-pointer"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/guardian/alerts/${child.id}`) }}>
                     {child.activeAlerts} alert{child.activeAlerts !== 1 ? "s" : ""}
                   </span>
                 )}
