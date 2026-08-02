@@ -9,16 +9,7 @@ export function GradeListPage() {
 
   const { data: grades, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["teacher-grades", user?.id],
-    queryFn: async () => {
-      const allGrades = await api.getAllGrades()
-      const withClasses = await Promise.all(
-        allGrades.map(async (grade) => ({ grade, classes: await api.getGradeClasses(grade.id) })),
-      )
-      return withClasses
-        .filter(({ classes }) => classes.some((c) => c.teacherId === user!.id))
-        .map(({ grade }) => grade)
-        .sort((a, b) => a.level - b.level)
-    },
+    queryFn: () => api.getTeacherGrades(user!.id),
     enabled: !!user?.id,
   })
 
@@ -59,8 +50,8 @@ export function GradeListPage() {
         <h1 className="font-headline-lg text-headline-lg text-primary mb-4">My Grades</h1>
         <EmptyState
           icon="school"
-          title="No grades yet"
-          description="Grades appear here when classes you teach are added to them."
+          title="No grades assigned"
+          description="Ask your admin to assign you to the grades you teach."
         />
       </div>
     )
