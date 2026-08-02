@@ -201,10 +201,10 @@ export function SubmissionDetailPage() {
                   <div key={score.id} className="bg-surface-container-low rounded-2xl p-md border border-outline-variant/10 space-y-sm">
                     <div className="flex items-start justify-between gap-sm">
                       <div className="flex-1 min-w-0">
-                        <p className="font-label-md text-label-md text-on-surface">{score.criterion.description}</p>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant">Max {score.criterion.maxPoints} pts</p>
+                        <p className="font-label-md text-label-md text-on-surface">{score.criterion?.description ?? "Criterion"}</p>
+                        <p className="font-label-sm text-label-sm text-on-surface-variant">Max {score.criterion?.maxPoints ?? 0} pts</p>
                       </div>
-                      <span className="font-headline-sm text-headline-sm text-primary whitespace-nowrap">{score.pointsAwarded}/{score.criterion.maxPoints}</span>
+                      <span className="font-headline-sm text-headline-sm text-primary whitespace-nowrap">{score.pointsAwarded}/{score.criterion?.maxPoints ?? 0}</span>
                     </div>
 
                     {score.aiFeedback && (
@@ -228,7 +228,7 @@ export function SubmissionDetailPage() {
                           <input
                             type="number"
                             min={0}
-                            max={score.criterion.maxPoints}
+                            max={score.criterion?.maxPoints ?? 0}
                             value={score.pointsAwarded}
                             onChange={(e) => handlePointsChange(score.id, Number(e.target.value))}
                             className="w-full bg-white border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface form-input-focus"
@@ -254,7 +254,7 @@ export function SubmissionDetailPage() {
                   <div className="flex items-center justify-between">
                     <span className="font-label-md text-label-md text-primary font-bold">Total</span>
                     <span className="font-headline-md text-headline-md text-primary">
-                      {mergedScores.reduce((a, s) => a + s.pointsAwarded, 0)} / {mergedScores.reduce((a, s) => a + s.criterion.maxPoints, 0)} pts
+                      {mergedScores.reduce((a, s) => a + s.pointsAwarded, 0)} / {mergedScores.reduce((a, s) => a + (s.criterion?.maxPoints ?? 0), 0)} pts
                     </span>
                   </div>
                 </div>
