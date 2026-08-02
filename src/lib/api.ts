@@ -24,21 +24,6 @@ export function clearToken(): void {
 
 const api = axios.create({ baseURL: API_URL })
 
-export function getErrorMessage(err: unknown): string {
-  if (axios.isAxiosError(err)) {
-    const data = err.response?.data as { message?: string | string[] } | undefined
-    if (data?.message) {
-      return Array.isArray(data.message) ? data.message.join(", ") : data.message
-    }
-    if (err.message && err.message !== `Request failed with status code ${err.response?.status}`) {
-      return err.message
-    }
-  }
-  return err instanceof Error ? err.message : "An unexpected error occurred"
-}
-
-
-
 api.interceptors.request.use((config) => {
   const token = getStoredToken()
   if (token) {
@@ -105,7 +90,7 @@ export interface CriterionFeedback {
   teacherNotes: string | null
   isConfirmed: boolean
   createdAt: string
-  criterion: { id: string; description: string; maxPoints: number }
+  criterion?: { id: string; description: string; maxPoints: number }
 }
 
 export interface SubmissionDetail {
@@ -122,6 +107,8 @@ export interface SubmissionDetail {
 }
 
 export interface DashboardOverview {
+  activeAlertCount: number
+  resolvedAlertCount: number
   classCount: number
   pendingConfirmations: number
   recentAlerts: { id: string; studentName: string; type: string; reason: string; createdAt: string }[]
@@ -211,6 +198,53 @@ export async function login(data: components["schemas"]["LoginDto"]): Promise<Us
 
 export async function getMe(): Promise<User> {
   const res = await api.get<User>("/auth/me")
+  return res.data
+}
+
+// ── Communication Agent Types ────────────────────────────────────
+
+export interface DiagnosisPayload {
+  hasIssue: boolean
+  issueType: "STUDENT_ISSUE" | "CLASS_ISSUE" | "BOTH" | null
+  severity: "LOW" | "MEDIUM" | "HIGH" | null
+  summary: string | null
+  classContext: string | null
+}
+
+export interface TeacherContentPayload {
+  analysis: string
+  skillGaps: string[]
+  interventions: string[]
+  resourceSuggestions: string[]
+}
+
+export interface GuardianContentPayload {
+  message: string
+  homeSupport: string[]
+}
+
+export interface TeacherFeedbackPayload {
+  feedback: string
+  patternAnalysis: string
+  strategies: string[]
+}
+
+export interface ManagementSummaryPayload {
+  summary: string
+  classTrend: string
+  recommendation: string
+}
+
+export interface AlertDetail {
+  diagnosis: DiagnosisPayload
+  teacherContent: TeacherContentPayload | null
+  guardianContent: GuardianContentPayload | null
+  teacherFeedback: TeacherFeedbackPayload | null
+  managementSummary: ManagementSummaryPayload | null
+}
+
+export async function getAlertDetail(id: string): Promise<AlertDetail> {
+  const res = await api.get<AlertDetail>(`/alerts/${id}/teacher-detail`)
   return res.data
 }
 
@@ -368,7 +402,30 @@ export async function getSubmissions(status?: string, assignmentId?: string): Pr
 
 export async function getSubmission(id: string): Promise<SubmissionDetail> {
   const res = await api.get<SubmissionDetail>(`/submissions/${id}`)
-  return res.data
+  const data = res.data
+
+  if (data.scores && data.scores.length > 0) {
+    try {
+      const rubrics = await getRubrics(data.assignmentId)
+      const criteriaMap = new Map<string, { id: string; description: string; maxPoints: number }>()
+      for (const rubric of rubrics) {
+        for (const c of rubric.criteria) {
+          criteriaMap.set(c.id, { id: c.id, description: c.description, maxPoints: c.maxPoints })
+        }
+      }
+      data.scores = data.scores.map((score) => {
+        const criterion = criteriaMap.get(score.criteriaId)
+        if (criterion) {
+          return { ...score, criterion }
+        }
+        return score
+      }) as CriterionFeedback[]
+    } catch {
+      // Rubric fetch failed — criterion will be missing, fallback UI handles it
+    }
+  }
+
+  return data
 }
 
 export async function createSubmission(data: components["schemas"]["CreateSubmissionDto"]): Promise<components["schemas"]["SubmissionDto"]> {
@@ -405,9 +462,16 @@ export async function confirmGrade(id: string, data?: { pointsAwarded: number; t
 
 // ── Alerts ────────────────────────────────────────────────────────
 
-export async function getAlerts(status?: string): Promise<components["schemas"]["AlertDto"][]> {
+export type AlertListItem = components["schemas"]["AlertDto"] & {
+  studentName: string
+  className: string
+  severity: "LOW" | "MEDIUM" | "HIGH"
+  skillGapCount: number
+}
+
+export async function getAlerts(status?: string): Promise<AlertListItem[]> {
   const params = status ? { status } : undefined
-  const res = await api.get<components["schemas"]["AlertDto"][]>("/alerts", { params })
+  const res = await api.get<AlertListItem[]>("/alerts", { params })
   return res.data
 }
 
@@ -455,15 +519,37 @@ export async function searchMaterials(classId: string, q: string, topK?: number)
   return res.data
 }
 
-export async function uploadMaterial(title: string, classId: string, file: File): Promise<Material> {
+export async function uploadMaterial(
+  title: string,
+  classId: string,
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<Material> {
   const fd = new FormData()
   fd.append("file", file)
   fd.append("title", title)
   fd.append("classId", classId)
   const res = await api.post<Material>("/materials/upload", fd, {
     headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (e) => {
+      if (onProgress && e.total) onProgress(Math.round((e.loaded / e.total) * 100))
+    },
   })
   return res.data
+}
+
+export function getErrorMessage(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as { message?: string | string[] } | undefined
+    if (data?.message) {
+      return Array.isArray(data.message) ? data.message.join(", ") : data.message
+    }
+    if (err.message && err.message !== `Request failed with status code ${err.response?.status}`) {
+      return err.message
+    }
+  }
+  if (err instanceof Error) return err.message
+  return "Something went wrong"
 }
 
 export async function deleteMaterial(id: string): Promise<void> {
@@ -513,18 +599,6 @@ export async function getStudentSubmissionGrades(studentId: string, submissionId
   return res.data
 }
 
-export interface StudentClass {
-  id: string
-  name: string
-  description: string | null
-  teacherName: string
-  assignments: { id: string; title: string; description: string | null; dueDate: string; totalPoints: number }[]
-}
-
-export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
-  const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
-  return res.data
-}
 export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
   const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
   return res.data
@@ -593,8 +667,45 @@ export async function sendChatMessage(
   return res.data
 }
 
-export async function updateGrade(id: string, data: { pointsAwarded?: number; teacherNotes?: string }): Promise<void> {
-  await api.patch(`/grades/scores/${id}`, data)
+// ── Homework Help ─────────────────────────────────────────────────
+
+export type HomeworkHelpFeedbackValue = "HELPFUL" | "NOT_HELPFUL"
+
+export interface HomeworkHelpInteraction {
+  id: string
+  question: string
+  answer: string
+  action: "HINT" | "EXPLANATION" | "REDIRECT_TEACHER" | string
+  sources: string[]
+  feedback: HomeworkHelpFeedbackValue | null
+  createdAt: string
+}
+
+export interface HomeworkHelpResponse {
+  interactionId: string
+  reply: string
+  action: string
+  sources: string[]
+  teacherNotified: boolean
+}
+
+export async function askHomeworkHelp(data: {
+  classId: string
+  question: string
+  assignmentId?: string
+}): Promise<HomeworkHelpResponse> {
+  const res = await api.post<HomeworkHelpResponse>("/assistant/homework-help", data)
+  return res.data
+}
+
+export async function getHomeworkHelpHistory(classId?: string): Promise<HomeworkHelpInteraction[]> {
+  const params = classId ? { classId } : undefined
+  const res = await api.get<{ interactions: HomeworkHelpInteraction[] }>("/assistant/homework-help/history", { params })
+  return res.data.interactions
+}
+
+export async function submitHomeworkHelpFeedback(interactionId: string, feedback: HomeworkHelpFeedbackValue): Promise<void> {
+  await api.patch(`/assistant/homework-help/${interactionId}/feedback`, { feedback })
 }
 
 // ── Quizzes ───────────────────────────────────────────────────────
@@ -788,8 +899,6 @@ export async function updateQuizAnswer(answerId: string, pointsAwarded: number):
   const res = await api.patch<QuizAnswerDto>(`/quizzes/answers/${answerId}`, { pointsAwarded })
   return res.data
 }
-
-
 
 // ── Re-export extractMessage for hooks ────────────────────────────
 
