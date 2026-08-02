@@ -392,11 +392,15 @@ export async function gradeSubmission(submissionId: string): Promise<void> {
   await api.post(`/grades/submissions/${submissionId}/grade`)
 }
 
+export async function updateGrade(id: string, data: { pointsAwarded?: number; teacherNotes?: string }): Promise<void> {
+  await api.patch(`/grades/scores/${id}`, data)
+}
+
 export async function confirmAllGrades(submissionId: string): Promise<void> {
   await api.patch(`/grades/confirm-all/${submissionId}`)
 }
 
-/** @deprecated Use confirmAllGrades instead — kept for backward compat */
+/** @deprecated Use updateGrade + confirmAllGrades instead */
 export async function confirmGrade(id: string, data?: { pointsAwarded: number; teacherNotes?: string }): Promise<void> {
   void data
   await api.patch(`/grades/confirm-all/${id}`)
@@ -510,8 +514,27 @@ export async function getClassAttendance(classId: string): Promise<components["s
 
 // ── Student Grades ────────────────────────────────────────────────
 
-export async function getStudentGrades(studentId: string): Promise<components["schemas"]["GradeDto"][]> {
-  const res = await api.get<components["schemas"]["GradeDto"][]>(`/students/${studentId}/grades`)
+export interface StudentGrade {
+  id: string
+  submissionId: string
+  assignmentId: string
+  criteriaId: string
+  pointsAwarded: number
+  aiFeedback: string | null
+  teacherNotes: string | null
+  isConfirmed: boolean
+  createdAt: string
+  criterionDescription: string
+  criterionMaxPoints: number
+}
+
+export async function getStudentGrades(studentId: string): Promise<StudentGrade[]> {
+  const res = await api.get<StudentGrade[]>(`/students/${studentId}/grades`)
+  return res.data
+}
+
+export async function getStudentSubmissionGrades(studentId: string, submissionId: string): Promise<StudentGrade[]> {
+  const res = await api.get<StudentGrade[]>(`/students/${studentId}/grades/${submissionId}`)
   return res.data
 }
 
