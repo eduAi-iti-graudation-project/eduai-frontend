@@ -5,7 +5,8 @@ import { TeacherRoute, StudentRoute, GuardianRoute, AdminRoute, GuestRoute, Root
 import { LoginPage } from "./pages/LoginPage"
 import { SignupPage } from "./pages/SignupPage"
 import { TeacherDashboardPage } from "./pages/TeacherDashboardPage"
-import { ClassesPage } from "./pages/teacher/ClassesPage"
+import { GradeListPage } from "./pages/teacher/GradeListPage"
+import { ClassesInGradePage } from "./pages/teacher/ClassesInGradePage"
 import { ClassDetailPage } from "./pages/teacher/ClassDetailPage"
 import { InstructorAssignmentForm } from "./components/InstructorAssignmentForm"
 import { AssignmentDetailPage } from "./pages/teacher/AssignmentDetailPage"
@@ -37,7 +38,8 @@ import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const TEACHER_ROUTES = [
   { path: "/dashboard", element: <TeacherDashboardPage /> },
-  { path: "/classes", element: <ClassesPage /> },
+  { path: "/grades", element: <GradeListPage /> },
+  { path: "/grades/:gradeId", element: <ClassesInGradePage /> },
   { path: "/classes/:id", element: <ClassDetailPage /> },
   { path: "/assignments/new", element: <InstructorAssignmentForm /> },
   { path: "/assignments/:id", element: <AssignmentDetailPage /> },
