@@ -88,7 +88,7 @@ export function FileDropzone({
             <span className="material-symbols-outlined text-primary animate-spin">sync</span>
           </div>
           <p className="font-label-md text-label-md text-primary">Uploading...</p>
-          <div className="w-full max-w-xs mx-auto h-2 rounded-full bg-surface-container-high overflow-hidden">
+          <div className="w-full max-w-2xl mx-auto h-2 rounded-full bg-surface-container-high overflow-hidden">
             <div
               className="h-full rounded-full bg-primary-container transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}

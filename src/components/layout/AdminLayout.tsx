@@ -1,8 +1,11 @@
 import { Outlet, Link, useLocation } from "react-router-dom"
 import { MobileNav } from "./MobileNav"
+import { UserMenu } from "@/components/ui/UserMenu"
+import { NotificationBell } from "@/components/communication/NotificationBell"
 
 const navItems = [
   { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/admin" },
+  { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/admin/alerts" },
   { icon: "school", label: "Grades", id: "grades", href: "/admin/grades" },
   { icon: "group", label: "Students", id: "students", href: "/admin/students" },
   { icon: "grade", label: "Student Grades", id: "student-grades", href: "/admin/student-grades" },
@@ -14,6 +17,7 @@ export function AdminLayout() {
   const path = location.pathname
 
   const activeItem = path === "/admin" ? "dashboard"
+    : path.startsWith("/admin/alerts") ? "alerts"
     : path.startsWith("/admin/grades") ? "grades"
     : path.startsWith("/admin/students") ? "students"
     : path.startsWith("/admin/student-grades") ? "student-grades"
@@ -49,6 +53,7 @@ export function AdminLayout() {
             </Link>
           ))}
         </nav>
+
       </aside>
 
       <div className="flex-1 flex flex-col min-h-screen">
@@ -56,6 +61,10 @@ export function AdminLayout() {
           <h1 className="font-headline-md text-headline-md text-primary">
             {navItems.find((n) => n.id === activeItem)?.label ?? "Admin"}
           </h1>
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <UserMenu />
+          </div>
         </header>
         <main className="flex-1 overflow-y-auto">
           <Outlet />

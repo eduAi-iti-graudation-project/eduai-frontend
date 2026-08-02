@@ -11,8 +11,15 @@ export function useMaterials(classId: string) {
   })
 
   const upload = useMutation({
-    mutationFn: ({ title, file }: { title: string; file: File }) =>
-      api.uploadMaterial(title, classId, file),
+    mutationFn: ({
+      title,
+      file,
+      onProgress,
+    }: {
+      title: string
+      file: File
+      onProgress?: (percent: number) => void
+    }) => api.uploadMaterial(title, classId, file, onProgress),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["materials", classId] })
     },
