@@ -35,6 +35,9 @@ import { QuizzesPage } from "./pages/teacher/QuizzesPage"
 import { QuizEditorPage } from "./pages/teacher/QuizEditorPage"
 import { QuizAttemptsListPage } from "./pages/teacher/QuizAttemptsListPage"
 import { QuizAttemptDetailPage } from "./pages/teacher/QuizAttemptDetailPage"
+import { HomeworkHelpPage } from "./pages/student/HomeworkHelpPage"
+import { HomeworkHelpHistoryPage } from "./pages/student/HomeworkHelpHistoryPage"
+
 import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
 import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
@@ -86,6 +89,9 @@ export const STUDENT_ROUTES = [
   { path: "/student/quizzes", element: <StudentQuizzesPage /> },
   { path: "/student/quizzes/:id/take", element: <QuizTakePage /> },
   { path: "/student/quizzes/:id/result", element: <StudentQuizResultPage /> },
+  { path: "/student/homework-help", element: <HomeworkHelpPage /> },
+  { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },
+
   { path: "/student/notifications", element: <NotificationsListPage /> },
 ]
 

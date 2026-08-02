@@ -6,6 +6,7 @@ const navItems = [
   { icon: "school", label: "Classes", id: "classes", href: "/student/classes" },
   { icon: "assignment", label: "Assignments", id: "assignments", href: "/student/assignments" },
   { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/student/quizzes" },
+  { icon: "auto_awesome", label: "Homework Help", id: "homework-help", href: "/student/homework-help" },
   { icon: "grade", label: "My Grades", id: "grades", href: "/student/grades" },
   { icon: "calendar_today", label: "Attendance", id: "attendance", href: "/student/attendance" },
   { icon: "notifications", label: "Notifications", id: "notifications", href: "/student/notifications" },
@@ -26,6 +27,7 @@ export function StudentLayout() {
     : path.startsWith("/student/grades") ? "grades"
     : path.startsWith("/student/attendance") ? "attendance"
     : path.startsWith("/student/quizzes") ? "quizzes"
+    : path.startsWith("/student/homework-help") ? "homework-help"
     : path.startsWith("/student/notifications") ? "notifications"
     : path.startsWith("/student/settings") ? "settings"
     : "dashboard"
