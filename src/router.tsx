@@ -5,7 +5,8 @@ import { TeacherRoute, StudentRoute, GuardianRoute, AdminRoute, GuestRoute, Root
 import { LoginPage } from "./pages/LoginPage"
 import { SignupPage } from "./pages/SignupPage"
 import { TeacherDashboardPage } from "./pages/TeacherDashboardPage"
-import { ClassesPage } from "./pages/teacher/ClassesPage"
+import { GradeListPage } from "./pages/teacher/GradeListPage"
+import { ClassesInGradePage } from "./pages/teacher/ClassesInGradePage"
 import { ClassDetailPage } from "./pages/teacher/ClassDetailPage"
 import { InstructorAssignmentForm } from "./components/InstructorAssignmentForm"
 import { AssignmentDetailPage } from "./pages/teacher/AssignmentDetailPage"
@@ -22,6 +23,7 @@ import { AttendanceImportPage } from "./pages/teacher/AttendanceImportPage"
 import { ReportsPage } from "./pages/ReportsPage"
 import { StudentDashboardPage } from "./pages/student/StudentDashboardPage"
 import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage"
+import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
 import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
 import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
@@ -37,7 +39,8 @@ import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const TEACHER_ROUTES = [
   { path: "/dashboard", element: <TeacherDashboardPage /> },
-  { path: "/classes", element: <ClassesPage /> },
+  { path: "/grades", element: <GradeListPage /> },
+  { path: "/grades/:gradeId", element: <ClassesInGradePage /> },
   { path: "/classes/:id", element: <ClassDetailPage /> },
   { path: "/assignments/new", element: <InstructorAssignmentForm /> },
   { path: "/assignments/:id", element: <AssignmentDetailPage /> },
@@ -57,6 +60,7 @@ export const TEACHER_ROUTES = [
 
 export const STUDENT_ROUTES = [
   { path: "/student", element: <StudentDashboardPage /> },
+  { path: "/student/classes", element: <AvailableClassesPage /> },
   { path: "/student/assignments", element: <StudentAssignmentsPage /> },
   { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
   { path: "/student/grades", element: <MyGradesPage /> },
