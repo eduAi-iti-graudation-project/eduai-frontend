@@ -23,6 +23,7 @@ import { AttendanceImportPage } from "./pages/teacher/AttendanceImportPage"
 import { ReportsPage } from "./pages/ReportsPage"
 import { StudentDashboardPage } from "./pages/student/StudentDashboardPage"
 import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage"
+import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
 import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
 import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
@@ -59,6 +60,7 @@ export const TEACHER_ROUTES = [
 
 export const STUDENT_ROUTES = [
   { path: "/student", element: <StudentDashboardPage /> },
+  { path: "/student/classes", element: <AvailableClassesPage /> },
   { path: "/student/assignments", element: <StudentAssignmentsPage /> },
   { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
   { path: "/student/grades", element: <MyGradesPage /> },
