@@ -538,6 +538,47 @@ export async function sendChatMessage(
   return res.data
 }
 
+// ── Homework Help ─────────────────────────────────────────────────
+
+export type HomeworkHelpFeedbackValue = "HELPFUL" | "NOT_HELPFUL"
+
+export interface HomeworkHelpInteraction {
+  id: string
+  question: string
+  answer: string
+  action: "HINT" | "EXPLANATION" | "REDIRECT_TEACHER" | string
+  sources: string[]
+  feedback: HomeworkHelpFeedbackValue | null
+  createdAt: string
+}
+
+export interface HomeworkHelpResponse {
+  interactionId: string
+  reply: string
+  action: string
+  sources: string[]
+  teacherNotified: boolean
+}
+
+export async function askHomeworkHelp(data: {
+  classId: string
+  question: string
+  assignmentId?: string
+}): Promise<HomeworkHelpResponse> {
+  const res = await api.post<HomeworkHelpResponse>("/assistant/homework-help", data)
+  return res.data
+}
+
+export async function getHomeworkHelpHistory(classId?: string): Promise<HomeworkHelpInteraction[]> {
+  const params = classId ? { classId } : undefined
+  const res = await api.get<{ interactions: HomeworkHelpInteraction[] }>("/assistant/homework-help/history", { params })
+  return res.data.interactions
+}
+
+export async function submitHomeworkHelpFeedback(interactionId: string, feedback: HomeworkHelpFeedbackValue): Promise<void> {
+  await api.patch(`/assistant/homework-help/${interactionId}/feedback`, { feedback })
+}
+
 // ── Re-export extractMessage for hooks ────────────────────────────
 
 export { extractMessage }

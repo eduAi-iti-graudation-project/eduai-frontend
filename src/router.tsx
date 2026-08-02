@@ -23,6 +23,8 @@ import { ReportsPage } from "./pages/ReportsPage"
 import { StudentDashboardPage } from "./pages/student/StudentDashboardPage"
 import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage"
 import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
+import { HomeworkHelpPage } from "./pages/student/HomeworkHelpPage"
+import { HomeworkHelpHistoryPage } from "./pages/student/HomeworkHelpHistoryPage"
 import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
 import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
@@ -56,6 +58,8 @@ export const STUDENT_ROUTES = [
   { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
   { path: "/student/grades", element: <MyGradesPage /> },
   { path: "/student/attendance", element: <MyAttendancePage /> },
+  { path: "/student/homework-help", element: <HomeworkHelpPage /> },
+  { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },
   { path: "/student/notifications", element: <NotificationsListPage /> },
 ]
 
