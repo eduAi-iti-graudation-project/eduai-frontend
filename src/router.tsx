@@ -33,6 +33,13 @@ import { StudentClassGradesPage } from "./pages/student/StudentClassGradesPage"
 import { StudentAssignmentGradePage } from "./pages/student/StudentAssignmentGradePage"
 import { HomeworkHelpPage } from "./pages/student/HomeworkHelpPage"
 import { HomeworkHelpHistoryPage } from "./pages/student/HomeworkHelpHistoryPage"
+import { StudentQuizzesPage } from "./pages/student/StudentQuizzesPage"
+import { QuizTakePage } from "./pages/student/QuizTakePage"
+import { StudentQuizResultPage } from "./pages/student/StudentQuizResultPage"
+import { QuizzesPage } from "./pages/teacher/QuizzesPage"
+import { QuizEditorPage } from "./pages/teacher/QuizEditorPage"
+import { QuizAttemptsListPage } from "./pages/teacher/QuizAttemptsListPage"
+import { QuizAttemptDetailPage } from "./pages/teacher/QuizAttemptDetailPage"
 import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
 import { UserMenu } from "@/components/ui/UserMenu"
@@ -60,6 +67,11 @@ export const TEACHER_ROUTES = [
   { path: "/rubrics/confirm/:rubricId", element: <RubricConfirmPage /> },
   { path: "/submissions", element: <SubmissionsPage /> },
   { path: "/submissions/:id", element: <SubmissionDetailPage /> },
+  { path: "/quizzes", element: <QuizzesPage /> },
+  { path: "/quizzes/new", element: <QuizEditorPage /> },
+  { path: "/quizzes/:id", element: <QuizEditorPage /> },
+  { path: "/quizzes/:id/attempts", element: <QuizAttemptsListPage /> },
+  { path: "/quizzes/attempts/:id", element: <QuizAttemptDetailPage /> },
   { path: "/alerts", element: <AlertsPage /> },
   { path: "/alerts/:alertId", element: <AlertDetailPage /> },
   { path: "/assistant", element: <AssistantPage /> },
@@ -81,6 +93,9 @@ export const STUDENT_ROUTES = [
   { path: "/student/attendance", element: <MyAttendancePage /> },
   { path: "/student/homework-help", element: <HomeworkHelpPage /> },
   { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },
+  { path: "/student/quizzes", element: <StudentQuizzesPage /> },
+  { path: "/student/quizzes/:id/take", element: <QuizTakePage /> },
+  { path: "/student/quizzes/:id/result", element: <StudentQuizResultPage /> },
   { path: "/student/notifications", element: <NotificationsListPage /> },
 ]
 
