@@ -30,7 +30,12 @@ import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
 import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
 import { ChildDetailPage } from "./pages/guardian/ChildDetailPage"
+import { AdminLayout } from "./components/layout/AdminLayout"
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage"
+import { GradeManagementPage } from "./pages/admin/GradeManagementPage"
+import { StudentManagementPage } from "./pages/admin/StudentManagementPage"
+import { StudentGradesPage } from "./pages/admin/StudentGradesPage"
+import { AttendancePage } from "./pages/admin/AttendancePage"
 import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const TEACHER_ROUTES = [
