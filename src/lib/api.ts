@@ -284,6 +284,11 @@ export async function createRubric(data: components["schemas"]["CreateRubricDto"
   return res.data
 }
 
+export async function updateRubric(id: string, data: { title?: string; criteria?: { id?: string; description: string; maxPoints: number }[] }): Promise<Rubric> {
+  const res = await api.patch<Rubric>(`/rubrics/${id}`, data)
+  return res.data
+}
+
 export async function confirmRubric(id: string): Promise<Rubric> {
   const res = await api.patch<Rubric>(`/rubrics/${id}/confirm`)
   return res.data
