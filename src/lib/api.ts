@@ -538,6 +538,199 @@ export async function sendChatMessage(
   return res.data
 }
 
+// ── Quizzes ───────────────────────────────────────────────────────
+
+export type QuizStatus = "DRAFT" | "PUBLISHED" | "CLOSED"
+export type QuizQuestionType = "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY"
+export type StudentAttemptStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED"
+
+export interface QuizOption {
+  text: string
+  isCorrect?: boolean
+}
+
+export interface QuizQuestion {
+  id: string
+  type: QuizQuestionType
+  question: string
+  options?: QuizOption[]
+  points: number
+  order: number
+}
+
+export interface QuizDto {
+  id: string
+  title: string
+  description: string | null
+  classId: string
+  timeLimit: number | null
+  passingScore: number | null
+  status: QuizStatus
+  endsAt: string | null
+  createdAt: string
+  questions?: QuizQuestion[]
+}
+
+export interface QuizWithAttemptStatus extends QuizDto {
+  attemptStatus?: StudentAttemptStatus
+  attemptId?: string
+}
+
+export interface CreateQuizOption {
+  id?: string
+  text: string
+  isCorrect: boolean
+}
+
+export interface CreateQuizQuestion {
+  id?: string
+  type: QuizQuestionType
+  question: string
+  options?: CreateQuizOption[]
+  points?: number
+  order: number
+}
+
+export interface CreateQuizDto {
+  title: string
+  description?: string
+  classId: string
+  timeLimit?: number
+  passingScore?: number
+  endsAt: string
+  questions: CreateQuizQuestion[]
+}
+
+export interface GenerateQuizDto {
+  classId: string
+  topic: string
+  questionCount: number
+  types: QuizQuestionType[]
+}
+
+export interface GenerateQuizResult {
+  quizId: string
+  title: string
+  message: string
+}
+
+export type QuizViolationType = "TAB_SWITCH" | "FULLSCREEN_EXIT"
+
+export interface QuizViolation {
+  id: string
+  type: QuizViolationType | string
+  createdAt: string
+}
+
+export interface QuizAnswerDto {
+  id: string
+  questionId: string
+  answer: string
+  pointsAwarded: number | null
+  aiFeedback: string | null
+  isConfirmed: boolean
+}
+
+export interface QuizAttemptDto {
+  id: string
+  quizId: string
+  studentId: string
+  startedAt: string
+  submittedAt: string | null
+  totalScore: number | null
+  status: "IN_PROGRESS" | "COMPLETED"
+  violations?: QuizViolation[]
+  expiresAt: string | null
+  serverNow?: string
+}
+
+export interface QuizAttemptDetail extends QuizAttemptDto {
+  student?: { id: string; name: string }
+  quiz?: QuizDto
+  answers?: QuizAnswerDto[]
+}
+
+export interface SubmitQuizAnswers {
+  questionId: string
+  answer: string
+}
+
+export async function getQuizzes(classId?: string): Promise<QuizDto[]> {
+  const params = classId ? { classId } : undefined
+  const res = await api.get<QuizDto[]>("/quizzes", { params })
+  return res.data
+}
+
+export async function getStudentQuizzes(): Promise<QuizWithAttemptStatus[]> {
+  const res = await api.get<QuizWithAttemptStatus[]>("/quizzes")
+  return res.data
+}
+
+export async function getQuiz(id: string): Promise<QuizDto> {
+  const res = await api.get<QuizDto>(`/quizzes/${id}`)
+  return res.data
+}
+
+export async function createQuiz(data: CreateQuizDto): Promise<QuizDto> {
+  const res = await api.post<QuizDto>("/quizzes", data)
+  return res.data
+}
+
+export async function generateQuiz(data: GenerateQuizDto): Promise<GenerateQuizResult> {
+  const res = await api.post<GenerateQuizResult>("/quizzes/generate", data)
+  return res.data
+}
+
+export async function updateQuiz(id: string, data: Partial<CreateQuizDto> & { status?: QuizStatus }): Promise<QuizDto> {
+  const res = await api.patch<QuizDto>(`/quizzes/${id}`, data)
+  return res.data
+}
+
+export async function publishQuiz(id: string): Promise<QuizDto> {
+  const res = await api.patch<QuizDto>(`/quizzes/${id}/publish`)
+  return res.data
+}
+
+export async function deleteQuiz(id: string): Promise<void> {
+  await api.delete(`/quizzes/${id}`)
+}
+
+export async function startQuizAttempt(quizId: string): Promise<QuizAttemptDto> {
+  const res = await api.post<QuizAttemptDto>(`/quizzes/${quizId}/start`)
+  return res.data
+}
+
+export async function submitQuizAttempt(quizId: string, answers: SubmitQuizAnswers[]): Promise<QuizAttemptDto> {
+  const res = await api.post<QuizAttemptDto>(`/quizzes/${quizId}/submit`, { answers })
+  return res.data
+}
+
+export async function reportQuizViolation(attemptId: string, type: QuizViolationType): Promise<QuizViolation> {
+  const res = await api.post<QuizViolation>(`/quizzes/attempts/${attemptId}/violations`, { type })
+  return res.data
+}
+
+export async function getQuizAttempt(attemptId: string): Promise<QuizAttemptDetail> {
+  const res = await api.get<QuizAttemptDetail>(`/quizzes/attempts/${attemptId}`)
+  return res.data
+}
+
+export async function getQuizAttempts(quizId: string): Promise<QuizAttemptDetail[]> {
+  const res = await api.get<QuizAttemptDetail[]>(`/quizzes/${quizId}/attempts`)
+  return res.data
+}
+
+export async function confirmQuizAttempt(attemptId: string): Promise<QuizAttemptDetail> {
+  const res = await api.patch<QuizAttemptDetail>(`/quizzes/attempts/${attemptId}/confirm`)
+  return res.data
+}
+
+export async function updateQuizAnswer(answerId: string, pointsAwarded: number): Promise<QuizAnswerDto> {
+  const res = await api.patch<QuizAnswerDto>(`/quizzes/answers/${answerId}`, { pointsAwarded })
+  return res.data
+}
+
+
 // ── Re-export extractMessage for hooks ────────────────────────────
 
 export { extractMessage }
