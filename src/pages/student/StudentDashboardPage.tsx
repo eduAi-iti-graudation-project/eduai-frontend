@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import * as api from "@/lib/api"
+import { useAuth } from "@/providers/use-auth"
 import { EmptyState } from "@/components/ui/EmptyState"
 
 interface StudentDashboardOverview {
@@ -10,6 +12,14 @@ interface StudentDashboardOverview {
 }
 
 export function StudentDashboardPage() {
+  const { user } = useAuth()
+
+  const studentClasses = useQuery({
+    queryKey: ["student", "classes", user?.id],
+    queryFn: () => api.getStudentClasses(user!.id),
+    enabled: !!user?.id,
+  })
+
   const dashboard = useQuery({
     queryKey: ["dashboard", "student"],
     queryFn: async () => {
@@ -20,7 +30,7 @@ export function StudentDashboardPage() {
 
   if (dashboard.isError) {
     return (
-      <div className="flex items-center justify-center h-full p-xl">
+      <div className="flex items-center justify-center h-full p-margin-desktop">
         <div className="text-center">
           <span className="material-symbols-outlined text-[48px] text-error mb-md">error</span>
           <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Something went wrong</h2>
@@ -38,20 +48,30 @@ export function StudentDashboardPage() {
     )
   }
 
+  if (studentClasses.data && studentClasses.data.length === 0) {
+    return (
+      <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+        <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Dashboard</h1>
+        <EmptyState
+          icon="school"
+          title="Not enrolled in any classes"
+          description="Browse available classes for your grade level and request to join."
+          action={<Link to="/student/classes" className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md inline-block">Browse Classes</Link>}
+        />
+      </div>
+    )
+  }
+
   const data = dashboard.data
 
   return (
-    <>
-      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
-        <h1 className="font-headline-lg text-headline-lg text-primary">Dashboard</h1>
-      </header>
-
-      <div className="flex-1 p-xl max-w-5xl mx-auto w-full">
+    <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+        <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Dashboard</h1>
         {dashboard.isLoading ? (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-[32px] bg-white p-xl border border-outline-variant/10 animate-pulse">
+                <div key={i} className="rounded-[32px] bg-white p-md border border-outline-variant/10 animate-pulse">
                   <div className="w-10 h-10 rounded-xl bg-surface-container-high mb-4" />
                   <div className="h-4 w-20 bg-surface-container-high rounded-full mb-2" />
                   <div className="h-6 w-16 bg-surface-container-high rounded-full" />
@@ -63,21 +83,21 @@ export function StudentDashboardPage() {
         ) : data ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="rounded-[32px] bg-white p-xl border border-outline-variant/10 shadow-sm">
+              <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
                 <div className="w-10 h-10 rounded-xl bg-primary-fixed/20 flex items-center justify-center mb-4">
                   <span className="material-symbols-outlined text-primary">pending_actions</span>
                 </div>
                 <p className="font-body-md text-body-md text-on-surface-variant">Upcoming</p>
                 <p className="font-headline-xl text-headline-xl text-primary mt-1">{data.upcomingCount}</p>
               </div>
-              <div className="rounded-[32px] bg-white p-xl border border-outline-variant/10 shadow-sm">
+              <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
                 <div className="w-10 h-10 rounded-xl bg-primary-fixed/20 flex items-center justify-center mb-4">
                   <span className="material-symbols-outlined text-primary">check_circle</span>
                 </div>
                 <p className="font-body-md text-body-md text-on-surface-variant">Attendance</p>
                 <p className="font-headline-xl text-headline-xl text-primary mt-1">{data.attendancePercentage}%</p>
               </div>
-              <div className="rounded-[32px] bg-white p-xl border border-outline-variant/10 shadow-sm">
+              <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
                 <div className="w-10 h-10 rounded-xl bg-primary-fixed/20 flex items-center justify-center mb-4">
                   <span className="material-symbols-outlined text-primary">notifications</span>
                 </div>
@@ -86,7 +106,7 @@ export function StudentDashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-[32px] bg-white p-xl border border-outline-variant/10 shadow-sm">
+            <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
               <h2 className="font-headline-md text-headline-md text-primary mb-4">Recent Grades</h2>
               {data.recentGrades.length === 0 ? (
                 <EmptyState
@@ -124,6 +144,5 @@ export function StudentDashboardPage() {
           </>
         ) : null}
       </div>
-    </>
   )
 }
