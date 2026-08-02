@@ -5,7 +5,7 @@ export function Sidebar() {
   const path = location.pathname
 
   const activeItem = path === "/dashboard" ? "dashboard"
-    : path.startsWith("/classes") ? "classes"
+    : path.startsWith("/grades") ? "grades"
     : path.startsWith("/rubrics") ? "rubrics"
     : path.startsWith("/submissions") ? "submissions"
     : path.startsWith("/alerts") ? "alerts"
@@ -15,7 +15,7 @@ export function Sidebar() {
 
   const navItems = [
     { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/dashboard" },
-    { icon: "school", label: "Classes", id: "classes", href: "/classes" },
+    { icon: "school", label: "My Grades", id: "grades", href: "/grades" },
     { icon: "assignment_turned_in", label: "Rubrics", id: "rubrics", href: "/rubrics" },
     { icon: "list_alt", label: "Submissions", id: "submissions", href: "/submissions" },
     { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/alerts" },
