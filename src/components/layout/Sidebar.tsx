@@ -5,7 +5,8 @@ export function Sidebar() {
   const path = location.pathname
 
   const activeItem = path === "/dashboard" ? "dashboard"
-    : path.startsWith("/classes") ? "classes"
+    : path.startsWith("/grades") ? "grades"
+    : path.startsWith("/assignments") ? "assignments"
     : path.startsWith("/rubrics") ? "rubrics"
     : path.startsWith("/submissions") ? "submissions"
     : path.startsWith("/quizzes") ? "quizzes"
@@ -16,7 +17,8 @@ export function Sidebar() {
 
   const navItems = [
     { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/dashboard" },
-    { icon: "school", label: "Classes", id: "classes", href: "/classes" },
+    { icon: "school", label: "My Grades", id: "grades", href: "/grades" },
+    { icon: "assignment", label: "Assignments", id: "assignments", href: "/assignments/new" },
     { icon: "assignment_turned_in", label: "Rubrics", id: "rubrics", href: "/rubrics" },
     { icon: "list_alt", label: "Submissions", id: "submissions", href: "/submissions" },
     { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/quizzes" },
@@ -61,15 +63,8 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* New Rubric + Bottom Nav */}
+      {/* Bottom Nav */}
       <div className="mt-auto pt-lg space-y-1">
-        <Link
-          to="/rubrics/new"
-          className="w-full bg-secondary-container text-on-secondary-container py-sm px-md rounded-full font-bold mb-md hover:opacity-90 transition-opacity flex items-center justify-center gap-sm"
-        >
-          <span className="material-symbols-outlined">add</span>
-          New Rubric
-        </Link>
         {bottomItems.map((item) => (
           <Link
             key={item.id}

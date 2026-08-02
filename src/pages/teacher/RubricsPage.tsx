@@ -2,6 +2,7 @@ import { useState, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useRubrics } from "@/hooks/use-rubrics"
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import * as api from "@/lib/api"
 import { toast } from "sonner"
 
@@ -35,7 +36,9 @@ export function RubricsPage() {
   const [manualCriteria, setManualCriteria] = useState<CriteriaRow[]>([])
   const [importedCriteria, setImportedCriteria] = useState<{ description: string; maxPoints: number }[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const builderTopRef = useRef<HTMLElement>(null)
   const [selectedRubricId, setSelectedRubricId] = useState<string | null>(null)
+  const [reuseCandidate, setReuseCandidate] = useState<api.Rubric | null>(null)
 
   function addRow() {
     setManualCriteria([...manualCriteria, { id: freshId(), name: "", description: "", maxPoints: 10 }])
@@ -100,11 +103,38 @@ export function RubricsPage() {
     )
   }
 
+  function loadRubricIntoBuilder(rubric: api.Rubric) {
+    setTitle(rubric.title)
+    setManualCriteria(
+      rubric.criteria.map((c) => ({ id: freshId(), name: c.description, description: "", maxPoints: c.maxPoints })),
+    )
+    setImportedCriteria([])
+    setSelectedRubricId(null)
+    builderTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
+  function handleUseInBuilder(rubric: api.Rubric) {
+    if (manualCriteria.length > 0 || importedCriteria.length > 0) {
+      setReuseCandidate(rubric)
+      return
+    }
+    loadRubricIntoBuilder(rubric)
+  }
+
+  function handleCopyToAssignment(rubric: api.Rubric) {
+    if (!resolvedAssignmentId) return
+    createRubric.mutate({
+      title: rubric.title,
+      assignmentId: resolvedAssignmentId,
+      criteria: rubric.criteria.map((c) => ({ description: c.description, maxPoints: c.maxPoints })),
+    })
+  }
+
   const totalPoints = manualCriteria.reduce((sum, c) => sum + (c.maxPoints || 0), 0)
 
   return (
     <div className="flex-1 flex flex-col min-h-screen">
-      <header className="flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
+      <header ref={builderTopRef} className="flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
           <div className="flex items-center gap-md">
             <h1 className="font-headline-lg text-headline-lg text-primary">Rubric Builder</h1>
             <div className="hidden lg:flex items-center gap-md">
@@ -378,35 +408,74 @@ export function RubricsPage() {
 
         {rubrics.data && rubrics.data.length > 0 && (
           <div className="px-margin-desktop pb-lg">
-            <h3 className="font-headline-md text-headline-md text-on-surface mb-md">Saved Rubrics</h3>
+            <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">Saved Rubrics</h3>
+            <p className="font-label-sm text-label-sm text-on-surface-variant mb-md">
+              Use in builder to reuse criteria in a new assignment.
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
               {rubrics.data.map((rubric) => (
-                <button
+                <div
                   key={rubric.id}
-                  onClick={() => setSelectedRubricId(rubric.id)}
                   className={`text-left bg-white rounded-xl p-md border-2 transition-all hover:shadow-sm ${
                     selectedRubricId === rubric.id ? "border-primary shadow-md" : "border-on-surface/5"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-headline-md text-headline-md text-on-surface truncate">{rubric.title}</h4>
-                    {rubric.isConfirmed ? (
-                      <span className="text-primary text-xs font-bold bg-primary-fixed/30 px-2 py-0.5 rounded-full">Confirmed</span>
-                    ) : (
-                      <span className="text-gold-honey text-xs font-bold bg-tertiary-fixed/30 px-2 py-0.5 rounded-full">Draft</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRubricId(rubric.id)}
+                    className="w-full text-left"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-headline-md text-headline-md text-on-surface truncate">{rubric.title}</h4>
+                      {rubric.isConfirmed ? (
+                        <span className="text-primary text-xs font-bold bg-primary-fixed/30 px-2 py-0.5 rounded-full">Confirmed</span>
+                      ) : (
+                        <span className="text-gold-honey text-xs font-bold bg-tertiary-fixed/30 px-2 py-0.5 rounded-full">Draft</span>
+                      )}
+                    </div>
+                    <p className="font-label-sm text-label-sm text-on-surface-variant">
+                      {rubric.criteria.length} criteria · {rubric.criteria.reduce((s, c) => s + c.maxPoints, 0)} pts
+                    </p>
+                    <p className="font-label-sm text-label-sm text-outline mt-1">
+                      {new Date(rubric.createdAt).toLocaleDateString()}
+                    </p>
+                  </button>
+                  <div className="mt-md flex gap-sm">
+                    <button
+                      type="button"
+                      onClick={() => handleUseInBuilder(rubric)}
+                      className="flex-1 bg-primary/10 text-primary text-xs px-3 py-1.5 rounded-full font-bold hover:bg-primary hover:text-white transition-all"
+                    >
+                      Use in builder
+                    </button>
+                    {resolvedAssignmentId && (
+                      <button
+                        type="button"
+                        onClick={() => handleCopyToAssignment(rubric)}
+                        disabled={createRubric.isPending}
+                        className="flex-1 bg-secondary-container/10 text-secondary text-xs px-3 py-1.5 rounded-full font-bold hover:bg-secondary-container hover:text-white transition-all disabled:opacity-50"
+                      >
+                        Copy to assignment
+                      </button>
                     )}
                   </div>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant">
-                    {rubric.criteria.length} criteria · {rubric.criteria.reduce((s, c) => s + c.maxPoints, 0)} pts
-                  </p>
-                  <p className="font-label-sm text-label-sm text-outline mt-1">
-                    {new Date(rubric.createdAt).toLocaleDateString()}
-                  </p>
-                </button>
+                </div>
               ))}
             </div>
           </div>
         )}
+
+        <ConfirmDialog
+          open={reuseCandidate !== null}
+          title="Replace current draft?"
+          message={`Loading "${reuseCandidate?.title ?? ""}" will replace the criteria you've already entered in the builder.`}
+          confirmLabel="Load rubric"
+          onCancel={() => setReuseCandidate(null)}
+          onConfirm={() => {
+            if (reuseCandidate) loadRubricIntoBuilder(reuseCandidate)
+            setReuseCandidate(null)
+          }}
+        />
     </div>
   )
 }

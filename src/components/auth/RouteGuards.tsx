@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom"
 import { useAuth } from "@/providers/use-auth"
 
-const TEACHER_ROLES = new Set(["TEACHER", "ADMIN"])
+const TEACHER_ROLES = new Set(["TEACHER"])
 const STUDENT_ROLES = new Set(["STUDENT", "GUARDIAN"])
 
 function LoadingScreen() {
@@ -45,7 +45,8 @@ export function GuestRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuth()
   if (isLoading) return <LoadingScreen />
   if (isAuthenticated && user?.role) {
-    if (user.role === "TEACHER" || user.role === "ADMIN") return <Navigate to="/dashboard" replace />
+    if (user.role === "ADMIN") return <Navigate to="/admin" replace />
+    if (user.role === "TEACHER") return <Navigate to="/dashboard" replace />
     if (user.role === "GUARDIAN") return <Navigate to="/guardian" replace />
     if (user.role === "STUDENT") return <Navigate to="/student" replace />
   }
@@ -64,7 +65,8 @@ export function RootRedirect() {
   const { isAuthenticated, isLoading, user } = useAuth()
   if (isLoading) return <LoadingScreen />
   if (isAuthenticated && user?.role) {
-    if (TEACHER_ROLES.has(user.role)) return <Navigate to="/dashboard" replace />
+    if (user.role === "ADMIN") return <Navigate to="/admin" replace />
+    if (user.role === "TEACHER") return <Navigate to="/dashboard" replace />
     if (user.role === "GUARDIAN") return <Navigate to="/guardian" replace />
     if (user.role === "STUDENT") return <Navigate to="/student" replace />
   }
