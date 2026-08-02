@@ -374,11 +374,15 @@ export async function gradeSubmission(submissionId: string): Promise<void> {
   await api.post(`/grades/submissions/${submissionId}/grade`)
 }
 
+export async function updateGrade(id: string, data: { pointsAwarded?: number; teacherNotes?: string }): Promise<void> {
+  await api.patch(`/grades/scores/${id}`, data)
+}
+
 export async function confirmAllGrades(submissionId: string): Promise<void> {
   await api.patch(`/grades/confirm-all/${submissionId}`)
 }
 
-/** @deprecated Use confirmAllGrades instead — kept for backward compat */
+/** @deprecated Use updateGrade + confirmAllGrades instead */
 export async function confirmGrade(id: string, data?: { pointsAwarded: number; teacherNotes?: string }): Promise<void> {
   void data
   await api.patch(`/grades/confirm-all/${id}`)
@@ -506,7 +510,6 @@ export async function getStudentClasses(studentId: string): Promise<StudentClass
   const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
   return res.data
 }
-
 export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
   const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
   return res.data

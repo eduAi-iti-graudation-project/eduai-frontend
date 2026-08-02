@@ -25,6 +25,9 @@ import { ReportsPage } from "./pages/ReportsPage"
 import { StudentDashboardPage } from "./pages/student/StudentDashboardPage"
 import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage"
 import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
+import { StudentClassGradesPage } from "./pages/student/StudentClassGradesPage"
+import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
+import { StudentAssignmentGradePage } from "./pages/student/StudentAssignmentGradePage"
 import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
 import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
@@ -61,6 +64,9 @@ export const TEACHER_ROUTES = [
 
 export const STUDENT_ROUTES = [
   { path: "/student", element: <StudentDashboardPage /> },
+  { path: "/student/classes", element: <AvailableClassesPage /> },
+  { path: "/student/classes/:classId", element: <StudentClassGradesPage /> },
+  { path: "/student/classes/:classId/assignments/:assignmentId", element: <StudentAssignmentGradePage /> },
   { path: "/student/assignments", element: <StudentAssignmentsPage /> },
   { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
   { path: "/student/grades", element: <MyGradesPage /> },
