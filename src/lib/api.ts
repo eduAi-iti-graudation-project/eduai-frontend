@@ -317,6 +317,11 @@ export async function createRubric(data: components["schemas"]["CreateRubricDto"
   return res.data
 }
 
+export async function updateRubric(id: string, data: { title?: string; criteria?: { id?: string; description: string; maxPoints: number }[] }): Promise<Rubric> {
+  const res = await api.patch<Rubric>(`/rubrics/${id}`, data)
+  return res.data
+}
+
 export async function confirmRubric(id: string): Promise<Rubric> {
   const res = await api.patch<Rubric>(`/rubrics/${id}/confirm`)
   return res.data
@@ -493,6 +498,18 @@ export async function getStudentSubmissionGrades(studentId: string, submissionId
   return res.data
 }
 
+export interface StudentClass {
+  id: string
+  name: string
+  description: string | null
+  teacherName: string
+  assignments: { id: string; title: string; description: string | null; dueDate: string; totalPoints: number }[]
+}
+
+export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
+  const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
+  return res.data
+}
 export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
   const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
   return res.data
@@ -559,6 +576,10 @@ export async function sendChatMessage(
 ): Promise<ChatResponse> {
   const res = await api.post<ChatResponse>("/assistant/chat", { classId, messages, newMessage })
   return res.data
+}
+
+export async function updateGrade(id: string, data: { pointsAwarded?: number; teacherNotes?: string }): Promise<void> {
+  await api.patch(`/grades/scores/${id}`, data)
 }
 
 // ── Re-export extractMessage for hooks ────────────────────────────

@@ -11,7 +11,7 @@ export function useClasses() {
   })
 
   const createClass = useMutation({
-    mutationFn: (data: { name: string; description?: string }) => api.createClass(data),
+    mutationFn: (data: { name: string; description?: string; teacherId: string }) => api.createClass(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] })
       toast.success("Class created")
