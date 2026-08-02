@@ -538,6 +538,10 @@ export async function sendChatMessage(
   return res.data
 }
 
+export async function updateGrade(id: string, data: { pointsAwarded?: number; teacherNotes?: string }): Promise<void> {
+  await api.patch(`/grades/scores/${id}`, data)
+}
+
 // ── Re-export extractMessage for hooks ────────────────────────────
 
 export { extractMessage }
