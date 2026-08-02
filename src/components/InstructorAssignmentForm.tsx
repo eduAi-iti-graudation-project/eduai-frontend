@@ -1,8 +1,9 @@
-import { useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useForm, type SubmitErrorHandler, type SubmitHandler } from "react-hook-form"
+import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
 
@@ -73,12 +74,65 @@ export function InstructorAssignmentForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  const [rubricMode, setRubricMode] = useState<"manual" | "pdf">("manual")
+  const [rubricMode, setRubricMode] = useState<"manual" | "pdf" | "library">("manual")
   const [rubricTitle, setRubricTitle] = useState("")
   const [criteriaRows, setCriteriaRows] = useState<{ id: string; description: string; maxPoints: number }[]>([])
   const [rubricPdfFile, setRubricPdfFile] = useState<File | null>(null)
+  const [importedCriteria, setImportedCriteria] = useState<{ description: string; maxPoints: number }[]>([])
+  const [isImporting, setIsImporting] = useState(false)
   const [rubricSubmitting, setRubricSubmitting] = useState(false)
+  const [selectedLibraryId, setSelectedLibraryId] = useState("")
   const rubricFileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const { data: allRubrics, isLoading: rubricsLoading } = useQuery({
+    queryKey: ["rubrics"],
+    queryFn: () => api.getRubrics(),
+  })
+
+  const confirmedRubrics = useMemo(
+    () =>
+      (allRubrics ?? [])
+        .filter((r) => r.isConfirmed)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    [allRubrics],
+  )
+
+  function selectLibraryRubric(rubric: api.Rubric) {
+    setSelectedLibraryId(rubric.id)
+    setRubricTitle(rubric.title)
+    setCriteriaRows(
+      rubric.criteria.map((c) => ({ id: freshCritId(), description: c.description, maxPoints: c.maxPoints })),
+    )
+  }
+
+  async function handleRubricPdfImport(file: File) {
+    if (file.type !== "application/pdf") {
+      toast.error("Only PDF files are allowed")
+      return
+    }
+    setIsImporting(true)
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      const data = await api.createRubricFromPdf(fd)
+      setImportedCriteria(data.criteria || [])
+      toast.success(`Extracted ${data.criteria?.length || 0} criteria from PDF`)
+      if (!rubricTitle && data.title) setRubricTitle(data.title)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to parse PDF")
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  function acceptImportedCriterion(desc: string, pts: number) {
+    setCriteriaRows([...criteriaRows, { id: freshCritId(), description: desc, maxPoints: pts }])
+    setImportedCriteria(importedCriteria.filter((c) => c.description !== desc))
+  }
+
+  function dismissImportedCriterion(desc: string) {
+    setImportedCriteria(importedCriteria.filter((c) => c.description !== desc))
+  }
 
   const critIdCounter = useRef(0)
   function freshCritId() {
@@ -117,20 +171,18 @@ export function InstructorAssignmentForm() {
       return
     }
 
-    if (rubricMode === "manual") {
-      if (!rubricTitle.trim()) {
-        toast.error("Please enter a rubric title")
-        return
-      }
-      if (criteriaRows.length === 0 || criteriaRows.every((r) => !r.description.trim())) {
-        toast.error("Add at least one criterion with a description")
-        return
-      }
-    } else {
-      if (!rubricPdfFile) {
-        toast.error("Please select a PDF file for the rubric")
-        return
-      }
+    if (rubricMode === "library" && !selectedLibraryId) {
+      toast.error("Select a rubric from the library")
+      return
+    }
+
+    if (!rubricTitle.trim()) {
+      toast.error("Please enter a rubric title")
+      return
+    }
+    if (criteriaRows.length === 0 || criteriaRows.every((r) => !r.description.trim())) {
+      toast.error("Add at least one criterion with a description")
+      return
     }
 
     setRubricSubmitting(true)
@@ -148,27 +200,20 @@ export function InstructorAssignmentForm() {
         classId,
       })
 
-      if (rubricMode === "manual") {
-        await api.createRubric({
-          title: rubricTitle.trim(),
-          assignmentId: assignment.id,
-          criteria: criteriaRows
-            .filter((r) => r.description.trim())
-            .map((r) => ({ description: r.description.trim(), maxPoints: r.maxPoints })),
-        })
-      } else {
-        const fd = new FormData()
-        fd.append("file", rubricPdfFile!)
-        fd.append("assignmentId", assignment.id)
-        await api.createRubricFromPdfDirect(fd)
-      }
+      const rubric = await api.createRubric({
+        title: rubricTitle.trim(),
+        assignmentId: assignment.id,
+        criteria: criteriaRows
+          .filter((r) => r.description.trim())
+          .map((r) => ({ description: r.description.trim(), maxPoints: r.maxPoints })),
+      })
 
       if (data.file) {
         await api.uploadMaterial(data.title, classId, data.file)
       }
 
-      toast.success("Assignment and rubric created successfully")
-      navigate(`/classes/${classId}`)
+      toast.success("Assignment created. Now review and confirm the rubric.")
+      navigate(`/rubrics/confirm/${rubric.id}?classId=${classId}`)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong")
     } finally {
@@ -382,6 +427,16 @@ export function InstructorAssignmentForm() {
                 <span className="bg-error text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded tracking-widest">Required</span>
               </div>
 
+              <div className="space-y-2 mb-4">
+                <label className="font-label-md text-label-md text-on-background ml-1">Rubric Title</label>
+                <input
+                  value={rubricTitle}
+                  onChange={(e) => setRubricTitle(e.target.value)}
+                  placeholder="e.g. Final Project Rubric"
+                  className="w-full bg-surface-container-low border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-2xl p-4 font-body-md text-body-md transition-all"
+                />
+              </div>
+
               <div className="flex gap-2 mb-4">
                 <button
                   type="button"
@@ -397,20 +452,17 @@ export function InstructorAssignmentForm() {
                 >
                   Upload PDF
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setRubricMode("library")}
+                  className={`flex-1 px-md py-sm rounded-full font-label-md transition-all ${rubricMode === "library" ? "bg-primary-container text-white" : "bg-surface-container text-on-surface-variant"}`}
+                >
+                  Use from library
+                </button>
               </div>
 
               {rubricMode === "manual" ? (
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="font-label-md text-label-md text-on-background ml-1">Rubric Title</label>
-                    <input
-                      value={rubricTitle}
-                      onChange={(e) => setRubricTitle(e.target.value)}
-                      placeholder="e.g. Final Project Rubric"
-                      className="w-full bg-surface-container-low border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-2xl p-4 font-body-md text-body-md transition-all"
-                    />
-                  </div>
-
                   {criteriaRows.map((row) => (
                     <div key={row.id} className="flex items-start gap-3 p-4 bg-surface-container-low rounded-2xl">
                       <div className="flex-1 space-y-2">
@@ -454,7 +506,7 @@ export function InstructorAssignmentForm() {
                     Add Criterion
                   </button>
                 </div>
-              ) : (
+              ) : rubricMode === "pdf" ? (
                 <div className="space-y-4">
                   <input
                     ref={rubricFileInputRef}
@@ -463,16 +515,20 @@ export function InstructorAssignmentForm() {
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0] ?? null
-                      if (file && file.type !== "application/pdf") {
-                        toast.error("Only PDF files are allowed")
-                        e.target.value = ""
-                        return
+                      if (file) {
+                        setRubricPdfFile(file)
+                        handleRubricPdfImport(file)
                       }
-                      setRubricPdfFile(file)
+                      e.target.value = ""
                     }}
                   />
 
-                  {rubricPdfFile ? (
+                  {isImporting ? (
+                    <div className="flex items-center justify-center gap-3 py-6 bg-surface-container-low rounded-2xl">
+                      <span className="material-symbols-outlined animate-spin text-primary">progress_activity</span>
+                      <span className="font-label-md text-label-md text-on-surface-variant">Extracting criteria from PDF...</span>
+                    </div>
+                  ) : rubricPdfFile ? (
                     <div className="flex items-center justify-between bg-surface-container p-3 rounded-full border border-outline-variant">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-error">
@@ -487,6 +543,7 @@ export function InstructorAssignmentForm() {
                         type="button"
                         onClick={() => {
                           setRubricPdfFile(null)
+                          setImportedCriteria([])
                           if (rubricFileInputRef.current) rubricFileInputRef.current.value = ""
                         }}
                         className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-highest text-on-surface-variant transition-colors"
@@ -506,6 +563,95 @@ export function InstructorAssignmentForm() {
                       </p>
                       <p className="font-label-sm text-label-sm text-on-surface-variant/70 mt-1">PDF only</p>
                     </button>
+                  )}
+
+                  {importedCriteria.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="font-label-md text-label-md text-primary">AI-Suggested Criteria</p>
+                      {importedCriteria.map((c, i) => (
+                        <div key={`ai-${i}`} className="flex items-center justify-between p-3 bg-primary-fixed/10 rounded-xl border border-dashed border-primary-container/30">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-body-md text-body-md text-on-surface truncate">{c.description}</p>
+                            <p className="font-label-sm text-label-sm text-on-surface-variant">{c.maxPoints} pts</p>
+                          </div>
+                          <div className="flex gap-2 shrink-0 ml-3">
+                            <button
+                              type="button"
+                              onClick={() => acceptImportedCriterion(c.description, c.maxPoints)}
+                              className="px-3 py-1 bg-primary-container text-white text-xs rounded-full font-bold"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => dismissImportedCriterion(c.description)}
+                              className="px-3 py-1 bg-surface-container-high text-on-surface-variant text-xs rounded-full font-bold"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {rubricsLoading ? (
+                    <div className="flex items-center justify-center gap-3 py-6 bg-surface-container-low rounded-2xl">
+                      <span className="material-symbols-outlined animate-spin text-primary text-lg">progress_activity</span>
+                      <span className="font-label-md text-label-md text-on-surface-variant">Loading your rubric library...</span>
+                    </div>
+                  ) : confirmedRubrics.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 px-6 bg-surface-container-low rounded-2xl text-center">
+                      <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 mb-2">menu_book</span>
+                      <p className="font-body-md text-body-md text-on-background">No confirmed rubrics yet</p>
+                      <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
+                        Rubrics become reusable once you confirm them.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {confirmedRubrics.map((rubric) => {
+                          const selected = selectedLibraryId === rubric.id
+                          const totalPts = rubric.criteria.reduce((s, c) => s + c.maxPoints, 0)
+                          return (
+                            <button
+                              key={rubric.id}
+                              type="button"
+                              onClick={() => selectLibraryRubric(rubric)}
+                              className={`text-left p-4 rounded-2xl border-2 transition-all ${
+                                selected
+                                  ? "border-primary-container bg-primary-fixed/10"
+                                  : "border-outline-variant/20 bg-white hover:border-primary-container/40"
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-2 mb-1">
+                                <p className="font-label-md text-label-md text-on-background truncate">{rubric.title}</p>
+                                {selected && (
+                                  <span className="material-symbols-outlined text-primary text-lg shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                    check_circle
+                                  </span>
+                                )}
+                              </div>
+                              <p className="font-label-sm text-label-sm text-on-surface-variant">
+                                {rubric.criteria.length} criteria · {totalPts} pts
+                              </p>
+                              <p className="font-label-sm text-label-sm text-outline mt-1">
+                                {new Date(rubric.createdAt).toLocaleDateString()}
+                              </p>
+                            </button>
+                          )
+                        })}
+                      </div>
+                      {selectedLibraryId && (
+                        <p className="font-label-sm text-label-sm text-primary flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px]">info</span>
+                          Loaded from library — you can still tweak it in Manual mode.
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
               )}

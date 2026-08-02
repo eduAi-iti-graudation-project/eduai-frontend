@@ -20,6 +20,16 @@ export function useSubmissions(status?: string, assignmentId?: string) {
     onError: (err: Error) => toast.error(err.message),
   })
 
+  const updateGrade = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { pointsAwarded?: number; teacherNotes?: string } }) =>
+      api.updateGrade(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["submissions"] })
+      toast.success("Score updated")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+
   const confirmGrade = useMutation({
     mutationFn: ({ id, data }: { id: string; data: { pointsAwarded: number; teacherNotes?: string } }) =>
       api.confirmGrade(id, data),
@@ -36,6 +46,7 @@ export function useSubmissions(status?: string, assignmentId?: string) {
     isError: submissions.isError,
     error: submissions.error,
     gradeSubmission,
+    updateGrade,
     confirmGrade,
   }
 }
