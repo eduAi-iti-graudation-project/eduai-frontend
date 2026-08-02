@@ -107,6 +107,8 @@ export interface SubmissionDetail {
 }
 
 export interface DashboardOverview {
+  activeAlertCount: number
+  resolvedAlertCount: number
   classCount: number
   pendingConfirmations: number
   recentAlerts: { id: string; studentName: string; type: string; reason: string; createdAt: string }[]
@@ -196,6 +198,53 @@ export async function login(data: components["schemas"]["LoginDto"]): Promise<Us
 
 export async function getMe(): Promise<User> {
   const res = await api.get<User>("/auth/me")
+  return res.data
+}
+
+// ── Communication Agent Types ────────────────────────────────────
+
+export interface DiagnosisPayload {
+  hasIssue: boolean
+  issueType: "STUDENT_ISSUE" | "CLASS_ISSUE" | "BOTH" | null
+  severity: "LOW" | "MEDIUM" | "HIGH" | null
+  summary: string | null
+  classContext: string | null
+}
+
+export interface TeacherContentPayload {
+  analysis: string
+  skillGaps: string[]
+  interventions: string[]
+  resourceSuggestions: string[]
+}
+
+export interface GuardianContentPayload {
+  message: string
+  homeSupport: string[]
+}
+
+export interface TeacherFeedbackPayload {
+  feedback: string
+  patternAnalysis: string
+  strategies: string[]
+}
+
+export interface ManagementSummaryPayload {
+  summary: string
+  classTrend: string
+  recommendation: string
+}
+
+export interface AlertDetail {
+  diagnosis: DiagnosisPayload
+  teacherContent: TeacherContentPayload | null
+  guardianContent: GuardianContentPayload | null
+  teacherFeedback: TeacherFeedbackPayload | null
+  managementSummary: ManagementSummaryPayload | null
+}
+
+export async function getAlertDetail(id: string): Promise<AlertDetail> {
+  const res = await api.get<AlertDetail>(`/alerts/${id}/teacher-detail`)
   return res.data
 }
 
@@ -381,9 +430,16 @@ export async function confirmGrade(id: string, data?: { pointsAwarded: number; t
 
 // ── Alerts ────────────────────────────────────────────────────────
 
-export async function getAlerts(status?: string): Promise<components["schemas"]["AlertDto"][]> {
+export type AlertListItem = components["schemas"]["AlertDto"] & {
+  studentName: string
+  className: string
+  severity: "LOW" | "MEDIUM" | "HIGH"
+  skillGapCount: number
+}
+
+export async function getAlerts(status?: string): Promise<AlertListItem[]> {
   const params = status ? { status } : undefined
-  const res = await api.get<components["schemas"]["AlertDto"][]>("/alerts", { params })
+  const res = await api.get<AlertListItem[]>("/alerts", { params })
   return res.data
 }
 

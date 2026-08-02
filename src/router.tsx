@@ -13,6 +13,9 @@ import { RubricsPage } from "./pages/teacher/RubricsPage"
 import { SubmissionsPage } from "./pages/teacher/SubmissionsPage"
 import { SubmissionDetailPage } from "./pages/teacher/SubmissionDetailPage"
 import { AlertsPage } from "./pages/teacher/AlertsPage"
+import { AlertDetailPage } from "./pages/teacher/AlertDetailPage"
+import { GuardianAlertDetailPage } from "./pages/guardian/GuardianAlertDetailPage"
+import { AdminAlertsPage } from "./pages/admin/AdminAlertsPage"
 import { AssistantPage } from "./pages/teacher/AssistantPage"
 import { SettingsPage } from "./pages/teacher/SettingsPage"
 import { SupportPage } from "./pages/teacher/SupportPage"
@@ -42,6 +45,7 @@ export const TEACHER_ROUTES = [
   { path: "/submissions", element: <SubmissionsPage /> },
   { path: "/submissions/:id", element: <SubmissionDetailPage /> },
   { path: "/alerts", element: <AlertsPage /> },
+  { path: "/alerts/:alertId", element: <AlertDetailPage /> },
   { path: "/assistant", element: <AssistantPage /> },
   { path: "/notifications", element: <NotificationsListPage /> },
   { path: "/reports", element: <ReportsPage /> },
@@ -80,6 +84,7 @@ export function guardianRoutes() {
     children: [
       { index: true, element: <GuardianDashboardPage /> },
       { path: "children/:id", element: <ChildDetailPage /> },
+      { path: "alerts/:id", element: <GuardianAlertDetailPage /> },
       { path: "reports", element: <ReportsPage /> },
       { path: "notifications", element: <NotificationsListPage /> },
     ],
@@ -92,6 +97,7 @@ export function adminRoutes() {
     element: <AdminRoute><AdminLayout /></AdminRoute>,
     children: [
       { index: true, element: <AdminDashboardPage /> },
+      { path: "alerts", element: <AdminAlertsPage /> },
       { path: "grades", element: <GradeManagementPage /> },
       { path: "students", element: <StudentManagementPage /> },
       { path: "student-grades", element: <StudentGradesPage /> },
