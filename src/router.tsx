@@ -31,6 +31,8 @@ import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
 import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
 import { StudentClassGradesPage } from "./pages/student/StudentClassGradesPage"
 import { StudentAssignmentGradePage } from "./pages/student/StudentAssignmentGradePage"
+import { HomeworkHelpPage } from "./pages/student/HomeworkHelpPage"
+import { HomeworkHelpHistoryPage } from "./pages/student/HomeworkHelpHistoryPage"
 import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
 import { UserMenu } from "@/components/ui/UserMenu"
@@ -77,6 +79,8 @@ export const STUDENT_ROUTES = [
   { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
   { path: "/student/grades", element: <MyGradesPage /> },
   { path: "/student/attendance", element: <MyAttendancePage /> },
+  { path: "/student/homework-help", element: <HomeworkHelpPage /> },
+  { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },
   { path: "/student/notifications", element: <NotificationsListPage /> },
 ]
 
