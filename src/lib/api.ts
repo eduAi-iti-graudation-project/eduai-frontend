@@ -317,6 +317,11 @@ export async function createRubric(data: components["schemas"]["CreateRubricDto"
   return res.data
 }
 
+export async function updateRubric(id: string, data: { title?: string; criteria?: { id?: string; description: string; maxPoints: number }[] }): Promise<Rubric> {
+  const res = await api.patch<Rubric>(`/rubrics/${id}`, data)
+  return res.data
+}
+
 export async function confirmRubric(id: string): Promise<Rubric> {
   const res = await api.patch<Rubric>(`/rubrics/${id}/confirm`)
   return res.data
@@ -465,8 +470,40 @@ export async function getClassAttendance(classId: string): Promise<components["s
 
 // ── Student Grades ────────────────────────────────────────────────
 
-export async function getStudentGrades(studentId: string): Promise<components["schemas"]["GradeDto"][]> {
-  const res = await api.get<components["schemas"]["GradeDto"][]>(`/students/${studentId}/grades`)
+export interface StudentGrade {
+  id: string
+  submissionId: string
+  assignmentId: string
+  criteriaId: string
+  pointsAwarded: number
+  aiFeedback: string | null
+  teacherNotes: string | null
+  isConfirmed: boolean
+  createdAt: string
+  criterionDescription: string
+  criterionMaxPoints: number
+}
+
+export async function getStudentGrades(studentId: string): Promise<StudentGrade[]> {
+  const res = await api.get<StudentGrade[]>(`/students/${studentId}/grades`)
+  return res.data
+}
+
+export async function getStudentSubmissionGrades(studentId: string, submissionId: string): Promise<StudentGrade[]> {
+  const res = await api.get<StudentGrade[]>(`/students/${studentId}/grades/${submissionId}`)
+  return res.data
+}
+
+export interface StudentClass {
+  id: string
+  name: string
+  description: string | null
+  teacherName: string
+  assignments: { id: string; title: string; description: string | null; dueDate: string; totalPoints: number }[]
+}
+
+export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
+  const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
   return res.data
 }
 

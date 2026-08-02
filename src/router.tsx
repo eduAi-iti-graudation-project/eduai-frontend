@@ -11,6 +11,7 @@ import { ClassDetailPage } from "./pages/teacher/ClassDetailPage"
 import { InstructorAssignmentForm } from "./components/InstructorAssignmentForm"
 import { AssignmentDetailPage } from "./pages/teacher/AssignmentDetailPage"
 import { RubricsPage } from "./pages/teacher/RubricsPage"
+import { RubricConfirmPage } from "./pages/teacher/RubricConfirmPage"
 import { SubmissionsPage } from "./pages/teacher/SubmissionsPage"
 import { SubmissionDetailPage } from "./pages/teacher/SubmissionDetailPage"
 import { AlertsPage } from "./pages/teacher/AlertsPage"
@@ -46,6 +47,7 @@ export const TEACHER_ROUTES = [
   { path: "/students/:id", element: <StudentDetailPage /> },
   { path: "/rubrics", element: <RubricsPage /> },
   { path: "/rubrics/new", element: <RubricsPage /> },
+  { path: "/rubrics/confirm/:rubricId", element: <RubricConfirmPage /> },
   { path: "/submissions", element: <SubmissionsPage /> },
   { path: "/submissions/:id", element: <SubmissionDetailPage /> },
   { path: "/alerts", element: <AlertsPage /> },
