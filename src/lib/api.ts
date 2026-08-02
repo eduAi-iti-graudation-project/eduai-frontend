@@ -24,6 +24,21 @@ export function clearToken(): void {
 
 const api = axios.create({ baseURL: API_URL })
 
+export function getErrorMessage(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as { message?: string | string[] } | undefined
+    if (data?.message) {
+      return Array.isArray(data.message) ? data.message.join(", ") : data.message
+    }
+    if (err.message && err.message !== `Request failed with status code ${err.response?.status}`) {
+      return err.message
+    }
+  }
+  return err instanceof Error ? err.message : "An unexpected error occurred"
+}
+
+
+
 api.interceptors.request.use((config) => {
   const token = getStoredToken()
   if (token) {
@@ -107,6 +122,8 @@ export interface SubmissionDetail {
 }
 
 export interface DashboardOverview {
+  activeAlertCount: number
+  resolvedAlertCount: number
   classCount: number
   pendingConfirmations: number
   recentAlerts: { id: string; studentName: string; type: string; reason: string; createdAt: string }[]
@@ -196,6 +213,53 @@ export async function login(data: components["schemas"]["LoginDto"]): Promise<Us
 
 export async function getMe(): Promise<User> {
   const res = await api.get<User>("/auth/me")
+  return res.data
+}
+
+// ── Communication Agent Types ────────────────────────────────────
+
+export interface DiagnosisPayload {
+  hasIssue: boolean
+  issueType: "STUDENT_ISSUE" | "CLASS_ISSUE" | "BOTH" | null
+  severity: "LOW" | "MEDIUM" | "HIGH" | null
+  summary: string | null
+  classContext: string | null
+}
+
+export interface TeacherContentPayload {
+  analysis: string
+  skillGaps: string[]
+  interventions: string[]
+  resourceSuggestions: string[]
+}
+
+export interface GuardianContentPayload {
+  message: string
+  homeSupport: string[]
+}
+
+export interface TeacherFeedbackPayload {
+  feedback: string
+  patternAnalysis: string
+  strategies: string[]
+}
+
+export interface ManagementSummaryPayload {
+  summary: string
+  classTrend: string
+  recommendation: string
+}
+
+export interface AlertDetail {
+  diagnosis: DiagnosisPayload
+  teacherContent: TeacherContentPayload | null
+  guardianContent: GuardianContentPayload | null
+  teacherFeedback: TeacherFeedbackPayload | null
+  managementSummary: ManagementSummaryPayload | null
+}
+
+export async function getAlertDetail(id: string): Promise<AlertDetail> {
+  const res = await api.get<AlertDetail>(`/alerts/${id}/teacher-detail`)
   return res.data
 }
 
@@ -317,6 +381,11 @@ export async function createRubric(data: components["schemas"]["CreateRubricDto"
   return res.data
 }
 
+export async function updateRubric(id: string, data: { title?: string; criteria?: { id?: string; description: string; maxPoints: number }[] }): Promise<Rubric> {
+  const res = await api.patch<Rubric>(`/rubrics/${id}`, data)
+  return res.data
+}
+
 export async function confirmRubric(id: string): Promise<Rubric> {
   const res = await api.patch<Rubric>(`/rubrics/${id}/confirm`)
   return res.data
@@ -392,11 +461,15 @@ export async function gradeSubmission(submissionId: string): Promise<void> {
   await api.post(`/grades/submissions/${submissionId}/grade`)
 }
 
+export async function updateGrade(id: string, data: { pointsAwarded?: number; teacherNotes?: string }): Promise<void> {
+  await api.patch(`/grades/scores/${id}`, data)
+}
+
 export async function confirmAllGrades(submissionId: string): Promise<void> {
   await api.patch(`/grades/confirm-all/${submissionId}`)
 }
 
-/** @deprecated Use confirmAllGrades instead — kept for backward compat */
+/** @deprecated Use updateGrade + confirmAllGrades instead */
 export async function confirmGrade(id: string, data?: { pointsAwarded: number; teacherNotes?: string }): Promise<void> {
   void data
   await api.patch(`/grades/confirm-all/${id}`)
@@ -404,9 +477,16 @@ export async function confirmGrade(id: string, data?: { pointsAwarded: number; t
 
 // ── Alerts ────────────────────────────────────────────────────────
 
-export async function getAlerts(status?: string): Promise<components["schemas"]["AlertDto"][]> {
+export type AlertListItem = components["schemas"]["AlertDto"] & {
+  studentName: string
+  className: string
+  severity: "LOW" | "MEDIUM" | "HIGH"
+  skillGapCount: number
+}
+
+export async function getAlerts(status?: string): Promise<AlertListItem[]> {
   const params = status ? { status } : undefined
-  const res = await api.get<components["schemas"]["AlertDto"][]>("/alerts", { params })
+  const res = await api.get<AlertListItem[]>("/alerts", { params })
   return res.data
 }
 
@@ -534,6 +614,18 @@ export async function getStudentSubmissionGrades(studentId: string, submissionId
   return res.data
 }
 
+export interface StudentClass {
+  id: string
+  name: string
+  description: string | null
+  teacherName: string
+  assignments: { id: string; title: string; description: string | null; dueDate: string; totalPoints: number }[]
+}
+
+export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
+  const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
+  return res.data
+}
 export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
   const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
   return res.data
@@ -601,6 +693,246 @@ export async function sendChatMessage(
   const res = await api.post<ChatResponse>("/assistant/chat", { classId, messages, newMessage })
   return res.data
 }
+
+export async function updateGrade(id: string, data: { pointsAwarded?: number; teacherNotes?: string }): Promise<void> {
+  await api.patch(`/grades/scores/${id}`, data)
+}
+
+// ── Quizzes ───────────────────────────────────────────────────────
+
+export type QuizStatus = "DRAFT" | "PUBLISHED" | "CLOSED"
+export type QuizQuestionType = "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY"
+export type StudentAttemptStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED"
+
+export interface QuizOption {
+  text: string
+  isCorrect?: boolean
+}
+
+export interface QuizQuestion {
+  id: string
+  type: QuizQuestionType
+  question: string
+  options?: QuizOption[]
+  points: number
+  order: number
+}
+
+export interface QuizDto {
+  id: string
+  title: string
+  description: string | null
+  classId: string
+  timeLimit: number | null
+  passingScore: number | null
+  status: QuizStatus
+  endsAt: string | null
+  createdAt: string
+  questions?: QuizQuestion[]
+}
+
+export interface QuizWithAttemptStatus extends QuizDto {
+  attemptStatus?: StudentAttemptStatus
+  attemptId?: string
+}
+
+export interface CreateQuizOption {
+  id?: string
+  text: string
+  isCorrect: boolean
+}
+
+export interface CreateQuizQuestion {
+  id?: string
+  type: QuizQuestionType
+  question: string
+  options?: CreateQuizOption[]
+  points?: number
+  order: number
+}
+
+export interface CreateQuizDto {
+  title: string
+  description?: string
+  classId: string
+  timeLimit?: number
+  passingScore?: number
+  endsAt: string
+  questions: CreateQuizQuestion[]
+}
+
+export interface GenerateQuizDto {
+  classId: string
+  topic: string
+  questionCount: number
+  types: QuizQuestionType[]
+}
+
+export interface GenerateQuizResult {
+  quizId: string
+  title: string
+  message: string
+}
+
+export type QuizViolationType = "TAB_SWITCH" | "FULLSCREEN_EXIT"
+
+export interface QuizViolation {
+  id: string
+  type: QuizViolationType | string
+  createdAt: string
+}
+
+export interface QuizAnswerDto {
+  id: string
+  questionId: string
+  answer: string
+  pointsAwarded: number | null
+  aiFeedback: string | null
+  isConfirmed: boolean
+}
+
+export interface QuizAttemptDto {
+  id: string
+  quizId: string
+  studentId: string
+  startedAt: string
+  submittedAt: string | null
+  totalScore: number | null
+  status: "IN_PROGRESS" | "COMPLETED"
+  violations?: QuizViolation[]
+  expiresAt: string | null
+  serverNow?: string
+}
+
+export interface QuizAttemptDetail extends QuizAttemptDto {
+  student?: { id: string; name: string }
+  quiz?: QuizDto
+  answers?: QuizAnswerDto[]
+}
+
+export interface SubmitQuizAnswers {
+  questionId: string
+  answer: string
+}
+
+export async function getQuizzes(classId?: string): Promise<QuizDto[]> {
+  const params = classId ? { classId } : undefined
+  const res = await api.get<QuizDto[]>("/quizzes", { params })
+  return res.data
+}
+
+export async function getStudentQuizzes(): Promise<QuizWithAttemptStatus[]> {
+  const res = await api.get<QuizWithAttemptStatus[]>("/quizzes")
+  return res.data
+}
+
+export async function getQuiz(id: string): Promise<QuizDto> {
+  const res = await api.get<QuizDto>(`/quizzes/${id}`)
+  return res.data
+}
+
+export async function createQuiz(data: CreateQuizDto): Promise<QuizDto> {
+  const res = await api.post<QuizDto>("/quizzes", data)
+  return res.data
+}
+
+export async function generateQuiz(data: GenerateQuizDto): Promise<GenerateQuizResult> {
+  const res = await api.post<GenerateQuizResult>("/quizzes/generate", data)
+  return res.data
+}
+
+export async function updateQuiz(id: string, data: Partial<CreateQuizDto> & { status?: QuizStatus }): Promise<QuizDto> {
+  const res = await api.patch<QuizDto>(`/quizzes/${id}`, data)
+  return res.data
+}
+
+export async function publishQuiz(id: string): Promise<QuizDto> {
+  const res = await api.patch<QuizDto>(`/quizzes/${id}/publish`)
+  return res.data
+}
+
+export async function deleteQuiz(id: string): Promise<void> {
+  await api.delete(`/quizzes/${id}`)
+}
+
+export async function startQuizAttempt(quizId: string): Promise<QuizAttemptDto> {
+  const res = await api.post<QuizAttemptDto>(`/quizzes/${quizId}/start`)
+  return res.data
+}
+
+export async function submitQuizAttempt(quizId: string, answers: SubmitQuizAnswers[]): Promise<QuizAttemptDto> {
+  const res = await api.post<QuizAttemptDto>(`/quizzes/${quizId}/submit`, { answers })
+  return res.data
+}
+
+export async function reportQuizViolation(attemptId: string, type: QuizViolationType): Promise<QuizViolation> {
+  const res = await api.post<QuizViolation>(`/quizzes/attempts/${attemptId}/violations`, { type })
+  return res.data
+}
+
+export async function getQuizAttempt(attemptId: string): Promise<QuizAttemptDetail> {
+  const res = await api.get<QuizAttemptDetail>(`/quizzes/attempts/${attemptId}`)
+  return res.data
+}
+
+export async function getQuizAttempts(quizId: string): Promise<QuizAttemptDetail[]> {
+  const res = await api.get<QuizAttemptDetail[]>(`/quizzes/${quizId}/attempts`)
+  return res.data
+}
+
+export async function confirmQuizAttempt(attemptId: string): Promise<QuizAttemptDetail> {
+  const res = await api.patch<QuizAttemptDetail>(`/quizzes/attempts/${attemptId}/confirm`)
+  return res.data
+}
+
+export async function updateQuizAnswer(answerId: string, pointsAwarded: number): Promise<QuizAnswerDto> {
+  const res = await api.patch<QuizAnswerDto>(`/quizzes/answers/${answerId}`, { pointsAwarded })
+  return res.data
+}
+
+
+
+// ── Homework Help ─────────────────────────────────────────────────
+
+export type HomeworkHelpFeedbackValue = "HELPFUL" | "NOT_HELPFUL"
+
+export interface HomeworkHelpInteraction {
+  id: string
+  question: string
+  answer: string
+  action: "HINT" | "EXPLANATION" | "REDIRECT_TEACHER" | string
+  sources: string[]
+  feedback: HomeworkHelpFeedbackValue | null
+  createdAt: string
+}
+
+export interface HomeworkHelpResponse {
+  interactionId: string
+  reply: string
+  action: string
+  sources: string[]
+  teacherNotified: boolean
+}
+
+export async function askHomeworkHelp(data: {
+  classId: string
+  question: string
+  assignmentId?: string
+}): Promise<HomeworkHelpResponse> {
+  const res = await api.post<HomeworkHelpResponse>("/assistant/homework-help", data)
+  return res.data
+}
+
+export async function getHomeworkHelpHistory(classId?: string): Promise<HomeworkHelpInteraction[]> {
+  const params = classId ? { classId } : undefined
+  const res = await api.get<{ interactions: HomeworkHelpInteraction[] }>("/assistant/homework-help/history", { params })
+  return res.data.interactions
+}
+
+export async function submitHomeworkHelpFeedback(interactionId: string, feedback: HomeworkHelpFeedbackValue): Promise<void> {
+  await api.patch(`/assistant/homework-help/${interactionId}/feedback`, { feedback })
+}
+
 
 // ── Re-export extractMessage for hooks ────────────────────────────
 

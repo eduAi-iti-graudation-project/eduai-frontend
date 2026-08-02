@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/providers/use-auth"
 import * as api from "@/lib/api"
@@ -6,9 +7,9 @@ import { EmptyState } from "@/components/ui/EmptyState"
 export function MyGradesPage() {
   const { user } = useAuth()
 
-  const { data: grades, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["student-grades", user?.id],
-    queryFn: () => api.getStudentGrades(user!.id),
+  const { data: studentClasses, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["student", "classes", user?.id],
+    queryFn: () => api.getStudentClasses(user!.id),
     enabled: !!user?.id,
   })
 
@@ -29,69 +30,53 @@ export function MyGradesPage() {
     )
   }
 
-  const confirmedGrades = (grades ?? []).filter((g) => g.isConfirmed)
-  const gradesBySubmission = new Map<string, NonNullable<typeof grades>>()
-  for (const g of confirmedGrades) {
-    const key = g.submissionId
-    const list = gradesBySubmission.get(key) ?? []
-    list.push(g)
-    gradesBySubmission.set(key, list)
-  }
+  const classes = studentClasses ?? []
 
   return (
     <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
       <h1 className="font-headline-lg text-headline-lg text-primary mb-4">My Grades</h1>
-        {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-[32px] bg-white p-md border border-outline-variant/10 animate-pulse">
-                <div className="h-5 w-64 bg-surface-container-high rounded-full mb-2" />
-                <div className="h-4 w-32 bg-surface-container-high rounded-full" />
-              </div>
-            ))}
-          </div>
-        ) : !grades || grades.length === 0 ? (
-          <EmptyState
-            icon="grade"
-            title="No grades yet"
-            description="Your grades will appear here once teachers confirm them."
-          />
-        ) : (
-          <div className="space-y-3">
-            {Array.from(gradesBySubmission.entries()).map(([submissionId, submissionGrades]) => {
-              const totalEarned = submissionGrades.reduce((s, g) => s + g.pointsAwarded, 0)
-              return (
-                <div key={submissionId} className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm hover:border-primary-container/30 hover:shadow-md transition-all">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="font-label-md text-label-md text-on-surface">Submission</p>
-                    <span className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full">
-                      {totalEarned} pts
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-[32px] bg-white p-md border border-outline-variant/10 animate-pulse">
+              <div className="h-5 w-64 bg-surface-container-high rounded-full mb-2" />
+              <div className="h-4 w-32 bg-surface-container-high rounded-full" />
+            </div>
+          ))}
+        </div>
+      ) : classes.length === 0 ? (
+        <EmptyState
+          icon="grade"
+          title="No grades yet"
+          description="Your grades will appear here once teachers confirm them."
+        />
+      ) : (
+        <div className="space-y-3">
+          {classes.map((cls) => (
+            <Link
+              key={cls.id}
+              to={`/student/classes/${cls.id}`}
+              className="block rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm hover:border-primary-container/30 hover:shadow-md transition-all"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="font-label-md text-label-md text-on-surface">{cls.name}</h3>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px]">person</span>
+                      {cls.teacherName}
+                    </span>
+                    <span className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px]">assignment</span>
+                      {cls.assignments.length} {cls.assignments.length === 1 ? "assignment" : "assignments"}
                     </span>
                   </div>
-                  <div className="space-y-2">
-                    {submissionGrades.map((g) => (
-                      <div key={g.id} className="rounded-3xl bg-surface-container-low p-md border border-outline-variant/10">
-                        <div className="flex items-start justify-between mb-1">
-                          <p className="font-label-sm text-label-sm text-on-surface-variant">Criterion</p>
-                          <span className="font-label-sm text-label-sm text-on-surface font-bold">+{g.pointsAwarded}</span>
-                        </div>
-                        {g.aiFeedback && (
-                          <p className="font-body-md text-body-md text-on-surface-variant mt-2">{g.aiFeedback}</p>
-                        )}
-                        {g.teacherNotes && (
-                          <div className="mt-2 pt-2 border-t border-outline-variant/10">
-                            <p className="font-label-sm text-label-sm text-primary mb-1">Teacher Notes</p>
-                            <p className="font-body-md text-body-md text-on-surface">{g.teacherNotes}</p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
                 </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
