@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
+import { DashboardStatCard } from "@/components/communication/DashboardStatCard"
 
 const iconOptions = [
   { icon: "calculate", bg: "bg-primary-container/10", color: "text-primary" },
@@ -20,7 +21,7 @@ function getInitials(name: string): string {
 }
 
 export function TeacherDashboardPage() {
-  const { isLoading, isError, error, classCards, submissionRate, avgGrade, totalSubmissions, alerts } = useDashboardData()
+  const { isLoading, isError, error, classCards, submissionRate, avgGrade, totalSubmissions, alerts, confirmedSubmissions } = useDashboardData()
 
   if (isError) {
     return (
@@ -54,7 +55,10 @@ export function TeacherDashboardPage() {
     )
   }
 
-  const pendingAlertCount = alerts.filter((a) => a.status === "ACTIVE" || !a.status).length
+  const activeAlertCount = alerts.filter((a) => a.status === "ACTIVE" || a.status === "NEW").length
+  const resolvedAlertCount = alerts.filter((a) => a.status === "RESOLVED").length
+  const pendingCount = totalSubmissions - confirmedSubmissions
+
   const avgGradeDisplay =
     avgGrade > 0
       ? avgGrade >= 90 ? "A" : avgGrade >= 80 ? "B+" : avgGrade >= 70 ? "B-" : avgGrade >= 60 ? "C" : "D"
@@ -67,6 +71,13 @@ export function TeacherDashboardPage() {
       </header>
 
       <div className="flex-1 overflow-y-auto p-margin-desktop">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-lg">
+          <DashboardStatCard icon="notifications_active" label="Active Alerts" value={activeAlertCount} color="text-error" />
+          <DashboardStatCard icon="check_circle" label="Resolved" value={resolvedAlertCount} color="text-primary" />
+          <DashboardStatCard icon="rate_review" label="Pending Review" value={pendingCount} color="text-secondary" />
+          <DashboardStatCard icon="trending_up" label="Avg Class Score" value={avgGradeDisplay} color="text-primary" />
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-gutter">
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-md">
@@ -140,9 +151,7 @@ export function TeacherDashboardPage() {
                   <div className="relative z-10">
                     <h3 className="font-headline-md text-headline-md text-primary mb-sm">Weekly Recap</h3>
                     <p className="font-body-md text-on-surface-variant mb-md">
-                      {totalSubmissions === 0
-                        ? "No submissions yet this week. Grades will appear here once students submit assignments."
-                        : `Your students have completed ${submissionRate}% of their assignments this week.`}
+                      Your students have completed {submissionRate}% of their assignments this week.
                     </p>
                     <div className="flex gap-md">
                       <div className="bg-white p-sm rounded-xl border border-outline-variant/20 flex flex-col">
@@ -166,8 +175,8 @@ export function TeacherDashboardPage() {
           <div className="w-full lg:w-80 flex flex-col gap-md">
             <div className="flex items-center justify-between">
               <h3 className="font-headline-md text-headline-md text-on-surface">Needs Attention</h3>
-              {alerts.length > 0 && (
-                <span className="bg-error-container text-on-error-container text-label-sm px-2 py-0.5 rounded-full font-bold">{pendingAlertCount}</span>
+              {activeAlertCount > 0 && (
+                <span className="bg-error-container text-on-error-container text-label-sm px-2 py-0.5 rounded-full font-bold">{activeAlertCount}</span>
               )}
             </div>
             <div className="flex flex-col gap-sm">
@@ -179,58 +188,38 @@ export function TeacherDashboardPage() {
               )}
               {alerts.map((alert) => {
                 const isAi = alert.type === "FAILING" || alert.type === "DOWNWARD_TREND" || alert.type === "CONSISTENT_STRUGGLE"
-                if (isAi) {
-                  return (
-                    <div key={alert.id} className="border border-dashed border-primary bg-primary/5 p-md rounded-xl relative group">
-                      <div className="flex justify-between items-start mb-base">
-                        <div className="flex items-center gap-xs">
-                          <span className="material-symbols-outlined text-primary text-[18px]">smart_toy</span>
-                          <span className="text-primary font-label-sm uppercase tracking-wider">AI Insight</span>
-                        </div>
-                        <button type="button" className="text-outline hover:text-on-surface">
-                          <span className="material-symbols-outlined text-[18px]">more_horiz</span>
-                        </button>
-                      </div>
-                      <h5 className="font-label-md text-on-surface mb-xs">{alert.type.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}</h5>
-                      <p className="font-body-md text-on-surface-variant text-sm mb-md">{alert.reason}</p>
-                      <button
-                        type="button"
-                        className="w-full bg-primary text-white py-1.5 rounded-full text-label-sm font-bold hover:opacity-90"
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  )
-                }
                 return (
-                  <div key={alert.id} className="border border-outline-variant/20 bg-white p-md rounded-xl">
-                    <div className="flex items-center gap-sm mb-base">
-                      <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant text-[12px] font-bold">
-                        {alert.type === "MISSED" ? "M" : "F"}
-                      </div>
+                  <div key={alert.id} className={`p-md rounded-xl ${isAi ? "border border-dashed border-primary bg-primary/5" : "border border-outline-variant/20 bg-white"}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      {alert.severity === "HIGH" && <span className="text-lg">🔴</span>}
+                      {alert.severity === "MEDIUM" && <span className="text-lg">🟡</span>}
+                      {alert.severity === "LOW" && <span className="text-lg">🟢</span>}
                       <div>
-                        <h5 className="font-label-md text-on-surface">{alert.type}</h5>
-                        <p className="text-[11px] text-outline">{alert.status}</p>
+                        <p className="font-label-md text-label-md text-on-surface font-bold">
+                          {alert.studentName ?? "Student"}
+                        </p>
+                        <p className="font-label-sm text-label-sm text-on-surface-variant">
+                          {alert.className ?? alert.type.replace(/_/g, " ")}
+                        </p>
                       </div>
                     </div>
-                    <p className="font-body-md text-on-surface-variant text-sm mb-md">{alert.reason}</p>
-                    <button
-                      type="button"
-                      className="w-full bg-surface-container-low text-on-surface-variant py-1.5 rounded-full text-label-sm font-bold hover:bg-surface-container-high transition-colors"
+                    <p className="font-body-md text-body-md text-on-surface-variant text-sm mb-3">{alert.reason}</p>
+                    <Link
+                      to={`/alerts/${alert.id}`}
+                      className="block w-full text-center bg-primary text-white py-1.5 rounded-full text-label-sm font-bold hover:opacity-90 transition-all"
                     >
-                      Review
-                    </button>
+                      View Details
+                    </Link>
                   </div>
                 )
               })}
             </div>
-            <div className="mt-auto bg-surface-container-low p-md rounded-xl border border-outline-variant/30">
-              <div className="flex items-center gap-sm mb-sm">
-                <span className="material-symbols-outlined text-primary text-[18px]">tips_and_updates</span>
-                <h6 className="font-label-md text-primary">Did you know?</h6>
-              </div>
-              <p className="text-[12px] text-on-surface-variant">Adding feedback within 24 hours increases student engagement by up to 30%.</p>
-            </div>
+            <Link
+              to="/alerts"
+              className="mt-auto text-center text-primary font-label-md text-label-sm hover:underline"
+            >
+              View All Alerts →
+            </Link>
           </div>
         </div>
       </div>

@@ -1,10 +1,19 @@
+import { useState } from "react"
+import { useAuth } from "@/providers/use-auth"
 import { useNotifications } from "@/hooks/use-notifications"
 import { NotificationItem } from "@/components/ui/NotificationItem"
+import { NotificationDetailDialog } from "@/components/ui/NotificationDetailDialog"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { toast } from "sonner"
+import type { components } from "@/types/api-schema"
+
+type NotificationDto = components["schemas"]["NotificationDto"]
 
 export function NotificationsListPage() {
-  const { notifications, isLoading, isError, error, markRead, refetch } = useNotifications()
+  const { user } = useAuth()
+  const { notifications, isLoading, isError, error, markRead, refetch } = useNotifications(user?.id)
+  const myNotifications = notifications.filter((n) => !user?.id || n.userId === user.id)
+  const [selected, setSelected] = useState<NotificationDto | null>(null)
 
   if (isError) {
     return (
@@ -28,7 +37,7 @@ export function NotificationsListPage() {
     )
   }
 
-  const unreadCount = notifications.filter((n) => !n.readAt).length
+  const unreadCount = myNotifications.filter((n) => !n.readAt).length
 
   return (
     <div className="p-xl max-w-3xl mx-auto">
@@ -36,7 +45,7 @@ export function NotificationsListPage() {
         <div>
           <h1 className="font-headline-xl text-headline-xl text-primary mb-xs">Notifications</h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant">
-            {isLoading ? "Loading..." : `${notifications.length} notification${notifications.length !== 1 ? "s" : ""}${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
+            {isLoading ? "Loading..." : `${myNotifications.length} notification${myNotifications.length !== 1 ? "s" : ""}${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
           </p>
         </div>
       </header>
@@ -55,7 +64,7 @@ export function NotificationsListPage() {
             </div>
           ))}
         </div>
-      ) : notifications.length === 0 ? (
+      ) : myNotifications.length === 0 ? (
         <EmptyState
           icon="notifications_off"
           title="No notifications yet"
@@ -63,13 +72,21 @@ export function NotificationsListPage() {
         />
       ) : (
         <div className="space-y-3">
-          {notifications.map((n) => (
+          {myNotifications.map((n) => (
             <NotificationItem
               key={n.id}
               title={n.title}
               body={n.body ?? ""}
               createdAt={n.createdAt}
               read={!!n.readAt}
+              onClick={() => {
+                if (!n.readAt) {
+                  markRead.mutate(n.id, {
+                    onError: () => toast.error("Failed to mark as read"),
+                  })
+                }
+                setSelected(n)
+              }}
               onMarkRead={() => {
                 markRead.mutate(n.id, {
                   onError: () => toast.error("Failed to mark as read"),
@@ -79,6 +96,8 @@ export function NotificationsListPage() {
           ))}
         </div>
       )}
+
+      <NotificationDetailDialog notification={selected} onClose={() => setSelected(null)} />
     </div>
   )
 }
