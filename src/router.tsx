@@ -27,6 +27,7 @@ import { AttendanceImportPage } from "./pages/teacher/AttendanceImportPage"
 import { ReportsPage } from "./pages/ReportsPage"
 import { StudentDashboardPage } from "./pages/student/StudentDashboardPage"
 import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage"
+import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
 import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
 import { StudentClassGradesPage } from "./pages/student/StudentClassGradesPage"
 import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
@@ -134,7 +135,6 @@ export function adminRoutes() {
     children: [
       { index: true, element: <AdminDashboardPage /> },
       { path: "alerts", element: <AdminAlertsPage /> },
-
       { path: "grades", element: <GradeManagementPage /> },
       { path: "students", element: <StudentManagementPage /> },
       { path: "student-grades", element: <StudentGradesPage /> },
