@@ -30,8 +30,9 @@ import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage"
 import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
 import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
 import { StudentClassGradesPage } from "./pages/student/StudentClassGradesPage"
-import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
 import { StudentAssignmentGradePage } from "./pages/student/StudentAssignmentGradePage"
+import { HomeworkHelpPage } from "./pages/student/HomeworkHelpPage"
+import { HomeworkHelpHistoryPage } from "./pages/student/HomeworkHelpHistoryPage"
 import { StudentQuizzesPage } from "./pages/student/StudentQuizzesPage"
 import { QuizTakePage } from "./pages/student/QuizTakePage"
 import { StudentQuizResultPage } from "./pages/student/StudentQuizResultPage"
@@ -39,9 +40,6 @@ import { QuizzesPage } from "./pages/teacher/QuizzesPage"
 import { QuizEditorPage } from "./pages/teacher/QuizEditorPage"
 import { QuizAttemptsListPage } from "./pages/teacher/QuizAttemptsListPage"
 import { QuizAttemptDetailPage } from "./pages/teacher/QuizAttemptDetailPage"
-import { HomeworkHelpPage } from "./pages/student/HomeworkHelpPage"
-import { HomeworkHelpHistoryPage } from "./pages/student/HomeworkHelpHistoryPage"
-
 import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
 import { UserMenu } from "@/components/ui/UserMenu"
@@ -93,12 +91,11 @@ export const STUDENT_ROUTES = [
   { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
   { path: "/student/grades", element: <MyGradesPage /> },
   { path: "/student/attendance", element: <MyAttendancePage /> },
+  { path: "/student/homework-help", element: <HomeworkHelpPage /> },
+  { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },
   { path: "/student/quizzes", element: <StudentQuizzesPage /> },
   { path: "/student/quizzes/:id/take", element: <QuizTakePage /> },
   { path: "/student/quizzes/:id/result", element: <StudentQuizResultPage /> },
-  { path: "/student/homework-help", element: <HomeworkHelpPage /> },
-  { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },
-
   { path: "/student/notifications", element: <NotificationsListPage /> },
 ]
 

@@ -24,21 +24,6 @@ export function clearToken(): void {
 
 const api = axios.create({ baseURL: API_URL })
 
-export function getErrorMessage(err: unknown): string {
-  if (axios.isAxiosError(err)) {
-    const data = err.response?.data as { message?: string | string[] } | undefined
-    if (data?.message) {
-      return Array.isArray(data.message) ? data.message.join(", ") : data.message
-    }
-    if (err.message && err.message !== `Request failed with status code ${err.response?.status}`) {
-      return err.message
-    }
-  }
-  return err instanceof Error ? err.message : "An unexpected error occurred"
-}
-
-
-
 api.interceptors.request.use((config) => {
   const token = getStoredToken()
   if (token) {
@@ -614,18 +599,6 @@ export async function getStudentSubmissionGrades(studentId: string, submissionId
   return res.data
 }
 
-export interface StudentClass {
-  id: string
-  name: string
-  description: string | null
-  teacherName: string
-  assignments: { id: string; title: string; description: string | null; dueDate: string; totalPoints: number }[]
-}
-
-export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
-  const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
-  return res.data
-}
 export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
   const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
   return res.data
@@ -694,8 +667,45 @@ export async function sendChatMessage(
   return res.data
 }
 
-export async function updateGrade(id: string, data: { pointsAwarded?: number; teacherNotes?: string }): Promise<void> {
-  await api.patch(`/grades/scores/${id}`, data)
+// ── Homework Help ─────────────────────────────────────────────────
+
+export type HomeworkHelpFeedbackValue = "HELPFUL" | "NOT_HELPFUL"
+
+export interface HomeworkHelpInteraction {
+  id: string
+  question: string
+  answer: string
+  action: "HINT" | "EXPLANATION" | "REDIRECT_TEACHER" | string
+  sources: string[]
+  feedback: HomeworkHelpFeedbackValue | null
+  createdAt: string
+}
+
+export interface HomeworkHelpResponse {
+  interactionId: string
+  reply: string
+  action: string
+  sources: string[]
+  teacherNotified: boolean
+}
+
+export async function askHomeworkHelp(data: {
+  classId: string
+  question: string
+  assignmentId?: string
+}): Promise<HomeworkHelpResponse> {
+  const res = await api.post<HomeworkHelpResponse>("/assistant/homework-help", data)
+  return res.data
+}
+
+export async function getHomeworkHelpHistory(classId?: string): Promise<HomeworkHelpInteraction[]> {
+  const params = classId ? { classId } : undefined
+  const res = await api.get<{ interactions: HomeworkHelpInteraction[] }>("/assistant/homework-help/history", { params })
+  return res.data.interactions
+}
+
+export async function submitHomeworkHelpFeedback(interactionId: string, feedback: HomeworkHelpFeedbackValue): Promise<void> {
+  await api.patch(`/assistant/homework-help/${interactionId}/feedback`, { feedback })
 }
 
 // ── Quizzes ───────────────────────────────────────────────────────
@@ -889,50 +899,6 @@ export async function updateQuizAnswer(answerId: string, pointsAwarded: number):
   const res = await api.patch<QuizAnswerDto>(`/quizzes/answers/${answerId}`, { pointsAwarded })
   return res.data
 }
-
-
-
-// ── Homework Help ─────────────────────────────────────────────────
-
-export type HomeworkHelpFeedbackValue = "HELPFUL" | "NOT_HELPFUL"
-
-export interface HomeworkHelpInteraction {
-  id: string
-  question: string
-  answer: string
-  action: "HINT" | "EXPLANATION" | "REDIRECT_TEACHER" | string
-  sources: string[]
-  feedback: HomeworkHelpFeedbackValue | null
-  createdAt: string
-}
-
-export interface HomeworkHelpResponse {
-  interactionId: string
-  reply: string
-  action: string
-  sources: string[]
-  teacherNotified: boolean
-}
-
-export async function askHomeworkHelp(data: {
-  classId: string
-  question: string
-  assignmentId?: string
-}): Promise<HomeworkHelpResponse> {
-  const res = await api.post<HomeworkHelpResponse>("/assistant/homework-help", data)
-  return res.data
-}
-
-export async function getHomeworkHelpHistory(classId?: string): Promise<HomeworkHelpInteraction[]> {
-  const params = classId ? { classId } : undefined
-  const res = await api.get<{ interactions: HomeworkHelpInteraction[] }>("/assistant/homework-help/history", { params })
-  return res.data.interactions
-}
-
-export async function submitHomeworkHelpFeedback(interactionId: string, feedback: HomeworkHelpFeedbackValue): Promise<void> {
-  await api.patch(`/assistant/homework-help/${interactionId}/feedback`, { feedback })
-}
-
 
 // ── Re-export extractMessage for hooks ────────────────────────────
 
