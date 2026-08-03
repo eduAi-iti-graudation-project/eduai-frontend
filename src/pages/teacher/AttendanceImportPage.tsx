@@ -3,6 +3,9 @@ import { useSearchParams, Link } from "react-router-dom"
 import { useClassDetail } from "@/hooks/use-classes"
 import { useImportAttendance } from "@/hooks/use-attendance"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED"
 
@@ -63,21 +66,21 @@ export function AttendanceImportPage() {
           {!classIdParam && (
             <div>
               <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Class</label>
-              <input
+              <Input
                 value={selectedClassId}
                 onChange={(e) => setSelectedClassId(e.target.value)}
                 placeholder="Class ID..."
-                className="w-full rounded-xl border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
+                className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
               />
             </div>
           )}
           <div>
             <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Date</label>
-            <input
+            <Input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-xl border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
+              className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
             />
           </div>
         </div>
@@ -85,7 +88,7 @@ export function AttendanceImportPage() {
         {!actualClassId ? (
           <EmptyState icon="calendar_month" title="Select a class" description="Choose a class to mark attendance." />
         ) : isLoading ? (
-          <p className="font-body-md text-body-md text-on-surface-variant text-center py-lg">Loading class roster...</p>
+          <LoadingState className="py-lg" />
         ) : students.length === 0 ? (
           <EmptyState icon="group" title="No students enrolled" description="Add students to the class before importing attendance." />
         ) : (
@@ -97,17 +100,18 @@ export function AttendanceImportPage() {
                   <span className="font-label-md text-label-md text-on-surface">{s.name}</span>
                   <div className="flex gap-1">
                     {STATUS_OPTIONS.map((opt) => (
-                      <button
+                      <Button
                         key={opt.value}
+                        type="button"
                         onClick={() => setStatus(s.id, opt.value)}
-                        className={`px-3 py-1 rounded-full font-label-sm text-label-sm border transition-all ${
+                        className={`px-3 py-1 h-auto rounded-full font-label-sm text-label-sm border transition-all ${
                           records[s.id] === opt.value
                             ? `${opt.color} border-2 font-semibold`
                             : "border-outline-variant text-on-surface-variant hover:border-primary-container"
                         }`}
                       >
                         {opt.label}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -116,13 +120,14 @@ export function AttendanceImportPage() {
 
             <div className="flex items-center justify-between mt-lg pt-lg border-t border-outline-variant/20">
               <span className="font-label-md text-label-md text-on-surface-variant">{selectedCount} student{selectedCount !== 1 ? "s" : ""} marked</span>
-              <button
+              <Button
+                type="button"
                 onClick={handleSubmit}
                 disabled={selectedCount === 0 || importAttendance.isPending}
-                className="px-lg py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover disabled:opacity-50"
+                className="px-lg h-auto py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover disabled:opacity-50"
               >
                 {importAttendance.isPending ? "Importing..." : `Import Attendance (${selectedCount})`}
-              </button>
+              </Button>
             </div>
           </>
         )}

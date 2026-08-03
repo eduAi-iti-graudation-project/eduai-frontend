@@ -5,6 +5,8 @@ import * as api from "@/lib/api"
 import { useSubmissionDetail } from "@/hooks/use-submissions"
 import { StatusBadge } from "@/components/ui/StatusBadge"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import type { SubmissionStatus } from "@/components/ui/StatusBadge"
 
@@ -16,7 +18,16 @@ export function SubmissionDetailPage() {
   const { data: sub, isLoading, isError } = useSubmissionDetail(id ?? "")
 
   const confirmAll = useMutation({
-    mutationFn: () => api.confirmAllGrades(id!),
+    mutationFn: async () => {
+      if (!sub?.scores) return
+      for (const score of sub.scores) {
+        await api.updateGrade(score.id, {
+          pointsAwarded: edits[score.id]?.pointsAwarded ?? score.pointsAwarded,
+          teacherNotes: edits[score.id]?.teacherNotes || score.teacherNotes || undefined,
+        })
+      }
+      await api.confirmAllGrades(sub.id)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["submission", id] })
       queryClient.invalidateQueries({ queryKey: ["submissions"] })
@@ -39,22 +50,6 @@ export function SubmissionDetailPage() {
     }))
   }
 
-  const handleConfirmAll = async () => {
-    if (!id) return
-    const entry = Object.entries(edits)
-    if (entry.length > 0) {
-      for (const [scoreId, data] of entry) {
-        await api.confirmGrade(scoreId, {
-          pointsAwarded: data.pointsAwarded,
-          teacherNotes: data.teacherNotes || undefined,
-        })
-      }
-      queryClient.invalidateQueries({ queryKey: ["submission", id] })
-      queryClient.invalidateQueries({ queryKey: ["submissions"] })
-    }
-    await confirmAll.mutateAsync()
-  }
-
   const mergedScores = useMemo(() => {
     if (!sub?.scores) return []
     return sub.scores.map((s) => ({
@@ -67,16 +62,7 @@ export function SubmissionDetailPage() {
   const isReadOnly = sub?.status === "CONFIRMED"
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full p-xl">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
-          </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">Loading submission...</p>
-        </div>
-      </div>
-    )
+    return <LoadingState label="Loading submission..." />
   }
 
   if (isError || !sub) {
@@ -260,17 +246,17 @@ export function SubmissionDetailPage() {
                 </div>
 
                 {!isReadOnly && (
-                  <button
-                    onClick={handleConfirmAll}
+                  <Button
+                    onClick={() => confirmAll.mutate()}
                     disabled={confirmAll.isPending}
-                    className="w-full flex items-center justify-center gap-xs px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full shadow-lg nudge-hover active:scale-95 disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-xs px-md py-sm h-auto rounded-full bg-primary-container text-white font-label-md text-label-md shadow-lg nudge-hover active:scale-95 disabled:opacity-50"
                   >
                     {confirmAll.isPending ? (
                       <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Confirming...</>
                     ) : (
                       <><span className="material-symbols-outlined text-[18px]">check_circle</span>Confirm All Grades</>
                     )}
-                  </button>
+                  </Button>
                 )}
               </div>
             )}

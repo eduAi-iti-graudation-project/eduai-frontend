@@ -5,6 +5,8 @@ import { toast } from "sonner"
 import * as api from "@/lib/api"
 import { useAuth } from "@/providers/use-auth"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { Button } from "@/components/ui/button"
+import { LoadingState } from "@/components/shared/LoadingState"
 
 export function AvailableClassesPage() {
   const { user } = useAuth()
@@ -33,7 +35,7 @@ export function AvailableClassesPage() {
     },
     onSettled: () => setJoiningId(null),
     onError: (err: Error, classId) => {
-      if (err.message?.includes("Already requested")) {
+      if (api.getErrorStatus(err) === 409) {
         setJoinedIds((prev) => new Set(prev).add(classId))
         return
       }
@@ -45,14 +47,7 @@ export function AvailableClassesPage() {
     return (
       <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
         <h1 className="font-headline-lg text-headline-lg text-primary mb-4">My Classes</h1>
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-[32px] bg-white p-md border border-outline-variant/10 animate-pulse">
-              <div className="h-5 w-48 bg-surface-container-high rounded-full mb-2" />
-              <div className="h-4 w-32 bg-surface-container-high rounded-full" />
-            </div>
-          ))}
-        </div>
+        <LoadingState />
       </div>
     )
   }
@@ -107,9 +102,11 @@ export function AvailableClassesPage() {
         </div>
       )}
 
-      <button
+      <Button
+        type="button"
+        variant="ghost"
         onClick={() => setShowAvailable((prev) => !prev)}
-        className="flex items-center gap-2 font-label-md text-label-md text-primary hover:underline mb-4"
+        className="flex items-center gap-2 font-label-md text-label-md text-primary hover:underline hover:bg-transparent mb-4 h-auto p-0"
       >
         <span className="material-symbols-outlined text-[20px] transition-transform duration-200" style={{ transform: showAvailable ? "rotate(90deg)" : undefined }}>
           chevron_right
@@ -120,7 +117,7 @@ export function AvailableClassesPage() {
             {availableClasses.length}
           </span>
         )}
-      </button>
+      </Button>
 
       {showAvailable && (
         <div className="space-y-3">
@@ -146,17 +143,18 @@ export function AvailableClassesPage() {
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">{(c as any).teacher?.name ?? "Teacher"}</p>
                   </div>
-                  <button
+                  <Button
+                    type="button"
                     onClick={() => joinMutation.mutate(c.id)}
                     disabled={isPending}
-                    className={`shrink-0 px-md py-sm rounded-full font-label-md transition-all disabled:opacity-50 ${
+                    className={`shrink-0 px-md py-sm rounded-full font-label-md transition-all disabled:opacity-50 h-auto ${
                       isPending
                         ? "bg-surface-container text-on-surface-variant"
-                        : "bg-secondary-container text-white hover:opacity-90"
+                        : "bg-secondary-container text-white hover:bg-secondary-container/90"
                     }`}
                   >
                     {isPending ? "Pending..." : "Join"}
-                  </button>
+                  </Button>
                 </div>
               )
             })

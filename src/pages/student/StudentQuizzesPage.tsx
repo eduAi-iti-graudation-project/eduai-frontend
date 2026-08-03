@@ -3,6 +3,10 @@ import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/providers/use-auth"
 import * as api from "@/lib/api"
 import { useStudentQuizList } from "@/hooks/use-quizzes"
+import { Badge } from "@/components/ui/badge"
+import { EmptyState } from "@/components/ui/EmptyState"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { LoadingState } from "@/components/shared/LoadingState"
 
 const attemptBadge: Record<string, { label: string; className: string }> = {
   IN_PROGRESS: { label: "In progress", className: "bg-primary-fixed text-primary" },
@@ -46,35 +50,18 @@ export function StudentQuizzesPage() {
       </header>
 
       {quizzes.isLoading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-md animate-pulse">
-              <div className="h-6 w-40 bg-surface-container-high rounded-full mb-3" />
-              <div className="h-4 w-3/4 bg-surface-container-high rounded-full" />
-            </div>
-          ))}
-        </div>
+        <LoadingState />
       ) : quizzes.isError ? (
-        <div className="text-center py-xl">
-          <span className="material-symbols-outlined text-[48px] text-error mb-md block">error_outline</span>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Failed to load quizzes</h2>
-          <button
-            onClick={() => quizzes.refetch()}
-            className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md"
-          >
-            Try Again
-          </button>
-        </div>
+        <ErrorState
+          title="Failed to load quizzes"
+          onRetry={() => quizzes.refetch()}
+        />
       ) : published.length === 0 ? (
-        <div className="text-center py-xl">
-          <div className="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mx-auto mb-4">
-            <span className="material-symbols-outlined text-on-surface-variant text-3xl">quiz</span>
-          </div>
-          <h2 className="font-headline-md text-headline-md text-primary mb-2">No quizzes right now</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            When your teacher publishes a quiz, it will show up here.
-          </p>
-        </div>
+        <EmptyState
+          icon="quiz"
+          title="No quizzes right now"
+          description="When your teacher publishes a quiz, it will show up here."
+        />
       ) : (
         <div className="space-y-4">
           {published.map((quiz) => {
@@ -123,9 +110,12 @@ export function StudentQuizzesPage() {
                         </>
                       )}
                       {badge && (
-                        <span className={`font-label-sm text-label-sm px-2 py-0.5 rounded-full ${badge.className}`}>
+                        <Badge
+                          variant="outline"
+                          className={`font-label-sm text-label-sm px-2 py-0.5 rounded-full border-0 ${badge.className}`}
+                        >
                           {badge.label}
-                        </span>
+                        </Badge>
                       )}
                     </div>
                     <h2 className="font-headline-md text-headline-md text-on-surface">{quiz.title}</h2>

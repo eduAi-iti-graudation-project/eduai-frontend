@@ -3,6 +3,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
 import type { components } from "@/types/api-schema"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export function GradeManagementPage() {
   const queryClient = useQueryClient()
@@ -99,13 +110,15 @@ export function GradeManagementPage() {
           <h1 className="font-headline-xl text-headline-xl text-primary">Grades</h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant mt-xs">{list.length} grades</p>
         </div>
-        <button
+        <Button
+          type="button"
+          variant="secondary"
           onClick={() => setShowCreate(!showCreate)}
-          className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md flex items-center gap-1"
+          className="h-auto rounded-full bg-secondary-container text-white px-md py-sm font-label-md text-label-sm flex items-center gap-1 hover:bg-secondary-container/90"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           New Grade
-        </button>
+        </Button>
       </div>
 
       {showCreate && (
@@ -113,51 +126,49 @@ export function GradeManagementPage() {
           <h2 className="font-headline-md text-headline-md text-primary mb-4">Create Grade</h2>
           <div className="flex items-end gap-3">
             <div className="flex-1">
-              <label className="font-label-sm text-label-sm text-on-surface-variant mb-1 block">Level (1-12)</label>
-              <input
+              <Label className="font-label-sm text-label-sm text-on-surface-variant mb-1 block">Level (1-12)</Label>
+              <Input
                 type="number"
                 min={1}
                 max={12}
                 value={newLevel}
                 onChange={(e) => setNewLevel(e.target.value)}
-                className="w-full px-md py-2 rounded-full border border-outline-variant/20 font-body-md bg-surface-container-low outline-none focus:border-primary"
+                className="w-full px-md py-2 rounded-full border border-outline-variant/20 font-body-md bg-surface-container-low outline-none focus:border-primary h-auto focus-visible:ring-transparent focus-visible:ring-offset-0"
               />
             </div>
             <div className="flex-[2]">
-              <label className="font-label-sm text-label-sm text-on-surface-variant mb-1 block">Name</label>
-              <input
+              <Label className="font-label-sm text-label-sm text-on-surface-variant mb-1 block">Name</Label>
+              <Input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="e.g. Eighth Grade"
-                className="w-full px-md py-2 rounded-full border border-outline-variant/20 font-body-md bg-surface-container-low outline-none focus:border-primary"
+                className="w-full px-md py-2 rounded-full border border-outline-variant/20 font-body-md bg-surface-container-low outline-none focus:border-primary h-auto focus-visible:ring-transparent focus-visible:ring-offset-0"
               />
             </div>
-            <button
+            <Button
+              type="button"
+              variant="secondary"
               onClick={() => createGrade.mutate()}
               disabled={!newLevel || !newName || createGrade.isPending}
-              className="bg-secondary-container text-white px-md py-2 rounded-full font-label-md disabled:opacity-50"
+              className="h-auto rounded-full bg-secondary-container text-white px-md py-2 font-label-md text-label-sm hover:bg-secondary-container/90"
             >
               Create
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-[32px] bg-white p-xl border border-outline-variant/10 animate-pulse">
-              <div className="h-6 w-48 bg-surface-container-high rounded-full" />
-            </div>
-          ))}
-        </div>
+        <LoadingState />
       ) : (
         <div className="space-y-3">
           {list.map((g) => (
             <div key={g.id} className="bg-white rounded-[32px] border border-outline-variant/10 shadow-sm overflow-hidden">
-              <button
+              <Button
+                type="button"
+                variant="ghost"
                 onClick={() => setExpandedGrade(expandedGrade === g.id ? null : g.id)}
-                className="w-full flex items-center justify-between px-xl py-4 hover:bg-surface-container-low transition-colors"
+                className="w-full h-auto justify-between px-xl py-4 rounded-none hover:bg-surface-container-low"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-primary-fixed/20 flex items-center justify-center">
@@ -171,7 +182,7 @@ export function GradeManagementPage() {
                 <span className="material-symbols-outlined text-on-surface-variant transition-transform" style={{ transform: expandedGrade === g.id ? "rotate(180deg)" : "" }}>
                   expand_more
                 </span>
-              </button>
+              </Button>
 
               {expandedGrade === g.id && (
                 <div className="px-xl pb-4 border-t border-outline-variant/10">
@@ -212,13 +223,15 @@ export function GradeManagementPage() {
                                         <option key={t.id} value={t.id}>{t.name}</option>
                                       ))}
                                     </select>
-                                    <button
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
                                       onClick={() => removeClass.mutate(c.id)}
                                       disabled={removeClass.isPending}
-                                      className="text-error font-label-sm text-label-sm hover:underline disabled:opacity-50"
+                                      className="text-error font-label-sm text-label-sm hover:underline hover:text-error hover:bg-transparent px-0 h-auto"
                                     >
                                       Remove
-                                    </button>
+                                    </Button>
                                   </div>
                                 </div>
                               )})}
@@ -231,23 +244,25 @@ export function GradeManagementPage() {
 
                   <div className="mt-4 pt-4 border-t border-outline-variant/10">
                     <div className="flex items-center gap-3">
-                      <select
-                        value={classToAdd}
-                        onChange={(e) => setClassToAdd(e.target.value)}
-                        className="flex-1 px-md py-2 rounded-full border border-outline-variant/20 font-body-md bg-surface-container-low outline-none focus:border-primary"
-                      >
-                        <option value="">Select a class to add...</option>
-                        {unassignedClasses.map((c) => (
-                          <option key={c.id} value={c.id}>{c.name}{c.description ? ` — ${c.description}` : ""}</option>
-                        ))}
-                      </select>
-                      <button
+                      <Select value={classToAdd} onValueChange={setClassToAdd}>
+                        <SelectTrigger className="flex-1 rounded-full border border-outline-variant/20 bg-surface-container-low px-md py-2 h-auto font-body-md text-body-md focus:outline-none focus-visible:ring-transparent focus-visible:ring-offset-0 focus:ring-transparent focus:ring-offset-0">
+                          <SelectValue placeholder="Select a class to add..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {unassignedClasses.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>{c.name}{c.description ? ` — ${c.description}` : ""}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        variant="secondary"
                         onClick={() => addClass.mutate()}
                         disabled={!classToAdd || addClass.isPending}
-                        className="bg-secondary-container text-white px-md py-2 rounded-full font-label-md disabled:opacity-50"
+                        className="h-auto rounded-full bg-secondary-container text-white px-md py-2 font-label-md text-label-sm hover:bg-secondary-container/90"
                       >
                         Add
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>

@@ -2,6 +2,8 @@ import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import * as api from "@/lib/api"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { ErrorState } from "@/components/shared/ErrorState"
 
 function getInitials(name: string): string {
   return name
@@ -32,34 +34,18 @@ export function ClassesInGradePage() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-full p-xl">
-        <div className="text-center">
-          <span className="material-symbols-outlined text-[48px] text-error mb-md">error</span>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Something went wrong</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mb-lg">{error instanceof Error ? error.message : "Failed to load classes"}</p>
-          <button onClick={() => refetch()} className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md">Try Again</button>
-        </div>
-      </div>
+      <ErrorState
+        title="Something went wrong"
+        message={error instanceof Error ? error.message : "Failed to load classes"}
+        onRetry={() => refetch()}
+        className="flex-1"
+      />
     )
   }
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-full bg-surface-container-high animate-pulse" />
-          <div className="h-6 w-32 bg-surface-container-high rounded-full animate-pulse" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-xl">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-[32px] bg-white p-xl border border-outline-variant/10 animate-pulse">
-              <div className="h-12 w-12 rounded-2xl bg-surface-container-high mb-4" />
-              <div className="h-5 w-40 bg-surface-container-high rounded-full mb-2" />
-              <div className="h-4 w-24 bg-surface-container-high rounded-full" />
-            </div>
-          ))}
-        </div>
-      </div>
+      <LoadingState className="flex-1 p-xl max-w-7xl mx-auto w-full" />
     )
   }
 

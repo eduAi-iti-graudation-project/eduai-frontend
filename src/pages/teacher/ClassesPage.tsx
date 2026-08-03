@@ -1,6 +1,17 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useClasses } from "@/hooks/use-classes"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/EmptyState"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 const iconOptions = [
   { icon: "functions", bg: "bg-surface-container", color: "text-primary-container" },
@@ -55,34 +66,16 @@ export function ClassesPage() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-full p-xl">
-        <div className="text-center w-full">
-          <span className="material-symbols-outlined text-[48px] text-error mb-md">error</span>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Something went wrong</h2>
-          <p className="font-body-md text-on-surface-variant mb-lg">{error instanceof Error ? error.message : "Failed to load classes"}</p>
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="bg-secondary-container text-white px-lg py-sm rounded-full font-label-md nudge-hover"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        title="Something went wrong"
+        message={error instanceof Error ? error.message : "Failed to load classes"}
+        onRetry={() => window.location.reload()}
+      />
     )
   }
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full p-xl">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-14 h-14 rounded-3xl bg-primary-container flex items-center justify-center text-white">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
-          </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">Loading classes...</p>
-        </div>
-      </div>
-    )
+    return <LoadingState label="Loading classes..." />
   }
 
   return (
@@ -103,14 +96,14 @@ export function ClassesPage() {
             </p>
           </div>
           <div className="flex items-center gap-md">
-            <button
+            <Button
               type="button"
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-xs px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full shadow-lg nudge-hover"
+              className="flex items-center gap-xs px-md py-sm h-auto rounded-full bg-primary-container text-white font-label-md text-label-md shadow-lg nudge-hover"
             >
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
               Add New Class
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -119,38 +112,42 @@ export function ClassesPage() {
             <span className="font-label-md text-label-md text-on-surface-variant">{totalActive} class{totalActive !== 1 ? "es" : ""}</span>
           </div>
           <div className="flex gap-sm">
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => setViewMode("grid")}
-              className={`p-xs rounded-lg material-symbols-outlined ${viewMode === "grid" ? "text-primary bg-primary-fixed/20" : "text-on-surface-variant hover:bg-surface-container"}`}
+              className={`h-auto w-auto p-xs rounded-lg text-[20px] ${viewMode === "grid" ? "text-primary bg-primary-fixed/20" : "text-on-surface-variant hover:bg-surface-container"}`}
             >
-              grid_view
-            </button>
-            <button
+              <span className="material-symbols-outlined">grid_view</span>
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => setViewMode("list")}
-              className={`p-xs rounded-lg material-symbols-outlined ${viewMode === "list" ? "text-primary bg-primary-fixed/20" : "text-on-surface-variant hover:bg-surface-container"}`}
+              className={`h-auto w-auto p-xs rounded-lg text-[20px] ${viewMode === "list" ? "text-primary bg-primary-fixed/20" : "text-on-surface-variant hover:bg-surface-container"}`}
             >
-              list
-            </button>
+              <span className="material-symbols-outlined">list</span>
+            </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-xl">
           {classCards.length === 0 && (
-            <div className="col-span-full bg-white rounded-[32px] p-xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant mb-md">
-                <span className="material-symbols-outlined text-4xl">school</span>
-              </div>
-              <h4 className="font-headline-md text-headline-md text-on-surface-variant mb-xs">No classes yet</h4>
-              <p className="font-body-md text-body-md text-on-surface-variant/60 max-w-[200px]">Create your first class to get started</p>
-              <button
-                type="button"
-                onClick={() => setShowCreateModal(true)}
-                className="mt-md px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover"
-              >
-                Create Class
-              </button>
+            <div className="col-span-full">
+              <EmptyState
+                icon="school"
+                title="No classes yet"
+                description="Create your first class to get started"
+                action={
+                  <Button
+                    type="button"
+                    onClick={() => setShowCreateModal(true)}
+                    className="mt-md px-md py-sm h-auto rounded-full bg-primary-container text-white font-label-md text-label-md nudge-hover"
+                  >
+                    Create Class
+                  </Button>
+                }
+              />
             </div>
           )}
           {classCards.map((c, i) => {
@@ -169,32 +166,35 @@ export function ClassesPage() {
                         {c.students} Student{c.students !== 1 ? "s" : ""}
                       </span>
                       <div className="relative">
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
                           onClick={() => setDeleteConfirm(deleteConfirm === c.id ? null : c.id)}
-                          className="p-1 text-on-surface-variant hover:text-error transition-colors"
+                          className="h-auto w-auto p-1 text-on-surface-variant hover:text-error transition-colors"
                         >
                           <span className="material-symbols-outlined text-[18px]">more_vert</span>
-                        </button>
+                        </Button>
                         {deleteConfirm === c.id && (
                           <div className="absolute right-0 top-full mt-xs z-50 bg-white rounded-2xl shadow-xl border border-outline-variant/20 p-sm min-w-[160px]">
                             <p className="font-label-sm text-label-sm text-on-surface mb-sm px-sm">Delete this class?</p>
                             <div className="flex gap-xs">
-                              <button
+                              <Button
                                 type="button"
+                                variant="secondary"
                                 onClick={() => setDeleteConfirm(null)}
-                                className="flex-1 py-1.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-xl"
+                                className="flex-1 h-auto py-1.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-xl"
                               >
                                 Cancel
-                              </button>
-                              <button
+                              </Button>
+                              <Button
                                 type="button"
+                                variant="destructive"
                                 onClick={() => handleDelete(c.id)}
                                 disabled={deleteClass.isPending}
-                                className="flex-1 py-1.5 bg-error text-on-error font-label-sm text-label-sm rounded-xl disabled:opacity-50"
+                                className="flex-1 h-auto py-1.5 bg-error text-on-error font-label-sm text-label-sm rounded-xl disabled:opacity-50"
                               >
                                 {deleteClass.isPending ? "..." : "Delete"}
-                              </button>
+                              </Button>
                             </div>
                           </div>
                         )}
@@ -208,12 +208,12 @@ export function ClassesPage() {
                       <span className="material-symbols-outlined text-primary-container text-base">group</span>
                       <span className="font-label-md text-label-md text-on-surface-variant">{c.students} Student{c.students !== 1 ? "s" : ""}</span>
                     </div>
-                    <Link
-                      to={`/classes/${c.id}`}
-                      className="px-md py-2 bg-primary-container text-white font-label-md text-label-md rounded-2xl group-hover:bg-teal-vibrant transition-colors"
+                    <Button
+                      asChild
+                      className="h-auto px-md py-2 rounded-2xl bg-primary-container text-white font-label-md text-label-md group-hover:bg-teal-vibrant transition-colors"
                     >
-                      View Class
-                    </Link>
+                      <Link to={`/classes/${c.id}`}>View Class</Link>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -247,35 +247,39 @@ export function ClassesPage() {
                 </div>
               </div>
               <div className="md:w-1/3 flex flex-col justify-center relative z-10">
-                <Link
-                  to={`/classes/${bestClass.id}`}
-                  className="w-full py-md bg-secondary-container text-white font-label-md text-label-md rounded-3xl shadow-lg nudge-hover flex items-center justify-center gap-sm mb-sm"
+                <Button
+                  asChild
+                  className="w-full h-auto py-md rounded-3xl bg-secondary-container text-white font-label-md text-label-md shadow-lg nudge-hover mb-sm"
                 >
-                  Open Dashboard
-                  <span className="material-symbols-outlined">arrow_forward</span>
-                </Link>
-                <button
+                  <Link to={`/classes/${bestClass.id}`}>
+                    Open Dashboard
+                    <span className="material-symbols-outlined">arrow_forward</span>
+                  </Link>
+                </Button>
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowCreateModal(true)}
-                  className="w-full py-sm border-2 border-white/30 text-white font-label-md text-label-md rounded-3xl hover:bg-white/10 transition-colors"
+                  className="w-full h-auto py-sm border-2 border-white/30 text-white font-label-md text-label-md rounded-3xl hover:bg-white/10 transition-colors"
                 >
                   New Class
-                </button>
+                </Button>
               </div>
             </div>
           )}
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={() => setShowCreateModal(true)}
-            className="border-2 border-dashed border-outline-variant rounded-[32px] p-md flex flex-col items-center justify-center text-center group hover:border-primary-container hover:bg-primary-fixed/5 transition-all cursor-pointer"
+            className="h-auto flex-col gap-0 border-2 border-dashed border-outline-variant rounded-[32px] p-md text-center group hover:border-primary-container hover:bg-primary-fixed/5 transition-all cursor-pointer"
           >
             <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant group-hover:text-primary-container group-hover:bg-primary-fixed/20 mb-md transition-all">
               <span className="material-symbols-outlined text-4xl">add</span>
             </div>
             <h4 className="font-headline-md text-headline-md text-on-surface-variant group-hover:text-primary transition-colors">Start New Section</h4>
             <p className="font-body-md text-body-md text-on-surface-variant/60 mt-sm">Create a new class workspace</p>
-          </button>
+          </Button>
         </div>
 
         <footer className="p-md text-center text-on-surface-variant/50 font-label-sm text-label-sm mt-xl">
@@ -283,52 +287,54 @@ export function ClassesPage() {
         </footer>
       </div>
 
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowCreateModal(false)}>
-          <div className="bg-white rounded-[32px] p-xl shadow-xl w-full max-w-[600px] mx-md border border-outline-variant/10" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-headline-md text-headline-md text-primary mb-md">Create New Class</h3>
-            <div className="space-y-md">
-              <div>
-                <label className="font-label-md text-label-md text-on-surface mb-xs block">Class Name</label>
-                <input
-                  value={newClassName}
-                  onChange={(e) => setNewClassName(e.target.value)}
-                  className="w-full px-md py-sm bg-surface-container-lowest border-2 border-outline-variant rounded-xl text-body-md focus:ring-2 focus:ring-primary-container outline-none transition-all"
-                  placeholder="e.g. Grade 10 Math"
-                  type="text"
-                />
-              </div>
-              <div>
-                <label className="font-label-md text-label-md text-on-surface mb-xs block">Description</label>
-                <input
-                  value={newClassDesc}
-                  onChange={(e) => setNewClassDesc(e.target.value)}
-                  className="w-full px-md py-sm bg-surface-container-lowest border-2 border-outline-variant rounded-xl text-body-md focus:ring-2 focus:ring-primary-container outline-none transition-all"
-                  placeholder="e.g. Section B - Advanced Algebra"
-                  type="text"
-                />
-              </div>
-              <div className="flex gap-md pt-sm">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCreate}
-                  disabled={!newClassName.trim() || createClass.isPending}
-                  className="flex-1 py-sm bg-primary-container text-white font-label-md text-label-md rounded-full disabled:opacity-50 nudge-hover"
-                >
-                  {createClass.isPending ? "Creating..." : "Create"}
-                </button>
-              </div>
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="rounded-[32px] w-full max-w-[600px] mx-md border border-outline-variant/10 bg-white p-xl">
+          <DialogHeader>
+            <DialogTitle className="font-headline-md text-headline-md text-primary">Create New Class</DialogTitle>
+            <DialogDescription className="sr-only">Create a new class workspace</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-md">
+            <div>
+              <label className="font-label-md text-label-md text-on-surface mb-xs block">Class Name</label>
+              <input
+                value={newClassName}
+                onChange={(e) => setNewClassName(e.target.value)}
+                className="w-full px-md py-sm bg-surface-container-lowest border-2 border-outline-variant rounded-xl text-body-md focus:ring-2 focus:ring-primary-container outline-none transition-all"
+                placeholder="e.g. Grade 10 Math"
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="font-label-md text-label-md text-on-surface mb-xs block">Description</label>
+              <input
+                value={newClassDesc}
+                onChange={(e) => setNewClassDesc(e.target.value)}
+                className="w-full px-md py-sm bg-surface-container-lowest border-2 border-outline-variant rounded-xl text-body-md focus:ring-2 focus:ring-primary-container outline-none transition-all"
+                placeholder="e.g. Section B - Advanced Algebra"
+                type="text"
+              />
+            </div>
+            <div className="flex gap-md pt-sm">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setShowCreateModal(false)}
+                className="flex-1 h-auto py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCreate}
+                disabled={!newClassName.trim() || createClass.isPending}
+                className="flex-1 h-auto py-sm rounded-full bg-primary-container text-white font-label-md text-label-md disabled:opacity-50 nudge-hover"
+              >
+                {createClass.isPending ? "Creating..." : "Create"}
+              </Button>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       <div className="fixed bottom-md right-md z-50">
         <Link to="/assistant" className="flex items-center gap-sm bg-inverse-surface text-inverse-on-surface px-md py-sm rounded-full shadow-2xl hover:scale-105 transition-transform">

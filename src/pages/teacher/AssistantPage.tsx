@@ -1,6 +1,19 @@
 import { useRef, useEffect, useState } from "react"
 import { useClasses } from "@/hooks/use-classes"
 import { useAssistantChat } from "@/hooks/use-assistant"
+import { PageHeader } from "@/components/shared/PageHeader"
+import { EmptyState } from "@/components/ui/EmptyState"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+const NO_CLASS = "__none__"
 
 export function AssistantPage() {
   const { classes } = useClasses()
@@ -29,29 +42,44 @@ export function AssistantPage() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
-        <h1 className="font-headline-lg text-headline-lg text-primary">AI Assistant</h1>
-        <div className="flex items-center gap-3">
-          <select value={selectedClassId} onChange={(e) => setSelectedClassId(e.target.value)} className="form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface">
-            <option value="">Select a class...</option>
-            {classes.data?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-          {messages.length > 0 && (
-            <button onClick={clearMessages} className="text-sm text-on-surface-variant hover:text-on-surface transition-colors">Clear chat</button>
-          )}
-        </div>
-      </header>
+      <PageHeader
+        title="AI Assistant"
+        actions={
+          <div className="flex items-center gap-3">
+            <Select
+              value={selectedClassId}
+              onValueChange={(v) => setSelectedClassId(v === NO_CLASS ? "" : v)}
+            >
+              <SelectTrigger className="w-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
+                <SelectValue placeholder="Select a class..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_CLASS}>Select a class...</SelectItem>
+                {classes.data?.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            {messages.length > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={clearMessages}
+                className="text-sm text-on-surface-variant hover:text-on-surface hover:bg-transparent h-auto px-2 py-1"
+              >
+                Clear chat
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full p-md gap-4 overflow-y-auto">
         {messages.length === 0 && (
           <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <span className="material-symbols-outlined text-primary text-3xl">psychology</span>
-              </div>
-              <h2 className="font-headline-md text-headline-md text-primary mb-2">How can I help you?</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant">Select a class and ask me anything — create quizzes, summarize materials, or get teaching suggestions.</p>
-            </div>
+            <EmptyState
+              icon="psychology"
+              title="How can I help you?"
+              description="Select a class and ask me anything — create quizzes, summarize materials, or get teaching suggestions."
+            />
           </div>
         )}
 
@@ -82,7 +110,7 @@ export function AssistantPage() {
 
         <div className="sticky bottom-0 bg-surface pt-2 pb-4">
           <div className="flex items-end gap-2 bg-surface-container-low rounded-[24px] border border-outline-variant/20 p-2">
-            <textarea
+            <Textarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -90,11 +118,17 @@ export function AssistantPage() {
               placeholder={selectedClassId ? "Type your message..." : "Select a class to start chatting..."}
               disabled={!selectedClassId || isLoading}
               rows={1}
-              className="flex-1 bg-transparent border-none outline-none resize-none px-3 py-2 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50"
+              className="flex-1 bg-transparent border-0 rounded-none shadow-none outline-none resize-none px-3 py-2 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 min-h-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
-            <button onClick={handleSend} disabled={!input.trim() || isLoading || !selectedClassId} className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary disabled:opacity-40 transition-opacity hover:opacity-90">
+            <Button
+              type="button"
+              onClick={handleSend}
+              disabled={!input.trim() || isLoading || !selectedClassId}
+              aria-label="Send message"
+              className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center disabled:opacity-40 transition-opacity hover:opacity-90"
+            >
               <span className="material-symbols-outlined text-[20px]">send</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

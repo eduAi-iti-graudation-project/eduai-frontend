@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react"
 import { Link } from "react-router-dom"
+import { Button } from "@/components/ui/button"
 
 const ROBOT_IMAGE =
   "https://lh3.googleusercontent.com/aida/AP1WRLvatK0oa70OgXYI1xwN07td_mPBmF4_jxbseRXIHjLqWfi-6Sddpc-OBnETMJlXbf4FqW1dafFVBrN6gcf76rrXRfcTqZXbeizOCyHlL0mhatN0HzPO_942mJDmaUDjyxE3wG0s4dLW4LAD7HJaz2G2PoCML2srU-Gppv9aKB1Yx_RDu48E1aGSlNG6M6NaVfTm5gh-2gsrMjsWw2LaB23PuSGy-Ukcpe4KJ9ALdMi5taaoQXiPpvLeIYw"
@@ -42,12 +43,24 @@ export function NotFoundPage() {
           <Link to="/assistant" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md no-underline">Lessons</Link>
         </nav>
         <div className="flex items-center gap-4">
-          <button className="text-on-surface-variant hover:text-primary transition-colors active:scale-95">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="text-on-surface-variant hover:text-primary hover:bg-transparent active:scale-95 transition-colors"
+            aria-label="Notifications"
+          >
             <span className="material-symbols-outlined">notifications</span>
-          </button>
-          <button className="text-on-surface-variant hover:text-primary transition-colors active:scale-95">
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="text-on-surface-variant hover:text-primary hover:bg-transparent active:scale-95 transition-colors"
+            aria-label="Help"
+          >
             <span className="material-symbols-outlined">help_outline</span>
-          </button>
+          </Button>
           <div className="w-10 h-10 rounded-full bg-surface-variant border border-on-surface/10 overflow-hidden">
             <div className="w-full h-full bg-surface-container-high flex items-center justify-center text-on-surface-variant font-label-md text-label-md">
               U
@@ -74,20 +87,24 @@ export function NotFoundPage() {
             </p>
 
             <div className="flex flex-col md:flex-row gap-4 w-full justify-center">
-              <Link
-                to="/dashboard"
-                className="bg-secondary-container text-white px-8 py-3 rounded-full font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-95 shadow-sm nudge-hover no-underline"
+              <Button
+                asChild
+                className="bg-secondary-container text-white px-8 py-3 h-auto rounded-full font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:brightness-110 hover:bg-secondary-container active:scale-95 shadow-sm nudge-hover no-underline"
               >
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
-                Back to Dashboard
-              </Link>
-              <Link
-                to="/"
-                className="border-2 border-primary text-primary px-8 py-3 rounded-full font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:bg-primary/5 active:scale-95 nudge-hover no-underline"
+                <Link to="/dashboard">
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
+                  Back to Dashboard
+                </Link>
+              </Button>
+              <Button
+                asChild
+                className="bg-transparent border-2 border-primary text-primary px-8 py-3 h-auto rounded-full font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:bg-primary/5 hover:text-primary active:scale-95 nudge-hover no-underline"
               >
-                <span className="material-symbols-outlined">home</span>
-                Go Home
-              </Link>
+                <Link to="/">
+                  <span className="material-symbols-outlined">home</span>
+                  Go Home
+                </Link>
+              </Button>
             </div>
 
             <div className="mt-12 p-4 border-[1.5px] border-dashed border-primary bg-primary/5 rounded-xl flex items-start gap-3 text-left max-w-2xl">

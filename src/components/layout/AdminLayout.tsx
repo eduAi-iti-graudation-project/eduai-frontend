@@ -10,6 +10,7 @@ const navItems = [
   { icon: "group", label: "Students", id: "students", href: "/admin/students" },
   { icon: "grade", label: "Student Grades", id: "student-grades", href: "/admin/student-grades" },
   { icon: "event_available", label: "Attendance", id: "attendance", href: "/admin/attendance" },
+  { icon: "monitoring", label: "Insights", id: "insights", href: "/admin/insights" },
 ]
 
 export function AdminLayout() {
@@ -22,6 +23,7 @@ export function AdminLayout() {
     : path.startsWith("/admin/students") ? "students"
     : path.startsWith("/admin/student-grades") ? "student-grades"
     : path.startsWith("/admin/attendance") ? "attendance"
+    : path.startsWith("/admin/insights") ? "insights"
     : "dashboard"
 
   return (

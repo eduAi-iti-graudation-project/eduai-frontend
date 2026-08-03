@@ -6,6 +6,16 @@ import * as api from "@/lib/api"
 import { useAuth } from "@/providers/use-auth"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { FileDropzone } from "@/components/ui/FileDropzone"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { LoadingState } from "@/components/shared/LoadingState"
 
 interface LocalSubmission {
   id: string
@@ -69,40 +79,18 @@ export function StudentAssignmentsPage() {
     return (
       <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
         <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Assignments</h1>
-        <div className="space-y-6">
-          {[1, 2].map((group) => (
-            <div key={group}>
-              <div className="h-6 w-48 bg-surface-container-high rounded-full mb-3 animate-pulse" />
-              <div className="space-y-3">
-                {[1, 2].map((i) => (
-                  <div key={i} className="rounded-[32px] bg-white p-md border border-outline-variant/10 animate-pulse">
-                    <div className="h-5 w-64 bg-surface-container-high rounded-full mb-2" />
-                    <div className="h-4 w-40 bg-surface-container-high rounded-full" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <LoadingState />
       </div>
     )
   }
 
   if (studentClasses.isError) {
     return (
-      <div className="flex items-center justify-center h-full p-margin-desktop">
-        <div className="text-center">
-          <span className="material-symbols-outlined text-[48px] text-error mb-md">error</span>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Something went wrong</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mb-lg">Failed to load assignments</p>
-          <button
-            onClick={() => studentClasses.refetch()}
-            className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        title="Something went wrong"
+        message="Failed to load assignments"
+        onRetry={() => studentClasses.refetch()}
+      />
     )
   }
 
@@ -180,12 +168,13 @@ export function StudentAssignmentsPage() {
                                 )}
                               </Link>
                             ) : (
-                              <button
+                              <Button
+                                type="button"
                                 onClick={() => setSubmitModal({ assignmentId: a.id, assignmentTitle: a.title })}
-                                className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md hover:opacity-90 active:scale-95 transition-all"
+                                className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md hover:bg-secondary-container/90 active:scale-95 transition-all h-auto"
                               >
                                 Submit
-                              </button>
+                              </Button>
                             )}
                           </div>
                         </div>
@@ -206,37 +195,38 @@ export function StudentAssignmentsPage() {
       </div>
 
       {submitModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden" onClick={() => setSubmitModal(null)}>
-          <div className="bg-white rounded-[32px] p-xl w-full max-w-[768px] mx-6 shadow-xl max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <Dialog open onOpenChange={(next) => { if (!next) setSubmitModal(null) }}>
+          <DialogContent className="rounded-[32px] w-full max-w-[768px] bg-white p-xl shadow-xl max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-headline-md text-headline-md text-primary">Submit Assignment</h2>
-              <button onClick={() => setSubmitModal(null)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
-                <span className="material-symbols-outlined text-on-surface-variant">close</span>
-              </button>
+              <DialogTitle className="font-headline-md text-headline-md text-primary">Submit Assignment</DialogTitle>
             </div>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-4">{submitModal.assignmentTitle}</p>
+            <DialogDescription className="font-body-md text-body-md text-on-surface-variant mb-4">
+              {submitModal.assignmentTitle}
+            </DialogDescription>
 
             <div className="flex gap-2 mb-4">
-              <button
+              <Button
+                type="button"
                 onClick={() => setUploadMode("text")}
-                className={`flex-1 px-md py-sm rounded-full font-label-md transition-all ${uploadMode === "text" ? "bg-primary-container text-white" : "bg-surface-container text-on-surface-variant"}`}
+                className={`flex-1 px-md py-sm rounded-full font-label-md transition-all h-auto ${uploadMode === "text" ? "bg-primary-container text-white hover:bg-primary-container/90" : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"}`}
               >
                 Type
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={() => setUploadMode("file")}
-                className={`flex-1 px-md py-sm rounded-full font-label-md transition-all ${uploadMode === "file" ? "bg-primary-container text-white" : "bg-surface-container text-on-surface-variant"}`}
+                className={`flex-1 px-md py-sm rounded-full font-label-md transition-all h-auto ${uploadMode === "file" ? "bg-primary-container text-white hover:bg-primary-container/90" : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"}`}
               >
                 Upload PDF
-              </button>
+              </Button>
             </div>
 
             {uploadMode === "text" ? (
-              <textarea
+              <Textarea
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
                 placeholder="Type your submission here..."
-                className="w-full min-h-[300px] p-md rounded-2xl border border-outline-variant/20 font-body-md text-body-md text-on-surface bg-surface-container-low resize-none outline-none focus:border-primary"
+                className="w-full min-h-[300px] p-md rounded-2xl border border-outline-variant/20 font-body-md text-body-md text-on-surface bg-surface-container-low resize-none outline-none focus:border-primary focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             ) : (
               <FileDropzone
@@ -246,13 +236,16 @@ export function StudentAssignmentsPage() {
             )}
 
             <div className="flex justify-end gap-3 mt-6">
-              <button
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => setSubmitModal(null)}
-                className="border-2 border-error text-error px-md py-sm rounded-full font-label-md"
+                className="border-2 border-error text-error px-md py-sm rounded-full font-label-md hover:bg-transparent hover:text-error h-auto"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={() => {
                   if (uploadMode === "text") {
                     if (!textContent.trim()) {
@@ -272,13 +265,13 @@ export function StudentAssignmentsPage() {
                   }
                 }}
                 disabled={createSubmission.isPending || createSubmissionPdf.isPending}
-                className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md disabled:opacity-50"
+                className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md hover:bg-secondary-container/90 h-auto"
               >
                 {createSubmission.isPending || createSubmissionPdf.isPending ? "Submitting..." : "Submit"}
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
+          </DialogContent>
+        </Dialog>
       )}
     </>
   )

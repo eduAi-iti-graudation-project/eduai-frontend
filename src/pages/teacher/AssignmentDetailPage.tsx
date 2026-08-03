@@ -5,6 +5,9 @@ import { useSubmissions } from "@/hooks/use-submissions"
 import { useRubrics } from "@/hooks/use-rubrics"
 import { StatusBadge } from "@/components/ui/StatusBadge"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import type { SubmissionStatus } from "@/components/ui/StatusBadge"
 
 export function AssignmentDetailPage() {
@@ -26,11 +29,7 @@ export function AssignmentDetailPage() {
   const classId = assignment?.classId
 
   if (assignmentQuery.isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full p-xl">
-        <p className="font-body-md text-body-md text-on-surface-variant">Loading assignment...</p>
-      </div>
-    )
+    return <LoadingState label="Loading assignment..." />
   }
 
   if (!assignment) {
@@ -63,11 +62,11 @@ export function AssignmentDetailPage() {
         <div className="lg:col-span-2 space-y-md">
           <div className="flex items-center justify-between">
             <h2 className="font-headline-md text-headline-md text-primary">Submissions</h2>
-            <span className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full">{subs.length} total</span>
+            <Badge variant="outline" className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full border-0">{subs.length} total</Badge>
           </div>
 
           {subsLoading ? (
-            <p className="font-body-md text-body-md text-on-surface-variant">Loading submissions...</p>
+            <LoadingState label="Loading submissions..." />
           ) : subs.length === 0 ? (
             <EmptyState icon="inbox" title="No submissions yet" description="Submissions will appear here once students submit their work." />
           ) : (
@@ -115,9 +114,11 @@ export function AssignmentDetailPage() {
             ) : (
               <div>
                 <p className="font-body-md text-body-md text-on-surface-variant mb-sm">No rubric yet</p>
-                <Link to={`/rubrics/new?assignmentId=${id}`} className="inline-flex items-center gap-xs px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover">
-                  <span className="material-symbols-outlined text-[18px]">add</span>Create Rubric
-                </Link>
+                <Button asChild className="inline-flex items-center gap-xs px-md py-sm h-auto rounded-full bg-primary-container text-white font-label-md text-label-md nudge-hover">
+                  <Link to={`/rubrics/new?assignmentId=${id}`}>
+                    <span className="material-symbols-outlined text-[18px]">add</span>Create Rubric
+                  </Link>
+                </Button>
               </div>
             )}
           </div>

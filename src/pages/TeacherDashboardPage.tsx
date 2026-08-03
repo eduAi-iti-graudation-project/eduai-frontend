@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
-import { DashboardStatCard } from "@/components/communication/DashboardStatCard"
+import { PageHeader } from "@/components/shared/PageHeader"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { StatCard } from "@/components/shared/StatCard"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 
 const iconOptions = [
   { icon: "calculate", bg: "bg-primary-container/10", color: "text-primary" },
@@ -24,35 +30,11 @@ export function TeacherDashboardPage() {
   const { isLoading, isError, error, classCards, submissionRate, avgGrade, totalSubmissions, alerts, confirmedSubmissions } = useDashboardData()
 
   if (isError) {
-    return (
-      <div className="flex items-center justify-center h-full p-margin-desktop">
-        <div className="text-center w-full">
-          <span className="material-symbols-outlined text-[48px] text-error mb-md">error</span>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Something went wrong</h2>
-          <p className="font-body-md text-on-surface-variant mb-lg">{error}</p>
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="bg-primary text-white px-lg py-base rounded-full font-label-md"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    )
+    return <ErrorState message={error} onRetry={() => window.location.reload()} className="p-margin-desktop" />
   }
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
-          </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">Loading dashboard...</p>
-        </div>
-      </div>
-    )
+    return <LoadingState label="Loading dashboard..." />
   }
 
   const activeAlertCount = alerts.filter((a) => a.status === "ACTIVE" || a.status === "NEW").length
@@ -66,16 +48,14 @@ export function TeacherDashboardPage() {
 
   return (
     <>
-      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
-        <h1 className="font-headline-lg text-headline-lg text-primary">Dashboard</h1>
-      </header>
+      <PageHeader title="Dashboard" />
 
       <div className="flex-1 overflow-y-auto p-margin-desktop">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-lg">
-          <DashboardStatCard icon="notifications_active" label="Active Alerts" value={activeAlertCount} color="text-error" />
-          <DashboardStatCard icon="check_circle" label="Resolved" value={resolvedAlertCount} color="text-primary" />
-          <DashboardStatCard icon="rate_review" label="Pending Review" value={pendingCount} color="text-secondary" />
-          <DashboardStatCard icon="trending_up" label="Avg Class Score" value={avgGradeDisplay} color="text-primary" />
+          <StatCard icon="notifications_active" label="Active Alerts" value={activeAlertCount} color="text-error" />
+          <StatCard icon="check_circle" label="Resolved" value={resolvedAlertCount} color="text-primary" />
+          <StatCard icon="rate_review" label="Pending Review" value={pendingCount} color="text-secondary" />
+          <StatCard icon="trending_up" label="Avg Class Score" value={avgGradeDisplay} color="text-primary" />
         </div>
 
         <div className="flex flex-col lg:flex-row gap-gutter">
@@ -101,9 +81,17 @@ export function TeacherDashboardPage() {
                 return (
                   <div key={c.id} className="bg-surface-container-lowest p-md rounded-xl border border-outline-variant/20 hover:border-primary/30 transition-all group relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4">
-                      <span className={`${c.pending > 0 ? "bg-secondary-container text-on-secondary-container" : "bg-surface-container-high text-on-surface-variant"} text-label-sm px-3 py-1 rounded-full font-bold`}>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "font-label-sm text-label-sm px-3 py-1 rounded-full border-0 font-bold",
+                          c.pending > 0
+                            ? "bg-secondary-container text-on-secondary-container"
+                            : "bg-surface-container-high text-on-surface-variant",
+                        )}
+                      >
                         {c.pending} Pending
-                      </span>
+                      </Badge>
                     </div>
                     <div className={`w-12 h-12 rounded-lg ${style.bg} ${style.color} flex items-center justify-center mb-md`}>
                       <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>{style.icon}</span>
@@ -123,12 +111,9 @@ export function TeacherDashboardPage() {
                           </div>
                         )}
                       </div>
-                      <Link
-                        to={`/classes/${c.id}`}
-                        className="bg-primary text-white px-md py-base rounded-full font-label-md hover:opacity-90 active:scale-95 transition-all"
-                      >
-                        Open Class
-                      </Link>
+                      <Button asChild className="h-auto px-md py-base rounded-full bg-primary text-white font-label-md hover:opacity-90 active:scale-95 transition-all">
+                        <Link to={`/classes/${c.id}`}>Open Class</Link>
+                      </Button>
                     </div>
                   </div>
                 )
@@ -176,7 +161,7 @@ export function TeacherDashboardPage() {
             <div className="flex items-center justify-between">
               <h3 className="font-headline-md text-headline-md text-on-surface">Needs Attention</h3>
               {activeAlertCount > 0 && (
-                <span className="bg-error-container text-on-error-container text-label-sm px-2 py-0.5 rounded-full font-bold">{activeAlertCount}</span>
+                <Badge variant="outline" className="bg-error-container text-on-error-container text-label-sm px-2 py-0.5 rounded-full border-0 font-bold">{activeAlertCount}</Badge>
               )}
             </div>
             <div className="flex flex-col gap-sm">
@@ -204,12 +189,9 @@ export function TeacherDashboardPage() {
                       </div>
                     </div>
                     <p className="font-body-md text-body-md text-on-surface-variant text-sm mb-3">{alert.reason}</p>
-                    <Link
-                      to={`/alerts/${alert.id}`}
-                      className="block w-full text-center bg-primary text-white py-1.5 rounded-full text-label-sm font-bold hover:opacity-90 transition-all"
-                    >
-                      View Details
-                    </Link>
+                    <Button asChild className="w-full h-auto py-1.5 rounded-full bg-primary text-white text-label-sm font-label-md font-bold hover:opacity-90 transition-all">
+                      <Link to={`/alerts/${alert.id}`}>View Details</Link>
+                    </Button>
                   </div>
                 )
               })}

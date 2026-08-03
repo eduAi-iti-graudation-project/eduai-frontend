@@ -1,5 +1,18 @@
 import { Link, useParams } from "react-router-dom"
 import { useQuiz, useAttemptsByQuiz } from "@/hooks/use-quizzes"
+import { EmptyState } from "@/components/ui/EmptyState"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 export function QuizAttemptsListPage() {
   const { id } = useParams<{ id: string }>()
@@ -27,101 +40,95 @@ export function QuizAttemptsListPage() {
           </div>
         </div>
         {quiz.data && (
-          <Link
-            to={`/quizzes/${quiz.data.id}`}
-            className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md nudge-hover"
+          <Button
+            asChild
+            className="bg-secondary-container text-white px-md h-auto py-sm rounded-full font-label-md nudge-hover"
           >
-            View quiz
-          </Link>
+            <Link to={`/quizzes/${quiz.data.id}`}>View quiz</Link>
+          </Button>
         )}
       </header>
 
       <div className="flex-1 p-md">
         {attempts.isLoading ? (
-          <div className="text-center py-xl">
-            <p className="font-body-md text-body-md text-on-surface-variant">Loading attempts…</p>
-          </div>
+          <LoadingState className="flex-1 p-md" />
         ) : attempts.isError ? (
-          <div className="text-center py-xl">
-            <span className="material-symbols-outlined text-[48px] text-error mb-md block">error_outline</span>
-            <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Failed to load attempts</h2>
-            <button
-              onClick={() => attempts.refetch()}
-              className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md"
-            >
-              Try Again
-            </button>
-          </div>
+          <ErrorState
+            title="Failed to load attempts"
+            message={attempts.error instanceof Error ? attempts.error.message : "Something went wrong"}
+            onRetry={() => attempts.refetch()}
+            className="flex-1"
+          />
         ) : (attempts.data ?? []).length === 0 ? (
-          <div className="text-center py-xl">
-            <div className="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-on-surface-variant text-3xl">how_to_reg</span>
-            </div>
-            <h2 className="font-headline-md text-headline-md text-primary mb-2">No attempts yet</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              When students take this quiz, their attempts will appear here for review.
-            </p>
-          </div>
+          <EmptyState
+            icon="how_to_reg"
+            title="No attempts yet"
+            description="When students take this quiz, their attempts will appear here for review."
+          />
         ) : (
           <div className="max-w-4xl mx-auto bg-surface-container-lowest rounded-[24px] border border-outline-variant/10 overflow-hidden">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-outline-variant/20 font-label-sm text-label-sm text-on-surface-variant">
-                  <th className="px-4 py-3">Student</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Score</th>
-                  <th className="px-4 py-3">Submitted</th>
-                  <th className="px-4 py-3 text-right">Review</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table className="text-left">
+              <TableHeader>
+                <TableRow className="border-outline-variant/20 font-label-sm text-label-sm text-on-surface-variant">
+                  <TableHead className="px-4 py-3 h-auto">Student</TableHead>
+                  <TableHead className="px-4 py-3 h-auto">Status</TableHead>
+                  <TableHead className="px-4 py-3 h-auto">Score</TableHead>
+                  <TableHead className="px-4 py-3 h-auto">Submitted</TableHead>
+                  <TableHead className="px-4 py-3 h-auto text-right">Review</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {(attempts.data ?? []).map((attempt) => {
                   const violations = (attempt.violations ?? []).length
                   return (
-                    <tr key={attempt.id} className="border-b border-outline-variant/10 last:border-0">
-                      <td className="px-4 py-3 font-body-md text-body-md text-on-surface">
+                    <TableRow key={attempt.id} className="border-outline-variant/10">
+                      <TableCell className="px-4 py-3 font-body-md text-body-md text-on-surface">
                         {attempt.student?.name ?? "Student"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`font-label-sm text-label-sm px-2 py-0.5 rounded-full ${
+                      </TableCell>
+                      <TableCell className="px-4 py-3">
+                        <Badge
+                          variant="outline"
+                          className={`border-transparent font-label-sm text-label-sm px-2 py-0.5 ${
                             attempt.status === "COMPLETED"
                               ? "bg-primary-fixed text-primary"
                               : "bg-surface-container-high text-on-surface-variant"
                           }`}
                         >
                           {attempt.status === "COMPLETED" ? "Submitted" : "In progress"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 font-body-md text-body-md text-on-surface">
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="px-4 py-3 font-body-md text-body-md text-on-surface">
                         {attempt.totalScore != null
                           ? `${attempt.totalScore} / ${maxPoints}`
                           : "—"}
-                      </td>
-                      <td className="px-4 py-3 font-label-sm text-label-sm text-on-surface-variant">
+                      </TableCell>
+                      <TableCell className="px-4 py-3 font-label-sm text-label-sm text-on-surface-variant">
                         {formatDate(attempt.submittedAt)}
-                      </td>
-                      <td className="px-4 py-3">
+                      </TableCell>
+                      <TableCell className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
                           {violations > 0 && (
-                            <span className="bg-error/10 text-error font-label-sm text-label-sm px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                            <Badge
+                              variant="outline"
+                              className="border-transparent bg-error/10 text-error font-label-sm text-label-sm px-2 py-0.5 inline-flex items-center gap-1"
+                            >
                               <span className="material-symbols-outlined text-[14px]">warning</span>
                               {violations}
-                            </span>
+                            </Badge>
                           )}
-                          <Link
-                            to={`/quizzes/attempts/${attempt.id}`}
-                            className="bg-primary text-white px-4 py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                          <Button
+                            asChild
+                            className="bg-primary text-white px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
                           >
-                            Review
-                          </Link>
+                            <Link to={`/quizzes/attempts/${attempt.id}`}>Review</Link>
+                          </Button>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>

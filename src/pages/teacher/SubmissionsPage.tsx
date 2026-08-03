@@ -2,6 +2,17 @@ import { useState, useCallback, useMemo } from "react"
 import { SubmissionCard } from "@/components/teacher/SubmissionCard"
 import { useSubmissions } from "@/hooks/use-submissions"
 import { toast } from "sonner"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/EmptyState"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const filterOptions = [
   { value: "", label: "All Statuses" },
@@ -42,16 +53,11 @@ export function SubmissionsPage() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-full p-md">
-        <div className="text-center w-full">
-          <div className="w-16 h-16 rounded-2xl bg-error-container flex items-center justify-center mx-auto mb-4">
-            <span className="material-symbols-outlined text-error text-3xl">error_outline</span>
-          </div>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-2">Failed to load submissions</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mb-4">{error?.message ?? "Something went wrong"}</p>
-          <button onClick={() => submissions.refetch()} className="px-md py-sm bg-secondary-container text-white rounded-full font-label-md text-label-md shadow-lg nudge-hover">Try Again</button>
-        </div>
-      </div>
+      <ErrorState
+        title="Failed to load submissions"
+        message={error?.message ?? "Something went wrong"}
+        onRetry={() => submissions.refetch()}
+      />
     )
   }
 
@@ -73,22 +79,36 @@ export function SubmissionsPage() {
             </p>
           </div>
           {!isLoading && submittedSubs.length > 0 && (
-            <button onClick={handleBulkGrade} disabled={bulkState !== null} className="flex items-center gap-xs px-md py-sm bg-secondary-container text-white rounded-full font-label-md text-label-md shadow-lg nudge-hover active:scale-95 disabled:opacity-50">
+            <Button
+              onClick={handleBulkGrade}
+              disabled={bulkState !== null}
+              className="flex items-center gap-xs px-md py-sm h-auto rounded-full bg-secondary-container text-white font-label-md text-label-md shadow-lg nudge-hover active:scale-95 disabled:opacity-50"
+            >
               {bulkState ? (
                 <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />AI Reviewing {bulkState.pending}/{bulkState.total}...</>
               ) : (
                 <><span className="material-symbols-outlined text-[18px]">auto_awesome</span>AI Review All ({submittedSubs.length})</>
               )}
-            </button>
+            </Button>
           )}
         </div>
 
         <div className="bg-surface-container-lowest/60 backdrop-blur-md rounded-3xl p-md mb-xl flex flex-wrap gap-md items-center justify-between border border-outline-variant/30">
           <div className="flex items-center gap-sm">
             <span className="font-label-md text-label-md text-on-surface-variant">Filter by:</span>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-transparent border-b-2 border-outline-variant py-1 pr-base focus:border-primary outline-none text-label-md font-label-md text-on-surface">
-              {filterOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-            </select>
+            <Select
+              value={statusFilter || "all"}
+              onValueChange={(value) => setStatusFilter(value === "all" ? "" : value)}
+            >
+              <SelectTrigger className="h-auto gap-1 bg-transparent border-b-2 border-outline-variant rounded-none py-1 pr-1 pl-0 focus:border-primary focus:ring-0 text-label-md font-label-md text-on-surface shadow-none [&>svg]:text-on-surface-variant">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                {filterOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value || "all"}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex gap-sm">
             <button className="p-xs text-primary bg-primary-fixed/20 rounded-lg material-symbols-outlined">grid_view</button>
@@ -97,28 +117,14 @@ export function SubmissionsPage() {
         </div>
 
         {isLoading ? (
-          <div className="space-y-md">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-[32px] p-md border border-outline-variant/10 animate-pulse">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 space-y-3">
-                    <div className="h-5 w-48 bg-surface-container-high rounded-full" />
-                    <div className="h-4 w-32 bg-surface-container-high rounded-full" />
-                  </div>
-                  <div className="h-8 w-20 bg-surface-container-high rounded-full" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <LoadingState label="Loading submissions..." />
         ) : submissions.data?.length === 0 ? (
           <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mx-auto mb-4">
-                <span className="material-symbols-outlined text-on-surface-variant text-3xl">inbox</span>
-              </div>
-              <h2 className="font-headline-md text-headline-md text-primary mb-2">No submissions yet</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant">{statusFilter ? "No submissions match the selected filter." : "Submissions from students will appear here."}</p>
-            </div>
+            <EmptyState
+              icon="inbox"
+              title="No submissions yet"
+              description={statusFilter ? "No submissions match the selected filter." : "Submissions from students will appear here."}
+            />
           </div>
         ) : (
           <div className="space-y-md">

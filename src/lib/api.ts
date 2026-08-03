@@ -42,6 +42,7 @@ api.interceptors.response.use(
         window.location.href = "/login"
       }
     }
+    error.message = getErrorMessage(error)
     return Promise.reject(error)
   },
 )
@@ -171,15 +172,74 @@ export interface ClassDetailEnriched extends ClassDto {
   enrollments: { id: string; classId: string; studentId: string; createdAt: string; student: User }[]
 }
 
-// ── Error helper ──────────────────────────────────────────────────
+// ── Error helpers ─────────────────────────────────────────────────
 
-function extractMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { message?: string } | undefined
-    return data?.message ?? error.message
+const GENERIC_BACKEND_MESSAGES = new Set([
+  "Internal server error",
+  "Unauthorized",
+  "Bad Request",
+  "Forbidden",
+  "Not Found",
+  "Request failed with status code 400",
+  "Request failed with status code 401",
+  "Request failed with status code 403",
+  "Request failed with status code 404",
+  "Request failed with status code 409",
+  "Request failed with status code 422",
+  "Request failed with status code 500",
+])
+
+const STATUS_MESSAGES: Record<number, string> = {
+  400: "The request was invalid. Check your input and try again.",
+  401: "Your session has expired. Please log in again.",
+  403: "You don't have permission to do that.",
+  404: "This item could not be found — it may have been removed.",
+  409: "This action conflicts with existing data.",
+  410: "This resource is no longer available.",
+  422: "Some of the submitted data is invalid.",
+  429: "Too many requests — please wait a moment and try again.",
+}
+
+export function getErrorStatus(err: unknown): number | undefined {
+  return (err as { response?: { status?: number } })?.response?.status
+}
+
+function isGenericBackendMessage(message: string): boolean {
+  return GENERIC_BACKEND_MESSAGES.has(message)
+}
+
+export function getErrorMessage(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as { message?: string | string[] } | undefined
+    const backendMessage =
+      typeof data?.message === "string"
+        ? data.message
+        : Array.isArray(data?.message)
+          ? data.message.join(", ")
+          : undefined
+
+    if (backendMessage && !isGenericBackendMessage(backendMessage)) {
+      return backendMessage
+    }
+
+    if (!err.response) {
+      if (err.code === "ECONNABORTED" || err.message.includes("timeout")) {
+        return "The request timed out. Please try again."
+      }
+      return "Cannot reach the server. Check your connection and try again."
+    }
+
+    const status = err.response.status
+    if (status >= 500) {
+      return "Something went wrong on our side. Please try again in a moment."
+    }
+    if (status in STATUS_MESSAGES) {
+      return STATUS_MESSAGES[status]
+    }
+    return "The request failed. Please try again."
   }
-  if (error instanceof Error) return error.message
-  return "An unexpected error occurred"
+  if (err instanceof Error && err.message) return err.message
+  return "Something went wrong"
 }
 
 // ── Auth ──────────────────────────────────────────────────────────
@@ -446,18 +506,12 @@ export async function gradeSubmission(submissionId: string): Promise<void> {
   await api.post(`/grades/submissions/${submissionId}/grade`)
 }
 
-export async function updateGrade(id: string, data: { pointsAwarded?: number; teacherNotes?: string }): Promise<void> {
-  await api.patch(`/grades/scores/${id}`, data)
+export async function updateGrade(scoreId: string, data: { pointsAwarded: number; teacherNotes?: string }): Promise<void> {
+  await api.patch(`/grades/scores/${scoreId}`, data)
 }
 
 export async function confirmAllGrades(submissionId: string): Promise<void> {
   await api.patch(`/grades/confirm-all/${submissionId}`)
-}
-
-/** @deprecated Use updateGrade + confirmAllGrades instead */
-export async function confirmGrade(id: string, data?: { pointsAwarded: number; teacherNotes?: string }): Promise<void> {
-  void data
-  await api.patch(`/grades/confirm-all/${id}`)
 }
 
 // ── Alerts ────────────────────────────────────────────────────────
@@ -538,20 +592,6 @@ export async function uploadMaterial(
   return res.data
 }
 
-export function getErrorMessage(err: unknown): string {
-  if (axios.isAxiosError(err)) {
-    const data = err.response?.data as { message?: string | string[] } | undefined
-    if (data?.message) {
-      return Array.isArray(data.message) ? data.message.join(", ") : data.message
-    }
-    if (err.message && err.message !== `Request failed with status code ${err.response?.status}`) {
-      return err.message
-    }
-  }
-  if (err instanceof Error) return err.message
-  return "Something went wrong"
-}
-
 export async function deleteMaterial(id: string): Promise<void> {
   await api.delete(`/materials/${id}`)
 }
@@ -608,9 +648,21 @@ export async function getStudentClasses(studentId: string): Promise<StudentClass
 
 export interface TeacherGrade { id: string; level: number; name: string; createdAt: string }
 
+interface TeacherGradeRow {
+  id: string
+  teacherId: string
+  gradeId: string
+  grade: { id: string; level: number; name: string; createdAt: string }
+}
+
 export async function getTeacherGrades(teacherId: string): Promise<TeacherGrade[]> {
-  const res = await api.get<TeacherGrade[]>(`/teachers/${teacherId}/grades`)
-  return res.data
+  const res = await api.get<TeacherGradeRow[]>(`/teachers/${teacherId}/grades`)
+  return res.data.map((row) => ({
+    id: row.grade.id,
+    level: row.grade.level,
+    name: row.grade.name,
+    createdAt: row.grade.createdAt,
+  }))
 }
 
 export async function getGradeClasses(gradeId: string): Promise<components["schemas"]["ClassDto"][]> {
@@ -900,6 +952,52 @@ export async function updateQuizAnswer(answerId: string, pointsAwarded: number):
   return res.data
 }
 
-// ── Re-export extractMessage for hooks ────────────────────────────
+// ── Dashboard Insights (contract: dashboard-insights-frontend.md) ──
+// NOTE: shapes mirror the backend Task 4 handoff contract. Once the
+// backend ships GET /dashboard/insights, run `npm run sync:api-types`
+// and import the generated types instead of these.
 
-export { extractMessage }
+export type InsightChartType = "line" | "area" | "bar" | "radar" | "donut"
+export type InsightDirection = "up" | "down" | "flat"
+
+export interface InsightSection {
+  /** stable id — see dashboard-insights-frontend.md per-role tables */
+  key: string
+  /** backend-written human-readable title */
+  title: string
+  chartType: InsightChartType
+  series: { label: string; value: number }[]
+  /** present on 'line'/'area' only */
+  delta?: {
+    /** e.g. 12.5 or -8.0 (signed) */
+    deltaPercent: number
+    direction: InsightDirection
+  }
+}
+
+export interface AgentInsight {
+  title: string
+  summary: string
+}
+
+export interface InsightsResponse {
+  interval: "week" | "month"
+  /** ordered for the page layout */
+  sections: InsightSection[]
+  /** narrative lists (cards), role-specific */
+  agentInsights: AgentInsight[]
+  unreadNotifications: number
+}
+
+export async function getDashboardInsights(interval: "week" | "month" = "week"): Promise<InsightsResponse> {
+  const res = await api.get<InsightsResponse>("/dashboard/insights", { params: { interval } })
+  return res.data
+}
+
+export async function getStudentInsights(
+  studentId: string,
+  interval: "week" | "month" = "week",
+): Promise<InsightsResponse> {
+  const res = await api.get<InsightsResponse>(`/dashboard/insights/students/${studentId}`, { params: { interval } })
+  return res.data
+}

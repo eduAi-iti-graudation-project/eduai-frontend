@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/providers/use-auth"
 import * as api from "@/lib/api"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { LoadingState } from "@/components/shared/LoadingState"
 
 export function MyGradesPage() {
   const { user } = useAuth()
@@ -15,18 +17,11 @@ export function MyGradesPage() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-full p-margin-desktop">
-        <div className="text-center">
-          <span className="material-symbols-outlined text-[48px] text-error mb-md">error_outline</span>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Failed to load grades</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mb-4">
-            {error instanceof Error ? error.message : "Something went wrong"}
-          </p>
-          <button onClick={() => refetch()} className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md">
-            Try Again
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        title="Failed to load grades"
+        message={error instanceof Error ? error.message : "Something went wrong"}
+        onRetry={() => refetch()}
+      />
     )
   }
 
@@ -36,14 +31,7 @@ export function MyGradesPage() {
     <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
       <h1 className="font-headline-lg text-headline-lg text-primary mb-4">My Grades</h1>
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-[32px] bg-white p-md border border-outline-variant/10 animate-pulse">
-              <div className="h-5 w-64 bg-surface-container-high rounded-full mb-2" />
-              <div className="h-4 w-32 bg-surface-container-high rounded-full" />
-            </div>
-          ))}
-        </div>
+        <LoadingState />
       ) : classes.length === 0 ? (
         <EmptyState
           icon="grade"

@@ -6,7 +6,7 @@ interface SubmissionCardProps {
   submission: SubmissionEnriched
   iconIndex: number
   gradeMutation: UseMutationResult<unknown, Error, string>
-  confirmMutation: UseMutationResult<unknown, Error, { id: string; data: { pointsAwarded: number } }>
+  confirmMutation: UseMutationResult<unknown, Error, SubmissionEnriched>
 }
 
 const statusConfigs: Record<string, { label: string; badge: string }> = {
@@ -102,7 +102,7 @@ export function SubmissionCard({
           {submission.status === "REVIEW_READY" && (
             <button
               onClick={() => {
-                confirmMutation.mutate({ id: submission.id, data: { pointsAwarded: totalPoints } })
+                confirmMutation.mutate(submission)
               }}
               disabled={confirmMutation.isPending}
               className="flex items-center gap-1 px-md py-sm bg-primary-container text-white rounded-full font-label-md text-label-md shadow-lg nudge-hover active:scale-95 disabled:opacity-50"

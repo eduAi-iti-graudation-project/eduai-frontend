@@ -2,6 +2,8 @@ import { useState, useMemo } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 export function StudentManagementPage() {
   const queryClient = useQueryClient()
@@ -57,11 +59,11 @@ export function StudentManagementPage() {
         <div className="lg:col-span-1 bg-white rounded-[32px] p-xl border border-outline-variant/10 shadow-sm">
           <div className="relative mb-4">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-            <input
+            <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search students..."
-              className="w-full pl-11 pr-4 py-2 rounded-full border border-outline-variant/20 font-body-md text-body-md bg-surface-container-low outline-none focus:border-primary"
+              className="w-full pl-11 pr-4 py-2 rounded-full border border-outline-variant/20 font-body-md text-body-md bg-surface-container-low outline-none focus:border-primary h-auto focus-visible:ring-transparent focus-visible:ring-offset-0"
             />
           </div>
           <div className="space-y-1 max-h-[500px] overflow-y-auto">
@@ -69,20 +71,22 @@ export function StudentManagementPage() {
               const sg = (s as unknown as { guardianId: string | undefined }).guardianId
               const guardian = sg ? guardiansById.get(sg) : undefined
               return (
-                <button
+                <Button
                   key={s.id}
+                  type="button"
+                  variant="ghost"
                   onClick={() => { setSelectedStudent(s); setSelectedGuardian(null) }}
-                  className={`w-full text-left px-md py-sm rounded-full transition-all ${
+                  className={`w-full h-auto flex flex-col items-start justify-start gap-0 px-md py-sm rounded-full text-left transition-all ${
                     selectedStudent?.id === s.id
-                      ? "bg-primary-container text-on-primary-container"
-                      : "hover:bg-surface-container text-on-surface"
+                      ? "bg-primary-container text-on-primary-container hover:bg-primary-container hover:text-on-primary-container"
+                      : "text-on-surface hover:bg-surface-container hover:text-on-surface"
                   }`}
                 >
                   <p className="font-label-md text-label-md">{s.name}</p>
                   <p className="font-label-sm text-label-sm text-on-surface-variant truncate">
                     {s.email} {guardian ? `· Guardian: ${guardian.name}` : ""}
                   </p>
-                </button>
+                </Button>
               )
             })}
             {filteredStudents.length === 0 && (
@@ -115,40 +119,44 @@ export function StudentManagementPage() {
                 </h3>
                 <div className="relative mb-3">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                  <input
+                  <Input
                     value={guardianSearch}
                     onChange={(e) => setGuardianSearch(e.target.value)}
                     placeholder="Search guardians..."
-                    className="w-full pl-11 pr-4 py-2 rounded-full border border-outline-variant/20 font-body-md bg-surface-container-low outline-none focus:border-primary"
+                    className="w-full pl-11 pr-4 py-2 rounded-full border border-outline-variant/20 font-body-md bg-surface-container-low outline-none focus:border-primary h-auto focus-visible:ring-transparent focus-visible:ring-offset-0"
                   />
                 </div>
                 <div className="space-y-1 max-h-[200px] overflow-y-auto mb-4">
                   {filteredGuardians.map((g) => (
-                    <button
+                    <Button
                       key={g.id}
+                      type="button"
+                      variant="ghost"
                       onClick={() => setSelectedGuardian(g)}
-                      className={`w-full text-left px-md py-sm rounded-full transition-all ${
+                      className={`w-full h-auto flex flex-col items-start justify-start gap-0 px-md py-sm rounded-full text-left transition-all ${
                         selectedGuardian?.id === g.id
-                          ? "bg-primary-container text-on-primary-container"
-                          : "hover:bg-surface-container text-on-surface"
+                          ? "bg-primary-container text-on-primary-container hover:bg-primary-container hover:text-on-primary-container"
+                          : "text-on-surface hover:bg-surface-container hover:text-on-surface"
                       }`}
                     >
                       <p className="font-label-md text-label-md">{g.name}</p>
                       <p className="font-label-sm text-label-sm text-on-surface-variant">{g.email}</p>
-                    </button>
+                    </Button>
                   ))}
                   {filteredGuardians.length === 0 && (
                     <p className="font-label-sm text-label-sm text-on-surface-variant text-center py-md">No guardians found</p>
                   )}
                 </div>
 
-                <button
+                <Button
+                  type="button"
+                  variant="secondary"
                   onClick={() => linkGuardian.mutate()}
                   disabled={!selectedGuardian || linkGuardian.isPending}
-                  className="bg-secondary-container text-white px-md py-2 rounded-full font-label-md disabled:opacity-50"
+                  className="h-auto rounded-full bg-secondary-container text-white px-md py-2 font-label-md text-label-sm hover:bg-secondary-container/90"
                 >
                   {selectedGuardian ? `Link ${selectedGuardian.name}` : "Select a guardian"}
-                </button>
+                </Button>
               </div>
             </div>
           )}

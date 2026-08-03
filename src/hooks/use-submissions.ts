@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
+import type { SubmissionEnriched } from "@/lib/api"
 
 export function useSubmissions(status?: string, assignmentId?: string) {
   const queryClient = useQueryClient()
@@ -21,7 +22,7 @@ export function useSubmissions(status?: string, assignmentId?: string) {
   })
 
   const updateGrade = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { pointsAwarded?: number; teacherNotes?: string } }) =>
+    mutationFn: ({ id, data }: { id: string; data: { pointsAwarded: number; teacherNotes?: string } }) =>
       api.updateGrade(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["submissions"] })
@@ -31,8 +32,7 @@ export function useSubmissions(status?: string, assignmentId?: string) {
   })
 
   const confirmGrade = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { pointsAwarded: number; teacherNotes?: string } }) =>
-      api.confirmGrade(id, data),
+    mutationFn: (submission: SubmissionEnriched) => api.confirmAllGrades(submission.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["submissions"] })
       toast.success("Grade confirmed")

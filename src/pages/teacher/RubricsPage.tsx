@@ -3,6 +3,15 @@ import { useSearchParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useRubrics } from "@/hooks/use-rubrics"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import * as api from "@/lib/api"
 import { toast } from "sonner"
 
@@ -141,20 +150,24 @@ export function RubricsPage() {
               {!assignmentId && (
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-on-surface-variant text-sm">assignment</span>
-                  <select
-                    value={selectedAssignmentId}
-                    onChange={(e) => setSelectedAssignmentId(e.target.value)}
-                    className="bg-surface-container-low border border-outline-variant/20 rounded-full px-3 py-1.5 text-label-md text-on-surface focus:ring-0 focus:border-primary"
+                  <Select
+                    value={selectedAssignmentId || "none"}
+                    onValueChange={(value) => setSelectedAssignmentId(value === "none" ? "" : value)}
                   >
-                    <option value="">Select assignment...</option>
-                    {assignmentsLoading ? (
-                      <option disabled>Loading...</option>
-                    ) : (
-                      allAssignments?.map((a) => (
-                        <option key={a.id} value={a.id}>{a.title}</option>
-                      ))
-                    )}
-                  </select>
+                    <SelectTrigger className="h-auto gap-2 rounded-full bg-surface-container-low border border-outline-variant/20 px-3 py-1.5 text-label-md text-on-surface focus:ring-0 focus:border-primary shadow-none">
+                      <SelectValue placeholder="Select assignment..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Select assignment...</SelectItem>
+                      {assignmentsLoading ? (
+                        <SelectItem value="__loading__" disabled>Loading...</SelectItem>
+                      ) : (
+                        allAssignments?.map((a) => (
+                          <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </div>
@@ -211,23 +224,26 @@ export function RubricsPage() {
                           <span className="font-label-sm text-sm text-on-surface-variant">points</span>
                         </div>
                       </div>
-                      <button
+                      <Button
+                        type="button"
+                        variant="ghost"
                         onClick={() => removeRow(criterion.id)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-error rounded-full hover:bg-error-container/30"
+                        className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-on-surface-variant hover:text-error rounded-full hover:bg-error-container/30"
                       >
                         <span className="material-symbols-outlined text-lg">close</span>
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
 
-                <button
+                <Button
+                  type="button"
                   onClick={addRow}
-                  className="flex items-center justify-center gap-sm py-sm px-md bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md hover:opacity-90 transition-all active:scale-95 shadow-md"
+                  className="flex items-center justify-center gap-sm py-sm px-md h-auto rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md hover:opacity-90 transition-all active:scale-95 shadow-md"
                 >
                   <span className="material-symbols-outlined">add</span>
                   Add Another Row
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -239,20 +255,21 @@ export function RubricsPage() {
                   </div>
                   <h3 className="font-headline-md text-headline-md text-on-surface">Import from PDF</h3>
                 </div>
-                <div className="bg-primary text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded tracking-widest">PRO Feature</div>
+                <Badge variant="outline" className="bg-primary text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded tracking-widest border-0">PRO Feature</Badge>
               </div>
               <p className="font-body-md text-body-md text-on-surface-variant mb-md">
                 Upload your assignment prompt or syllabus. Our AI will automatically draft rubric rows for you.
               </p>
               <input ref={fileInputRef} type="file" accept=".pdf" onChange={handlePdfImport} className="hidden" />
-              <button
+              <Button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importRubricPdf.isPending}
-                className="w-full flex items-center justify-center gap-sm py-sm px-md border-2 border-primary text-primary rounded-full font-label-md text-label-md hover:bg-primary hover:text-white transition-all active:scale-95 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-sm py-sm px-md h-auto border-2 border-primary text-primary rounded-full font-label-md text-label-md hover:bg-primary hover:text-white transition-all active:scale-95 disabled:opacity-50"
               >
                 <span className="material-symbols-outlined">attach_file</span>
                 {importRubricPdf.isPending ? "Extracting..." : "Upload Syllabus PDF"}
-              </button>
+              </Button>
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center p-lg opacity-40">
@@ -269,18 +286,20 @@ export function RubricsPage() {
             <div className="flex items-center justify-between">
               <h2 className="font-headline-md text-headline-md text-on-surface">Live Preview</h2>
               <div className="flex gap-sm items-center">
-                <span className="px-md py-1 bg-surface-container-high text-on-surface-variant rounded-full text-sm font-medium border border-outline-variant/20">
+                <Badge variant="outline" className="px-md py-1 bg-surface-container-high text-on-surface-variant rounded-full text-sm font-medium border border-outline-variant/20">
                   {selectedRubricId ? "Saved" : "Draft Mode"}
-                </span>
+                </Badge>
                 {manualCriteria.length > 0 && (
-                  <button
+                  <Button
+                    type="button"
+                    variant="link"
                     onClick={handleFinalize}
                     disabled={createRubric.isPending}
-                    className="text-primary hover:underline text-sm font-bold flex items-center gap-1 transition-all"
+                    className="h-auto p-0 text-primary hover:underline text-sm font-bold gap-1 transition-all"
                   >
                     <span className="material-symbols-outlined text-base">save</span>
                     Save Template
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -312,14 +331,15 @@ export function RubricsPage() {
                         </div>
                       ))}
                       {!rubric.isConfirmed && (
-                        <button
+                        <Button
+                          type="button"
                           onClick={() => confirmRubric.mutate(rubric.id)}
                           disabled={confirmRubric.isPending}
-                          className="w-full py-md rounded-xl font-headline-md text-headline-md font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                          className="w-full h-auto py-md rounded-xl font-headline-md text-headline-md font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50"
                           style={{ backgroundColor: "#FF6B5D", color: "#fff", border: "none" }}
                         >
                           {confirmRubric.isPending ? "Confirming..." : "Confirm & Publish Rubric"}
-                        </button>
+                        </Button>
                       )}
                     </>
                   )
@@ -365,18 +385,20 @@ export function RubricsPage() {
                         <span className="text-primary text-sm font-bold">{c.maxPoints} pts</span>
                       </div>
                       <div className="mt-md flex gap-base opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
+                        <Button
+                          type="button"
                           onClick={() => acceptAiRow(c.description, c.maxPoints)}
-                          className="bg-primary text-white text-xs px-3 py-1.5 rounded-full font-bold"
+                          className="h-auto px-3 py-1.5 rounded-full bg-primary text-white text-xs font-bold"
                         >
                           Accept Row
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          type="button"
                           onClick={() => setImportedCriteria(importedCriteria.filter((_, idx) => idx !== i))}
-                          className="bg-surface-container-high text-on-surface-variant text-xs px-3 py-1.5 rounded-full font-bold"
+                          className="h-auto px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-bold"
                         >
                           Dismiss
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -392,16 +414,21 @@ export function RubricsPage() {
             </div>
 
             <div className="flex gap-md">
-              <button
+              <Button
+                type="button"
                 onClick={handleFinalize}
                 disabled={createRubric.isPending || manualCriteria.length === 0}
-                className="flex-1 py-md rounded-xl font-headline-md text-headline-md border-2 transition-all active:scale-95 disabled:opacity-40 bg-white text-[#1F9D7C] border-[#1F9D7C] hover:bg-[#1F9D7C] hover:text-white"
+                className="flex-1 h-auto py-md rounded-xl font-headline-md text-headline-md border-2 transition-all active:scale-95 disabled:opacity-40 bg-white text-[#1F9D7C] border-[#1F9D7C] hover:bg-[#1F9D7C] hover:text-white"
               >
                 {createRubric.isPending ? "Publishing..." : "Preview Final Rubric"}
-              </button>
-              <button className="px-md py-md bg-white border-2 border-outline-variant/30 text-on-surface rounded-xl font-headline-md text-headline-md hover:bg-surface-container-low transition-all">
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                className="h-auto px-md py-md rounded-xl bg-white border-2 border-outline-variant/30 text-on-surface font-headline-md text-headline-md hover:bg-surface-container-low transition-all"
+              >
                 <span className="material-symbols-outlined">share</span>
-              </button>
+              </Button>
             </div>
           </section>
         </div>
@@ -420,17 +447,18 @@ export function RubricsPage() {
                     selectedRubricId === rubric.id ? "border-primary shadow-md" : "border-on-surface/5"
                   }`}
                 >
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     onClick={() => setSelectedRubricId(rubric.id)}
-                    className="w-full text-left"
+                    className="w-full h-auto p-0 text-left items-start gap-0"
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-2 w-full">
                       <h4 className="font-headline-md text-headline-md text-on-surface truncate">{rubric.title}</h4>
                       {rubric.isConfirmed ? (
-                        <span className="text-primary text-xs font-bold bg-primary-fixed/30 px-2 py-0.5 rounded-full">Confirmed</span>
+                        <Badge variant="outline" className="text-primary text-xs font-bold bg-primary-fixed/30 px-2 py-0.5 rounded-full border-0">Confirmed</Badge>
                       ) : (
-                        <span className="text-gold-honey text-xs font-bold bg-tertiary-fixed/30 px-2 py-0.5 rounded-full">Draft</span>
+                        <Badge variant="outline" className="text-gold-honey text-xs font-bold bg-tertiary-fixed/30 px-2 py-0.5 rounded-full border-0">Draft</Badge>
                       )}
                     </div>
                     <p className="font-label-sm text-label-sm text-on-surface-variant">
@@ -439,24 +467,24 @@ export function RubricsPage() {
                     <p className="font-label-sm text-label-sm text-outline mt-1">
                       {new Date(rubric.createdAt).toLocaleDateString()}
                     </p>
-                  </button>
+                  </Button>
                   <div className="mt-md flex gap-sm">
-                    <button
+                    <Button
                       type="button"
                       onClick={() => handleUseInBuilder(rubric)}
-                      className="flex-1 bg-primary/10 text-primary text-xs px-3 py-1.5 rounded-full font-bold hover:bg-primary hover:text-white transition-all"
+                      className="flex-1 h-auto px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold hover:bg-primary hover:text-white transition-all"
                     >
                       Use in builder
-                    </button>
+                    </Button>
                     {resolvedAssignmentId && (
-                      <button
+                      <Button
                         type="button"
                         onClick={() => handleCopyToAssignment(rubric)}
                         disabled={createRubric.isPending}
-                        className="flex-1 bg-secondary-container/10 text-secondary text-xs px-3 py-1.5 rounded-full font-bold hover:bg-secondary-container hover:text-white transition-all disabled:opacity-50"
+                        className="flex-1 h-auto px-3 py-1.5 rounded-full bg-secondary-container/10 text-secondary text-xs font-bold hover:bg-secondary-container hover:text-white transition-all disabled:opacity-50"
                       >
                         Copy to assignment
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>

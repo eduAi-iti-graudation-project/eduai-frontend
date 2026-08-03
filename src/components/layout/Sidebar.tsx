@@ -11,6 +11,7 @@ export function Sidebar() {
     : path.startsWith("/submissions") ? "submissions"
     : path.startsWith("/quizzes") ? "quizzes"
     : path.startsWith("/alerts") ? "alerts"
+    : path.startsWith("/insights") ? "insights"
     : path.startsWith("/notifications") ? "notifications"
     : path.startsWith("/assistant") ? "assistant"
     : "dashboard"
@@ -23,6 +24,7 @@ export function Sidebar() {
     { icon: "list_alt", label: "Submissions", id: "submissions", href: "/submissions" },
     { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/quizzes" },
     { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/alerts" },
+    { icon: "monitoring", label: "Insights", id: "insights", href: "/insights" },
     { icon: "notifications", label: "Notifications", id: "notifications", href: "/notifications" },
     { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/assistant" },
   ]

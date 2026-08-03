@@ -1,3 +1,5 @@
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 interface AlertCardProps {
@@ -19,10 +21,10 @@ const typeIcons: Record<string, string> = {
   MISSING_SUBMISSION: "assignment_late",
 }
 
-const statusColors: Record<string, string> = {
-  NEW: "bg-red-100 text-red-800",
-  ACKNOWLEDGED: "bg-yellow-100 text-yellow-800",
-  RESOLVED: "bg-green-100 text-green-800",
+const statusStyles: Record<string, string> = {
+  NEW: "bg-red-100 text-red-800 border-0",
+  ACKNOWLEDGED: "bg-yellow-100 text-yellow-800 border-0",
+  RESOLVED: "bg-green-100 text-green-800 border-0",
 }
 
 export function AlertCard({
@@ -36,9 +38,9 @@ export function AlertCard({
   className,
 }: AlertCardProps) {
   return (
-    <div
+    <Card
       className={cn(
-        "tactile-card rounded-[24px] bg-surface-container-lowest p-4 flex items-start gap-4",
+        "tactile-card rounded-[24px] bg-surface-container-lowest p-4 flex items-start gap-4 border-outline-variant/10 shadow-none",
         className,
       )}
     >
@@ -55,14 +57,15 @@ export function AlertCard({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span
+          <Badge
+            variant="outline"
             className={cn(
               "font-label-sm text-label-sm px-2 py-0.5 rounded-full",
-              statusColors[status] ?? "bg-gray-100 text-gray-800",
+              statusStyles[status] ?? "bg-gray-100 text-gray-800 border-0",
             )}
           >
             {status}
-          </span>
+          </Badge>
           <span className="font-label-sm text-label-sm text-on-surface-variant">
             {type.replace(/_/g, " ")}
           </span>
@@ -98,6 +101,6 @@ export function AlertCard({
           </div>
         )}
       </div>
-    </div>
+    </Card>
   )
 }

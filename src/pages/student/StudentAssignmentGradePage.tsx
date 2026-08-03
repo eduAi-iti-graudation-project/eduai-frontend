@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/providers/use-auth"
 import * as api from "@/lib/api"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { Badge } from "@/components/ui/badge"
+import { LoadingState } from "@/components/shared/LoadingState"
 
 export function StudentAssignmentGradePage() {
   const { classId, assignmentId } = useParams<{ classId: string; assignmentId: string }>()
@@ -60,10 +62,7 @@ export function StudentAssignmentGradePage() {
   if (isLoading) {
     return (
       <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
-        <div className="space-y-4 animate-pulse">
-          <div className="h-8 w-48 bg-surface-container-high rounded-full" />
-          <div className="h-64 rounded-[32px] bg-white border border-outline-variant/10" />
-        </div>
+        <LoadingState />
       </div>
     )
   }
@@ -126,9 +125,9 @@ export function StudentAssignmentGradePage() {
                       </p>
                     </div>
                     {g.criterionMaxPoints > 0 && (
-                      <span className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full shrink-0">
+                      <Badge variant="outline" className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full border-0 shrink-0">
                         {Math.round((g.pointsAwarded / g.criterionMaxPoints) * 100)}%
-                      </span>
+                      </Badge>
                     )}
                   </div>
                   {g.aiFeedback ? (

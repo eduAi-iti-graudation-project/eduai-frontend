@@ -5,6 +5,23 @@ import { useQuizList, useGenerateQuiz, useDeleteQuiz, usePublishQuiz } from "@/h
 import { useUpdateQuiz } from "@/hooks/use-quizzes"
 import { QuizStatusBadge } from "@/components/quiz/QuizStatusBadge"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { EmptyState } from "@/components/ui/EmptyState"
+import { PageHeader } from "@/components/shared/PageHeader"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { QuizDto, QuizQuestionType } from "@/lib/api"
 
 const TYPE_LABELS: Record<QuizQuestionType, string> = {
@@ -13,6 +30,9 @@ const TYPE_LABELS: Record<QuizQuestionType, string> = {
   SHORT_ANSWER: "Short answer",
   ESSAY: "Essay",
 }
+
+const ALL_CLASSES = "__all__"
+const NO_CLASS = "__none__"
 
 export function QuizzesPage() {
   const navigate = useNavigate()
@@ -63,84 +83,81 @@ export function QuizzesPage() {
 
   return (
     <>
-      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
-        <h1 className="font-headline-lg text-headline-lg text-primary">Quizzes</h1>
-        <div className="flex items-center gap-3">
-          <select
-            value={classFilter}
-            onChange={(e) => setClassFilter(e.target.value)}
-            className="form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface"
-          >
-            <option value="">All classes</option>
-            {(classes.data ?? []).map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          <button
-            onClick={() => {
-              setGenClassId(classFilter || classes.data?.[0]?.id || "")
-              setGeneratorOpen(true)
-            }}
-            className="bg-primary text-white px-md py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-            AI Generate
-          </button>
-          <Link
-            to="/quizzes/new"
-            className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            New Quiz
-          </Link>
-        </div>
-      </header>
+      <PageHeader
+        title="Quizzes"
+        actions={
+          <div className="flex items-center gap-3">
+            <Select
+              value={classFilter}
+              onValueChange={(v) => setClassFilter(v === ALL_CLASSES ? "" : v)}
+            >
+              <SelectTrigger className="w-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
+                <SelectValue placeholder="All classes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_CLASSES}>All classes</SelectItem>
+                {(classes.data ?? []).map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              onClick={() => {
+                setGenClassId(classFilter || classes.data?.[0]?.id || "")
+                setGeneratorOpen(true)
+              }}
+              className="bg-primary text-white px-md h-auto py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+              AI Generate
+            </Button>
+            <Button
+              asChild
+              className="bg-secondary-container text-white px-md h-auto py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1"
+            >
+              <Link to="/quizzes/new">
+                <span className="material-symbols-outlined text-[18px]">add</span>
+                New Quiz
+              </Link>
+            </Button>
+          </div>
+        }
+      />
 
       <div className="flex-1 p-md">
         {quizzes.isLoading ? (
-          <div className="space-y-3 max-w-4xl mx-auto">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="tactile-card rounded-[24px] bg-surface-container-lowest p-4 animate-pulse">
-                <div className="h-6 w-40 bg-surface-container-high rounded-full mb-3" />
-                <div className="h-4 w-64 bg-surface-container-high rounded-full" />
-              </div>
-            ))}
-          </div>
+          <LoadingState className="flex-1 p-md max-w-4xl mx-auto w-full" />
         ) : quizzes.isError ? (
-          <div className="text-center py-xl">
-            <span className="material-symbols-outlined text-[48px] text-error mb-md block">error_outline</span>
-            <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Failed to load quizzes</h2>
-            <button
-              onClick={() => quizzes.refetch()}
-              className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md"
-            >
-              Try Again
-            </button>
-          </div>
+          <ErrorState
+            title="Failed to load quizzes"
+            message={quizzes.error instanceof Error ? quizzes.error.message : "Something went wrong"}
+            onRetry={() => quizzes.refetch()}
+            className="flex-1"
+          />
         ) : (quizzes.data ?? []).length === 0 ? (
-          <div className="text-center py-xl">
-            <div className="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-on-surface-variant text-3xl">quiz</span>
-            </div>
-            <h2 className="font-headline-md text-headline-md text-primary mb-2">No quizzes yet</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-4">
-              Write one from scratch or let AI draft it for you.
-            </p>
-            <div className="flex gap-md justify-center">
-              <Link
-                to="/quizzes/new"
-                className="bg-primary text-white px-md py-sm rounded-full font-label-md hover:opacity-90 transition-all"
-              >
-                Create a quiz
-              </Link>
-              <button
-                onClick={() => setGeneratorOpen(true)}
-                className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md hover:opacity-90 transition-all"
-              >
-                Generate with AI
-              </button>
-            </div>
-          </div>
+          <EmptyState
+            icon="quiz"
+            title="No quizzes yet"
+            description="Write one from scratch or let AI draft it for you."
+            action={
+              <div className="flex gap-md justify-center">
+                <Button
+                  asChild
+                  className="bg-primary text-white px-md h-auto py-sm rounded-full font-label-md hover:opacity-90 transition-all"
+                >
+                  <Link to="/quizzes/new">Create a quiz</Link>
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setGeneratorOpen(true)}
+                  className="bg-secondary-container text-white px-md h-auto py-sm rounded-full font-label-md hover:opacity-90 transition-all"
+                >
+                  Generate with AI
+                </Button>
+              </div>
+            }
+          />
         ) : (
           <div className="space-y-3 max-w-4xl mx-auto">
             {(quizzes.data ?? []).map((quiz) => {
@@ -190,56 +207,60 @@ export function QuizzesPage() {
                     <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                       {quiz.status === "DRAFT" && (
                         <>
-                          <Link
-                            to={`/quizzes/${quiz.id}`}
-                            className="bg-primary text-white px-4 py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                          <Button
+                            asChild
+                            className="bg-primary text-white px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
                           >
-                            Edit
-                          </Link>
-                          <button
+                            <Link to={`/quizzes/${quiz.id}`}>Edit</Link>
+                          </Button>
+                          <Button
+                            type="button"
                             onClick={() => setPublishTarget(quiz)}
-                            className="bg-primary-fixed text-primary px-4 py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                            className="bg-primary-fixed text-primary px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
                           >
                             Publish
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            type="button"
                             onClick={() => setDeleteTarget(quiz)}
-                            className="bg-surface-container text-on-surface-variant px-4 py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                            className="bg-surface-container text-on-surface-variant px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
                           >
                             Delete
-                          </button>
+                          </Button>
                         </>
                       )}
                       {quiz.status === "PUBLISHED" && (
                         <>
-                          <Link
-                            to={`/quizzes/${quiz.id}/attempts`}
-                            className="bg-primary-fixed text-primary px-4 py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                          <Button
+                            asChild
+                            className="bg-primary-fixed text-primary px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
                           >
-                            View attempts
-                          </Link>
-                          <button
+                            <Link to={`/quizzes/${quiz.id}/attempts`}>View attempts</Link>
+                          </Button>
+                          <Button
+                            type="button"
                             onClick={() => setCloseTarget(quiz)}
-                            className="bg-surface-container text-on-surface-variant px-4 py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                            className="bg-surface-container text-on-surface-variant px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
                           >
                             Close
-                          </button>
+                          </Button>
                         </>
                       )}
                       {quiz.status === "CLOSED" && (
                         <>
-                          <Link
-                            to={`/quizzes/${quiz.id}/attempts`}
-                            className="bg-primary-fixed text-primary px-4 py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                          <Button
+                            asChild
+                            className="bg-primary-fixed text-primary px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
                           >
-                            View attempts
-                          </Link>
-                          <button
+                            <Link to={`/quizzes/${quiz.id}/attempts`}>View attempts</Link>
+                          </Button>
+                          <Button
+                            type="button"
                             onClick={() => setDeleteTarget(quiz)}
-                            className="bg-surface-container text-on-surface-variant px-4 py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                            className="bg-surface-container text-on-surface-variant px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
                           >
                             Delete
-                          </button>
+                          </Button>
                         </>
                       )}
                     </div>
@@ -251,94 +272,101 @@ export function QuizzesPage() {
         )}
       </div>
 
-      {generatorOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => !generateQuiz.isPending && setGeneratorOpen(false)}>
-          <div
-            className="bg-white rounded-[32px] p-xl shadow-xl max-w-2xl w-full mx-md border border-outline-variant/10 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-sm mb-lg">
-              <span className="material-symbols-outlined text-[28px] text-primary">auto_awesome</span>
-              <div>
-                <h3 className="font-headline-md text-headline-md text-on-surface">Generate quiz with AI</h3>
-                <p className="font-label-sm text-label-sm text-on-surface-variant">
-                  The AI drafts a full quiz you can review before publishing.
-                </p>
-              </div>
-            </div>
-
-            <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Class</label>
-            <select
-              value={genClassId}
-              onChange={(e) => setGenClassId(e.target.value)}
-              className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface mb-md"
-            >
-              <option value="">Select a class</option>
-              {(classes.data ?? []).map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-
-            <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Topic</label>
-            <input
-              value={genTopic}
-              onChange={(e) => setGenTopic(e.target.value)}
-              placeholder="e.g. Photosynthesis, World War II, Fractions…"
-              className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface mb-md"
-            />
-
-            <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
-              Questions ({genCount})
-            </label>
-            <input
-              type="range"
-              min={1}
-              max={30}
-              value={genCount}
-              onChange={(e) => setGenCount(Number(e.target.value))}
-              className="w-full mb-md accent-[#006951]"
-            />
-
-            <label className="block font-label-sm text-label-sm text-on-surface-variant mb-2">Question types</label>
-            <div className="grid grid-cols-2 gap-2 mb-lg">
-              {(Object.keys(TYPE_LABELS) as QuizQuestionType[]).map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => toggleType(type)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-label-md transition-all ${
-                    genTypes.includes(type)
-                      ? "border-primary bg-primary-fixed text-primary"
-                      : "border-outline-variant bg-surface text-on-surface-variant"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">{typeIcon[type]}</span>
-                  {TYPE_LABELS[type]}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex gap-md">
-              <button
-                type="button"
-                onClick={() => setGeneratorOpen(false)}
-                disabled={generateQuiz.isPending}
-                className="flex-1 py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={runGenerate}
-                disabled={generateQuiz.isPending || !genClassId || !genTopic.trim() || genTypes.length === 0}
-                className="flex-1 py-sm bg-primary text-white font-label-md text-label-md rounded-full disabled:opacity-50 active:scale-95 transition-all"
-              >
-                {generateQuiz.isPending ? "AI is writing your quiz…" : "Generate"}
-              </button>
+      <Dialog
+        open={generatorOpen}
+        onOpenChange={(next) => {
+          if (!next && !generateQuiz.isPending) setGeneratorOpen(false)
+        }}
+      >
+        <DialogContent
+          className="rounded-[32px] max-w-2xl bg-white p-xl mx-md max-h-[90vh] overflow-y-auto"
+          aria-describedby="quiz-generator-description"
+        >
+          <div className="flex items-center gap-sm mb-lg">
+            <span className="material-symbols-outlined text-[28px] text-primary">auto_awesome</span>
+            <div>
+              <h3 className="font-headline-md text-headline-md text-on-surface">Generate quiz with AI</h3>
+              <p id="quiz-generator-description" className="font-label-sm text-label-sm text-on-surface-variant">
+                The AI drafts a full quiz you can review before publishing.
+              </p>
             </div>
           </div>
-        </div>
-      )}
+
+          <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Class</label>
+          <Select
+            value={genClassId}
+            onValueChange={(v) => setGenClassId(v === NO_CLASS ? "" : v)}
+          >
+            <SelectTrigger className="w-full rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-md">
+              <SelectValue placeholder="Select a class" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NO_CLASS}>Select a class</SelectItem>
+              {(classes.data ?? []).map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Topic</label>
+          <Input
+            value={genTopic}
+            onChange={(e) => setGenTopic(e.target.value)}
+            placeholder="e.g. Photosynthesis, World War II, Fractions…"
+            className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-md"
+          />
+
+          <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
+            Questions ({genCount})
+          </label>
+          <input
+            type="range"
+            min={1}
+            max={30}
+            value={genCount}
+            onChange={(e) => setGenCount(Number(e.target.value))}
+            className="w-full mb-md accent-[#006951]"
+          />
+
+          <label className="block font-label-sm text-label-sm text-on-surface-variant mb-2">Question types</label>
+          <div className="grid grid-cols-2 gap-2 mb-lg">
+            {(Object.keys(TYPE_LABELS) as QuizQuestionType[]).map((type) => (
+              <Button
+                key={type}
+                type="button"
+                onClick={() => toggleType(type)}
+                className={`flex items-center gap-2 px-3 py-2 h-auto rounded-xl border text-sm font-label-md transition-all ${
+                  genTypes.includes(type)
+                    ? "border-primary bg-primary-fixed text-primary"
+                    : "border-outline-variant bg-surface text-on-surface-variant"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[18px]">{typeIcon[type]}</span>
+                {TYPE_LABELS[type]}
+              </Button>
+            ))}
+          </div>
+
+          <div className="flex gap-md">
+            <Button
+              type="button"
+              onClick={() => setGeneratorOpen(false)}
+              disabled={generateQuiz.isPending}
+              className="flex-1 h-auto py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full disabled:opacity-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={runGenerate}
+              disabled={generateQuiz.isPending || !genClassId || !genTopic.trim() || genTypes.length === 0}
+              className="flex-1 h-auto py-sm bg-primary text-white font-label-md text-label-md rounded-full disabled:opacity-50 active:scale-95 transition-all"
+            >
+              {generateQuiz.isPending ? "AI is writing your quiz…" : "Generate"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
         open={!!publishTarget}

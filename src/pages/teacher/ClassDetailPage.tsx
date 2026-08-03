@@ -7,6 +7,9 @@ import { useMaterials } from "@/hooks/use-materials"
 import { useClassAttendance } from "@/hooks/use-attendance"
 import { FileDropzone } from "@/components/ui/FileDropzone"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { Button } from "@/components/ui/button"
 import * as api from "@/lib/api"
 
 type TabId = "students" | "assignments" | "materials" | "attendance" | "requests"
@@ -136,9 +139,13 @@ export function ClassDetailPage() {
                       <Link to={`/students/${s.id}`} className="font-label-md text-label-md text-on-surface hover:text-primary transition-colors truncate block">{s.name}</Link>
                       <p className="font-label-sm text-label-sm text-on-surface-variant truncate">{s.email}</p>
                     </div>
-                    <button onClick={() => handleRemoveStudent(s.id)} className="p-1.5 rounded-full text-on-surface-variant hover:text-error hover:bg-error/10 opacity-0 group-hover:opacity-100 transition-all" title="Remove student">
+                    <Button
+                      onClick={() => handleRemoveStudent(s.id)}
+                      className="h-auto w-auto p-1.5 rounded-full text-on-surface-variant hover:text-error hover:bg-error/10 opacity-0 group-hover:opacity-100 transition-all"
+                      title="Remove student"
+                    >
                       <span className="material-symbols-outlined text-[18px]">close</span>
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -151,9 +158,11 @@ export function ClassDetailPage() {
           <div className="space-y-md">
             <div className="flex items-center justify-between">
               <h3 className="font-headline-md text-headline-md text-primary">Assignments</h3>
-              <Link to={`/assignments/new?classId=${cls?.id}`} className="flex items-center gap-xs px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover">
-                <span className="material-symbols-outlined text-[18px]">add</span>New Assignment
-              </Link>
+              <Button asChild className="flex items-center gap-xs px-md py-sm h-auto rounded-full bg-primary-container text-white font-label-md text-label-md nudge-hover">
+                <Link to={`/assignments/new?classId=${cls?.id}`}>
+                  <span className="material-symbols-outlined text-[18px]">add</span>New Assignment
+                </Link>
+              </Button>
             </div>
 
             {assignmentsData.length === 0 ? (
@@ -171,9 +180,12 @@ export function ClassDetailPage() {
                         <p className="font-label-sm text-label-sm text-on-surface-variant">Due {new Date(a.dueDate).toLocaleDateString()} &bull; {a.totalPoints} pts</p>
                       </div>
                     </div>
-                    <span onClick={(e) => { e.preventDefault(); navigate(`/submissions?assignmentId=${a.id}`) }} className="px-md py-2 bg-primary-container/10 text-primary font-label-sm text-label-sm rounded-2xl hover:bg-primary-container/20 transition-colors cursor-pointer">
+                    <Button
+                      onClick={(e) => { e.preventDefault(); navigate(`/submissions?assignmentId=${a.id}`) }}
+                      className="h-auto px-md py-2 rounded-2xl bg-primary-container/10 text-primary font-label-sm text-label-sm hover:bg-primary-container/20 transition-colors cursor-pointer"
+                    >
                       View Submissions
-                    </span>
+                    </Button>
                   </Link>
                 ))}
               </div>
@@ -208,14 +220,14 @@ export function ClassDetailPage() {
                   />
                   <div className="flex items-center gap-sm">
                     <p className="font-label-sm text-label-sm text-on-surface-variant flex-1 truncate">{pendingFile.name}</p>
-                    <button
+                    <Button
                       type="button"
                       onClick={handleUpload}
                       disabled={upload.isPending || !uploadTitle.trim()}
-                      className="px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full hover:opacity-90 transition-colors disabled:opacity-50"
+                      className="h-auto px-md py-sm rounded-full bg-primary-container text-white font-label-md text-label-md hover:opacity-90 transition-colors disabled:opacity-50"
                     >
                       {upload.isPending ? "Uploading..." : "Upload"}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -238,16 +250,18 @@ export function ClassDetailPage() {
                     </div>
                     <div className="flex items-center gap-sm">
                       {m.fileUrl && (
-                        <a href={m.fileUrl} target="_blank" rel="noreferrer" className="px-md py-2 bg-primary-container/10 text-primary font-label-sm text-label-sm rounded-2xl hover:bg-primary-container/20 transition-colors">View</a>
+                        <Button asChild className="h-auto px-md py-2 rounded-2xl bg-primary-container/10 text-primary font-label-sm text-label-sm hover:bg-primary-container/20 transition-colors">
+                          <a href={m.fileUrl} target="_blank" rel="noreferrer">View</a>
+                        </Button>
                       )}
-                      <button
+                      <Button
                         onClick={() => handleRemoveMaterial(m.id)}
                         disabled={removeMaterial.isPending}
-                        className="p-2 text-on-surface-variant hover:text-error transition-colors disabled:opacity-50"
+                        className="h-auto w-auto p-2 text-on-surface-variant hover:text-error transition-colors disabled:opacity-50"
                         title="Delete"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -261,9 +275,11 @@ export function ClassDetailPage() {
           <div className="space-y-md">
             <div className="flex items-center justify-between">
               <h3 className="font-headline-md text-headline-md text-primary">Attendance</h3>
-              <Link to={`/attendance/import?classId=${id}`} className="flex items-center gap-xs px-md py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover">
-                <span className="material-symbols-outlined text-[18px]">upload</span>Import
-              </Link>
+              <Button asChild className="flex items-center gap-xs px-md py-sm h-auto rounded-full bg-primary-container text-white font-label-md text-label-md nudge-hover">
+                <Link to={`/attendance/import?classId=${id}`}>
+                  <span className="material-symbols-outlined text-[18px]">upload</span>Import
+                </Link>
+              </Button>
             </div>
 
             {attendanceRecords.length === 0 ? (
@@ -337,20 +353,21 @@ export function ClassDetailPage() {
                       <p className="font-label-sm text-label-sm text-on-surface-variant">{req.student.email}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button
+                      <Button
+                        variant="outline"
                         onClick={() => rejectMutation.mutate(req.id)}
                         disabled={rejectMutation.isPending}
-                        className="px-md py-sm border-2 border-error text-error font-label-sm text-label-sm rounded-full hover:bg-error/10 transition-colors disabled:opacity-50"
+                        className="h-auto px-md py-sm border-2 border-error text-error font-label-sm text-label-sm rounded-full hover:bg-error/10 transition-colors disabled:opacity-50"
                       >
                         Reject
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => approveMutation.mutate(req.id)}
                         disabled={approveMutation.isPending}
-                        className="px-md py-sm bg-secondary-container text-white font-label-sm text-label-sm rounded-full hover:opacity-90 transition-colors disabled:opacity-50"
+                        className="h-auto px-md py-sm rounded-full bg-secondary-container text-white font-label-sm text-label-sm hover:opacity-90 transition-colors disabled:opacity-50"
                       >
                         Approve
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -375,16 +392,7 @@ export function ClassDetailPage() {
   }
 
   if (isLoading || !cls) {
-    return (
-      <div className="flex items-center justify-center h-full p-xl">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-14 h-14 rounded-3xl bg-primary-container flex items-center justify-center text-white">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
-          </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">Loading class...</p>
-        </div>
-      </div>
-    )
+    return <LoadingState label="Loading class..." />
   }
 
   return (
@@ -413,7 +421,14 @@ export function ClassDetailPage() {
             </div>
           </div>
           <div className="flex items-center gap-sm">
-            <button type="button" onClick={() => setShowDeleteConfirm(true)} className="px-md py-sm border-2 border-error text-error font-label-md text-label-md rounded-full hover:bg-error/10 transition-colors">Delete</button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="h-auto px-md py-sm border-2 border-error text-error font-label-md text-label-md rounded-full hover:bg-error/10 transition-colors"
+            >
+              Delete
+            </Button>
           </div>
         </div>
 
@@ -433,21 +448,17 @@ export function ClassDetailPage() {
         {tabContent(activeTab)}
       </div>
 
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="bg-white rounded-[32px] p-xl shadow-xl max-w-2xl w-full mx-md border border-outline-variant/10" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-sm mb-md">
-              <span className="material-symbols-outlined text-error text-[28px]">warning</span>
-              <h3 className="font-headline-md text-headline-md text-on-surface">Delete {cls.name}?</h3>
-            </div>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-lg">This will permanently delete this class and all associated assignments, submissions, and rubrics.</p>
-            <div className="flex gap-md">
-              <button type="button" onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full">Cancel</button>
-              <button type="button" onClick={handleDelete} disabled={deleteClass.isPending} className="flex-1 py-sm bg-error text-on-error font-label-md text-label-md rounded-full disabled:opacity-50">{deleteClass.isPending ? "Deleting..." : "Delete"}</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title={`Delete ${cls.name}?`}
+        message="This will permanently delete this class and all associated assignments, submissions, and rubrics."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        isLoading={deleteClass.isPending}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
 
       <div className="fixed bottom-md right-md z-50">
         <Link to="/assistant" className="flex items-center gap-sm bg-inverse-surface text-inverse-on-surface px-md py-sm rounded-full shadow-2xl hover:scale-105 transition-transform">

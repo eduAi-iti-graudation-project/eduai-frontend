@@ -6,6 +6,9 @@ import { toast } from "sonner"
 import { useAuth } from "@/providers/use-auth"
 import { loginSchema, type LoginFormData } from "@/lib/validations"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import authImg from "@/assets/auth.png"
 
 type Role = "teacher" | "student"
@@ -103,45 +106,47 @@ export function LoginPage() {
 
           {/* Role Toggle */}
           <div className="mb-md p-1 bg-surface-variant rounded-full flex">
-            <button
+            <Button
               type="button"
+              variant="ghost"
               className={cn(
-                "flex-1 py-2 rounded-full font-label-md flex items-center justify-center gap-2 transition-all duration-300",
+                "flex-1 h-auto py-2 rounded-full font-label-md flex items-center justify-center gap-2 transition-all duration-300",
                 role === "teacher"
-                  ? "bg-primary-container text-on-primary-container shadow-sm"
-                  : "text-on-surface-variant"
+                  ? "bg-primary-container text-on-primary-container shadow-sm hover:bg-primary-container hover:text-on-primary-container"
+                  : "text-on-surface-variant hover:bg-transparent hover:text-on-surface-variant"
               )}
               onClick={() => setRole("teacher")}
             >
               <span className="material-symbols-outlined text-[20px]">school</span>
               Teacher
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
               className={cn(
-                "flex-1 py-2 rounded-full font-label-md flex items-center justify-center gap-2 transition-all duration-300",
+                "flex-1 h-auto py-2 rounded-full font-label-md flex items-center justify-center gap-2 transition-all duration-300",
                 role === "student"
-                  ? "bg-primary-container text-on-primary-container shadow-sm"
-                  : "text-on-surface-variant"
+                  ? "bg-primary-container text-on-primary-container shadow-sm hover:bg-primary-container hover:text-on-primary-container"
+                  : "text-on-surface-variant hover:bg-transparent hover:text-on-surface-variant"
               )}
               onClick={() => setRole("student")}
             >
               <span className="material-symbols-outlined text-[20px]">face</span>
               Student
-            </button>
+            </Button>
           </div>
 
           {/* Form Fields */}
           <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             {/* Email */}
             <div className="space-y-xs">
-              <label className="font-label-md text-label-md text-on-surface ml-base" htmlFor="email">Email Address</label>
+              <Label className="font-label-md text-label-md text-on-surface ml-base" htmlFor="email">Email Address</Label>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none">mail</span>
-                <input
+                <Input
                   id="email"
                   className={cn(
-                    "form-input-focus w-full pl-12 pr-md py-4 rounded-xl border-2 bg-white text-on-surface placeholder:text-outline-variant font-body-md transition-all outline-none",
+                    "form-input-focus w-full pl-12 pr-md py-4 h-auto rounded-xl border-2 bg-white text-on-surface placeholder:text-outline-variant font-body-md text-body-md transition-all outline-none",
                     errors.email ? "border-error" : "border-surface-container-highest"
                   )}
                   placeholder="e.g. name@school.edu"
@@ -157,32 +162,33 @@ export function LoginPage() {
             {/* Password */}
             <div className="space-y-xs">
               <div className="flex justify-between items-center px-base">
-                <label className="font-label-md text-label-md text-on-surface" htmlFor="password">Password</label>
-                <button type="button" className="font-label-sm text-label-sm text-primary hover:underline font-bold">Forgot password?</button>
+                <Label className="font-label-md text-label-md text-on-surface" htmlFor="password">Password</Label>
+                <Button type="button" variant="link" className="h-auto p-0 font-label-sm text-label-sm text-primary font-bold">Forgot password?</Button>
               </div>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none">lock</span>
-                <input
+                <Input
                   id="password"
                   className={cn(
-                    "form-input-focus w-full pl-12 pr-md py-4 rounded-xl border-2 bg-white text-on-surface placeholder:text-outline-variant font-body-md transition-all outline-none",
+                    "form-input-focus w-full pl-12 pr-md py-4 h-auto rounded-xl border-2 bg-white text-on-surface placeholder:text-outline-variant font-body-md text-body-md transition-all outline-none",
                     errors.password ? "border-error" : "border-surface-container-highest"
                   )}
                   placeholder="••••••••"
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   tabIndex={-1}
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center hover:text-primary transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 h-auto w-auto p-0 flex items-center justify-center hover:text-primary hover:bg-transparent transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   <span className="material-symbols-outlined text-outline-variant">
                     {showPassword ? "visibility_off" : "visibility"}
                   </span>
-                </button>
+                </Button>
               </div>
               {errors.password && (
                 <p className="text-error text-label-sm ml-1 mt-1">{errors.password.message}</p>
@@ -191,10 +197,10 @@ export function LoginPage() {
 
             {/* CTA Button + Social + Footer (inside form in Stitch) */}
             <div className="pt-lg space-y-4">
-              <button
+              <Button
                 type="submit"
                 disabled={login.isPending}
-                className="btn-hover-arrow w-full py-4 bg-secondary-container text-white font-label-md text-label-md rounded-full shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-hover-arrow w-full h-auto py-4 bg-secondary-container text-white font-label-md text-label-md rounded-full shadow-lg hover:shadow-xl hover:scale-[1.01] hover:bg-secondary-container active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-auto"
               >
                 {login.isPending ? (
                   "Logging in..."
@@ -204,7 +210,7 @@ export function LoginPage() {
                     <span className="material-symbols-outlined transition-transform duration-300" data-icon="arrow_forward">arrow_forward</span>
                   </>
                 )}
-              </button>
+              </Button>
 
               {/* Social Divider */}
               <div className="flex items-center gap-4 py-4">
@@ -215,9 +221,10 @@ export function LoginPage() {
 
               {/* Social Login */}
               <div className="grid grid-cols-2 gap-3">
-                <button
+                <Button
                   type="button"
-                  className="flex items-center justify-center gap-2 py-3 px-4 border-2 border-surface-container-highest rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container transition-colors"
+                  variant="outline"
+                  className="flex items-center justify-center gap-2 py-3 px-4 h-auto border-2 border-surface-container-highest rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface-variant transition-colors"
                 >
                   <img
                     alt="Google Logo"
@@ -225,14 +232,15 @@ export function LoginPage() {
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJkzg9rDLE7XZdaUozY_15Wi43RZS2kgdG0eeCJ9pkLVFuDyNSoaWsi8H4h5t8CXZuG6cKkJHO1jt9hzxmRrbOn6crP1dWEvxsNkk0l5YV66sOKe88wd3ygQgQ8d8snOpgDfXJ9rNqdEUYXf0jOZfG39mEp6mOVu1GVKWWZWwezFrTACmZQcEGKPJlURa_mU5Pk7xVSrajlsEXdnZ5kRzXUs2POOXh4n7ffNCKS6oqeG1B0eZYPg5M"
                   />
                   Google
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="flex items-center justify-center gap-2 py-3 px-4 border-2 border-surface-container-highest rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container transition-colors"
+                  variant="outline"
+                  className="flex items-center justify-center gap-2 py-3 px-4 h-auto border-2 border-surface-container-highest rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface-variant transition-colors"
                 >
                   <span className="material-symbols-outlined text-primary" data-icon="grid_view">grid_view</span>
                   Microsoft
-                </button>
+                </Button>
               </div>
 
               {/* Footer Links */}
