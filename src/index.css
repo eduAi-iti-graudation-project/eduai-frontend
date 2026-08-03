@@ -15,6 +15,7 @@
   --color-muted-foreground: #3d4944;
   --color-accent: #ebedff;
   --color-accent-foreground: #0a1842;
+  --color-destructive: #ba1a1a;
   --color-destructive-foreground: #ffffff;
   --color-border: #dce1ff;
   --color-input: #dce1ff;
@@ -132,37 +133,12 @@
   --radius-3xl: 1.5rem;
 }
 
-/* ── shadcn theme variables ──────────────────────────────────── */
-@layer base {
-  :root {
-    --background: 249 100% 99%;
-    --foreground: 226 74% 15%;
-    --card: 0 0% 100%;
-    --card-foreground: 226 74% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 226 74% 15%;
-    --primary-hsl: 168 100% 21%;
-    --primary-foreground: 0 0% 100%;
-    --secondary-hsl: 3 63% 42%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 243 100% 97%;
-    --muted-foreground: 160 9% 26%;
-    --accent: 234 100% 96%;
-    --accent-foreground: 226 74% 15%;
-    --destructive: 0 75% 42%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 231 100% 93%;
-    --input: 231 100% 93%;
-    --ring: 168 100% 21%;
-    --radius: 0.5rem;
-  }
-
-  body {
-    background-color: var(--color-surface);
-    font-family: var(--font-body-md);
-    overflow-x: hidden;
-    min-height: max(884px, 100dvh);
-  }
+/* ── body styles ─────────────────────────────────────────────── */
+body {
+  background-color: var(--color-surface);
+  font-family: var(--font-body-md);
+  overflow-x: hidden;
+  min-height: max(884px, 100dvh);
 }
 
 /* ── Utility classes from HTML design ────────────────────────── */

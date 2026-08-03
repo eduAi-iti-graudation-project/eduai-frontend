@@ -3,6 +3,15 @@ import { Link, useNavigate, useParams, useBlocker } from "react-router-dom"
 import { useQuiz } from "@/hooks/use-quizzes"
 import { useQuizSession } from "@/hooks/use-quiz-session"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { getErrorMessage } from "@/lib/api"
 
 const TYPE_HINTS: Record<string, string> = {
@@ -204,13 +213,13 @@ export function QuizTakePage() {
               {getErrorMessage(quiz.error)}
             </p>
             <div className="flex gap-md justify-center">
-              <button
+              <Button
                 type="button"
                 onClick={() => quiz.refetch()}
-                className="px-lg py-sm bg-primary text-white font-label-md text-label-md rounded-full hover:opacity-90 transition-all"
+                className="px-lg py-sm bg-primary text-white font-label-md text-label-md rounded-full hover:opacity-90 transition-all h-auto"
               >
                 Try again
-              </button>
+              </Button>
               <Link
                 to="/student/quizzes"
                 className="px-lg py-sm border-2 border-outline-variant text-on-surface font-label-md text-label-md rounded-full hover:bg-surface-container-low transition-colors"
@@ -321,13 +330,14 @@ export function QuizTakePage() {
             </div>
           )}
 
-          <button
+          <Button
+            type="button"
             onClick={() => setStartOpen(true)}
             disabled={!quiz.data || deadlinePassed}
-            className="w-full bg-primary text-white py-md rounded-full font-label-lg text-label-lg disabled:opacity-50 nudge-hover"
+            className="w-full bg-primary text-white py-md rounded-full font-label-lg text-label-lg disabled:opacity-50 nudge-hover h-auto"
           >
             Start quiz
-          </button>
+          </Button>
             </>
           )}
         </div>
@@ -390,7 +400,11 @@ export function QuizTakePage() {
               <p className="font-body-lg text-body-lg text-on-surface mb-md">{question.question}</p>
 
               {question.type === "MCQ" && (
-                <div className="space-y-2">
+                <RadioGroup
+                  value={value}
+                  onValueChange={(v) => setAnswer(question.id, v)}
+                  className="space-y-2"
+                >
                   {(question.options ?? []).map((option) => (
                     <label
                       key={option.text}
@@ -400,56 +414,55 @@ export function QuizTakePage() {
                           : "border-outline-variant bg-surface hover:border-primary/40"
                       }`}
                     >
-                      <input
-                        type="radio"
-                        name={`q-${question.id}`}
-                        checked={value === option.text}
-                        onChange={() => setAnswer(question.id, option.text)}
-                        className="accent-[#006951]"
+                      <RadioGroupItem
+                        value={option.text}
+                        id={`q-${question.id}-${option.text}`}
+                        className="shrink-0"
                       />
                       <span className="font-body-md text-body-md text-on-surface">{option.text}</span>
                     </label>
                   ))}
-                </div>
+                </RadioGroup>
               )}
 
               {question.type === "TRUE_FALSE" && (
                 <div className="grid grid-cols-2 gap-2">
                   {["True", "False"].map((label) => (
-                    <button
+                    <Button
                       key={label}
                       type="button"
+                      variant="outline"
                       onClick={() => setAnswer(question.id, label)}
-                      className={`py-md rounded-xl border font-label-lg text-label-lg transition-all ${
+                      className={`py-md rounded-xl border font-label-lg text-label-lg transition-all h-auto hover:bg-transparent ${
                         value === label
                           ? "border-primary bg-primary-fixed/20 text-primary"
                           : "border-outline-variant bg-surface text-on-surface-variant hover:border-primary/40"
                       }`}
                     >
                       {label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
 
               {question.type === "SHORT_ANSWER" && (
-                <textarea
+                <Textarea
                   value={value}
                   onChange={(e) => setAnswer(question.id, e.target.value)}
                   rows={3}
                   placeholder="Write your answer…"
-                  className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface resize-none"
+                  className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface resize-none focus-visible:ring-0"
                 />
               )}
 
               {question.type === "ESSAY" && (
                 <div>
-                  <textarea
+                  <Textarea
                     value={value}
                     onChange={(e) => setAnswer(question.id, e.target.value)}
                     rows={6}
                     placeholder="Write your full response…"
-                    className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface resize-none"
+                    className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface resize-none focus-visible:ring-0"
                   />
                   <p className="font-label-sm text-label-sm text-on-surface-variant text-right">{value.length} characters</p>
                 </div>
@@ -463,48 +476,55 @@ export function QuizTakePage() {
         {submitError && (
           <p className="font-label-md text-label-md text-error w-full text-center">{submitError}</p>
         )}
-        <button
+        <Button
+          type="button"
           onClick={() => {
             if (answeredCount < questions.length) setSubmitOpen(true)
             else runSubmit()
           }}
           disabled={isSubmitting || questions.length === 0}
-          className="bg-primary text-white px-lg py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+          className="bg-primary text-white px-lg py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover h-auto"
         >
           {isSubmitting ? "Submitting…" : "Submit quiz"}
-        </button>
+        </Button>
       </div>
 
       {(isSubmitting || blocker.state === "blocked") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-[32px] p-xl shadow-xl max-w-2xl w-full mx-md text-center">
+        <Dialog open>
+          <DialogContent className="rounded-[32px] max-w-2xl bg-white p-xl shadow-xl text-center [&>button.absolute]:hidden">
             {blocker.state === "blocked" ? (
               <>
                 <span className="material-symbols-outlined text-[32px] text-primary block mb-sm">logout</span>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-2">Leave the quiz?</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant mb-lg">
+                <DialogTitle className="font-headline-md text-headline-md text-on-surface mb-2">Leave the quiz?</DialogTitle>
+                <DialogDescription className="font-body-md text-body-md text-on-surface-variant mb-lg">
                   Your answers are saved — you can come back and continue.
-                </p>
+                </DialogDescription>
                 <div className="flex gap-md">
-                  <button
+                  <Button
+                    type="button"
+                    variant="secondary"
                     onClick={() => blocker.reset?.()}
-                    className="flex-1 py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full"
+                    className="flex-1 py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full hover:bg-surface-container-high h-auto"
                   >
                     Stay
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
                     onClick={() => blocker.proceed?.()}
-                    className="flex-1 py-sm bg-primary text-white font-label-md text-label-md rounded-full"
+                    className="flex-1 py-sm bg-primary text-white font-label-md text-label-md rounded-full h-auto"
                   >
                     Leave
-                  </button>
+                  </Button>
                 </div>
               </>
             ) : (
-              <p className="font-body-md text-body-md text-on-surface">Submitting your quiz…</p>
+              <>
+                <DialogTitle className="sr-only">Submitting quiz</DialogTitle>
+                <p className="font-body-md text-body-md text-on-surface">Submitting your quiz…</p>
+              </>
             )}
-          </div>
-        </div>
+          </DialogContent>
+        </Dialog>
       )}
 
       <ConfirmDialog

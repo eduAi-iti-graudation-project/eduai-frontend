@@ -3,6 +3,9 @@ import { useParams, useSearchParams, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { EmptyState } from "@/components/ui/EmptyState"
+import { Button } from "@/components/ui/button"
 
 interface LocalCriterion {
   id: string
@@ -88,17 +91,13 @@ export function RubricConfirmPage() {
   const totalPoints = criteria.reduce((sum, c) => sum + (c.maxPoints || 0), 0)
 
   if (isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <p className="font-body-md text-body-md text-on-surface-variant">Loading rubric...</p>
-      </div>
-    )
+    return <LoadingState label="Loading rubric..." />
   }
 
   if (!rubric) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="font-body-md text-body-md text-on-surface-variant">Rubric not found</p>
+        <EmptyState icon="error" title="Rubric not found" description="This rubric may have been deleted." />
       </div>
     )
   }
@@ -126,9 +125,9 @@ export function RubricConfirmPage() {
             <span className="font-label-md text-label-md text-on-surface font-bold">Total</span>
             <span className="font-headline-md text-headline-md text-primary">{rubric.criteria.reduce((s, c) => s + c.maxPoints, 0)} pts</span>
           </div>
-          <button onClick={() => navigate(classId ? `/classes/${classId}` : "/rubrics")} className="w-full py-3 bg-primary-container text-white rounded-full font-label-md text-label-md">
+          <Button onClick={() => navigate(classId ? `/classes/${classId}` : "/rubrics")} className="w-full h-auto py-3 rounded-full bg-primary-container text-white font-label-md text-label-md">
             Back to Class
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -177,24 +176,25 @@ export function RubricConfirmPage() {
                   <span className="font-label-sm text-label-sm text-on-surface-variant">points</span>
                 </div>
               </div>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => removeCriterion(c.id)}
-                className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-error rounded-full hover:bg-error-container/30 transition-colors shrink-0 mt-1"
+                className="w-8 h-8 p-0 flex items-center justify-center text-on-surface-variant hover:text-error rounded-full hover:bg-error-container/30 transition-colors shrink-0 mt-1"
               >
                 <span className="material-symbols-outlined text-lg">close</span>
-              </button>
+              </Button>
             </div>
           ))}
 
-          <button
+          <Button
             type="button"
             onClick={addCriterion}
-            className="flex items-center justify-center gap-sm py-sm px-md bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md hover:opacity-90 transition-all active:scale-95 w-full"
+            className="flex items-center justify-center gap-sm py-sm px-md h-auto rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md hover:opacity-90 transition-all active:scale-95 w-full"
           >
             <span className="material-symbols-outlined">add</span>
             Add Criterion
-          </button>
+          </Button>
         </div>
 
         <div className="flex justify-between items-center p-md bg-surface-container-high rounded-2xl">
@@ -210,10 +210,11 @@ export function RubricConfirmPage() {
           </div>
         </div>
 
-        <button
+        <Button
+          type="button"
           onClick={() => confirmMutation.mutate()}
           disabled={confirmMutation.isPending || criteria.length === 0}
-          className="w-full py-4 rounded-full font-headline-md text-headline-md font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full h-auto py-4 rounded-full font-headline-md text-headline-md font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{ backgroundColor: "#FF6B5D", color: "#fff", border: "none" }}
         >
           {confirmMutation.isPending ? (
@@ -221,7 +222,7 @@ export function RubricConfirmPage() {
           ) : (
             <><span className="material-symbols-outlined">check_circle</span>Confirm & Publish Rubric</>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   )

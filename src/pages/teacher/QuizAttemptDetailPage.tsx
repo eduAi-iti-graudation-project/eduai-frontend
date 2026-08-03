@@ -2,6 +2,10 @@ import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { useAttempt, useConfirmAttempt, useUpdateAnswer } from "@/hooks/use-quizzes"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 
 const VIOLATION_LABELS: Record<string, string> = {
   TAB_SWITCH: "Tab switch",
@@ -57,9 +61,7 @@ export function QuizAttemptDetailPage() {
 
   if (!detail) {
     return (
-      <div className="flex-1 p-md flex items-center justify-center">
-        <p className="font-body-md text-body-md text-on-surface-variant">Loading attempt…</p>
-      </div>
+      <LoadingState className="flex-1 p-md" />
     )
   }
 
@@ -76,13 +78,14 @@ export function QuizAttemptDetailPage() {
             <p className="font-label-sm text-label-sm text-on-surface-variant">{quiz?.title}</p>
           </div>
         </div>
-        <button
+        <Button
+          type="button"
           onClick={() => setConfirmOpen(true)}
           disabled={allConfirmed}
-          className="bg-primary text-white px-md py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+          className="bg-primary text-white px-md h-auto py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
         >
           {allConfirmed ? "Confirmed" : `Confirm ${unconfirmedCount > 0 ? `${unconfirmedCount} answer${unconfirmedCount > 1 ? "s" : ""}` : "all"}`}
-        </button>
+        </Button>
       </header>
 
       <div className="flex-1 p-md overflow-y-auto">
@@ -105,9 +108,11 @@ export function QuizAttemptDetailPage() {
 
           {(detail.violations ?? []).length > 0 && (
             <div className="tactile-card rounded-[24px] bg-surface-container-lowest p-md">
-              <button
+              <Button
+                type="button"
+                variant="ghost"
                 onClick={() => setViolationsOpen((v) => !v)}
-                className="w-full flex items-center justify-between font-label-md text-label-md text-error"
+                className="w-full h-auto p-0 flex items-center justify-between font-label-md text-label-md text-error hover:text-error hover:bg-transparent"
               >
                 <span className="inline-flex items-center gap-2">
                   <span className="material-symbols-outlined text-[18px]">warning</span>
@@ -116,7 +121,7 @@ export function QuizAttemptDetailPage() {
                 <span className="material-symbols-outlined text-[18px] transition-transform" style={{ transform: violationsOpen ? "rotate(180deg)" : undefined }}>
                   expand_more
                 </span>
-              </button>
+              </Button>
               {violationsOpen && (
                 <ul className="mt-3 space-y-1">
                   {(detail.violations ?? []).map((v) => (
@@ -138,19 +143,28 @@ export function QuizAttemptDetailPage() {
                 <div className="flex items-start justify-between gap-3 mb-sm">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="font-label-sm text-label-sm text-on-surface-variant shrink-0">Q{index + 1}</span>
-                    <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant shrink-0">
+                    <Badge
+                      variant="outline"
+                      className="border-transparent font-label-sm text-label-sm px-2 py-0.5 bg-surface-container-high text-on-surface-variant shrink-0"
+                    >
                       {question.type.replace(/_/g, " ").toLowerCase()}
-                    </span>
+                    </Badge>
                     {!isConfirmed && answer && (
-                      <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-primary-fixed text-primary shrink-0 inline-flex items-center gap-1">
+                      <Badge
+                        variant="outline"
+                        className="border-transparent font-label-sm text-label-sm px-2 py-0.5 bg-primary-fixed text-primary shrink-0 inline-flex items-center gap-1"
+                      >
                         <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
                         AI suggestion
-                      </span>
+                      </Badge>
                     )}
                     {isConfirmed && (
-                      <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-primary text-white shrink-0">
+                      <Badge
+                        variant="outline"
+                        className="border-transparent font-label-sm text-label-sm px-2 py-0.5 bg-primary text-white shrink-0"
+                      >
                         Confirmed
-                      </span>
+                      </Badge>
                     )}
                   </div>
                   <span className="font-label-sm text-label-sm text-on-surface-variant shrink-0">{question.points} pts</span>
@@ -220,21 +234,22 @@ export function QuizAttemptDetailPage() {
                 <div className="mt-4 flex items-center gap-2 justify-end">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">
                     Points
-                    <input
+                    <Input
                       type="number"
                       min={0}
                       value={draftPoints[answer?.id ?? ""] ?? ""}
                       onChange={(e) => setDraftPoints((prev) => ({ ...prev, [answer?.id ?? ""]: e.target.value }))}
-                      className="ml-2 w-20 form-input-focus rounded-xl border border-outline-variant bg-surface px-2 py-1.5 text-sm text-on-surface"
+                      className="ml-2 w-20 h-auto rounded-xl border border-outline-variant bg-surface px-2 py-1.5 text-sm text-on-surface form-input-focus"
                     />
                   </label>
-                  <button
+                  <Button
+                    type="button"
                     onClick={() => answer && savePoints(answer.id)}
                     disabled={!answer || updateAnswer.isPending}
-                    className="bg-secondary-container text-white px-4 py-1.5 rounded-full font-label-md text-label-sm disabled:opacity-50 nudge-hover"
+                    className="bg-secondary-container text-white px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm disabled:opacity-50 nudge-hover"
                   >
                     Save
-                  </button>
+                  </Button>
                 </div>
               </div>
             )

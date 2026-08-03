@@ -2,8 +2,11 @@ import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import * as api from "@/lib/api"
-import { DashboardStatCard } from "@/components/communication/DashboardStatCard"
+import { StatCard } from "@/components/shared/StatCard"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { LoadingState } from "@/components/shared/LoadingState"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { Badge } from "@/components/ui/badge"
 
 export function AdminAlertsPage() {
   const alerts = useQuery({
@@ -36,18 +39,11 @@ export function AdminAlertsPage() {
 
   if (alerts.isError) {
     return (
-      <div className="flex items-center justify-center h-full p-xl">
-        <div className="text-center">
-          <span className="material-symbols-outlined text-[48px] text-error mb-md">error</span>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Failed to load alerts</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mb-lg">
-            {alerts.error instanceof Error ? alerts.error.message : "Something went wrong"}
-          </p>
-          <button onClick={() => alerts.refetch()} className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md">
-            Try Again
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        title="Failed to load alerts"
+        message={alerts.error instanceof Error ? alerts.error.message : "Something went wrong"}
+        onRetry={() => alerts.refetch()}
+      />
     )
   }
 
@@ -56,23 +52,16 @@ export function AdminAlertsPage() {
       <h1 className="font-headline-xl text-headline-xl text-primary mb-6">School-Wide Overview</h1>
 
       {alerts.isLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="rounded-[32px] bg-white p-md border border-outline-variant/10 animate-pulse">
-              <div className="h-4 w-16 bg-surface-container-high rounded-full mb-3" />
-              <div className="h-6 w-12 bg-surface-container-high rounded-full" />
-            </div>
-          ))}
-        </div>
+        <LoadingState />
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-            <DashboardStatCard icon="notifications_active" label="Active Alerts" value={stats.active} color="text-error" />
-            <DashboardStatCard icon="check_circle" label="Resolved This Week" value={stats.resolved} color="text-primary" />
-            <DashboardStatCard icon="error" label="High Severity" value={stats.high} color="text-error" />
-            <DashboardStatCard icon="warning" label="Medium Severity" value={stats.medium} color="text-yellow-600" />
-            <DashboardStatCard icon="info" label="Low Severity" value={stats.low} color="text-blue-600" />
-            <DashboardStatCard icon="trending_down" label="Failing Students" value={stats.failing} color="text-secondary" />
+            <StatCard icon="notifications_active" label="Active Alerts" value={stats.active} color="text-error" />
+            <StatCard icon="check_circle" label="Resolved This Week" value={stats.resolved} color="text-primary" />
+            <StatCard icon="error" label="High Severity" value={stats.high} color="text-error" />
+            <StatCard icon="warning" label="Medium Severity" value={stats.medium} color="text-yellow-600" />
+            <StatCard icon="info" label="Low Severity" value={stats.low} color="text-blue-600" />
+            <StatCard icon="trending_down" label="Failing Students" value={stats.failing} color="text-secondary" />
           </div>
 
           <div className="rounded-[32px] bg-white border border-outline-variant/10 shadow-sm overflow-hidden mb-6">
@@ -105,9 +94,12 @@ export function AdminAlertsPage() {
                   <div className="px-md py-3 border-b border-outline-variant/10 bg-surface-container-low">
                     <div className="flex items-center justify-between">
                       <h3 className="font-headline-md text-headline-md text-primary">{className}</h3>
-                      <span className="bg-error-container text-error font-label-sm text-label-sm px-2 py-0.5 rounded-full">
+                      <Badge
+                        variant="outline"
+                        className="bg-error-container text-error font-label-sm text-label-sm px-2 py-0.5 rounded-full border-0"
+                      >
                         {classAlerts.length} flagged
-                      </span>
+                      </Badge>
                     </div>
                   </div>
                   <div className="divide-y divide-outline-variant/10">

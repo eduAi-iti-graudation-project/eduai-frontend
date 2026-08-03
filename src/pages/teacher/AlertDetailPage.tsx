@@ -6,6 +6,8 @@ import { TeacherAnalysisSection } from "@/components/communication/TeacherAnalys
 import { TeacherFeedbackSection } from "@/components/communication/TeacherFeedbackSection"
 import { GuardianMessagePreview } from "@/components/communication/GuardianMessagePreview"
 import { ManagementSummarySection } from "@/components/communication/ManagementSummarySection"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { Button } from "@/components/ui/button"
 import * as api from "@/lib/api"
 import { toast } from "sonner"
 
@@ -27,14 +29,7 @@ export function AlertDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>psychology</span>
-          </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">Loading alert details...</p>
-        </div>
-      </div>
+      <LoadingState className="flex-1 p-md" />
     )
   }
 
@@ -79,20 +74,22 @@ export function AlertDetailPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            type="button"
             onClick={() => resolve.mutate("RESOLVED")}
             disabled={resolve.isPending}
-            className="bg-primary-container text-white px-md py-sm rounded-full font-label-md text-label-sm hover:opacity-90 disabled:opacity-50 transition-all"
+            className="bg-primary-container text-white px-md h-auto py-sm rounded-full font-label-md text-label-sm hover:opacity-90 disabled:opacity-50 transition-all"
           >
             Resolve
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
             onClick={() => resolve.mutate("DISMISSED")}
             disabled={resolve.isPending}
-            className="bg-surface-container text-on-surface-variant px-md py-sm rounded-full font-label-md text-label-sm hover:bg-surface-container-high disabled:opacity-50 transition-all"
+            className="bg-surface-container text-on-surface-variant px-md h-auto py-sm rounded-full font-label-md text-label-sm hover:bg-surface-container-high disabled:opacity-50 transition-all"
           >
             Dismiss
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -109,13 +106,15 @@ export function AlertDetailPage() {
 
         {detail.teacherContent && detail.teacherContent.resourceSuggestions.length > 0 && (
           <div className="flex items-center justify-center pt-2">
-            <Link
-              to="/reports"
-              className="inline-flex items-center gap-2 bg-surface-container-low text-on-surface-variant px-lg py-sm rounded-full font-label-md text-label-sm hover:bg-surface-container-high transition-colors"
+            <Button
+              asChild
+              className="inline-flex items-center gap-2 bg-surface-container-low text-on-surface-variant px-lg h-auto py-sm rounded-full font-label-md text-label-sm hover:bg-surface-container-high transition-colors"
             >
-              <span className="material-symbols-outlined text-[18px]">description</span>
-              View Full Report
-            </Link>
+              <Link to="/reports">
+                <span className="material-symbols-outlined text-[18px]">description</span>
+                View Full Report
+              </Link>
+            </Button>
           </div>
         )}
       </div>

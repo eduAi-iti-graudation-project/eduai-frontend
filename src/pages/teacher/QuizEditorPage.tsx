@@ -4,6 +4,17 @@ import { useClasses } from "@/hooks/use-classes"
 import { useQuiz, useCreateQuiz, useUpdateQuiz, usePublishQuiz } from "@/hooks/use-quizzes"
 import { QuizStatusBadge } from "@/components/quiz/QuizStatusBadge"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { QuizQuestionType, QuizStatus } from "@/lib/api"
 
 interface EditorOption {
@@ -30,6 +41,8 @@ const TYPE_LABELS: Record<QuizQuestionType, string> = {
 }
 
 const QUESTION_TYPES: QuizQuestionType[] = ["MCQ", "TRUE_FALSE", "SHORT_ANSWER", "ESSAY"]
+
+const NO_CLASS = "__none__"
 
 let localSeq = 0
 const newLocalId = () => `local-${Date.now()}-${localSeq++}`
@@ -271,28 +284,30 @@ export function QuizEditorPage() {
           {!isNew && quiz.data && <QuizStatusBadge status={quiz.data.status} />}
         </div>
         {readOnly ? (
-          <Link
-            to={`/quizzes/${id}/attempts`}
-            className="bg-primary text-white px-md py-sm rounded-full font-label-md nudge-hover"
+          <Button
+            asChild
+            className="bg-primary text-white px-md h-auto py-sm rounded-full font-label-md nudge-hover"
           >
-            View attempts
-          </Link>
+            <Link to={`/quizzes/${id}/attempts`}>View attempts</Link>
+          </Button>
         ) : (
           <div className="flex items-center gap-3">
-            <button
+            <Button
+              type="button"
               onClick={() => save(false)}
               disabled={saving || !canSave}
-              className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+              className="bg-secondary-container text-white px-md h-auto py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
             >
               {saving ? "Saving…" : "Save draft"}
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
               onClick={() => setPublishOpen(true)}
               disabled={saving || !canSave}
-              className="bg-primary text-white px-md py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+              className="bg-primary text-white px-md h-auto py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
             >
               Publish
-            </button>
+            </Button>
           </div>
         )}
       </header>
@@ -306,76 +321,80 @@ export function QuizEditorPage() {
         )}
 
         {!showEditor ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="font-body-md text-body-md text-on-surface-variant">Loading quiz…</p>
-          </div>
+          <LoadingState className="flex-1 p-md" />
         ) : (
           <div className="max-w-3xl mx-auto space-y-4">
             <div className="tactile-card rounded-[24px] bg-surface-container-lowest p-md space-y-4">
               <div>
                 <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Title</label>
-                <input
+                <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   disabled={readOnly}
                   placeholder="e.g. Chapter 4: Photosynthesis"
-                  className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-60"
+                  className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                 />
               </div>
               <div>
                 <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Description (optional)</label>
-                <textarea
+                <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   disabled={readOnly}
                   rows={2}
                   placeholder="Instructions students see before starting"
-                  className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-60 resize-none"
+                  className="w-full min-h-0 rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 resize-none"
                 />
               </div>
               <div>
                 <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Class</label>
-                <select
+                <Select
                   value={classId}
-                  onChange={(e) => setClassId(e.target.value)}
+                  onValueChange={(v) => setClassId(v === NO_CLASS ? "" : v)}
                   disabled={!isNew || readOnly}
-                  className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-60"
                 >
-                  {isNew ? (
-                    <>
-                      <option value="">Select a class</option>
-                      {(classes.data ?? []).map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </>
-                  ) : (
-                    <option value={classId}>{(classes.data ?? []).find((c) => c.id === classId)?.name ?? "Class"}</option>
-                  )}
-                </select>
+                  <SelectTrigger className="w-full rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60">
+                    <SelectValue placeholder="Select a class" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {isNew ? (
+                      <>
+                        <SelectItem value={NO_CLASS}>Select a class</SelectItem>
+                        {(classes.data ?? []).map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </>
+                    ) : (
+                      <SelectItem value={classId || NO_CLASS}>
+                        {(classes.data ?? []).find((c) => c.id === classId)?.name ?? "Class"}
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid grid-cols-2 gap-md">
                 <div>
                   <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Time limit (minutes, optional)</label>
-                  <input
+                  <Input
                     type="number"
                     min={1}
                     value={timeLimit}
                     onChange={(e) => setTimeLimit(e.target.value)}
                     disabled={readOnly}
                     placeholder="No limit"
-                    className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-60"
+                    className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                   />
                 </div>
                 <div>
                   <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Passing score (optional)</label>
-                  <input
+                  <Input
                     type="number"
                     min={0}
                     value={passingScore}
                     onChange={(e) => setPassingScore(e.target.value)}
                     disabled={readOnly}
                     placeholder="Not required"
-                    className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-60"
+                    className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -383,13 +402,13 @@ export function QuizEditorPage() {
                 <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
                   Closes at <span className="text-error">*</span>
                 </label>
-                <input
+                <Input
                   type="datetime-local"
                   value={closesAt}
                   min={isNew ? toLocalInputValue(new Date().toISOString()) : undefined}
                   onChange={(e) => setClosesAt(e.target.value)}
                   disabled={readOnly}
-                  className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-60"
+                  className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                 />
                 {closesAtError ? (
                   <p className="font-label-sm text-label-sm text-error mt-1">{closesAtError}</p>
@@ -406,13 +425,14 @@ export function QuizEditorPage() {
                 Questions <span className="text-on-surface-variant text-body-md">· {questions.length} · {totalPoints} pts</span>
               </h2>
               {!readOnly && (
-                <button
+                <Button
+                  type="button"
                   onClick={() => setQuestions((prev) => [...prev, makeQuestion("MCQ")])}
-                  className="bg-primary-fixed text-primary px-md py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1"
+                  className="bg-primary-fixed text-primary px-md h-auto py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-[18px]">add</span>
                   Add question
-                </button>
+                </Button>
               )}
             </div>
 
@@ -420,108 +440,118 @@ export function QuizEditorPage() {
               <div key={q.localId} className="tactile-card rounded-[24px] bg-surface-container-lowest p-md">
                 <div className="flex items-center gap-2 mb-sm">
                   <span className="font-label-md text-label-md text-on-surface-variant">Q{index + 1}</span>
-                  <select
+                  <Select
                     value={q.type}
-                    onChange={(e) => changeType(q.localId, e.target.value as QuizQuestionType)}
+                    onValueChange={(v) => changeType(q.localId, v as QuizQuestionType)}
                     disabled={readOnly}
-                    className="form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-1.5 text-sm text-on-surface disabled:opacity-60"
                   >
-                    {QUESTION_TYPES.map((t) => (
-                      <option key={t} value={t}>{TYPE_LABELS[t]}</option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-auto h-auto rounded-xl border border-outline-variant bg-surface px-3 py-1.5 text-sm text-on-surface form-input-focus disabled:opacity-60">
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {QUESTION_TYPES.map((t) => (
+                        <SelectItem key={t} value={t}>{TYPE_LABELS[t]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <div className="flex-1" />
                   <label className="flex items-center gap-1 text-sm text-on-surface-variant">
                     pts
-                    <input
+                    <Input
                       type="number"
                       min={1}
                       value={q.points}
                       onChange={(e) => updateQuestion(q.localId, { points: Math.max(1, Number(e.target.value) || 1) })}
                       disabled={readOnly}
-                      className="w-16 form-input-focus rounded-xl border border-outline-variant bg-surface px-2 py-1.5 text-sm text-on-surface disabled:opacity-60"
+                      className="w-16 h-auto rounded-xl border border-outline-variant bg-surface px-2 py-1.5 text-sm text-on-surface form-input-focus disabled:opacity-60"
                     />
                   </label>
                   {!readOnly && (
                     <>
-                      <button
+                      <Button
+                        type="button"
                         onClick={() => moveQuestion(index, -1)}
                         disabled={index === 0}
-                        className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant disabled:opacity-30 hover:bg-surface-container-high transition-colors"
+                        className="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant disabled:opacity-30 hover:bg-surface-container-high transition-colors"
                         aria-label="Move up"
                       >
                         <span className="material-symbols-outlined text-[18px]">arrow_upward</span>
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        type="button"
                         onClick={() => moveQuestion(index, 1)}
                         disabled={index === questions.length - 1}
-                        className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant disabled:opacity-30 hover:bg-surface-container-high transition-colors"
+                        className="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant disabled:opacity-30 hover:bg-surface-container-high transition-colors"
                         aria-label="Move down"
                       >
                         <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        type="button"
                         onClick={() => removeQuestion(q.localId)}
-                        className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-error hover:bg-error/10 transition-colors"
+                        className="w-8 h-8 rounded-full bg-surface-container text-error hover:bg-error/10 transition-colors"
                         aria-label="Remove question"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
-                      </button>
+                      </Button>
                     </>
                   )}
                 </div>
 
-                <textarea
+                <Textarea
                   value={q.question}
                   onChange={(e) => updateQuestion(q.localId, { question: e.target.value })}
                   disabled={readOnly}
                   rows={2}
                   placeholder="Type the question…"
-                  className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-60 mb-sm resize-none"
+                  className="w-full min-h-0 rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 mb-sm resize-none"
                 />
 
                 {(q.type === "MCQ" || q.type === "TRUE_FALSE") && (
                   <div className="space-y-2">
                     {q.options.map((opt) => (
                       <div key={opt.localId} className="flex items-center gap-2">
-                        <button
+                        <Button
                           type="button"
                           onClick={() => !readOnly && setCorrectOption(q.localId, opt.localId)}
                           disabled={readOnly}
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                          className={`w-5 h-5 p-0 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                             opt.isCorrect ? "border-primary" : "border-outline-variant"
                           }`}
                           aria-label={opt.isCorrect ? "Correct answer" : "Mark as correct"}
                         >
                           {opt.isCorrect && <span className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                        </button>
-                        <input
+                        </Button>
+                        <Input
                           value={opt.text}
                           onChange={(e) => updateOption(q.localId, opt.localId, { text: e.target.value })}
                           disabled={readOnly}
                           placeholder="Answer option"
-                          className="flex-1 form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-60"
+                          className="flex-1 h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                         />
                         {!readOnly && q.type === "MCQ" && (
-                          <button
+                          <Button
+                            type="button"
                             onClick={() => removeOption(q.localId, opt.localId)}
                             disabled={q.options.length <= 2}
-                            className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant disabled:opacity-30 hover:bg-error/10 hover:text-error transition-colors"
+                            className="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant disabled:opacity-30 hover:bg-error/10 hover:text-error transition-colors"
                             aria-label="Remove option"
                           >
                             <span className="material-symbols-outlined text-[18px]">close</span>
-                          </button>
+                          </Button>
                         )}
                       </div>
                     ))}
                     {!readOnly && q.type === "MCQ" && (
-                      <button
+                      <Button
+                        type="button"
+                        variant="link"
                         onClick={() => addOption(q.localId)}
-                        className="text-primary font-label-md text-label-md hover:underline inline-flex items-center gap-1"
+                        className="text-primary font-label-md text-label-md hover:underline h-auto p-0 inline-flex items-center gap-1"
                       >
                         <span className="material-symbols-outlined text-[16px]">add</span>
                         Add option
-                      </button>
+                      </Button>
                     )}
                   </div>
                 )}
@@ -537,20 +567,22 @@ export function QuizEditorPage() {
 
             {!readOnly && questions.length > 0 && (
               <div className="flex justify-end gap-3 pb-lg">
-                <button
+                <Button
+                  type="button"
                   onClick={() => save(false)}
                   disabled={saving || !canSave}
-                  className="bg-secondary-container text-white px-lg py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+                  className="bg-secondary-container text-white px-lg h-auto py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
                 >
                   {saving ? "Saving…" : "Save draft"}
-                </button>
-                <button
+                </Button>
+                <Button
+                  type="button"
                   onClick={() => setPublishOpen(true)}
                   disabled={saving || !canSave}
-                  className="bg-primary text-white px-lg py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+                  className="bg-primary text-white px-lg h-auto py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
                 >
                   Publish
-                </button>
+                </Button>
               </div>
             )}
           </div>

@@ -432,7 +432,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Update points awarded for a single score */
+        /** Update points awarded and notes for a single score */
         patch: operations["GradingController_updateScore"];
         trace?: never;
     };
@@ -453,34 +453,17 @@ export interface paths {
         patch: operations["GradingController_confirmAll"];
         trace?: never;
     };
-    "/reports": {
+    "/grades/backfill-feedback": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List reports, optionally filtered by student */
-        get: operations["ReportsController_findAll"];
+        get?: never;
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reports/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a single report by ID */
-        get: operations["ReportsController_findOne"];
-        put?: never;
-        post?: never;
+        /** Re-run feedback writer for all confirmed submissions missing AI feedback */
+        post: operations["GradingController_backfillFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -521,6 +504,40 @@ export interface paths {
         patch: operations["NotificationsController_markRead"];
         trace?: never;
     };
+    "/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List reports, optionally filtered by student */
+        get: operations["ReportsController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a single report by ID */
+        get: operations["ReportsController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/alerts": {
         parameters: {
             query?: never;
@@ -530,6 +547,23 @@ export interface paths {
         };
         /** List alerts for teacher's classes */
         get: operations["AlertsController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/alerts/{id}/teacher-detail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get structured analysis data for an alert */
+        get: operations["AlertsController_getTeacherDetail"];
         put?: never;
         post?: never;
         delete?: never;
@@ -589,23 +623,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/materials/class/{classId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List materials for a class */
-        get: operations["MaterialsController_findByClass"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/materials/class/{classId}/search": {
         parameters: {
             query?: never;
@@ -615,6 +632,23 @@ export interface paths {
         };
         /** Search material chunks by semantic similarity */
         get: operations["MaterialsController_searchChunks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/class/{classId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List materials for a class */
+        get: operations["MaterialsController_findByClass"];
         put?: never;
         post?: never;
         delete?: never;
@@ -650,6 +684,23 @@ export interface paths {
         };
         /** Get confirmed grades for a student */
         get: operations["StudentsController_getGrades"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/students/{id}/grades/{submissionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get confirmed grades for a specific submission */
+        get: operations["StudentsController_getSubmissionGrades"];
         put?: never;
         post?: never;
         delete?: never;
@@ -769,6 +820,40 @@ export interface paths {
         };
         /** Role-aware dashboard overview */
         get: operations["DashboardController_getOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/insights": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Role-aware dashboard insights */
+        get: operations["DashboardController_getInsights"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/insights/students/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Per-student insights drill-down */
+        get: operations["DashboardController_getStudentInsights"];
         put?: never;
         post?: never;
         delete?: never;
@@ -933,14 +1018,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/health": {
+    "/assistant/homework-help": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["SystemController_health"];
+        get?: never;
+        put?: never;
+        /** Ask the homework helper agent for help */
+        post: operations["HomeworkHelperController_help"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/homework-help/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get past homework help interactions */
+        get: operations["HomeworkHelperController_getHistory"];
         put?: never;
         post?: never;
         delete?: never;
@@ -949,14 +1052,67 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/ready": {
+    "/assistant/homework-help/{interactionId}/feedback": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["SystemController_ready"];
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Submit feedback on a homework help interaction */
+        patch: operations["HomeworkHelperController_submitFeedback"];
+        trace?: never;
+    };
+    "/quizzes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List quizzes (role-aware: teacher-owned or student enrolled), optionally filtered by class */
+        get: operations["QuizzesController_findAll"];
+        put?: never;
+        /** Create a quiz with nested questions */
+        post: operations["QuizzesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/quizzes/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate a quiz with AI */
+        post: operations["QuizzesController_generate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/quizzes/attempts/{attemptId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an attempt with answers, quiz, student and violations */
+        get: operations["QuizzesController_getAttempt"];
         put?: never;
         post?: never;
         delete?: never;
@@ -965,36 +1121,142 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/info": {
+    "/quizzes/attempts/{attemptId}/confirm": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["SystemController_info"];
+        get?: never;
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Confirm all answers of an attempt (rejects if any answer is ungraded) */
+        patch: operations["QuizzesController_confirmAttempt"];
+        trace?: never;
+    };
+    "/quizzes/attempts/{attemptId}/violations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report a quiz violation (own attempt only) */
+        post: operations["QuizzesController_reportViolation"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/{path}": {
+    "/quizzes/answers/{answerId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["MastraController_handleRequest_get"];
-        put: operations["MastraController_handleRequest_put"];
-        post: operations["MastraController_handleRequest_post"];
-        delete: operations["MastraController_handleRequest_delete"];
-        options: operations["MastraController_handleRequest_options"];
-        head: operations["MastraController_handleRequest_head"];
-        patch: operations["MastraController_handleRequest_patch"];
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update points awarded for a single answer */
+        patch: operations["QuizzesController_updateAnswer"];
+        trace?: never;
+    };
+    "/quizzes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a quiz with questions */
+        get: operations["QuizzesController_findOne"];
+        put?: never;
+        post?: never;
+        /** Delete a quiz (cascades questions and attempts) */
+        delete: operations["QuizzesController_remove"];
+        options?: never;
+        head?: never;
+        /** Update a quiz (replaces/upserts questions when included) */
+        patch: operations["QuizzesController_update"];
+        trace?: never;
+    };
+    "/quizzes/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Publish a quiz */
+        patch: operations["QuizzesController_publish"];
+        trace?: never;
+    };
+    "/quizzes/{quizId}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start (or resume) a quiz attempt */
+        post: operations["QuizzesController_startAttempt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/quizzes/{quizId}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit answers for a quiz attempt */
+        post: operations["QuizzesController_submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/quizzes/{quizId}/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all attempts for a quiz */
+        get: operations["QuizzesController_getQuizAttempts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
@@ -1109,18 +1371,6 @@ export interface components {
             createdAt: string;
             updatedAt: string;
         };
-        ReportDto: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            studentId: string;
-            /** Format: uuid */
-            alertId: string;
-            parentSection: string;
-            teacherSection: string;
-            managementSection: string;
-            createdAt: string;
-        };
         NotificationDto: {
             /** Format: uuid */
             id: string;
@@ -1136,6 +1386,18 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        ReportDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            studentId: string;
+            /** Format: uuid */
+            alertId: string;
+            parentSection: string;
+            teacherSection: string;
+            managementSection: string;
+            createdAt: string;
+        };
         AlertDto: {
             /** Format: uuid */
             id: string;
@@ -1145,6 +1407,10 @@ export interface components {
             /** Format: uuid */
             studentId: string;
             createdAt: string;
+            studentName: string;
+            className: string | null;
+            severity: string | null;
+            skillGapCount: number;
         };
         ResolveAlertDto: {
             /** @enum {string} */
@@ -1214,6 +1480,36 @@ export interface components {
             createdAt: string;
             updatedAt: string;
         };
+        InsightsResponseDto: {
+            /** @enum {string} */
+            interval: "week" | "month";
+            sections: {
+                key: string;
+                title: string;
+                /** @enum {string} */
+                chartType: "line" | "area" | "bar" | "radar" | "donut";
+                series: {
+                    label: string;
+                    value: number;
+                }[];
+                delta?: {
+                    deltaPercent: number;
+                    /** @enum {string} */
+                    direction: "up" | "down" | "flat";
+                };
+            }[];
+            agentInsights: {
+                id: string;
+                type: string;
+                title: string;
+                body: string;
+                studentName?: string;
+                studentId?: string;
+                childName?: string;
+                childId?: string;
+            }[];
+            unreadNotifications: number;
+        };
         GradeClassDto: {
             /** Format: uuid */
             id: string;
@@ -1233,6 +1529,283 @@ export interface components {
         AddTeacherGradeDto: {
             /** Format: uuid */
             gradeId: string;
+        };
+        HomeworkHelpRequestDto: {
+            /** Format: uuid */
+            classId: string;
+            question: string;
+            /** Format: uuid */
+            assignmentId?: string;
+        };
+        HomeworkHelpResponseDto: {
+            answer: string;
+            reply: string;
+            /** @enum {string} */
+            action: "HINT" | "EXPLANATION" | "REDIRECT_TEACHER";
+            sources: string[];
+            /** Format: uuid */
+            interactionId: string;
+            teacherNotified: boolean;
+        };
+        HomeworkHelpHistoryResponseDto: {
+            interactions: {
+                /** Format: uuid */
+                id: string;
+                question: string;
+                answer: string;
+                /** @enum {string} */
+                action: "HINT" | "EXPLANATION" | "REDIRECT_TEACHER";
+                sources: string[];
+                feedback: string | null;
+                createdAt: string;
+            }[];
+        };
+        HomeworkHelpFeedbackDto: {
+            /** @enum {string} */
+            feedback: "HELPFUL" | "NOT_HELPFUL";
+        };
+        QuizWithAttemptStatusDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            description: string | null;
+            /** Format: uuid */
+            classId: string;
+            timeLimit: number | null;
+            passingScore: number | null;
+            /** @enum {string} */
+            status: "DRAFT" | "PUBLISHED" | "CLOSED";
+            endsAt: string | null;
+            createdAt: string;
+            questions?: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                type: "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY";
+                question: string;
+                options?: {
+                    /** Format: uuid */
+                    id: string;
+                    text: string;
+                    isCorrect?: boolean;
+                }[];
+                points: number;
+                order: number;
+            }[];
+            /** @enum {string} */
+            attemptStatus?: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
+            /** Format: uuid */
+            attemptId?: string | null;
+        };
+        GenerateQuizDto: {
+            /** Format: uuid */
+            classId: string;
+            topic: string;
+            questionCount: number;
+            types: ("MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY")[];
+        };
+        GenerateQuizResultDto: {
+            /** Format: uuid */
+            quizId: string;
+            title: string;
+            message: string;
+        };
+        QuizAttemptDetailDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            quizId: string;
+            /** Format: uuid */
+            studentId: string;
+            startedAt: string;
+            submittedAt: string | null;
+            totalScore: number | null;
+            /** @enum {string} */
+            status: "IN_PROGRESS" | "COMPLETED";
+            violations?: {
+                /** Format: uuid */
+                id: string;
+                type: string;
+                createdAt: string;
+            }[];
+            expiresAt: string | null;
+            serverNow?: string;
+            student?: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            };
+            quiz?: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                description: string | null;
+                /** Format: uuid */
+                classId: string;
+                timeLimit: number | null;
+                passingScore: number | null;
+                /** @enum {string} */
+                status: "DRAFT" | "PUBLISHED" | "CLOSED";
+                endsAt: string | null;
+                createdAt: string;
+                questions?: {
+                    /** Format: uuid */
+                    id: string;
+                    /** @enum {string} */
+                    type: "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY";
+                    question: string;
+                    options?: {
+                        /** Format: uuid */
+                        id: string;
+                        text: string;
+                        isCorrect?: boolean;
+                    }[];
+                    points: number;
+                    order: number;
+                }[];
+            };
+            answers?: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                questionId: string;
+                answer: string;
+                pointsAwarded: number | null;
+                aiFeedback: string | null;
+                isConfirmed: boolean;
+            }[];
+        };
+        ReportViolationDto: {
+            /** @enum {string} */
+            type: "TAB_SWITCH" | "FULLSCREEN_EXIT";
+        };
+        QuizViolationDto: {
+            /** Format: uuid */
+            id: string;
+            type: string;
+            createdAt: string;
+        };
+        UpdateAnswerDto: {
+            pointsAwarded: number;
+        };
+        QuizAnswerDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            questionId: string;
+            answer: string;
+            pointsAwarded: number | null;
+            aiFeedback: string | null;
+            isConfirmed: boolean;
+        };
+        CreateQuizDto: {
+            title: string;
+            description?: string;
+            /** Format: uuid */
+            classId: string;
+            timeLimit?: number;
+            passingScore?: number;
+            /** Format: date-time */
+            endsAt?: string;
+            questions: {
+                /** Format: uuid */
+                id?: string;
+                /** @enum {string} */
+                type: "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY";
+                question: string;
+                options?: {
+                    /** Format: uuid */
+                    id?: string;
+                    text: string;
+                    isCorrect: boolean;
+                }[];
+                points?: number;
+                order: number;
+            }[];
+        };
+        QuizDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            description: string | null;
+            /** Format: uuid */
+            classId: string;
+            timeLimit: number | null;
+            passingScore: number | null;
+            /** @enum {string} */
+            status: "DRAFT" | "PUBLISHED" | "CLOSED";
+            endsAt: string | null;
+            createdAt: string;
+            questions?: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                type: "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY";
+                question: string;
+                options?: {
+                    /** Format: uuid */
+                    id: string;
+                    text: string;
+                    isCorrect?: boolean;
+                }[];
+                points: number;
+                order: number;
+            }[];
+        };
+        UpdateQuizDto: {
+            title?: string;
+            description?: string;
+            /** Format: uuid */
+            classId?: string;
+            timeLimit?: number;
+            passingScore?: number;
+            /** Format: date-time */
+            endsAt?: string;
+            questions?: {
+                /** Format: uuid */
+                id?: string;
+                /** @enum {string} */
+                type: "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY";
+                question: string;
+                options?: {
+                    /** Format: uuid */
+                    id?: string;
+                    text: string;
+                    isCorrect: boolean;
+                }[];
+                points?: number;
+                order: number;
+            }[];
+            /** @enum {string} */
+            status?: "DRAFT" | "PUBLISHED" | "CLOSED";
+        };
+        QuizAttemptDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            quizId: string;
+            /** Format: uuid */
+            studentId: string;
+            startedAt: string;
+            submittedAt: string | null;
+            totalScore: number | null;
+            /** @enum {string} */
+            status: "IN_PROGRESS" | "COMPLETED";
+            violations?: {
+                /** Format: uuid */
+                id: string;
+                type: string;
+                createdAt: string;
+            }[];
+            expiresAt: string | null;
+            serverNow?: string;
+        };
+        SubmitQuizDto: {
+            answers: {
+                /** Format: uuid */
+                questionId: string;
+                answer: string;
+            }[];
         };
     };
     responses: never;
@@ -1950,45 +2523,20 @@ export interface operations {
             };
         };
     };
-    ReportsController_findAll: {
+    GradingController_backfillFeedback: {
         parameters: {
-            query?: {
-                studentId?: string;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["ReportDto"][];
-                };
-            };
-        };
-    };
-    ReportsController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReportDto"];
-                };
+                content?: never;
             };
         };
     };
@@ -2032,6 +2580,48 @@ export interface operations {
             };
         };
     };
+    ReportsController_findAll: {
+        parameters: {
+            query?: {
+                studentId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDto"][];
+                };
+            };
+        };
+    };
+    ReportsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDto"];
+                };
+            };
+        };
+    };
     AlertsController_findAll: {
         parameters: {
             query?: {
@@ -2050,6 +2640,25 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AlertDto"][];
                 };
+            };
+        };
+    };
+    AlertsController_getTeacherDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2128,9 +2737,12 @@ export interface operations {
             };
         };
     };
-    MaterialsController_findByClass: {
+    MaterialsController_searchChunks: {
         parameters: {
-            query?: never;
+            query: {
+                q: string;
+                topK: string;
+            };
             header?: never;
             path: {
                 classId: string;
@@ -2147,12 +2759,9 @@ export interface operations {
             };
         };
     };
-    MaterialsController_searchChunks: {
+    MaterialsController_findByClass: {
         parameters: {
-            query: {
-                q: string;
-                topK: string;
-            };
+            query?: never;
             header?: never;
             path: {
                 classId: string;
@@ -2213,6 +2822,28 @@ export interface operations {
             header?: never;
             path: {
                 id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeDto"][];
+                };
+            };
+        };
+    };
+    StudentsController_getSubmissionGrades: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                submissionId: string;
             };
             cookie?: never;
         };
@@ -2372,6 +3003,62 @@ export interface operations {
         responses: {
             /** @description Role-aware dashboard data — shape varies by role */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DashboardController_getInsights: {
+        parameters: {
+            query?: {
+                /** @description Bucket interval — defaults to week */
+                interval?: "week" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Insights response envelope (sections + agent insights) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InsightsResponseDto"];
+                };
+            };
+        };
+    };
+    DashboardController_getStudentInsights: {
+        parameters: {
+            query?: {
+                /** @description Bucket interval — defaults to week */
+                interval?: "week" | "month";
+            };
+            header?: never;
+            path: {
+                /** @description Student user id */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Insights response envelope scoped to one student */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InsightsResponseDto"];
+                };
+            };
+            /** @description No access to this student */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2632,11 +3319,260 @@ export interface operations {
             };
         };
     };
-    SystemController_health: {
+    HomeworkHelperController_help: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HomeworkHelpRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomeworkHelpResponseDto"];
+                };
+            };
+        };
+    };
+    HomeworkHelperController_getHistory: {
+        parameters: {
+            query?: {
+                classId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomeworkHelpHistoryResponseDto"];
+                };
+            };
+        };
+    };
+    HomeworkHelperController_submitFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                interactionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HomeworkHelpFeedbackDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuizzesController_findAll: {
+        parameters: {
+            query?: {
+                classId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizWithAttemptStatusDto"][];
+                };
+            };
+        };
+    };
+    QuizzesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateQuizDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizDto"];
+                };
+            };
+        };
+    };
+    QuizzesController_generate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateQuizDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateQuizResultDto"];
+                };
+            };
+        };
+    };
+    QuizzesController_getAttempt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizAttemptDetailDto"];
+                };
+            };
+        };
+    };
+    QuizzesController_confirmAttempt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizAttemptDetailDto"];
+                };
+            };
+        };
+    };
+    QuizzesController_reportViolation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportViolationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizViolationDto"];
+                };
+            };
+        };
+    };
+    QuizzesController_updateAnswer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                answerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAnswerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizAnswerDto"];
+                };
+            };
+        };
+    };
+    QuizzesController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizDto"];
+                };
+            };
+        };
+    };
+    QuizzesController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -2649,28 +3585,38 @@ export interface operations {
             };
         };
     };
-    SystemController_ready: {
+    QuizzesController_update: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateQuizDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["QuizDto"];
+                };
             };
         };
     };
-    SystemController_info: {
+    QuizzesController_publish: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -2679,15 +3625,19 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["QuizDto"];
+                };
             };
         };
     };
-    MastraController_handleRequest_get: {
+    QuizzesController_startAttempt: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                quizId: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -2696,49 +3646,44 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["QuizAttemptDto"];
+                };
             };
         };
     };
-    MastraController_handleRequest_put: {
+    QuizzesController_submit: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                quizId: string;
+            };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitQuizDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["QuizAttemptDto"];
+                };
             };
         };
     };
-    MastraController_handleRequest_post: {
+    QuizzesController_getQuizAttempts: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
+            path: {
+                quizId: string;
             };
-        };
-    };
-    MastraController_handleRequest_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -2747,58 +3692,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-        };
-    };
-    MastraController_handleRequest_options: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["QuizAttemptDetailDto"][];
                 };
-                content?: never;
-            };
-        };
-    };
-    MastraController_handleRequest_head: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MastraController_handleRequest_patch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

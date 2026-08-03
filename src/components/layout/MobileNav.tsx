@@ -4,6 +4,7 @@ const items = [
   { icon: "home", label: "Home", id: "home", href: "/dashboard" },
   { icon: "school", label: "Classes", id: "classes", href: "/classes" },
   { icon: "notifications", label: "Alerts", id: "alerts", href: "/alerts" },
+  { icon: "monitoring", label: "Insights", id: "insights", href: "/insights" },
   { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/assistant" },
 ]
 
@@ -14,6 +15,7 @@ export function MobileNav() {
   const activeItem = path === "/dashboard" ? "home"
     : path.startsWith("/classes") ? "classes"
     : path.startsWith("/alerts") ? "alerts"
+    : path.startsWith("/insights") ? "insights"
     : path.startsWith("/assistant") ? "assistant"
     : "home"
 

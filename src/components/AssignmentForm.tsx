@@ -89,9 +89,8 @@ export function AssignmentForm() {
     }
   }
 
-  const onSubmit: SubmitHandler<AssignmentFormData> = async (data) => {
+  const onSubmit: SubmitHandler<AssignmentFormData> = async () => {
     try {
-      console.log(data)
       await new Promise((resolve) => setTimeout(resolve, 2000))
       toast.success("Assignment submitted successfully")
       setIsSuccess(true)

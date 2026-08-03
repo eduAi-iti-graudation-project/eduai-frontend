@@ -2,6 +2,17 @@ import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useAlertDetail } from "@/hooks/use-alert-detail"
 import { HomeStrategiesList } from "@/components/communication/HomeStrategiesList"
+import { EmptyState } from "@/components/ui/EmptyState"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { LoadingState } from "@/components/shared/LoadingState"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import * as api from "@/lib/api"
 
 export function GuardianAlertDetailPage() {
@@ -15,27 +26,17 @@ export function GuardianAlertDetailPage() {
   })
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full p-xl">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>family_history</span>
-          </div>
-          <p className="font-body-md text-body-md text-on-surface-variant">Loading alert...</p>
-        </div>
-      </div>
-    )
+    return <LoadingState />
   }
 
   if (isError || !detail) {
     return (
-      <div className="flex items-center justify-center h-full p-xl">
-        <div className="text-center">
-          <span className="material-symbols-outlined text-[48px] text-error mb-md">error_outline</span>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Failed to load alert</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mb-lg">
-            {error instanceof Error ? error.message : "Something went wrong"}
-          </p>
+      <div className="flex flex-col items-center justify-center h-full">
+        <ErrorState
+          title="Failed to load alert"
+          message={error instanceof Error ? error.message : "Something went wrong"}
+        />
+        <div className="pb-xl">
           <Link to="/guardian" className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md">
             Back to Dashboard
           </Link>
@@ -95,28 +96,26 @@ export function GuardianAlertDetailPage() {
             ))}
           </div>
         ) : !grades.data || grades.data.length === 0 ? (
-          <div className="p-6 text-center">
-            <p className="font-body-md text-body-md text-on-surface-variant">No grades available yet.</p>
-          </div>
+          <EmptyState icon="grade" title="No grades available yet." />
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-outline-variant/10 bg-surface-container-low">
-                <th className="text-left font-label-sm text-label-sm text-on-surface-variant px-md py-3">Assignment</th>
-                <th className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3">Score</th>
-                <th className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3">Max</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-outline-variant/10 bg-surface-container-low hover:bg-transparent">
+                <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Assignment</TableHead>
+                <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Score</TableHead>
+                <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Max</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {grades.data.filter((g) => g.isConfirmed).map((g) => (
-                <tr key={g.id} className="border-b border-outline-variant/10 last:border-0 hover:bg-surface-container transition-colors">
-                  <td className="px-md py-3 font-body-md text-body-md text-on-surface">{g.criterionDescription}</td>
-                  <td className="px-md py-3 text-right font-body-md text-body-md text-on-surface">{g.pointsAwarded}</td>
-                  <td className="px-md py-3 text-right font-body-md text-body-md text-on-surface-variant">{g.criterionMaxPoints}</td>
-                </tr>
+                <TableRow key={g.id} className="border-b border-outline-variant/10 hover:bg-surface-container">
+                  <TableCell className="px-md py-3 font-body-md text-body-md text-on-surface">{g.criterionDescription}</TableCell>
+                  <TableCell className="px-md py-3 text-right font-body-md text-body-md text-on-surface">{g.pointsAwarded}</TableCell>
+                  <TableCell className="px-md py-3 text-right font-body-md text-body-md text-on-surface-variant">{g.criterionMaxPoints}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
       </div>
     </div>

@@ -4,6 +4,8 @@ import { useNotifications } from "@/hooks/use-notifications"
 import { NotificationItem } from "@/components/ui/NotificationItem"
 import { NotificationDetailDialog } from "@/components/ui/NotificationDetailDialog"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { ErrorState } from "@/components/shared/ErrorState"
 import { toast } from "sonner"
 import type { components } from "@/types/api-schema"
 
@@ -17,23 +19,12 @@ export function NotificationsListPage() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-error-container flex items-center justify-center mx-auto mb-4">
-            <span className="material-symbols-outlined text-error text-3xl">error_outline</span>
-          </div>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-2">Failed to load notifications</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mb-4">
-            {error?.message ?? "Something went wrong"}
-          </p>
-          <button
-            onClick={() => refetch()}
-            className="px-md py-sm bg-secondary-container text-white rounded-full font-label-md text-label-md shadow-lg"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        title="Failed to load notifications"
+        message={error?.message ?? "Something went wrong"}
+        onRetry={() => refetch()}
+        className="flex-1"
+      />
     )
   }
 
@@ -51,19 +42,7 @@ export function NotificationsListPage() {
       </header>
 
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-[24px] bg-surface-container-lowest p-4 border border-outline-variant/10 animate-pulse">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-surface-container-high shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-5 w-48 bg-surface-container-high rounded-full" />
-                  <div className="h-4 w-64 bg-surface-container-high rounded-full" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <LoadingState className="py-lg" />
       ) : myNotifications.length === 0 ? (
         <EmptyState
           icon="notifications_off"

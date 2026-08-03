@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 interface NotificationItemProps {
@@ -20,12 +21,19 @@ export function NotificationItem({
   className,
 }: NotificationItemProps) {
   return (
-    <button
-      type="button"
+    <Card
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       className={cn(
-        "w-full text-left tactile-card rounded-[24px] bg-surface-container-lowest p-4 flex items-start gap-4 transition-all hover:shadow-sm",
-        !read && "border-l-4 border-primary",
+        "w-full text-left tactile-card rounded-[24px] bg-surface-container-lowest p-4 flex items-start gap-4 border-outline-variant/10 shadow-none transition-all hover:shadow-sm cursor-pointer",
+        !read && "border-l-4 border-l-primary",
         className,
       )}
     >
@@ -64,10 +72,11 @@ export function NotificationItem({
           }}
           className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container hover:text-primary transition-all"
           title="Mark as read"
+          aria-label="Mark as read"
         >
           <span className="material-symbols-outlined text-[18px]">mark_email_read</span>
         </button>
       )}
-    </button>
+    </Card>
   )
 }

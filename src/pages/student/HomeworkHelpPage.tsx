@@ -5,6 +5,15 @@ import { useAuth } from "@/providers/use-auth"
 import * as api from "@/lib/api"
 import { useHomeworkHelpChat } from "@/hooks/use-homework-help"
 import { FeedbackButtons } from "@/components/student/FeedbackButtons"
+import { PageHeader } from "@/components/shared/PageHeader"
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const actionConfig: Record<string, { icon: string; label: string }> = {
   HINT: { icon: "auto_awesome", label: "Hint" },
@@ -48,51 +57,59 @@ export function HomeworkHelpPage() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
-        <div className="flex items-center gap-3">
-          <h1 className="font-headline-lg text-headline-lg text-primary">Homework Help</h1>
-          <Link
-            to="/student/homework-help/history"
-            className="text-primary font-label-sm text-label-sm hover:underline"
-          >
-            Help History →
-          </Link>
-        </div>
-        <div className="flex items-center gap-2">
-          <select
-            value={selectedClassId}
-            onChange={(e) => {
-              setSelectedClassId(e.target.value)
-              setSelectedAssignmentId("")
-            }}
-            className="form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface"
-          >
-            <option value="">Select a class...</option>
-            {studentClasses.data?.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          <select
-            value={selectedAssignmentId}
-            onChange={(e) => setSelectedAssignmentId(e.target.value)}
-            disabled={!selectedClassId}
-            className="form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-50"
-          >
-            <option value="">
-              {selectedClassId
-                ? (studentClasses.data?.find((c) => c.id === selectedClassId)?.assignments.length ?? 0) > 0
-                  ? "No specific assignment"
-                  : "No assignments in this class"
-                : "Select a class first..."}
-            </option>
-            {studentClasses.data
-              ?.find((c) => c.id === selectedClassId)
-              ?.assignments.map((a) => (
-                <option key={a.id} value={a.id}>{a.title}</option>
-              ))}
-          </select>
-        </div>
-      </header>
+      <PageHeader
+        title="Homework Help"
+        actions={
+          <>
+            <Link
+              to="/student/homework-help/history"
+              className="text-primary font-label-sm text-label-sm hover:underline shrink-0"
+            >
+              Help History →
+            </Link>
+            <Select
+              value={selectedClassId}
+              onValueChange={(value) => {
+                setSelectedClassId(value)
+                setSelectedAssignmentId("")
+              }}
+            >
+              <SelectTrigger className="form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[170px]">
+                <SelectValue placeholder="Select a class..." />
+              </SelectTrigger>
+              <SelectContent>
+                {studentClasses.data?.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={selectedAssignmentId}
+              onValueChange={setSelectedAssignmentId}
+              disabled={!selectedClassId}
+            >
+              <SelectTrigger className="form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[200px] disabled:opacity-50">
+                <SelectValue
+                  placeholder={
+                    selectedClassId
+                      ? (studentClasses.data?.find((c) => c.id === selectedClassId)?.assignments.length ?? 0) > 0
+                        ? "No specific assignment"
+                        : "No assignments in this class"
+                      : "Select a class first..."
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {studentClasses.data
+                  ?.find((c) => c.id === selectedClassId)
+                  ?.assignments.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </>
+        }
+      />
 
       <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full p-md gap-4 overflow-y-auto">
         {messages.length === 0 && (
@@ -176,21 +193,25 @@ export function HomeworkHelpPage() {
               rows={1}
               className="flex-1 bg-transparent border-none outline-none resize-none px-3 py-2 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50"
             />
-            <button
+            <Button
+              type="button"
               onClick={handleSend}
               disabled={!input.trim() || isLoading || !selectedClassId}
-              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary disabled:opacity-40 transition-opacity hover:opacity-90"
+              size="icon"
+              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary disabled:opacity-40 transition-opacity hover:opacity-90 hover:bg-primary"
             >
               <span className="material-symbols-outlined text-[20px]">send</span>
-            </button>
+            </Button>
           </div>
           {messages.length > 0 && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               onClick={clearMessages}
-              className="mt-2 text-sm text-on-surface-variant hover:text-on-surface transition-colors"
+              className="mt-2 h-auto p-0 text-sm text-on-surface-variant hover:text-on-surface hover:bg-transparent transition-colors"
             >
               Clear chat
-            </button>
+            </Button>
           )}
         </div>
       </div>

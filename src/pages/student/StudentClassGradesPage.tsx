@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/providers/use-auth"
 import * as api from "@/lib/api"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { LoadingState } from "@/components/shared/LoadingState"
 
 export function StudentClassGradesPage() {
   const { classId } = useParams<{ classId: string }>()
@@ -40,14 +41,7 @@ export function StudentClassGradesPage() {
           <div className="w-8 h-8 rounded-full bg-surface-container-high animate-pulse" />
           <div className="h-8 w-48 bg-surface-container-high rounded-full animate-pulse" />
         </div>
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-[32px] bg-white p-md border border-outline-variant/10 animate-pulse">
-              <div className="h-5 w-48 bg-surface-container-high rounded-full mb-2" />
-              <div className="h-4 w-32 bg-surface-container-high rounded-full" />
-            </div>
-          ))}
-        </div>
+        <LoadingState />
       </div>
     )
   }

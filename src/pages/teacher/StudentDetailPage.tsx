@@ -3,6 +3,23 @@ import { useStudentGrades } from "@/hooks/use-students"
 import { useStudentAttendance } from "@/hooks/use-attendance"
 import { useReports } from "@/hooks/use-reports"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { Badge } from "@/components/ui/badge"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { cn } from "@/lib/utils"
+
+const attendanceStatusClasses: Record<string, string> = {
+  PRESENT: "bg-green-100 text-green-700",
+  ABSENT: "bg-red-100 text-red-700",
+  LATE: "bg-yellow-100 text-yellow-700",
+  EXCUSED: "bg-gray-100 text-gray-700",
+}
 
 export function StudentDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -22,10 +39,19 @@ export function StudentDetailPage() {
         <div className="w-16 h-16 bg-primary-container rounded-3xl flex items-center justify-center text-white">
           <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="font-headline-xl text-headline-xl text-primary mb-xs">Student Detail</h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant">ID: {id}</p>
         </div>
+        {id ? (
+          <Link
+            to={`/insights/students/${id}`}
+            className="inline-flex items-center gap-xs bg-primary-container text-white font-label-md text-label-md px-lg py-sm rounded-full hover:opacity-90 transition-opacity"
+          >
+            <span className="material-symbols-outlined text-[18px]">monitoring</span>
+            Insights
+          </Link>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-xl">
@@ -61,29 +87,32 @@ export function StudentDetailPage() {
             <EmptyState icon="calendar_month" title="No attendance records" />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-outline-variant/20">
-                    <th className="text-left px-3 py-2 font-label-sm text-label-sm text-on-surface-variant">Date</th>
-                    <th className="text-left px-3 py-2 font-label-sm text-label-sm text-on-surface-variant">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-outline-variant/20 hover:bg-transparent">
+                    <TableHead className="px-3 py-2 font-label-sm text-label-sm text-on-surface-variant">Date</TableHead>
+                    <TableHead className="px-3 py-2 font-label-sm text-label-sm text-on-surface-variant">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {attendance.map((r) => (
-                    <tr key={r.id} className="border-b border-outline-variant/10 last:border-none">
-                      <td className="px-3 py-2 font-label-sm text-label-sm text-on-surface">{new Date(r.date).toLocaleDateString()}</td>
-                      <td className="px-3 py-2">
-                        <span className={`inline-block px-2 py-0.5 rounded-full font-label-sm text-label-sm ${
-                          r.status === "PRESENT" ? "bg-green-100 text-green-700" :
-                          r.status === "ABSENT" ? "bg-red-100 text-red-700" :
-                          r.status === "LATE" ? "bg-yellow-100 text-yellow-700" :
-                          "bg-gray-100 text-gray-700"
-                        }`}>{r.status}</span>
-                      </td>
-                    </tr>
+                    <TableRow key={r.id} className="border-b border-outline-variant/10 last:border-none hover:bg-transparent">
+                      <TableCell className="px-3 py-2 font-label-sm text-label-sm text-on-surface">{new Date(r.date).toLocaleDateString()}</TableCell>
+                      <TableCell className="px-3 py-2">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "inline-block px-2 py-0.5 rounded-full font-label-sm text-label-sm border-0",
+                            attendanceStatusClasses[r.status] ?? "bg-gray-100 text-gray-700",
+                          )}
+                        >
+                          {r.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>
@@ -99,15 +128,17 @@ export function StudentDetailPage() {
               {reports.map((r) => (
                 <div key={r.id} className="p-md rounded-2xl bg-surface-container hover:bg-surface-container-low transition-colors">
                   <div className="flex items-center justify-between mb-sm">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <p className="font-label-md text-label-md text-on-surface">{(r as any).title ?? "Report"}</p>
+                    <p className="font-label-md text-label-md text-on-surface">Report</p>
                     <span className="font-label-sm text-label-sm text-on-surface-variant">{new Date(r.createdAt).toLocaleDateString()}</span>
                   </div>
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {(r as any).sections?.map((s: any, i: number) => (
-                    <div key={i} className="mt-sm p-sm rounded-xl bg-white">
-                      <p className="font-label-sm text-label-sm text-primary mb-xs">{s.heading ?? s.title ?? `Section ${i + 1}`}</p>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant">{s.content}</p>
+                  {[
+                    ["Teacher Section", r.teacherSection],
+                    ["Parent Section", r.parentSection],
+                    ["Management Section", r.managementSection],
+                  ].map(([heading, content]) => (
+                    <div key={heading} className="mt-sm p-sm rounded-xl bg-white">
+                      <p className="font-label-sm text-label-sm text-primary mb-xs">{heading}</p>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant whitespace-pre-wrap">{content || "No content available."}</p>
                     </div>
                   ))}
                 </div>

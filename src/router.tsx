@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from "react-router-dom"
+import { createBrowserRouter, Link, Outlet } from "react-router-dom"
 import { TeacherLayout } from "./components/layout/TeacherLayout"
 import { StudentLayout } from "./components/layout/StudentLayout"
 import { TeacherRoute, StudentRoute, GuardianRoute, AdminRoute, RootRedirect } from "./components/auth/RouteGuards"
@@ -29,7 +29,6 @@ import { StudentDashboardPage } from "./pages/student/StudentDashboardPage"
 import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage"
 import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
 import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
-import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
 import { StudentClassGradesPage } from "./pages/student/StudentClassGradesPage"
 import { StudentAssignmentGradePage } from "./pages/student/StudentAssignmentGradePage"
 import { HomeworkHelpPage } from "./pages/student/HomeworkHelpPage"
@@ -53,6 +52,8 @@ import { GradeManagementPage } from "./pages/admin/GradeManagementPage"
 import { StudentManagementPage } from "./pages/admin/StudentManagementPage"
 import { StudentGradesPage } from "./pages/admin/StudentGradesPage"
 import { AttendancePage } from "./pages/admin/AttendancePage"
+import { InsightsPage } from "./pages/insights/InsightsPage"
+import { StudentInsightsPage } from "./pages/insights/StudentInsightsPage"
 import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const TEACHER_ROUTES = [
@@ -75,6 +76,8 @@ export const TEACHER_ROUTES = [
   { path: "/quizzes/attempts/:id", element: <QuizAttemptDetailPage /> },
   { path: "/alerts", element: <AlertsPage /> },
   { path: "/alerts/:alertId", element: <AlertDetailPage /> },
+  { path: "/insights", element: <InsightsPage /> },
+  { path: "/insights/students/:id", element: <StudentInsightsPage /> },
   { path: "/assistant", element: <AssistantPage /> },
   { path: "/notifications", element: <NotificationsListPage /> },
   { path: "/reports", element: <ReportsPage /> },
@@ -97,6 +100,7 @@ export const STUDENT_ROUTES = [
   { path: "/student/quizzes", element: <StudentQuizzesPage /> },
   { path: "/student/quizzes/:id/take", element: <QuizTakePage /> },
   { path: "/student/quizzes/:id/result", element: <StudentQuizResultPage /> },
+  { path: "/student/insights", element: <InsightsPage /> },
   { path: "/student/notifications", element: <NotificationsListPage /> },
 ]
 
@@ -120,6 +124,10 @@ export function guardianRoutes() {
     element: <GuardianRoute><div className="min-h-screen bg-surface"><header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
           <h1 className="font-headline-md text-headline-md text-primary">Guardian Portal</h1>
           <div className="flex items-center gap-3">
+            <Link to="/guardian/insights" className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors">
+              <span className="material-symbols-outlined text-[20px]">monitoring</span>
+              Insights
+            </Link>
             <NotificationBell />
             <UserMenu />
           </div>
@@ -128,6 +136,8 @@ export function guardianRoutes() {
       { index: true, element: <GuardianDashboardPage /> },
       { path: "children/:id", element: <ChildDetailPage /> },
       { path: "alerts/:id", element: <GuardianAlertDetailPage /> },
+      { path: "insights", element: <InsightsPage /> },
+      { path: "insights/students/:id", element: <StudentInsightsPage /> },
       { path: "reports", element: <ReportsPage /> },
       { path: "notifications", element: <NotificationsListPage /> },
     ],
@@ -145,6 +155,8 @@ export function adminRoutes() {
       { path: "students", element: <StudentManagementPage /> },
       { path: "student-grades", element: <StudentGradesPage /> },
       { path: "attendance", element: <AttendancePage /> },
+      { path: "insights", element: <InsightsPage /> },
+      { path: "insights/students/:id", element: <StudentInsightsPage /> },
     ],
   }
 }

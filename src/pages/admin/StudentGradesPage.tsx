@@ -1,6 +1,18 @@
 import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import * as api from "@/lib/api"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { EmptyState } from "@/components/ui/EmptyState"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface AssignmentSummary {
   id: string
@@ -111,27 +123,29 @@ export function StudentGradesPage() {
         <div className="lg:col-span-1 bg-white rounded-[32px] p-xl border border-outline-variant/10 shadow-sm">
           <div className="relative mb-4">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-            <input
+            <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search students..."
-              className="w-full pl-11 pr-4 py-2 rounded-full border border-outline-variant/20 font-body-md text-body-md bg-surface-container-low outline-none focus:border-primary"
+              className="w-full pl-11 pr-4 py-2 rounded-full border border-outline-variant/20 font-body-md text-body-md bg-surface-container-low outline-none focus:border-primary h-auto focus-visible:ring-transparent focus-visible:ring-offset-0"
             />
           </div>
           <div className="space-y-1 max-h-[500px] overflow-y-auto">
             {filteredStudents.map((s) => (
-              <button
+              <Button
                 key={s.id}
+                type="button"
+                variant="ghost"
                 onClick={() => setSelectedStudentId(s.id)}
-                className={`w-full text-left px-md py-sm rounded-full transition-all ${
+                className={`w-full h-auto flex flex-col items-start justify-start gap-0 px-md py-sm rounded-full text-left transition-all ${
                   selectedStudentId === s.id
-                    ? "bg-primary-container text-on-primary-container"
-                    : "hover:bg-surface-container text-on-surface"
+                    ? "bg-primary-container text-on-primary-container hover:bg-primary-container hover:text-on-primary-container"
+                    : "text-on-surface hover:bg-surface-container hover:text-on-surface"
                 }`}
               >
                 <p className="font-label-md text-label-md">{s.name}</p>
                 <p className="font-label-sm text-label-sm text-on-surface-variant">{s.email}</p>
-              </button>
+              </Button>
             ))}
             {filteredStudents.length === 0 && (
               <p className="font-body-md text-body-md text-on-surface-variant text-center py-md">No students found</p>
@@ -145,15 +159,7 @@ export function StudentGradesPage() {
               <p className="font-body-md text-body-md text-on-surface-variant">Select a student to view grades</p>
             </div>
           ) : studentClasses.isLoading || studentGrades.isLoading ? (
-            <div className="space-y-4">
-              {[1, 2].map((i) => (
-                <div key={i} className="bg-white rounded-[32px] p-xl border border-outline-variant/10 shadow-sm animate-pulse">
-                  <div className="h-6 w-48 bg-surface-container-high rounded-full mb-4" />
-                  <div className="h-4 w-full bg-surface-container-high rounded-full mb-2" />
-                  <div className="h-4 w-3/4 bg-surface-container-high rounded-full" />
-                </div>
-              ))}
-            </div>
+            <LoadingState className="w-full" />
           ) : (
             <div className="space-y-4">
               {selectedStudent && (
@@ -164,8 +170,8 @@ export function StudentGradesPage() {
               )}
 
               {classSummaries.length === 0 ? (
-                <div className="bg-white rounded-[32px] p-xl border border-outline-variant/10 shadow-sm text-center">
-                  <p className="font-body-md text-body-md text-on-surface-variant">No grades found for this student.</p>
+                <div className="bg-white rounded-[32px] p-xl border border-outline-variant/10 shadow-sm">
+                  <EmptyState icon="grade" title="No grades found for this student." />
                 </div>
               ) : (
                 classSummaries.map((cls) => (
@@ -183,30 +189,30 @@ export function StudentGradesPage() {
 
                     {cls.assignments.length > 0 && (
                       <div className="px-xl py-3">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b border-outline-variant/10">
-                              <th className="text-left font-label-sm text-label-sm text-on-surface-variant pb-2">Assignment</th>
-                              <th className="text-right font-label-sm text-label-sm text-on-surface-variant pb-2">Score</th>
-                              <th className="text-right font-label-sm text-label-sm text-on-surface-variant pb-2">Percentage</th>
-                              <th className="text-right font-label-sm text-label-sm text-on-surface-variant pb-2">Criteria</th>
-                            </tr>
-                          </thead>
-                          <tbody>
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="border-b border-outline-variant/10 hover:bg-transparent">
+                              <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant pb-2 h-auto px-0">Assignment</TableHead>
+                              <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant pb-2 h-auto px-0">Score</TableHead>
+                              <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant pb-2 h-auto px-0">Percentage</TableHead>
+                              <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant pb-2 h-auto px-0">Criteria</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
                             {cls.assignments.map((a) => (
-                              <tr key={a.id} className="border-b border-outline-variant/5 last:border-0">
-                                <td className="py-2 font-body-md text-body-md text-on-surface">{a.title}</td>
-                                <td className="py-2 text-right font-body-md text-body-md text-on-surface">{a.earned}/{a.maxPossible}</td>
-                                <td className="py-2 text-right font-body-md text-body-md">
+                              <TableRow key={a.id} className="border-b border-outline-variant/5 hover:bg-transparent">
+                                <TableCell className="py-2 px-0 font-body-md text-body-md text-on-surface">{a.title}</TableCell>
+                                <TableCell className="py-2 px-0 text-right font-body-md text-body-md text-on-surface">{a.earned}/{a.maxPossible}</TableCell>
+                                <TableCell className="py-2 px-0 text-right font-body-md text-body-md">
                                   <span className={a.maxPossible > 0 && (a.earned / a.maxPossible) >= 0.5 ? "text-primary" : "text-error"}>
                                     {a.maxPossible > 0 ? Math.round((a.earned / a.maxPossible) * 100) : 0}%
                                   </span>
-                                </td>
-                                <td className="py-2 text-right font-body-md text-body-md text-on-surface">{a.confirmedCount}/{a.criteriaCount}</td>
-                              </tr>
+                                </TableCell>
+                                <TableCell className="py-2 px-0 text-right font-body-md text-body-md text-on-surface">{a.confirmedCount}/{a.criteriaCount}</TableCell>
+                              </TableRow>
                             ))}
-                          </tbody>
-                        </table>
+                          </TableBody>
+                        </Table>
                       </div>
                     )}
                   </div>

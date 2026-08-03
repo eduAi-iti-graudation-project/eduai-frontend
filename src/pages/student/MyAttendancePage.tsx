@@ -5,6 +5,17 @@ import * as api from "@/lib/api"
 import { AttendanceHeatmap } from "@/components/attendance/AttendanceHeatmap"
 import { AttendanceDonut, MonthlyAttendanceBars } from "@/components/attendance/AttendanceCharts"
 import { computeAttendanceStats } from "@/lib/attendance-stats"
+import { Badge } from "@/components/ui/badge"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { LoadingState } from "@/components/shared/LoadingState"
 
 const statusStyles: Record<string, string> = {
   PRESENT: "bg-primary-fixed/40 text-primary",
@@ -72,31 +83,18 @@ export function MyAttendancePage() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-full p-margin-desktop">
-        <div className="text-center">
-          <span className="material-symbols-outlined text-[48px] text-error mb-md">error_outline</span>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Failed to load attendance</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mb-4">
-            {error instanceof Error ? error.message : "Something went wrong"}
-          </p>
-          <button onClick={() => refetch()} className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md">
-            Try Again
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        title="Failed to load attendance"
+        message={error instanceof Error ? error.message : "Something went wrong"}
+        onRetry={() => refetch()}
+      />
     )
   }
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-margin-desktop max-w-6xl mx-auto w-full space-y-lg">
-        <div className="h-10 w-48 bg-surface-container-high rounded-full animate-pulse" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 bg-white rounded-[28px] border border-outline-variant/10 animate-pulse" />
-          ))}
-        </div>
-        <div className="h-64 bg-white rounded-[32px] border border-outline-variant/10 animate-pulse" />
+      <div className="flex-1 p-margin-desktop max-w-6xl mx-auto w-full">
+        <LoadingState />
       </div>
     )
   }
@@ -180,48 +178,49 @@ export function MyAttendancePage() {
       <div className="animate-[rise-in_550ms_ease-out_both]" style={{ animationDelay: "300ms" }}>
         <Card title="Recent records">
           <div className="-mx-xl -mb-xl overflow-hidden rounded-b-[32px]">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-outline-variant/10 bg-surface-container-low">
-                  <th className="text-left font-label-sm text-label-sm text-on-surface-variant px-xl py-3">Date</th>
-                  <th className="text-right font-label-sm text-label-sm text-on-surface-variant px-xl py-3">Status</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-outline-variant/10 bg-surface-container-low hover:bg-surface-container-low">
+                  <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant px-xl py-3 h-auto">Date</TableHead>
+                  <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-xl py-3 h-auto">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {records === undefined || records.length === 0 ? (
-                  <tr>
-                    <td colSpan={2} className="px-xl py-6 text-center font-body-md text-body-md text-on-surface-variant">
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={2} className="px-xl py-6 text-center font-body-md text-body-md text-on-surface-variant">
                       No records yet.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   records.map((r) => (
-                    <tr
+                    <TableRow
                       key={r.id}
-                      className="border-b border-outline-variant/10 last:border-0 hover:bg-surface-container transition-colors"
+                      className="border-b border-outline-variant/10 hover:bg-surface-container transition-colors"
                     >
-                      <td className="px-xl py-3 font-body-md text-body-md text-on-surface">
+                      <TableCell className="px-xl py-3 font-body-md text-body-md text-on-surface">
                         {new Date(r.date).toLocaleDateString(undefined, {
                           weekday: "short",
                           year: "numeric",
                           month: "short",
                           day: "numeric",
                         })}
-                      </td>
-                      <td className="px-xl py-3 text-right">
-                        <span
-                          className={`font-label-sm text-label-sm px-sm py-0.5 rounded-full ${
+                      </TableCell>
+                      <TableCell className="px-xl py-3 text-right">
+                        <Badge
+                          variant="outline"
+                          className={`font-label-sm text-label-sm px-sm py-0.5 rounded-full border-0 ${
                             statusStyles[r.status] ?? "bg-surface-container-high text-on-surface-variant"
                           }`}
                         >
                           {r.status}
-                        </span>
-                      </td>
-                    </tr>
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </Card>
       </div>

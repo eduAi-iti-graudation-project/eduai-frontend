@@ -1,3 +1,4 @@
+import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 
 interface ScoreBarProps {
@@ -11,12 +12,11 @@ export function ScoreBar({ earned, max, className }: ScoreBarProps) {
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <div className="flex-1 h-3 rounded-full bg-surface-container-high overflow-hidden">
-        <div
-          className="h-full rounded-full bg-primary-container transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <Progress
+        value={pct}
+        className="flex-1 h-3 rounded-full bg-surface-container-high [&>div]:bg-primary-container [&>div]:transition-all [&>div]:duration-500"
+        aria-label={`Score ${earned} out of ${max}`}
+      />
       <span className="font-label-md text-label-md text-on-surface-variant whitespace-nowrap">
         {earned}/{max}
         <span className="text-outline ml-1">({pct}%)</span>
