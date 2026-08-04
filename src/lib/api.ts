@@ -3,7 +3,7 @@ import type { components } from "@/types/api-schema"
 
 // ── Config ───────────────────────────────────────────────────────
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000"
+export const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000"
 const TOKEN_KEY = "eduai_token"
 
 // ── Auth helpers ──────────────────────────────────────────────────
@@ -132,7 +132,7 @@ export interface MaterialChunk {
   similarity?: number
 }
 
-export interface ChatMessage {
+export interface AssistantChatMessage {
   role: "user" | "assistant"
   content: string
 }
@@ -712,7 +712,7 @@ export async function removeClassFromGrade(gradeId: string, classId: string): Pr
 
 export async function sendChatMessage(
   classId: string,
-  messages: ChatMessage[],
+  messages: AssistantChatMessage[],
   newMessage: string,
 ): Promise<ChatResponse> {
   const res = await api.post<ChatResponse>("/assistant/chat", { classId, messages, newMessage })
@@ -1000,4 +1000,68 @@ export async function getStudentInsights(
 ): Promise<InsightsResponse> {
   const res = await api.get<InsightsResponse>(`/dashboard/insights/students/${studentId}`, { params: { interval } })
   return res.data
+}
+
+// ── Chat ─────────────────────────────────────────────────────
+
+export interface ChatMessage {
+  id: string
+  threadId: string
+  authorId: string
+  text: string
+  readAt: string | null
+  createdAt: string
+}
+
+export interface ChatThreadListItem {
+  id: string
+  classId: string
+  teacherId: string
+  studentId: string
+  createdAt: string
+  updatedAt: string
+  className: string | null
+  peerId: string
+  peerName: string
+  lastMessage: string | null
+}
+
+export interface ChatThread {
+  id: string
+  classId: string
+  teacherId: string
+  studentId: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MessagesPage {
+  items: ChatMessage[]
+  nextCursor: string | null
+}
+
+export async function getChatThreads(): Promise<ChatThreadListItem[]> {
+  const res = await api.get<ChatThreadListItem[]>("/chat/threads")
+  return res.data
+}
+
+export async function createOrGetChatThread(classId: string, studentId?: string): Promise<ChatThread> {
+  const res = await api.post<ChatThread>("/chat/threads", { classId, studentId })
+  return res.data
+}
+
+export async function getChatMessages(threadId: string, after?: string): Promise<MessagesPage> {
+  const res = await api.get<MessagesPage>(`/chat/threads/${threadId}/messages`, {
+    params: after ? { after } : undefined,
+  })
+  return res.data
+}
+
+export async function sendThreadMessage(threadId: string, text: string): Promise<ChatMessage> {
+  const res = await api.post<ChatMessage>(`/chat/threads/${threadId}/messages`, { text })
+  return res.data
+}
+
+export async function markThreadRead(threadId: string): Promise<void> {
+  await api.post(`/chat/threads/${threadId}/read`)
 }

@@ -1,19 +1,24 @@
 import { useLocation, Link } from "react-router-dom"
-
-const items = [
-  { icon: "home", label: "Home", id: "home", href: "/dashboard" },
-  { icon: "school", label: "Classes", id: "classes", href: "/classes" },
-  { icon: "notifications", label: "Alerts", id: "alerts", href: "/alerts" },
-  { icon: "monitoring", label: "Insights", id: "insights", href: "/insights" },
-  { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/assistant" },
-]
+import { useAuth } from "@/providers/use-auth"
 
 export function MobileNav() {
   const location = useLocation()
+  const { user } = useAuth()
   const path = location.pathname
+  const chatHref = user?.role === "TEACHER" ? "/chat" : "/student/chat"
+
+  const items = [
+    { icon: "home", label: "Home", id: "home", href: "/dashboard" },
+    { icon: "school", label: "Classes", id: "classes", href: "/classes" },
+    { icon: "chat_bubble", label: "Messages", id: "chat", href: chatHref },
+    { icon: "notifications", label: "Alerts", id: "alerts", href: "/alerts" },
+    { icon: "monitoring", label: "Insights", id: "insights", href: "/insights" },
+    { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/assistant" },
+  ]
 
   const activeItem = path === "/dashboard" ? "home"
     : path.startsWith("/classes") ? "classes"
+    : path.startsWith("/chat") || path.startsWith("/student/chat") ? "chat"
     : path.startsWith("/alerts") ? "alerts"
     : path.startsWith("/insights") ? "insights"
     : path.startsWith("/assistant") ? "assistant"

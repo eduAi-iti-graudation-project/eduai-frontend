@@ -54,6 +54,8 @@ import { StudentGradesPage } from "./pages/admin/StudentGradesPage"
 import { AttendancePage } from "./pages/admin/AttendancePage"
 import { InsightsPage } from "./pages/insights/InsightsPage"
 import { StudentInsightsPage } from "./pages/insights/StudentInsightsPage"
+import { ChatListPage } from "./pages/chat/ChatListPage"
+import { ChatThreadPage } from "./pages/chat/ChatThreadPage"
 import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const TEACHER_ROUTES = [
@@ -78,6 +80,8 @@ export const TEACHER_ROUTES = [
   { path: "/alerts/:alertId", element: <AlertDetailPage /> },
   { path: "/insights", element: <InsightsPage /> },
   { path: "/insights/students/:id", element: <StudentInsightsPage /> },
+  { path: "/chat", element: <ChatListPage /> },
+  { path: "/chat/:threadId", element: <ChatThreadPage /> },
   { path: "/assistant", element: <AssistantPage /> },
   { path: "/notifications", element: <NotificationsListPage /> },
   { path: "/reports", element: <ReportsPage /> },
@@ -101,6 +105,8 @@ export const STUDENT_ROUTES = [
   { path: "/student/quizzes/:id/take", element: <QuizTakePage /> },
   { path: "/student/quizzes/:id/result", element: <StudentQuizResultPage /> },
   { path: "/student/insights", element: <InsightsPage /> },
+  { path: "/student/chat", element: <ChatListPage /> },
+  { path: "/student/chat/:threadId", element: <ChatThreadPage /> },
   { path: "/student/notifications", element: <NotificationsListPage /> },
 ]
 

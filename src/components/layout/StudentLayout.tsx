@@ -10,6 +10,7 @@ const navItems = [
   { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/student/quizzes" },
   { icon: "grade", label: "My Grades", id: "grades", href: "/student/grades" },
   { icon: "monitoring", label: "Insights", id: "insights", href: "/student/insights" },
+  { icon: "chat_bubble", label: "Messages", id: "chat", href: "/student/chat" },
   { icon: "calendar_today", label: "Attendance", id: "attendance", href: "/student/attendance" },
   { icon: "notifications", label: "Notifications", id: "notifications", href: "/student/notifications" },
 ]
@@ -29,6 +30,7 @@ export function StudentLayout() {
     : path.startsWith("/student/grades") ? "grades"
     : path.startsWith("/student/attendance") ? "attendance"
     : path.startsWith("/student/insights") ? "insights"
+    : path.startsWith("/student/chat") ? "chat"
     : path.startsWith("/student/homework-help") ? "homework-help"
     : path.startsWith("/student/quizzes") ? "quizzes"
     : path.startsWith("/student/notifications") ? "notifications"
