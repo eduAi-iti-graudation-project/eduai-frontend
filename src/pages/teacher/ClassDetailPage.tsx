@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { useClassDetail } from "@/hooks/use-classes"
 import { useMaterials } from "@/hooks/use-materials"
 import { useClassAttendance } from "@/hooks/use-attendance"
+import { useCreateChatThread } from "@/hooks/use-chat-threads"
 import { FileDropzone } from "@/components/ui/FileDropzone"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
@@ -44,6 +45,7 @@ export function ClassDetailPage() {
   const { detail, assignments, isLoading, isError, error, deleteClass, removeEnrollment } = useClassDetail(id ?? "")
   const { materials, upload, remove: removeMaterial } = useMaterials(id ?? "")
   const attendanceQuery = useClassAttendance(id ?? "")
+  const createThread = useCreateChatThread()
 
   const cls = detail.data
   const assignmentsData = assignments.data ?? []
@@ -139,6 +141,22 @@ export function ClassDetailPage() {
                       <Link to={`/students/${s.id}`} className="font-label-md text-label-md text-on-surface hover:text-primary transition-colors truncate block">{s.name}</Link>
                       <p className="font-label-sm text-label-sm text-on-surface-variant truncate">{s.email}</p>
                     </div>
+                    <Button
+                      onClick={() =>
+                        createThread.mutate(
+                          { classId: id as string, studentId: s.id },
+                          {
+                            onSuccess: (thread) => navigate(`/chat/${thread.id}`),
+                            onError: (err: Error) => toast.error(err.message),
+                          },
+                        )
+                      }
+                      disabled={createThread.isPending}
+                      className="h-auto w-auto p-1.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-primary/10"
+                      title="Message student"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
+                    </Button>
                     <Button
                       onClick={() => handleRemoveStudent(s.id)}
                       className="h-auto w-auto p-1.5 rounded-full text-on-surface-variant hover:text-error hover:bg-error/10 opacity-0 group-hover:opacity-100 transition-all"

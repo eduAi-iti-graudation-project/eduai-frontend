@@ -1,13 +1,18 @@
-import { useParams, Link } from "react-router-dom"
+import { useParams, Link, useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/providers/use-auth"
+import { useCreateChatThread } from "@/hooks/use-chat-threads"
 import * as api from "@/lib/api"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 export function StudentClassGradesPage() {
   const { classId } = useParams<{ classId: string }>()
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const createThread = useCreateChatThread()
 
   const { data: studentClasses, isLoading: classesLoading } = useQuery({
     queryKey: ["student", "classes", user?.id],
@@ -67,8 +72,28 @@ export function StudentClassGradesPage() {
       </div>
 
       <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm mb-6">
-        <p className="font-label-sm text-label-sm text-on-surface-variant">Teacher</p>
-        <p className="font-body-md text-body-md text-on-surface">{cls.teacherName}</p>
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="font-label-sm text-label-sm text-on-surface-variant">Teacher</p>
+            <p className="font-body-md text-body-md text-on-surface">{cls.teacherName}</p>
+          </div>
+          <Button
+            onClick={() =>
+              createThread.mutate(
+                { classId: classId as string },
+                {
+                  onSuccess: (thread) => navigate(`/student/chat/${thread.id}`),
+                  onError: (err: Error) => toast.error(err.message),
+                },
+              )
+            }
+            disabled={createThread.isPending}
+            className="rounded-full shrink-0"
+          >
+            <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
+            Message
+          </Button>
+        </div>
       </div>
 
       {cls.assignments.length === 0 ? (
