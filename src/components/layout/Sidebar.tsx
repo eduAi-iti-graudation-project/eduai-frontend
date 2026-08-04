@@ -12,6 +12,7 @@ export function Sidebar() {
     : path.startsWith("/quizzes") ? "quizzes"
     : path.startsWith("/alerts") ? "alerts"
     : path.startsWith("/insights") ? "insights"
+    : path.startsWith("/chat") ? "chat"
     : path.startsWith("/notifications") ? "notifications"
     : path.startsWith("/assistant") ? "assistant"
     : "dashboard"
@@ -25,6 +26,7 @@ export function Sidebar() {
     { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/quizzes" },
     { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/alerts" },
     { icon: "monitoring", label: "Insights", id: "insights", href: "/insights" },
+    { icon: "chat_bubble", label: "Messages", id: "chat", href: "/chat" },
     { icon: "notifications", label: "Notifications", id: "notifications", href: "/notifications" },
     { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/assistant" },
   ]
