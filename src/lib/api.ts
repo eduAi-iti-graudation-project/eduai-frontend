@@ -32,16 +32,36 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+export const SESSION_EXPIRED_EVENT = "eduai:session-expired"
+
+export function isAuthEndpointUrl(url: string | undefined): boolean {
+  const u = url ?? ""
+  return u.includes("/auth/login") || u.includes("/auth/signup")
+}
+
+export function shouldExpireSession(
+  status: number | undefined,
+  url: string | undefined,
+  hasToken: boolean,
+): boolean {
+  return status === 401 && hasToken && !isAuthEndpointUrl(url)
+}
+
 api.interceptors.response.use(
   (res) => res,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      const url = error.config?.url ?? ""
-      if (!url.includes("/auth/login") && !url.includes("/auth/signup")) {
-        clearToken()
-        window.location.href = "/login"
-      }
+    if (shouldExpireSession(error.response?.status, error.config?.url, getStoredToken() !== null)) {
+      clearToken()
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT))
     }
+
+    const requirement = getSubscriptionRequirement(error)
+    if (requirement.kind !== "none") {
+      window.dispatchEvent(
+        new CustomEvent("eduai:subscription-required", { detail: requirement }),
+      )
+    }
+
     error.message = getErrorMessage(error)
     return Promise.reject(error)
   },
@@ -56,6 +76,8 @@ export interface User {
   name: string
   role: "TEACHER" | "STUDENT" | "GUARDIAN" | "ADMIN"
   guardianId: string | null
+  gradeId: string | null
+  grade?: { id: string; level: number; name: string | null } | null
   createdAt: string
   updatedAt: string
 }
@@ -204,6 +226,14 @@ export function getErrorStatus(err: unknown): number | undefined {
   return (err as { response?: { status?: number } })?.response?.status
 }
 
+export function getErrorCode(err: unknown): string | undefined {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as { code?: string } | undefined
+    return data?.code
+  }
+  return undefined
+}
+
 function isGenericBackendMessage(message: string): boolean {
   return GENERIC_BACKEND_MESSAGES.has(message)
 }
@@ -242,12 +272,60 @@ export function getErrorMessage(err: unknown): string {
   return "Something went wrong"
 }
 
+export type SubscriptionRequirement =
+  | { kind: "none" }
+  | { kind: "subscription" }
+  | { kind: "tier"; tier: string }
+
+export function getSubscriptionRequirement(err: unknown): SubscriptionRequirement {
+  if (axios.isAxiosError(err)) {
+    const status = err.response?.status
+    if (status === 402) {
+      const code = getErrorCode(err)
+      const message = getErrorMessage(err)
+      const isSubscriptionRequired =
+        code === "SUBSCRIPTION_REQUIRED" || /active subscription/i.test(message)
+      if (isSubscriptionRequired) {
+        return { kind: "subscription" }
+      }
+    }
+    if (status === 403) {
+      const message = getErrorMessage(err)
+      const match = message.match(/This feature requires the (.+) plan or higher/)
+      if (match) {
+        return { kind: "tier", tier: match[1] }
+      }
+    }
+  }
+  return { kind: "none" }
+}
+
 // ── Auth ──────────────────────────────────────────────────────────
 
-export async function signup(data: components["schemas"]["SignupDto"]): Promise<User> {
-  const res = await api.post<AuthResponse>("/auth/signup", data)
-  storeToken(res.data.accessToken)
-  return res.data.user
+export interface SignupPayload {
+  name: string
+  email: string
+  password: string
+  role?: "TEACHER" | "STUDENT"
+  gradeLevel?: number
+  joinCode?: string
+  organizationName?: string
+}
+
+export interface PendingSignupResult {
+  status: "PENDING"
+  message: string
+}
+
+export type SignupResult = User | PendingSignupResult
+
+export async function signup(data: SignupPayload): Promise<SignupResult> {
+  const res = await api.post<AuthResponse | PendingSignupResult>("/auth/signup", data)
+  if ("status" in res.data && res.data.status === "PENDING") {
+    return res.data
+  }
+  storeToken((res.data as AuthResponse).accessToken)
+  return (res.data as AuthResponse).user
 }
 
 export async function login(data: components["schemas"]["LoginDto"]): Promise<User> {
@@ -460,6 +538,19 @@ export async function getSubmissions(status?: string, assignmentId?: string): Pr
   return res.data
 }
 
+export interface MySubmission {
+  id: string
+  assignmentId: string
+  status: string
+}
+
+export async function getMySubmissions(assignmentId?: string): Promise<MySubmission[]> {
+  const params: Record<string, string> = {}
+  if (assignmentId) params.assignmentId = assignmentId
+  const res = await api.get<MySubmission[]>("/submissions/mine", { params })
+  return res.data
+}
+
 export async function getSubmission(id: string): Promise<SubmissionDetail> {
   const res = await api.get<SubmissionDetail>(`/submissions/${id}`)
   const data = res.data
@@ -519,6 +610,9 @@ export async function confirmAllGrades(submissionId: string): Promise<void> {
 export type AlertListItem = components["schemas"]["AlertDto"] & {
   studentName: string
   className: string
+  grade: { id: string; level: number; name: string | null } | null
+  teacherName: string | null
+  teacherId: string | null
   severity: "LOW" | "MEDIUM" | "HIGH"
   skillGapCount: number
 }
@@ -532,6 +626,350 @@ export async function getAlerts(status?: string): Promise<AlertListItem[]> {
 export async function resolveAlert(id: string, status: "RESOLVED" | "DISMISSED"): Promise<components["schemas"]["AlertDto"]> {
   const res = await api.patch<components["schemas"]["AlertDto"]>(`/alerts/${id}`, { status })
   return res.data
+}
+
+// ── Admin student detail ───────────────────────────────────────────
+
+export interface AdminStudentProfile {
+  id: string
+  name: string
+  email: string
+  grade: { id: string; level: number; name: string | null } | null
+  guardian: { id: string; name: string; email: string } | null
+  createdAt: string
+  classes: {
+    id: string
+    name: string
+    description: string | null
+    teacher: { id: string; name: string; email: string }
+    grade: { id: string; level: number; name: string | null } | null
+  }[]
+  activeAlertCount: number
+  quizGradeSummary: { count: number; averagePct: number | null }
+}
+
+export interface StudentQuizGrade {
+  id: string
+  quizId: string
+  quizTitle: string
+  className: string
+  teacherName: string | null
+  totalScore: number
+  maxPoints: number
+  percent: number
+  submittedAt: string
+}
+
+export interface HistoryYear {
+  year: string
+  quizCount: number
+  quizAveragePct: number | null
+  quizScores: {
+    quizTitle: string
+    totalScore: number
+    maxPoints: number
+    percent: number
+    submittedAt: string
+  }[]
+  warnings: {
+    id: string
+    type: string
+    reason: string
+    status: string
+    createdAt: string
+    severity?: string
+  }[]
+}
+
+export interface StudentHistory {
+  studentId: string
+  years: HistoryYear[]
+}
+
+export type DocumentType =
+  | "CERTIFICATE"
+  | "REPORT_CARD"
+  | "TRANSCRIPT"
+  | "IMMUNIZATION"
+  | "TRANSFER"
+  | "ENROLLMENT_FORM"
+  | "ID"
+  | "MEDICAL"
+  | "OTHER"
+
+export interface StudentDocument {
+  id: string
+  studentId: string
+  type: DocumentType
+  title: string
+  academicYear: string | null
+  fileName: string
+  fileUrl: string
+  mimeType: string | null
+  sizeBytes: number | null
+  uploadedById: string | null
+  createdAt: string
+  uploadedBy?: { id: string; name: string } | null
+}
+
+export type FeeType = "TUITION" | "REGISTRATION" | "EXAM" | "MATERIALS" | "OTHER"
+export type FeeStatus = "PAID" | "PARTIAL" | "POSTPONED" | "UNPAID"
+
+export interface StudentFee {
+  id: string
+  studentId: string
+  academicYear: string
+  feeType: FeeType
+  amount: string
+  amountPaid: string | null
+  status: FeeStatus
+  body: string | null
+  paidAt: string | null
+  dueDate: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export async function getAdminStudentProfile(studentId: string): Promise<AdminStudentProfile> {
+  const res = await api.get<AdminStudentProfile>(`/students/${studentId}/admin-profile`)
+  return res.data
+}
+
+export async function getStudentQuizGrades(studentId: string): Promise<StudentQuizGrade[]> {
+  const res = await api.get<StudentQuizGrade[]>(`/students/${studentId}/quiz-grades`)
+  return res.data
+}
+
+export async function getStudentHistory(studentId: string): Promise<StudentHistory> {
+  const res = await api.get<StudentHistory>(`/students/${studentId}/history`)
+  return res.data
+}
+
+export async function getStudentDocuments(studentId: string): Promise<StudentDocument[]> {
+  const res = await api.get<StudentDocument[]>(`/students/${studentId}/documents`)
+  return res.data
+}
+
+export async function uploadStudentDocument(
+  studentId: string,
+  data: { file: File; title: string; type: DocumentType; academicYear?: string | null },
+): Promise<StudentDocument> {
+  const form = new FormData()
+  form.append("file", data.file)
+  form.append("title", data.title)
+  form.append("type", data.type)
+  if (data.academicYear) form.append("academicYear", data.academicYear)
+  const res = await api.post<StudentDocument>(`/students/${studentId}/documents`, form)
+  return res.data
+}
+
+export async function getStudentDocumentUrl(studentId: string, documentId: string): Promise<string> {
+  const res = await api.get(`/students/${studentId}/documents/${documentId}/file`, { responseType: "blob" })
+  return URL.createObjectURL(res.data as Blob)
+}
+
+export async function deleteStudentDocument(studentId: string, documentId: string): Promise<void> {
+  await api.delete(`/students/${studentId}/documents/${documentId}`)
+}
+
+export async function getStudentFees(studentId: string): Promise<StudentFee[]> {
+  const res = await api.get<StudentFee[]>(`/students/${studentId}/fees`)
+  return res.data
+}
+
+export interface CreateFeeInput {
+  academicYear: string
+  feeType: FeeType
+  amount: number
+  amountPaid?: number | null
+  status: FeeStatus
+  body?: string | null
+  paidAt?: string | null
+  dueDate?: string | null
+}
+
+export async function createStudentFee(studentId: string, data: CreateFeeInput): Promise<StudentFee> {
+  const res = await api.post<StudentFee>(`/students/${studentId}/fees`, data)
+  return res.data
+}
+
+export async function updateStudentFee(
+  studentId: string,
+  feeId: string,
+  data: Partial<CreateFeeInput>,
+): Promise<StudentFee> {
+  const res = await api.patch<StudentFee>(`/students/${studentId}/fees/${feeId}`, data)
+  return res.data
+}
+
+export async function deleteStudentFee(studentId: string, feeId: string): Promise<void> {
+  await api.delete(`/students/${studentId}/fees/${feeId}`)
+}
+
+// ── Teacher admin ──────────────────────────────────────────────────
+
+export type TeacherGender = "MALE" | "FEMALE" | "OTHER"
+
+export interface AdminTeacherProfile {
+  id: string
+  name: string
+  email: string
+  gender: TeacherGender | null
+  createdAt: string
+  grades: { id: string; level: number; name: string | null }[]
+  classes: {
+    id: string
+    name: string
+    description: string | null
+    grades: { id: string; level: number; name: string | null }[]
+    studentCount: number
+    quizCount: number
+    assignmentCount: number
+  }[]
+  classCount: number
+  studentCount: number
+  quizCount: number
+  documentsCount: number
+  salaryRecordsCount: number
+}
+
+export interface TeacherClass {
+  id: string
+  name: string
+  description: string | null
+  createdAt: string
+  grades: { id: string; level: number; name: string | null }[]
+  students: { id: string; name: string; email: string }[]
+}
+
+export interface TeacherHistoryEntry {
+  id: string
+  classId: string
+  className: string
+  grades: { id: string; level: number; name: string | null }[]
+  startedAt: string
+  endedAt: string | null
+  active: boolean
+  studentCount: number
+}
+
+export type TeacherDocumentType =
+  | "SOCIAL_SECURITY"
+  | "NATIONAL_ID"
+  | "PASSPORT"
+  | "LICENSE"
+  | "DEGREE"
+  | "CONTRACT"
+  | "OTHER"
+
+export interface TeacherDocument {
+  id: string
+  teacherId: string
+  type: TeacherDocumentType
+  title: string
+  fileName: string
+  fileUrl: string
+  mimeType: string | null
+  sizeBytes: number | null
+  uploadedById: string | null
+  createdAt: string
+  uploadedBy?: { id: string; name: string } | null
+}
+
+export type SalaryStatus = "PAID" | "PARTIAL" | "POSTPONED" | "UNPAID"
+
+export interface SalaryRecord {
+  id: string
+  teacherId: string
+  period: string
+  amount: string
+  amountPaid: string | null
+  status: SalaryStatus
+  body: string | null
+  paidAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export async function getAdminTeacherProfile(teacherId: string): Promise<AdminTeacherProfile> {
+  const res = await api.get<AdminTeacherProfile>(`/teachers/${teacherId}/admin-profile`)
+  return res.data
+}
+
+export async function updateTeacherGender(
+  teacherId: string,
+  gender: TeacherGender | null,
+): Promise<{ id: string; name: string; gender: TeacherGender | null }> {
+  const res = await api.patch(`/teachers/${teacherId}/profile`, { gender })
+  return res.data
+}
+
+export async function getTeacherClasses(teacherId: string): Promise<TeacherClass[]> {
+  const res = await api.get<TeacherClass[]>(`/teachers/${teacherId}/classes`)
+  return res.data
+}
+
+export async function getTeacherHistory(teacherId: string): Promise<TeacherHistoryEntry[]> {
+  const res = await api.get<TeacherHistoryEntry[]>(`/teachers/${teacherId}/history`)
+  return res.data
+}
+
+export async function getTeacherDocuments(teacherId: string): Promise<TeacherDocument[]> {
+  const res = await api.get<TeacherDocument[]>(`/teachers/${teacherId}/documents`)
+  return res.data
+}
+
+export async function uploadTeacherDocument(
+  teacherId: string,
+  data: { file: File; title: string; type: TeacherDocumentType },
+): Promise<TeacherDocument> {
+  const form = new FormData()
+  form.append("file", data.file)
+  form.append("title", data.title)
+  form.append("type", data.type)
+  const res = await api.post<TeacherDocument>(`/teachers/${teacherId}/documents`, form)
+  return res.data
+}
+
+export async function getTeacherDocumentUrl(teacherId: string, documentId: string): Promise<string> {
+  const res = await api.get(`/teachers/${teacherId}/documents/${documentId}/file`, { responseType: "blob" })
+  return URL.createObjectURL(res.data as Blob)
+}
+
+export async function deleteTeacherDocument(teacherId: string, documentId: string): Promise<void> {
+  await api.delete(`/teachers/${teacherId}/documents/${documentId}`)
+}
+
+export interface CreateSalaryInput {
+  period: string
+  amount: number
+  amountPaid?: number | null
+  status: SalaryStatus
+  body?: string | null
+  paidAt?: string | null
+}
+
+export async function getTeacherSalaries(teacherId: string): Promise<SalaryRecord[]> {
+  const res = await api.get<SalaryRecord[]>(`/teachers/${teacherId}/salaries`)
+  return res.data
+}
+
+export async function createTeacherSalary(teacherId: string, data: CreateSalaryInput): Promise<SalaryRecord> {
+  const res = await api.post<SalaryRecord>(`/teachers/${teacherId}/salaries`, data)
+  return res.data
+}
+
+export async function updateTeacherSalary(
+  teacherId: string,
+  salaryId: string,
+  data: Partial<CreateSalaryInput>,
+): Promise<SalaryRecord> {
+  const res = await api.patch<SalaryRecord>(`/teachers/${teacherId}/salaries/${salaryId}`, data)
+  return res.data
+}
+
+export async function deleteTeacherSalary(teacherId: string, salaryId: string): Promise<void> {
+  await api.delete(`/teachers/${teacherId}/salaries/${salaryId}`)
 }
 
 // ── Notifications ─────────────────────────────────────────────────
@@ -672,10 +1110,23 @@ export async function getGradeClasses(gradeId: string): Promise<components["sche
 
 // ── Admin ─────────────────────────────────────────────────────────
 
-export interface AdminUser { id: string; email: string; name: string; role: string }
+export interface AdminUser { id: string; email: string; name: string; role: string; gradeId: string | null }
 
 export async function getUsers(params?: { role?: string; q?: string }): Promise<AdminUser[]> {
   const res = await api.get<AdminUser[]>("/users", { params })
+  return res.data
+}
+
+export interface DeletedUser {
+  id: string
+  email: string
+  name: string
+  role: string
+  deletedAt: string
+}
+
+export async function deleteUser(userId: string): Promise<DeletedUser> {
+  const res = await api.delete<DeletedUser>(`/users/${userId}`)
   return res.data
 }
 
@@ -978,6 +1429,16 @@ export interface InsightSection {
 export interface AgentInsight {
   title: string
   summary: string
+  breakdown?: {
+    kind: "alert"
+    type: string
+    severity?: string | null
+    headline: string
+    highlights: string[]
+    strengths: string[]
+    concerns: string[]
+    recommendation: string
+  }
 }
 
 export interface InsightsResponse {
@@ -1064,4 +1525,121 @@ export async function sendThreadMessage(threadId: string, text: string): Promise
 
 export async function markThreadRead(threadId: string): Promise<void> {
   await api.post(`/chat/threads/${threadId}/read`)
+}
+
+// ── Organizations & Billing ───────────────────────────────────────
+
+export type SubscriptionTier = "TRIAL" | "BASIC" | "PRO" | "ENTERPRISE"
+export type SubscriptionStatus = "TRIALING" | "ACTIVE" | "PAST_DUE" | "CANCELED"
+export type PlanId = "basic" | "pro" | "enterprise"
+
+export interface Organization {
+  id: string
+  name: string
+  joinCode?: string
+  subscriptionStatus: SubscriptionStatus
+  subscriptionTier: SubscriptionTier
+  seatLimit: number | null
+  userCount: number
+}
+
+export interface CheckoutSession {
+  url: string
+}
+
+export interface ChangePlanResult {
+  planId: PlanId
+  status: string
+  cancelAtPeriodEnd: boolean
+}
+
+export async function getOrganization(): Promise<Organization> {
+  const res = await api.get<Organization>("/organizations/me")
+  return res.data
+}
+
+export async function createCheckoutSession(planId: PlanId): Promise<CheckoutSession> {
+  const res = await api.post<CheckoutSession>("/billing/checkout", {
+    planId,
+    successUrl: `${window.location.origin}/admin/billing`,
+    cancelUrl: `${window.location.origin}/admin/billing`,
+  })
+  return res.data
+}
+
+export async function createBillingPortal(): Promise<CheckoutSession> {
+  const res = await api.post<CheckoutSession>("/billing/portal", {
+    returnUrl: `${window.location.origin}/admin/billing`,
+  })
+  return res.data
+}
+
+export async function changePlan(planId: PlanId, atPeriodEnd = false): Promise<ChangePlanResult> {
+  const res = await api.post<ChangePlanResult>("/billing/change-plan", { planId, atPeriodEnd })
+  return res.data
+}
+
+export async function inviteMember(
+  organizationId: string,
+  data: { email: string; name?: string; role: "TEACHER" | "STUDENT" },
+): Promise<{ id: string; email: string; role: string }> {
+  const res = await api.post(`/organizations/${organizationId}/invite`, data)
+  return res.data
+}
+
+// ── Membership requests ───────────────────────────────────────────
+
+export type MembershipRequestStatus = "PENDING" | "APPROVED" | "REJECTED"
+export type MembershipRole = "TEACHER" | "STUDENT"
+
+export interface MembershipRequest {
+  id: string
+  email: string
+  name: string
+  role: MembershipRole
+  status: MembershipRequestStatus
+  createdAt: string
+}
+
+export interface ApprovedMembershipRequest {
+  id: string
+  email: string
+  name: string
+  role: MembershipRole
+}
+
+export function normalizeJoinCode(raw: string): string {
+  return raw.trim().toUpperCase()
+}
+
+export async function getMembershipRequests(
+  status: MembershipRequestStatus = "PENDING",
+): Promise<MembershipRequest[]> {
+  const res = await api.get<MembershipRequest[]>("/organizations/me/requests", {
+    params: { status },
+  })
+  return res.data
+}
+
+export async function approveMembershipRequest(
+  requestId: string,
+  role?: MembershipRole,
+): Promise<ApprovedMembershipRequest> {
+  const res = await api.post<ApprovedMembershipRequest>(
+    `/organizations/me/requests/${requestId}/approve`,
+    role ? { role } : {},
+  )
+  return res.data
+}
+
+export async function rejectMembershipRequest(requestId: string): Promise<MembershipRequest> {
+  const res = await api.post<MembershipRequest>(
+    `/organizations/me/requests/${requestId}/reject`,
+  )
+  return res.data
+}
+
+export async function regenerateJoinCode(): Promise<Organization> {
+  const res = await api.post<Organization>("/organizations/me/join-code")
+  return res.data
 }

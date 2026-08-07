@@ -140,6 +140,7 @@ export function useClassDetail(id: string) {
       api.createAssignment({ ...data, classId: id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assignments", id] })
+      queryClient.invalidateQueries({ queryKey: ["assignments"] })
       toast.success("Assignment created")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -149,6 +150,7 @@ export function useClassDetail(id: string) {
     mutationFn: (assignmentId: string) => api.deleteAssignment(assignmentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assignments", id] })
+      queryClient.invalidateQueries({ queryKey: ["assignments"] })
       toast.success("Assignment deleted")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -158,6 +160,7 @@ export function useClassDetail(id: string) {
     mutationFn: (studentId: string) => api.addEnrollment(id, studentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["class", id] })
+      queryClient.invalidateQueries({ queryKey: ["classes"] })
       toast.success("Student enrolled")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -167,6 +170,7 @@ export function useClassDetail(id: string) {
     mutationFn: (studentId: string) => api.removeEnrollment(id, studentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["class", id] })
+      queryClient.invalidateQueries({ queryKey: ["classes"] })
       toast.success("Enrollment removed")
     },
     onError: (err: Error) => toast.error(err.message),

@@ -43,18 +43,18 @@ export function useDashboardData() {
     submissionsByClass.set(classId, existing)
   }
 
-  const pendingStatuses = new Set(["SUBMITTED", "REVIEW_READY"])
   const classCards = classesData.map((c) => {
     const classSubmissions = submissionsByClass.get(c.id) ?? []
-    const pending = classSubmissions.filter((s) => pendingStatuses.has(s.status)).length
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enrollments = ((c as any).enrollments as Array<{ status: string }> | undefined) ?? []
+    const pendingRequests = enrollments.filter((e) => e.status === "PENDING").length
     const confirmed = classSubmissions.filter((s) => s.status === "CONFIRMED").length
     return {
       id: c.id,
       name: c.name,
       section: c.description ?? "No description",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      students: (c as any).enrollments?.length ?? 0,
-      pending,
+      students: enrollments.filter((e) => e.status === "APPROVED").length,
+      pending: pendingRequests,
       total: classSubmissions.length,
       confirmed,
     }
