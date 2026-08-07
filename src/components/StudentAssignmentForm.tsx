@@ -141,7 +141,7 @@ export function StudentAssignmentForm() {
         <div className="flex items-center gap-4">
           <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
           <span className="material-symbols-outlined text-on-surface-variant">help_outline</span>
-          <div className="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+          <div className="w-8 h-8 rounded-lg bg-surface-container-high overflow-hidden border border-outline-variant">
             <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaR8Kwh6k2eyYYhxwSn4aX4zJQmf9agPvc0KlznytwDFSumsDNq6sAOJDpYlirNfefdIDN1cdYdX_zUN3oszkAhECboawshZ9BoM0hCHY5LZPHAgqdMpbgNcHQ1S4K6JYYTZJT-LdkAkaYl_ixsrrCtHm9rTNrAVRngax8oyEOpyQKSExN81uEBFDFW73QVTbjOneg0eZgXRHqxZjRUl4XuqByOlq2xvyRJ8PN-sXSXP3ek1mhEjaP" alt="Student avatar" />
           </div>
         </div>
@@ -149,16 +149,11 @@ export function StudentAssignmentForm() {
 
       {/* Content Canvas */}
       <main className="flex-grow pt-20 pb-24 px-margin-mobile">
-        <div className="relative bg-surface-container-lowest rounded-3xl p-6 shadow-xl shadow-on-background/5 border border-on-surface/5 overflow-hidden">
-          {/* Decorative Blobs */}
-          <div className="blurred-blob blob-1"></div>
-          <div className="blurred-blob blob-2"></div>
-
+        <div className="relative bg-surface-container-lowest rounded-xl p-6 border border-border overflow-hidden">
           {/* Header Section */}
           <div className="relative z-10 flex flex-col items-center text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-50 to-teal-50 flex items-center justify-center mb-4 border border-white">
-              <span className="material-symbols-outlined text-gradient" style={{ fontSize: "32px" }}>description</span>
-              <span className="material-symbols-outlined absolute text-yellow-400 -top-1 -right-1" style={{ fontSize: "20px" }}>auto_awesome</span>
+            <div className="w-16 h-16 rounded-lg bg-accent flex items-center justify-center mb-4 border border-border">
+              <span className="material-symbols-outlined text-primary" style={{ fontSize: "32px" }}>description</span>
             </div>
             <h2 className="font-headline-md text-headline-md text-on-background mb-1">Submit Your Assignment</h2>
             <p className="font-body-md text-body-md text-on-surface-variant">Add your notes and upload your file below</p>
@@ -174,7 +169,7 @@ export function StudentAssignmentForm() {
                 name="notes"
                 rows={5}
                 placeholder="Add any notes or comments about your assignment..."
-                className="w-full min-h-[140px] rounded-2xl border-2 border-surface-container-high focus:border-primary-container focus:ring-0 bg-surface-container-low p-4 text-on-surface placeholder:text-outline text-body-md transition-colors"
+                className="w-full min-h-[140px] rounded-lg border-2 border-surface-container-high focus:border-primary-container focus:ring-0 bg-surface-container-low p-4 text-on-surface placeholder:text-outline text-body-md transition-colors"
                 value={notes}
                 onChange={(e) => {
                   const value = e.target.value
@@ -202,9 +197,9 @@ export function StudentAssignmentForm() {
 
               {selectedFile ? (
                 /* Selected File State */
-                <div className="flex items-center justify-between bg-surface-container p-3 rounded-full border border-outline-variant">
+                <div className="flex items-center justify-between bg-surface-container p-3 rounded-lg border border-outline-variant">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-error">
+                    <div className="w-10 h-10 rounded-lg bg-error-container flex items-center justify-center text-error">
                       <span className="material-symbols-outlined">picture_as_pdf</span>
                     </div>
                     <div>
@@ -215,7 +210,7 @@ export function StudentAssignmentForm() {
                   <button
                     type="button"
                     onClick={removeFile}
-                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-highest text-on-surface-variant transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-highest text-on-surface-variant transition-colors"
                   >
                     <span className="material-symbols-outlined text-[20px]">close</span>
                   </button>
@@ -223,13 +218,13 @@ export function StudentAssignmentForm() {
               ) : (
                 /* Drop Zone */
                 <div
-                  className={`upload-zone rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer ${isDragging ? "border-primary scale-[1.02]" : ""}`}
+                  className={`upload-zone rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer ${isDragging ? "border-primary scale-[1.02]" : ""}`}
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onClick={openFilePicker}
                 >
-                  <div className="w-12 h-12 rounded-full bg-gradient-submit flex items-center justify-center mb-3 text-white shadow-md">
+                  <div className="w-12 h-12 rounded-lg bg-gradient-submit flex items-center justify-center mb-3 text-white shadow-md">
                     <span className="material-symbols-outlined">cloud_upload</span>
                   </div>
                   <p className="font-label-md text-label-md text-on-background">
@@ -249,7 +244,7 @@ export function StudentAssignmentForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-gradient-submit text-white font-headline-md text-body-md py-4 rounded-full glow-button flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-submit text-white font-headline-md text-body-md py-4 rounded-lg glow-button flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
@@ -268,14 +263,14 @@ export function StudentAssignmentForm() {
 
         {/* Submission Meta Card (Bento-style snippet) */}
         <div className="mt-4 grid grid-cols-2 gap-4">
-          <div className="bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-on-surface/5 flex items-center gap-3">
+          <div className="bg-white/60 backdrop-blur-sm p-4 rounded-lg border border-on-surface/5 flex items-center gap-3">
             <span className="material-symbols-outlined text-secondary">calendar_today</span>
             <div>
               <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Deadline</p>
               <p className="font-label-md text-label-md text-on-background">Oct 24, 11:59 PM</p>
             </div>
           </div>
-          <div className="bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-on-surface/5 flex items-center gap-3">
+          <div className="bg-white/60 backdrop-blur-sm p-4 rounded-lg border border-on-surface/5 flex items-center gap-3">
             <span className="material-symbols-outlined text-primary">emoji_events</span>
             <div>
               <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Points</p>
@@ -291,7 +286,7 @@ export function StudentAssignmentForm() {
           <span className="material-symbols-outlined">home</span>
           <span className="font-label-sm-mobile text-label-sm-mobile">Home</span>
         </div>
-        <div className="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform duration-200">
+        <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-lg px-4 py-1 active:scale-90 transition-transform duration-200">
           <span className="material-symbols-outlined">school</span>
           <span className="font-label-sm-mobile text-label-sm-mobile">Classes</span>
         </div>

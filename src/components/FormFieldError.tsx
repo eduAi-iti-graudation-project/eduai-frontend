@@ -10,7 +10,7 @@ export function FormFieldError({ message }: FormFieldErrorProps) {
   }
 
   return (
-    <FormMessage className="absolute -bottom-10 left-2 inline-flex items-center gap-2 rounded-xl bg-red-500/90 px-4 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-sm">
+    <FormMessage className="absolute -bottom-10 left-2 inline-flex items-center gap-2 rounded-lg bg-inverse-surface px-4 py-2 text-sm font-semibold text-inverse-on-surface shadow-lg backdrop-blur-sm">
       {message}
     </FormMessage>
   )
