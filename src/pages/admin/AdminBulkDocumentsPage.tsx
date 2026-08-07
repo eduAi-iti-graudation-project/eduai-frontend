@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
@@ -23,6 +23,7 @@ import { EmptyState } from "@/components/ui/EmptyState"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
+import { StudentSelectCombobox, type StudentOption } from "@/components/ui/StudentSelectCombobox"
 import { cn } from "@/lib/utils"
 
 const categoryLabels: Record<api.StudentDocumentCategory, string> = {
@@ -56,7 +57,7 @@ function confidenceLabel(confidence: number | null): string | null {
 
 interface PendingRowState {
   category: api.StudentDocumentCategory
-  studentId: string
+  student: StudentOption | null
 }
 
 export function AdminBulkDocumentsPage() {
@@ -71,16 +72,10 @@ export function AdminBulkDocumentsPage() {
     queryFn: () => api.listBulkDocuments(),
   })
 
-  const studentsQ = useQuery({
-    queryKey: ["users", "STUDENT"],
-    queryFn: () => api.getUsers({ role: "STUDENT" }),
-  })
-
-  const students = useMemo(() => {
-    const list = studentsQ.data ?? []
-    const byName = [...list].sort((a, b) => a.name.localeCompare(b.name))
-    return byName
-  }, [studentsQ.data])
+  const searchStudents = async (q: string): Promise<StudentOption[]> => {
+    const rows = await api.getUsers({ role: "STUDENT", q, take: 20 })
+    return rows.map(({ id, name, email }) => ({ id, name, email }))
+  }
 
   const uploadM = useMutation({
     mutationFn: () => api.bulkUploadStudentDocuments(selectedFiles),
@@ -120,10 +115,14 @@ export function AdminBulkDocumentsPage() {
     if (inputRef.current) inputRef.current.value = ""
   }
 
-  const canConfirm = (doc: api.StudentDocument): boolean => {
+  const resolveStudent = (doc: api.StudentDocument): StudentOption | null => {
     const edit = edits[doc.id]
-    const studentId = edit?.studentId ?? doc.aiSuggestedStudentId
-    return !!studentId
+    if (edit?.student !== undefined) return edit.student
+    return doc.aiSuggestedStudent ?? null
+  }
+
+  const canConfirm = (doc: api.StudentDocument): boolean => {
+    return !!resolveStudent(doc)
   }
 
   return (
@@ -227,8 +226,7 @@ export function AdminBulkDocumentsPage() {
                 {(pendingQ.data ?? []).map((doc) => {
                   const edit = edits[doc.id]
                   const category = edit?.category ?? doc.aiSuggestedCategory ?? "OTHER"
-                  const studentId = edit?.studentId ?? doc.aiSuggestedStudentId ?? ""
-                  const matchName = students.find((s) => s.id === studentId)?.name ?? null
+                  const student = resolveStudent(doc)
                   const confidence = doc.aiMatchConfidence
                   return (
                     <TableRow key={doc.id} className="align-top">
@@ -262,22 +260,22 @@ export function AdminBulkDocumentsPage() {
                       </TableCell>
                       <TableCell className="min-w-[220px]">
                         <div className="flex flex-col gap-1">
-                          <Select value={studentId} onValueChange={(v) => setEdits((prev) => ({ ...prev, [doc.id]: { ...prev[doc.id], studentId: v } }))}>
-                            <SelectTrigger className="h-auto rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-sm text-label-sm">
-                              <SelectValue placeholder="No student selected" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {students.map((s) => (
-                                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {matchName && doc.aiSuggestedStudentId && studentId === doc.aiSuggestedStudentId ? (
+                          <StudentSelectCombobox
+                            value={student}
+                            onChange={(s) =>
+                              setEdits((prev) => ({
+                                ...prev,
+                                [doc.id]: { ...prev[doc.id], student: s },
+                              }))
+                            }
+                            searchFn={searchStudents}
+                          />
+                          {student?.id === doc.aiSuggestedStudentId ? (
                             <Badge variant="secondary" className="w-fit rounded-md bg-tertiary-container text-on-tertiary-container border-0 font-label-sm text-label-sm">
                               <span className="material-symbols-outlined text-[12px] mr-1">auto_awesome</span>
                               AI · {confidenceLabel(confidence) ?? `${Math.round((confidence ?? 0) * 100)}%`}
                             </Badge>
-                          ) : doc.aiSuggestedStudentId && !studentId ? (
+                          ) : doc.aiSuggestedStudentId && !student ? (
                             <span className="font-label-sm text-label-sm text-on-tertiary-fixed">Unmatched — choose a student manually</span>
                           ) : null}
                         </div>
@@ -288,7 +286,7 @@ export function AdminBulkDocumentsPage() {
                           size="sm"
                           disabled={!canConfirm(doc) || confirmM.isPending}
                           onClick={() =>
-                            confirmM.mutate({ documentId: doc.id, data: { studentId, category } })
+                            confirmM.mutate({ documentId: doc.id, data: { studentId: student!.id, category } })
                           }
                           className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-label-md text-label-md"
                         >

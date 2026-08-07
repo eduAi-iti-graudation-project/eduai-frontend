@@ -838,6 +838,7 @@ export interface StudentDocument {
   aiSuggestedCategory: string | null
   aiSuggestedStudentId: string | null
   aiMatchConfidence: number | null
+  aiSuggestedStudent?: { id: string; name: string; email: string } | null
   uploadedById: string | null
   createdAt: string
   uploadedBy?: { id: string; name: string } | null
@@ -1318,7 +1319,7 @@ export async function getGradeClasses(gradeLevelId: string): Promise<SectionSumm
 
 export interface AdminUser { id: string; email: string; name: string; role: string; gradeId: string | null }
 
-export async function getUsers(params?: { role?: string; q?: string }): Promise<AdminUser[]> {
+export async function getUsers(params?: { role?: string; q?: string; take?: number }): Promise<AdminUser[]> {
   const res = await api.get<AdminUser[]>("/users", { params })
   return res.data
 }
