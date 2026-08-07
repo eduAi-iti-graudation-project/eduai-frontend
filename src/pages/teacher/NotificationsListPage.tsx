@@ -34,11 +34,17 @@ export function NotificationsListPage() {
     <div className="p-xl max-w-3xl mx-auto">
       <header className="flex items-center justify-between mb-lg">
         <div>
-          <h1 className="font-headline-xl text-headline-xl text-primary mb-xs">Notifications</h1>
-          <p className="font-body-lg text-body-lg text-on-surface-variant">
+          <h1 className="font-headline-xl text-headline-xl text-on-surface mb-1">Notifications</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant">
             {isLoading ? "Loading..." : `${myNotifications.length} notification${myNotifications.length !== 1 ? "s" : ""}${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
           </p>
         </div>
+        {unreadCount > 0 && (
+          <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md bg-primary text-primary-foreground font-label-md text-label-md">
+            <span className="material-symbols-outlined text-[16px]">mark_email_unread</span>
+            {unreadCount} unread
+          </span>
+        )}
       </header>
 
       {isLoading ? (

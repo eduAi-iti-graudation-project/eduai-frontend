@@ -13,7 +13,7 @@ export function StudentQuizResultPage() {
   if (attemptStatus === "IN_PROGRESS") {
     return (
       <div className="flex-1 p-xl max-w-2xl mx-auto w-full flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-lg bg-primary-fixed flex items-center justify-center mb-4">
           <span className="material-symbols-outlined text-primary text-3xl">play_arrow</span>
         </div>
         <h1 className="font-headline-lg text-headline-lg text-on-surface mb-2">Quiz still in progress</h1>
@@ -22,7 +22,7 @@ export function StudentQuizResultPage() {
         </p>
         <Link
           to={`/student/quizzes/${quizId}/take`}
-          className="bg-primary text-white px-lg py-sm rounded-full font-label-md hover:opacity-90 transition-all"
+          className="bg-primary text-white px-lg py-sm rounded-lg font-label-md hover:opacity-90 transition-all"
         >
           Resume quiz
         </Link>
@@ -49,7 +49,7 @@ export function StudentQuizResultPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="tactile-card rounded-[24px] bg-surface-container-lowest p-xl text-center">
+          <div className="rounded-lg bg-surface-container-lowest p-xl text-center border border-outline-variant">
             <p className="font-label-md text-label-md text-on-surface-variant mb-2">Your score</p>
             <p className="font-headline-xl text-headline-xl text-primary">
               {detail.totalScore != null ? `${detail.totalScore} / ${maxPoints}` : "Being graded"}
@@ -62,7 +62,7 @@ export function StudentQuizResultPage() {
           </div>
 
           {unconfirmedCount > 0 && (
-            <div className="rounded-[24px] bg-primary-fixed/20 border border-primary/20 p-md flex items-start gap-3">
+            <div className="rounded-lg bg-primary-fixed/20 border border-primary/20 p-md flex items-start gap-3">
               <span className="material-symbols-outlined text-[20px] text-primary shrink-0">hourglass_top</span>
               <p className="font-body-md text-body-md text-on-surface">
                 {unconfirmedCount} open-ended answer{unconfirmedCount > 1 ? "s" : ""} are being reviewed by
@@ -72,7 +72,7 @@ export function StudentQuizResultPage() {
           )}
 
           {violations > 0 && (
-            <div className="rounded-[24px] bg-surface-container-low p-md flex items-start gap-3">
+            <div className="rounded-lg bg-surface-container-low p-md flex items-start gap-3">
               <span className="material-symbols-outlined text-[20px] text-on-surface-variant shrink-0">info</span>
               <p className="font-body-md text-body-md text-on-surface-variant">
                 Leaving the quiz screen was recorded during your attempt — your teacher can see it.
@@ -85,11 +85,11 @@ export function StudentQuizResultPage() {
               const answer = detail.answers?.find((a) => a.questionId === question.id)
               const confirmed = answer?.isConfirmed ?? false
               return (
-                <div key={question.id} className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-md">
+                <div key={question.id} className="rounded-lg bg-surface-container-lowest border border-outline-variant p-md">
                   <div className="flex items-center justify-between gap-3 mb-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-label-sm text-label-sm text-on-surface-variant shrink-0">Q{index + 1}</span>
-                      <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant shrink-0">
+                      <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-lg bg-surface-container-high text-on-surface-variant shrink-0">
                         {question.type.replace(/_/g, " ").toLowerCase()}
                       </span>
                     </div>
@@ -108,7 +108,7 @@ export function StudentQuizResultPage() {
           <div className="flex justify-center pt-md">
             <Link
               to="/student/homework-help"
-              className="bg-primary-fixed text-primary px-lg py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-2"
+              className="bg-primary text-primary-foreground px-lg py-sm rounded-lg font-label-md nudge-hover inline-flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
               Need help on this topic? Ask the Homework Helper

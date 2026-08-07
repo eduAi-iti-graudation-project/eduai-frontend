@@ -9,8 +9,8 @@ import { ErrorState } from "@/components/shared/ErrorState"
 import { LoadingState } from "@/components/shared/LoadingState"
 
 const attemptBadge: Record<string, { label: string; className: string }> = {
-  IN_PROGRESS: { label: "In progress", className: "bg-primary-fixed text-primary" },
-  COMPLETED: { label: "Completed", className: "bg-secondary-container text-white" },
+  IN_PROGRESS: { label: "In progress", className: "bg-surface-container-high text-on-surface" },
+  COMPLETED: { label: "Completed", className: "bg-primary text-primary-foreground" },
 }
 
 export function StudentQuizzesPage() {
@@ -78,7 +78,7 @@ export function StudentQuizzesPage() {
                   ? "View result"
                   : "Start quiz"
             return (
-              <div key={quiz.id} className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-md">
+              <div key={quiz.id} className="rounded-lg bg-white border border-border p-md">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -112,7 +112,7 @@ export function StudentQuizzesPage() {
                       {badge && (
                         <Badge
                           variant="outline"
-                          className={`font-label-sm text-label-sm px-2 py-0.5 rounded-full border-0 ${badge.className}`}
+                          className={`font-label-sm text-label-sm px-2 py-0.5 rounded-lg border-0 ${badge.className}`}
                         >
                           {badge.label}
                         </Badge>
@@ -127,7 +127,7 @@ export function StudentQuizzesPage() {
                   </div>
                   <Link
                     to={link}
-                    className={`shrink-0 px-md py-sm rounded-full font-label-md nudge-hover ${
+                    className={`shrink-0 px-md py-sm rounded-lg font-label-md nudge-hover ${
                       quiz.attemptStatus === "COMPLETED"
                         ? "bg-surface-container text-on-surface-variant"
                         : "bg-primary text-white"

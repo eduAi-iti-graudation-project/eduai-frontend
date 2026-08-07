@@ -91,7 +91,7 @@ export function QuizzesPage() {
               value={classFilter}
               onValueChange={(v) => setClassFilter(v === ALL_CLASSES ? "" : v)}
             >
-              <SelectTrigger className="w-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
+              <SelectTrigger className="w-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
                 <SelectValue placeholder="All classes" />
               </SelectTrigger>
               <SelectContent>
@@ -107,14 +107,14 @@ export function QuizzesPage() {
                 setGenClassId(classFilter || classes.data?.[0]?.id || "")
                 setGeneratorOpen(true)
               }}
-              className="bg-primary text-white px-md h-auto py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1"
+              className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md nudge-hover inline-flex items-center gap-1"
             >
               <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
               AI Generate
             </Button>
             <Button
               asChild
-              className="bg-secondary-container text-white px-md h-auto py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1"
+              className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md nudge-hover inline-flex items-center gap-1"
             >
               <Link to="/quizzes/new">
                 <span className="material-symbols-outlined text-[18px]">add</span>
@@ -144,14 +144,14 @@ export function QuizzesPage() {
               <div className="flex gap-md justify-center">
                 <Button
                   asChild
-                  className="bg-primary text-white px-md h-auto py-sm rounded-full font-label-md hover:opacity-90 transition-all"
+                  className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md hover:opacity-90 transition-all"
                 >
                   <Link to="/quizzes/new">Create a quiz</Link>
                 </Button>
                 <Button
                   type="button"
                   onClick={() => setGeneratorOpen(true)}
-                  className="bg-secondary-container text-white px-md h-auto py-sm rounded-full font-label-md hover:opacity-90 transition-all"
+                  className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md hover:opacity-90 transition-all"
                 >
                   Generate with AI
                 </Button>
@@ -163,7 +163,7 @@ export function QuizzesPage() {
             {(quizzes.data ?? []).map((quiz) => {
               const totalPoints = (quiz.questions ?? []).reduce((sum, q) => sum + q.points, 0)
               return (
-                <div key={quiz.id} className="tactile-card rounded-[24px] bg-surface-container-lowest p-4">
+                <div key={quiz.id} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant hover:border-primary transition-colors">
                   <div className="flex items-start justify-between gap-4">
                     <Link to={`/quizzes/${quiz.id}`} className="flex-1 min-w-0 group">
                       <div className="flex items-center gap-2 mb-1">
@@ -209,21 +209,21 @@ export function QuizzesPage() {
                         <>
                           <Button
                             asChild
-                            className="bg-primary text-white px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                            className="bg-primary text-white! px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover"
                           >
                             <Link to={`/quizzes/${quiz.id}`}>Edit</Link>
                           </Button>
                           <Button
                             type="button"
                             onClick={() => setPublishTarget(quiz)}
-                            className="bg-primary-fixed text-primary px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover"
                           >
                             Publish
                           </Button>
                           <Button
                             type="button"
                             onClick={() => setDeleteTarget(quiz)}
-                            className="bg-surface-container text-on-surface-variant px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
+                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
                           >
                             Delete
                           </Button>
@@ -233,14 +233,14 @@ export function QuizzesPage() {
                         <>
                           <Button
                             asChild
-                            className="bg-primary-fixed text-primary px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover"
                           >
                             <Link to={`/quizzes/${quiz.id}/attempts`}>View attempts</Link>
                           </Button>
                           <Button
                             type="button"
                             onClick={() => setCloseTarget(quiz)}
-                            className="bg-surface-container text-on-surface-variant px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
+                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
                           >
                             Close
                           </Button>
@@ -250,14 +250,14 @@ export function QuizzesPage() {
                         <>
                           <Button
                             asChild
-                            className="bg-primary-fixed text-primary px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover"
                           >
                             <Link to={`/quizzes/${quiz.id}/attempts`}>View attempts</Link>
                           </Button>
                           <Button
                             type="button"
                             onClick={() => setDeleteTarget(quiz)}
-                            className="bg-surface-container text-on-surface-variant px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
+                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
                           >
                             Delete
                           </Button>
@@ -279,7 +279,7 @@ export function QuizzesPage() {
         }}
       >
         <DialogContent
-          className="rounded-[32px] max-w-2xl bg-white p-xl mx-md max-h-[90vh] overflow-y-auto"
+          className="rounded-lg max-w-2xl bg-surface-container-lowest p-xl mx-md max-h-[90vh] overflow-y-auto"
           aria-describedby="quiz-generator-description"
         >
           <div className="flex items-center gap-sm mb-lg">
@@ -297,7 +297,7 @@ export function QuizzesPage() {
             value={genClassId}
             onValueChange={(v) => setGenClassId(v === NO_CLASS ? "" : v)}
           >
-            <SelectTrigger className="w-full rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-md">
+            <SelectTrigger className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-md">
               <SelectValue placeholder="Select a class" />
             </SelectTrigger>
             <SelectContent>
@@ -313,7 +313,7 @@ export function QuizzesPage() {
             value={genTopic}
             onChange={(e) => setGenTopic(e.target.value)}
             placeholder="e.g. Photosynthesis, World War II, Fractions…"
-            className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-md"
+            className="w-full h-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-md"
           />
 
           <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
@@ -325,7 +325,7 @@ export function QuizzesPage() {
             max={30}
             value={genCount}
             onChange={(e) => setGenCount(Number(e.target.value))}
-            className="w-full mb-md accent-[#006951]"
+            className="w-full mb-md accent-primary"
           />
 
           <label className="block font-label-sm text-label-sm text-on-surface-variant mb-2">Question types</label>
@@ -335,9 +335,9 @@ export function QuizzesPage() {
                 key={type}
                 type="button"
                 onClick={() => toggleType(type)}
-                className={`flex items-center gap-2 px-3 py-2 h-auto rounded-xl border text-sm font-label-md transition-all ${
+                className={`flex items-center gap-2 px-3 py-2 h-auto rounded-md border text-sm font-label-md transition-all ${
                   genTypes.includes(type)
-                    ? "border-primary bg-primary-fixed text-primary"
+                    ? "border-primary bg-primary text-primary-foreground"
                     : "border-outline-variant bg-surface text-on-surface-variant"
                 }`}
               >
@@ -352,7 +352,7 @@ export function QuizzesPage() {
               type="button"
               onClick={() => setGeneratorOpen(false)}
               disabled={generateQuiz.isPending}
-              className="flex-1 h-auto py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full disabled:opacity-50"
+              className="flex-1 h-auto py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-md disabled:opacity-50"
             >
               Cancel
             </Button>
@@ -360,7 +360,7 @@ export function QuizzesPage() {
               type="button"
               onClick={runGenerate}
               disabled={generateQuiz.isPending || !genClassId || !genTopic.trim() || genTypes.length === 0}
-              className="flex-1 h-auto py-sm bg-primary text-white font-label-md text-label-md rounded-full disabled:opacity-50 active:scale-95 transition-all"
+              className="flex-1 h-auto py-sm bg-primary text-white! font-label-md text-label-md rounded-md disabled:opacity-50 active:scale-95 transition-all"
             >
               {generateQuiz.isPending ? "AI is writing your quiz…" : "Generate"}
             </Button>

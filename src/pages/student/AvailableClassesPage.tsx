@@ -73,7 +73,7 @@ export function AvailableClassesPage() {
             <Link
               key={cls.id}
               to={`/student/classes/${cls.id}`}
-              className="block rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm hover:border-primary-container/30 hover:shadow-md transition-all"
+              className="block rounded-lg bg-white p-md border border-border hover:border-primary-container/30 hover:shadow-md transition-all"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
@@ -113,7 +113,7 @@ export function AvailableClassesPage() {
         </span>
         Available to Join
         {availableClasses.length > 0 && (
-          <span className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full">
+          <span className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-lg">
             {availableClasses.length}
           </span>
         )}
@@ -133,7 +133,7 @@ export function AvailableClassesPage() {
               return (
                 <div
                   key={c.id}
-                  className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm flex items-center justify-between gap-4"
+                  className="rounded-lg bg-white p-md border border-border flex items-center justify-between gap-4"
                 >
                   <div className="flex-1">
                     <h3 className="font-label-md text-label-md text-on-surface">{c.name}</h3>
@@ -147,10 +147,10 @@ export function AvailableClassesPage() {
                     type="button"
                     onClick={() => joinMutation.mutate(c.id)}
                     disabled={isPending}
-                    className={`shrink-0 px-md py-sm rounded-full font-label-md transition-all disabled:opacity-50 h-auto ${
+                    className={`shrink-0 px-md py-sm rounded-lg font-label-md transition-all disabled:opacity-50 h-auto ${
                       isPending
                         ? "bg-surface-container text-on-surface-variant"
-                        : "bg-secondary-container text-white hover:bg-secondary-container/90"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90/90"
                     }`}
                   >
                     {isPending ? "Pending..." : "Join"}

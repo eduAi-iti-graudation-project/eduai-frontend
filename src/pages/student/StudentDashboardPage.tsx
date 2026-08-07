@@ -17,6 +17,7 @@ import { LoadingState } from "@/components/shared/LoadingState"
 import { StatCard } from "@/components/shared/StatCard"
 
 interface StudentDashboardOverview {
+  grade: { id: string; level: number; name: string } | null
   upcomingCount: number
   attendancePercentage: number
   unreadNotifications: number
@@ -40,6 +41,8 @@ export function StudentDashboardPage() {
     },
   })
 
+  const studentGrade = dashboard.data?.grade
+
   if (dashboard.isError) {
     return (
       <ErrorState
@@ -53,12 +56,19 @@ export function StudentDashboardPage() {
   if (studentClasses.data && studentClasses.data.length === 0) {
     return (
       <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
-        <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Dashboard</h1>
+        <div className="flex items-center gap-3 mb-4">
+          <h1 className="font-headline-lg text-headline-lg text-primary">Dashboard</h1>
+          {studentGrade && (
+            <Badge variant="outline" className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-lg border-0">
+              Grade {studentGrade.level}
+            </Badge>
+          )}
+        </div>
         <EmptyState
           icon="school"
           title="Not enrolled in any classes"
           description="Browse available classes for your grade level and request to join."
-          action={<Link to="/student/classes" className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md inline-block">Browse Classes</Link>}
+          action={<Link to="/student/classes" className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md inline-block">Browse Classes</Link>}
         />
       </div>
     )
@@ -68,7 +78,14 @@ export function StudentDashboardPage() {
 
   return (
     <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
-        <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Dashboard</h1>
+        <div className="flex items-center gap-3 mb-4">
+          <h1 className="font-headline-lg text-headline-lg text-primary">Dashboard</h1>
+          {studentGrade && (
+            <Badge variant="outline" className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-lg border-0">
+              Grade {studentGrade.level}
+            </Badge>
+          )}
+        </div>
         {dashboard.isLoading ? (
           <LoadingState />
         ) : data ? (
@@ -79,7 +96,7 @@ export function StudentDashboardPage() {
               <StatCard icon="notifications" label="Unread" value={data.unreadNotifications} />
             </div>
 
-            <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
+            <div className="rounded-lg bg-white p-md border border-border">
               <h2 className="font-headline-md text-headline-md text-primary mb-4">Recent Grades</h2>
               {data.recentGrades.length === 0 ? (
                 <EmptyState
@@ -90,7 +107,7 @@ export function StudentDashboardPage() {
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-b border-outline-variant/10 hover:bg-transparent">
+                    <TableRow className="border-b border-border hover:bg-transparent">
                       <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant pb-3 px-0 h-auto">Assignment</TableHead>
                       <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant pb-3 px-0 h-auto">Score</TableHead>
                       <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant pb-3 px-0 h-auto">Percentage</TableHead>
@@ -98,11 +115,11 @@ export function StudentDashboardPage() {
                   </TableHeader>
                   <TableBody>
                     {data.recentGrades.map((g, i) => (
-                      <TableRow key={i} className="border-b border-outline-variant/10 hover:bg-transparent">
+                      <TableRow key={i} className="border-b border-border hover:bg-transparent">
                         <TableCell className="py-3 px-0 font-body-md text-body-md text-on-surface">{g.assignmentName}</TableCell>
                         <TableCell className="py-3 px-0 text-right font-body-md text-body-md text-on-surface">{g.score}/{g.totalPoints}</TableCell>
                         <TableCell className="py-3 px-0 text-right">
-                          <Badge variant="outline" className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full border-0">
+                          <Badge variant="outline" className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-lg border-0">
                             {g.percentage}%
                           </Badge>
                         </TableCell>

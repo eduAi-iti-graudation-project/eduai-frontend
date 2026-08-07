@@ -43,8 +43,8 @@ export function StudentClassGradesPage() {
     return (
       <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-full bg-surface-container-high animate-pulse" />
-          <div className="h-8 w-48 bg-surface-container-high rounded-full animate-pulse" />
+          <div className="w-8 h-8 rounded-lg bg-surface-container-high animate-pulse" />
+          <div className="h-8 w-48 bg-surface-container-high rounded-lg animate-pulse" />
         </div>
         <LoadingState />
       </div>
@@ -64,14 +64,14 @@ export function StudentClassGradesPage() {
       <div className="flex items-center gap-3 mb-4">
         <Link
           to="/student/grades"
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors"
         >
           <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
         </Link>
         <h1 className="font-headline-lg text-headline-lg text-primary">{cls.name}</h1>
       </div>
 
-      <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm mb-6">
+      <div className="rounded-lg bg-white p-md border border-border mb-6">
         <div className="flex items-center justify-between gap-2">
           <div>
             <p className="font-label-sm text-label-sm text-on-surface-variant">Teacher</p>
@@ -88,7 +88,7 @@ export function StudentClassGradesPage() {
               )
             }
             disabled={createThread.isPending}
-            className="rounded-full shrink-0"
+            className="rounded-lg shrink-0"
           >
             <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
             Message
@@ -108,7 +108,7 @@ export function StudentClassGradesPage() {
               <Link
                 key={assignment.id}
                 to={`/student/classes/${classId}/assignments/${assignment.id}`}
-                className="block rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm hover:border-primary-container/30 hover:shadow-md transition-all"
+                className="block rounded-lg bg-white p-md border border-border hover:border-primary-container/30 hover:shadow-md transition-all"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">

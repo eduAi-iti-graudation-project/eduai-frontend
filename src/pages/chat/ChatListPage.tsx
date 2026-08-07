@@ -53,8 +53,8 @@ export function ChatListPage() {
   return (
     <div className="p-xl max-w-3xl mx-auto w-full">
       <header className="mb-lg">
-        <h1 className="font-headline-xl text-headline-xl text-primary mb-xs">Messages</h1>
-        <p className="font-body-lg text-body-lg text-on-surface-variant">
+        <h1 className="font-headline-xl text-headline-xl text-on-surface mb-1">Messages</h1>
+        <p className="font-body-md text-body-md text-on-surface-variant">
           {isLoading ? "Loading..." : subtitle}
         </p>
       </header>
@@ -68,23 +68,23 @@ export function ChatListPage() {
           description="Start a conversation from a class page or students list."
         />
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-3">
           {data.map((thread: ChatThreadListItem) => (
             <Link
               key={thread.id}
               to={`${basePath}/${thread.id}`}
               className={cn(
-                "block bg-white rounded-[24px] p-md shadow-sm border border-outline-variant/10",
-                "hover:border-primary/40 hover:shadow-md transition-all",
+                "block bg-surface-container-lowest rounded-lg p-md border border-outline-variant",
+                "hover:border-primary transition-colors group",
               )}
             >
               <div className="flex items-center gap-sm">
-                <div className="w-11 h-11 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant font-label-md font-bold shrink-0">
+                <div className="w-11 h-11 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container font-label-md font-bold shrink-0">
                   {getInitials(thread.peerName)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2">
-                    <p className="font-label-md text-label-md text-on-surface truncate">
+                    <p className="font-label-md text-label-md text-on-surface truncate font-medium">
                       {thread.peerName}
                     </p>
                     {thread.lastMessage && (
@@ -94,10 +94,12 @@ export function ChatListPage() {
                     )}
                   </div>
                   <p className="font-label-sm text-label-sm text-on-surface-variant truncate">
-                    {thread.className ?? "Class"}
-                    {thread.lastMessage ? ` · ${thread.lastMessage}` : ""}
+                    {thread.className ?? "Class"}{thread.lastMessage ? ` · ${thread.lastMessage}` : ""}
                   </p>
                 </div>
+                <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors shrink-0">
+                  chevron_right
+                </span>
               </div>
             </Link>
           ))}

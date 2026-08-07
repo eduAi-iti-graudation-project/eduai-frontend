@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from "react"
 import { useClasses } from "@/hooks/use-classes"
 import { useAssistantChat } from "@/hooks/use-assistant"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { RichText } from "@/components/shared/RichText"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -50,7 +51,7 @@ export function AssistantPage() {
               value={selectedClassId}
               onValueChange={(v) => setSelectedClassId(v === NO_CLASS ? "" : v)}
             >
-              <SelectTrigger className="w-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
+              <SelectTrigger className="w-auto rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
                 <SelectValue placeholder="Select a class..." />
               </SelectTrigger>
               <SelectContent>
@@ -86,8 +87,12 @@ export function AssistantPage() {
         <div className="flex-1 space-y-4">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[80%] rounded-[24px] px-4 py-3 ${msg.role === "user" ? "bg-primary text-on-primary rounded-br-[6px]" : "bg-surface-container-low text-on-surface border border-outline-variant/20 rounded-bl-[6px]"}`}>
-                <p className="font-body-md text-body-md whitespace-pre-wrap">{msg.content}</p>
+              <div className={`max-w-[80%] rounded-lg px-4 py-3 ${msg.role === "user" ? "bg-primary text-on-primary rounded-br-[6px]" : "bg-surface-container-low text-on-surface border border-outline-variant rounded-bl-[6px]"}`}>
+                {msg.role === "user" ? (
+                  <p className="font-body-md text-body-md whitespace-pre-wrap">{msg.content}</p>
+                ) : (
+                  <RichText text={msg.content} />
+                )}
                 <p className={`font-label-sm text-label-sm mt-1 ${msg.role === "user" ? "text-on-primary/60" : "text-on-surface-variant"}`}>
                   {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </p>
@@ -96,11 +101,11 @@ export function AssistantPage() {
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] rounded-[24px] rounded-bl-[6px] px-4 py-3 bg-surface-container-low border border-outline-variant/20">
+              <div className="max-w-[80%] rounded-lg rounded-bl-[6px] px-4 py-3 bg-surface-container-low border border-outline-variant">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
             </div>
@@ -109,7 +114,7 @@ export function AssistantPage() {
         </div>
 
         <div className="sticky bottom-0 bg-surface pt-2 pb-4">
-          <div className="flex items-end gap-2 bg-surface-container-low rounded-[24px] border border-outline-variant/20 p-2">
+          <div className="flex items-end gap-2 bg-surface-container-low rounded-lg border border-outline-variant p-2">
             <Textarea
               ref={inputRef}
               value={input}
@@ -125,7 +130,7 @@ export function AssistantPage() {
               onClick={handleSend}
               disabled={!input.trim() || isLoading || !selectedClassId}
               aria-label="Send message"
-              className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center disabled:opacity-40 transition-opacity hover:opacity-90"
+              className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center disabled:opacity-40 transition-opacity hover:opacity-90"
             >
               <span className="material-symbols-outlined text-[20px]">send</span>
             </Button>

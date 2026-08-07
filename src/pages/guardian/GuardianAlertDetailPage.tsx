@@ -37,7 +37,7 @@ export function GuardianAlertDetailPage() {
           message={error instanceof Error ? error.message : "Something went wrong"}
         />
         <div className="pb-xl">
-          <Link to="/guardian" className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md">
+          <Link to="/guardian" className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md">
             Back to Dashboard
           </Link>
         </div>
@@ -61,14 +61,14 @@ export function GuardianAlertDetailPage() {
 
       {detail.guardianContent && (
         <div className="space-y-6">
-          <div className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-md">
+          <div className="rounded-lg bg-white border border-border p-md">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-tertiary-fixed/20 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[18px] text-tertiary">family_history</span>
+              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+                <span className="material-symbols-outlined text-[18px] text-accent-foreground">family_history</span>
               </div>
               <h2 className="font-headline-md text-headline-md text-primary">Message</h2>
             </div>
-            <div className="bg-tertiary-fixed/10 rounded-xl p-4 border border-tertiary-fixed/20">
+            <div className="bg-accent rounded-lg p-4 border border-outline-variant">
               <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap">
                 {detail.guardianContent.message}
               </p>
@@ -80,19 +80,19 @@ export function GuardianAlertDetailPage() {
       )}
 
       {!detail.guardianContent && detail.diagnosis.summary && (
-        <div className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-md">
+        <div className="rounded-lg bg-white border border-border p-md">
           <p className="font-body-md text-body-md text-on-surface">{detail.diagnosis.summary}</p>
         </div>
       )}
 
-      <div className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm overflow-hidden mt-4">
-        <div className="px-md py-3 border-b border-outline-variant/10">
+      <div className="rounded-lg bg-white border border-border overflow-hidden mt-4">
+        <div className="px-md py-3 border-b border-border">
           <h3 className="font-headline-md text-headline-md text-primary">Recent Grades</h3>
         </div>
         {grades.isLoading ? (
           <div className="p-4 space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-surface-container-high rounded-xl animate-pulse" />
+              <div key={i} className="h-12 bg-surface-container-high rounded-lg animate-pulse" />
             ))}
           </div>
         ) : !grades.data || grades.data.length === 0 ? (
@@ -100,7 +100,7 @@ export function GuardianAlertDetailPage() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-outline-variant/10 bg-surface-container-low hover:bg-transparent">
+              <TableRow className="border-b border-border bg-surface-container-low hover:bg-transparent">
                 <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Assignment</TableHead>
                 <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Score</TableHead>
                 <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Max</TableHead>
@@ -108,7 +108,7 @@ export function GuardianAlertDetailPage() {
             </TableHeader>
             <TableBody>
               {grades.data.filter((g) => g.isConfirmed).map((g) => (
-                <TableRow key={g.id} className="border-b border-outline-variant/10 hover:bg-surface-container">
+                <TableRow key={g.id} className="border-b border-border hover:bg-surface-container">
                   <TableCell className="px-md py-3 font-body-md text-body-md text-on-surface">{g.criterionDescription}</TableCell>
                   <TableCell className="px-md py-3 text-right font-body-md text-body-md text-on-surface">{g.pointsAwarded}</TableCell>
                   <TableCell className="px-md py-3 text-right font-body-md text-body-md text-on-surface-variant">{g.criterionMaxPoints}</TableCell>

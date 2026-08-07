@@ -63,18 +63,12 @@ export function SubmissionsPage() {
 
   return (
     <>
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="blob absolute -top-20 -left-20 w-96 h-96 bg-primary-fixed rounded-full animate-pulse" />
-        <div className="blob absolute top-1/2 -right-20 w-80 h-80 bg-secondary-fixed rounded-full" style={{ animation: "bounce 10s infinite" }} />
-        <div className="blob absolute bottom-0 left-1/3 w-[500px] h-[500px] bg-tertiary-fixed rounded-full opacity-20" />
-      </div>
-
       <div className="flex-grow p-xl max-w-7xl mx-auto w-full">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-md mb-lg">
           <div>
-            <h2 className="font-headline-xl text-headline-xl text-primary mb-xs">Submissions Queue</h2>
+            <h2 className="font-headline-xl text-headline-xl text-on-surface mb-xs">Submissions Queue</h2>
             <p className="font-body-lg text-body-lg text-on-surface-variant flex items-center gap-xs">
-              <span className="w-2 h-2 rounded-full bg-primary-container" />
+              <span className="w-2 h-2 rounded-lg bg-primary-container" />
               {isLoading ? "Loading..." : `${submissions.data?.length ?? 0} submissions to review`}
             </p>
           </div>
@@ -82,10 +76,10 @@ export function SubmissionsPage() {
             <Button
               onClick={handleBulkGrade}
               disabled={bulkState !== null}
-              className="flex items-center gap-xs px-md py-sm h-auto rounded-full bg-secondary-container text-white font-label-md text-label-md shadow-lg nudge-hover active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-xs px-md py-sm h-auto rounded-lg bg-primary text-primary-foreground font-label-md text-label-md active:scale-95 disabled:opacity-50"
             >
               {bulkState ? (
-                <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />AI Reviewing {bulkState.pending}/{bulkState.total}...</>
+                <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-lg animate-spin" />AI Reviewing {bulkState.pending}/{bulkState.total}...</>
               ) : (
                 <><span className="material-symbols-outlined text-[18px]">auto_awesome</span>AI Review All ({submittedSubs.length})</>
               )}
@@ -93,7 +87,7 @@ export function SubmissionsPage() {
           )}
         </div>
 
-        <div className="bg-surface-container-lowest/60 backdrop-blur-md rounded-3xl p-md mb-xl flex flex-wrap gap-md items-center justify-between border border-outline-variant/30">
+        <div className="bg-surface-container-lowest/60 rounded-lg p-md mb-xl flex flex-wrap gap-md items-center justify-between border border-outline-variant">
           <div className="flex items-center gap-sm">
             <span className="font-label-md text-label-md text-on-surface-variant">Filter by:</span>
             <Select

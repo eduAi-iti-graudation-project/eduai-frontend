@@ -99,14 +99,14 @@ export function ChatThreadPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="flex items-center gap-3 px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
+      <header className="flex items-center gap-3 px-md py-4 bg-surface-container-lowest border-b border-outline-variant">
         <Link
           to={basePath}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors"
         >
           <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
         </Link>
-        <div className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant font-label-md font-bold shrink-0">
+        <div className="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant font-label-md font-bold shrink-0">
           {getInitials(peerName)}
         </div>
         <div className="min-w-0">
@@ -135,7 +135,7 @@ export function ChatThreadPage() {
         </div>
       )}
 
-      <footer className="border-t border-outline-variant/20 bg-surface-container-lowest p-md">
+      <footer className="border-t border-outline-variant bg-surface-container-lowest p-md">
         <div className="flex items-end gap-2 max-w-3xl mx-auto w-full">
           <textarea
             value={draft}
@@ -153,7 +153,7 @@ export function ChatThreadPage() {
           <Button
             onClick={handleSend}
             disabled={!canSend}
-            className="h-[44px] w-[44px] p-0 rounded-full shrink-0"
+            className="h-[44px] w-[44px] p-0 rounded-lg shrink-0"
             title="Send"
           >
             <span className="material-symbols-outlined text-[20px]">send</span>

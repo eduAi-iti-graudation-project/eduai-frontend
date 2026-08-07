@@ -80,7 +80,7 @@ export function StudentAssignmentGradePage() {
       <div className="flex items-center gap-3 mb-4">
         <Link
           to={`/student/classes/${classId}`}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors"
         >
           <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
         </Link>
@@ -88,19 +88,19 @@ export function StudentAssignmentGradePage() {
       </div>
 
       {assignment.description && (
-        <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm mb-6">
+        <div className="rounded-lg bg-white p-md border border-border mb-6">
           <p className="font-body-md text-body-md text-on-surface-variant">{assignment.description}</p>
         </div>
       )}
 
       {mergedGrades.length === 0 ? (
-        <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm text-center py-xl">
+        <div className="rounded-lg bg-white p-md border border-border text-center py-xl">
           <span className="material-symbols-outlined text-[48px] text-on-surface-variant/40 mb-md">rate_review</span>
           <p className="font-label-md text-label-md text-on-surface-variant">No grades confirmed yet for this assignment</p>
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
+          <div className="rounded-lg bg-white p-md border border-border">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-headline-md text-headline-md text-primary">Results</h2>
               <div className="text-right">
@@ -115,7 +115,7 @@ export function StudentAssignmentGradePage() {
               {mergedGrades.map((g) => (
                 <div
                   key={g.id}
-                  className="rounded-3xl bg-surface-container-low p-md border border-outline-variant/10"
+                  className="rounded-lg bg-surface-container-low p-md border border-border"
                 >
                   <div className="flex items-start justify-between mb-1">
                     <div className="flex-1">
@@ -125,24 +125,24 @@ export function StudentAssignmentGradePage() {
                       </p>
                     </div>
                     {g.criterionMaxPoints > 0 && (
-                      <Badge variant="outline" className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full border-0 shrink-0">
+                      <Badge variant="outline" className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-lg border-0 shrink-0">
                         {Math.round((g.pointsAwarded / g.criterionMaxPoints) * 100)}%
                       </Badge>
                     )}
                   </div>
                   {g.aiFeedback ? (
-                    <div className="mt-2 pt-2 border-t border-outline-variant/10">
+                    <div className="mt-2 pt-2 border-t border-border">
                       <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">AI Feedback</p>
                       <p className="font-body-md text-body-md text-on-surface">{g.aiFeedback}</p>
                     </div>
                   ) : needsFeedback ? (
-                    <div className="mt-2 pt-2 border-t border-outline-variant/10 flex items-center gap-2">
+                    <div className="mt-2 pt-2 border-t border-border flex items-center gap-2">
                       <span className="material-symbols-outlined text-on-surface-variant/40 text-[18px] animate-spin">sync</span>
                       <p className="font-label-sm text-label-sm text-on-surface-variant">Generating feedback...</p>
                     </div>
                   ) : null}
                   {g.teacherNotes && (
-                    <div className="mt-2 pt-2 border-t border-outline-variant/10">
+                    <div className="mt-2 pt-2 border-t border-border">
                       <p className="font-label-sm text-label-sm text-primary mb-1">Teacher Notes</p>
                       <p className="font-body-md text-body-md text-on-surface">{g.teacherNotes}</p>
                     </div>

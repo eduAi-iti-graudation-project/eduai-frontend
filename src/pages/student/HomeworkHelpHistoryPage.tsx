@@ -48,7 +48,7 @@ export function HomeworkHelpHistoryPage() {
 
       <div className="mb-lg">
         <Select value={classFilter} onValueChange={setClassFilter}>
-          <SelectTrigger className="form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[180px]">
+          <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[180px]">
             <SelectValue placeholder="All Classes" />
           </SelectTrigger>
           <SelectContent>
@@ -75,7 +75,7 @@ export function HomeworkHelpHistoryPage() {
           action={
             <Link
               to="/student/homework-help"
-              className="inline-block bg-primary text-white px-md py-sm rounded-full font-label-md hover:opacity-90 transition-all"
+              className="inline-block bg-primary text-white px-md py-sm rounded-lg font-label-md hover:opacity-90 transition-all"
             >
               Ask for homework help →
             </Link>
