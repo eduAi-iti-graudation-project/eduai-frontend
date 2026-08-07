@@ -1,10 +1,12 @@
 import { createBrowserRouter, Link, Outlet } from "react-router-dom"
 import { TeacherLayout } from "./components/layout/TeacherLayout"
 import { StudentLayout } from "./components/layout/StudentLayout"
-import { TeacherRoute, StudentRoute, GuardianRoute, AdminRoute, RootRedirect } from "./components/auth/RouteGuards"
+import { TeacherRoute, StudentRoute, GuardianRoute, AdminRoute, GuestRoute } from "./components/auth/RouteGuards"
 import { LoginPage } from "./pages/LoginPage"
 import { SignupPage } from "./pages/SignupPage"
+import { LandingPage } from "./pages/LandingPage"
 import { TeacherDashboardPage } from "./pages/TeacherDashboardPage"
+import { ClassesPage } from "./pages/teacher/ClassesPage"
 import { GradeListPage } from "./pages/teacher/GradeListPage"
 import { ClassesInGradePage } from "./pages/teacher/ClassesInGradePage"
 import { ClassDetailPage } from "./pages/teacher/ClassDetailPage"
@@ -48,10 +50,14 @@ import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
 import { ChildDetailPage } from "./pages/guardian/ChildDetailPage"
 import { AdminLayout } from "./components/layout/AdminLayout"
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage"
+import { AdminAssistantPage } from "./pages/admin/AdminAssistantPage"
+import { AdminBillingPage } from "./pages/admin/AdminBillingPage"
+import { AdminRequestsPage } from "./pages/admin/AdminRequestsPage"
 import { GradeManagementPage } from "./pages/admin/GradeManagementPage"
 import { StudentManagementPage } from "./pages/admin/StudentManagementPage"
-import { StudentGradesPage } from "./pages/admin/StudentGradesPage"
-import { AttendancePage } from "./pages/admin/AttendancePage"
+import { AdminStudentDetailPage } from "./pages/admin/AdminStudentDetailPage"
+import { TeacherManagementPage } from "./pages/admin/TeacherManagementPage"
+import { AdminTeacherDetailPage } from "./pages/admin/AdminTeacherDetailPage"
 import { InsightsPage } from "./pages/insights/InsightsPage"
 import { StudentInsightsPage } from "./pages/insights/StudentInsightsPage"
 import { ChatListPage } from "./pages/chat/ChatListPage"
@@ -60,6 +66,7 @@ import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const TEACHER_ROUTES = [
   { path: "/dashboard", element: <TeacherDashboardPage /> },
+  { path: "/classes", element: <ClassesPage /> },
   { path: "/grades", element: <GradeListPage /> },
   { path: "/grades/:gradeId", element: <ClassesInGradePage /> },
   { path: "/classes/:id", element: <ClassDetailPage /> },
@@ -108,6 +115,7 @@ export const STUDENT_ROUTES = [
   { path: "/student/chat", element: <ChatListPage /> },
   { path: "/student/chat/:threadId", element: <ChatThreadPage /> },
   { path: "/student/notifications", element: <NotificationsListPage /> },
+  { path: "/student/settings", element: <SettingsPage /> },
 ]
 
 export function teacherRoutes() {
@@ -127,8 +135,8 @@ export function studentRoutes() {
 export function guardianRoutes() {
   return {
     path: "/guardian",
-    element: <GuardianRoute><div className="min-h-screen bg-surface"><header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
-          <h1 className="font-headline-md text-headline-md text-primary">Guardian Portal</h1>
+    element: <GuardianRoute><div className="min-h-screen bg-surface-container-low"><header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-border">
+          <h1 className="font-headline-md text-headline-md text-on-surface">Guardian Portal</h1>
           <div className="flex items-center gap-3">
             <Link to="/guardian/insights" className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors">
               <span className="material-symbols-outlined text-[20px]">monitoring</span>
@@ -156,13 +164,17 @@ export function adminRoutes() {
     element: <AdminRoute><AdminLayout /></AdminRoute>,
     children: [
       { index: true, element: <AdminDashboardPage /> },
+      { path: "assistant", element: <AdminAssistantPage /> },
       { path: "alerts", element: <AdminAlertsPage /> },
       { path: "grades", element: <GradeManagementPage /> },
       { path: "students", element: <StudentManagementPage /> },
-      { path: "student-grades", element: <StudentGradesPage /> },
-      { path: "attendance", element: <AttendancePage /> },
+      { path: "students/:id", element: <AdminStudentDetailPage /> },
+      { path: "teachers", element: <TeacherManagementPage /> },
+      { path: "teachers/:id", element: <AdminTeacherDetailPage /> },
       { path: "insights", element: <InsightsPage /> },
       { path: "insights/students/:id", element: <StudentInsightsPage /> },
+      { path: "billing", element: <AdminBillingPage /> },
+      { path: "requests", element: <AdminRequestsPage /> },
     ],
   }
 }
@@ -170,15 +182,27 @@ export function adminRoutes() {
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <RootRedirect />,
+    element: (
+      <GuestRoute>
+        <LandingPage />
+      </GuestRoute>
+    ),
   },
   {
     path: "/login",
-    element: <LoginPage />,
+    element: (
+      <GuestRoute>
+        <LoginPage />
+      </GuestRoute>
+    ),
   },
   {
     path: "/signup",
-    element: <SignupPage />,
+    element: (
+      <GuestRoute>
+        <SignupPage />
+      </GuestRoute>
+    ),
   },
   teacherRoutes(),
   studentRoutes(),

@@ -10,11 +10,11 @@ interface RoleToggleProps {
 
 export function RoleToggle({ value, onChange, className }: RoleToggleProps) {
   return (
-    <div className={cn("flex p-1 bg-surface-variant rounded-full relative", className)}>
+    <div className={cn("flex p-1 bg-surface-variant rounded-lg relative", className)}>
       <button
         type="button"
         className={cn(
-          "flex-1 py-2 rounded-full font-label-md transition-all duration-300 z-10",
+          "flex-1 py-2 rounded-lg font-label-md transition-all duration-300 z-10",
           value === "teacher"
             ? "text-on-primary-container bg-primary-container"
             : "text-on-surface-variant",
@@ -26,7 +26,7 @@ export function RoleToggle({ value, onChange, className }: RoleToggleProps) {
       <button
         type="button"
         className={cn(
-          "flex-1 py-2 rounded-full font-label-md transition-all duration-300 z-10",
+          "flex-1 py-2 rounded-lg font-label-md transition-all duration-300 z-10",
           value === "student"
             ? "text-on-primary-container bg-primary-container"
             : "text-on-surface-variant",

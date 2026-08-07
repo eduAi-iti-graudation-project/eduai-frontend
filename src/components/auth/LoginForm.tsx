@@ -38,7 +38,8 @@ export function LoginForm() {
       {
         onSuccess: (user) => {
           toast.success("Welcome back!")
-          navigate(user.role === "TEACHER" ? "/dashboard" : "/student-portal")
+          const teacherRoles = new Set(["TEACHER", "ADMIN"])
+          navigate(teacherRoles.has(user.role) ? "/dashboard" : "/student")
         },
         onError: (error) => {
           toast.error(error.message)
@@ -48,14 +49,14 @@ export function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-[460px] bg-surface-container-lowest rounded-3xl p-8 md:p-10 shadow-[0_20px_50px_rgba(10,24,66,0.05)] tactile-card">
+    <div className="w-full max-w-[560px] bg-surface-container-lowest rounded-lg p-6 md:p-8 shadow-[0_20px_50px_rgba(10,24,66,0.05)]">
       <div className="md:hidden mb-8 text-center">
         <span className="font-headline-lg text-headline-lg text-primary">EduAI</span>
       </div>
 
       <header className="mb-6">
-        <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">Welcome Back</h1>
-        <p className="font-body-md text-body-md text-on-surface-variant" id="greeting">
+        <h1 className="font-headline-lg text-headline-lg md:text-headline-xl text-on-background mb-2">Welcome Back</h1>
+        <p className="text-body-lg text-on-surface-variant" id="greeting">
           {getGreeting()}
         </p>
       </header>
@@ -64,14 +65,14 @@ export function LoginForm() {
 
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-1.5">
-          <label className="font-label-md text-on-background ml-1" htmlFor="email">
+          <label className="text-body-md font-label-md text-on-background ml-1" htmlFor="email">
             Email Address
           </label>
           <div
             className={cn(
-              "group/input flex items-center gap-3 px-4 py-3 bg-white border-2 rounded-xl transition-all",
-              "focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)]",
-              errors.email ? "border-error" : "border-surface-container-highest",
+              "group/input flex items-center gap-3 px-4 py-3.5 bg-white border border-border rounded-lg transition-all",
+              "focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(79,70,229,0.15)]",
+              errors.email ? "border-error" : "border-border",
             )}
           >
             <span className="material-symbols-outlined text-outline group-hover/input:text-primary shrink-0">
@@ -79,7 +80,7 @@ export function LoginForm() {
             </span>
             <input
               id="email"
-              className="bg-transparent border-none focus:ring-0 w-full text-body-md placeholder:text-outline-variant outline-none"
+              className="bg-transparent border-none focus:ring-0 w-full text-body-lg placeholder:text-outline-variant outline-none"
               placeholder="name@school.edu"
               type="email"
               {...register("email")}
@@ -92,7 +93,7 @@ export function LoginForm() {
 
         <div className="space-y-1.5">
           <div className="flex justify-between items-center ml-1">
-            <label className="font-label-md text-on-background" htmlFor="password">
+            <label className="text-body-md font-label-md text-on-background" htmlFor="password">
               Password
             </label>
             <button type="button" className="font-label-sm text-label-sm text-primary hover:underline">
@@ -101,9 +102,9 @@ export function LoginForm() {
           </div>
           <div
             className={cn(
-              "group/input flex items-center gap-3 px-4 py-3 bg-white border-2 rounded-xl transition-all",
-              "focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)]",
-              errors.password ? "border-error" : "border-surface-container-highest",
+              "group/input flex items-center gap-3 px-4 py-3.5 bg-white border border-border rounded-lg transition-all",
+              "focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(79,70,229,0.15)]",
+              errors.password ? "border-error" : "border-border",
             )}
           >
             <span className="material-symbols-outlined text-outline group-hover/input:text-primary shrink-0">
@@ -111,7 +112,7 @@ export function LoginForm() {
             </span>
             <input
               id="password"
-              className="bg-transparent border-none focus:ring-0 w-full text-body-md placeholder:text-outline-variant outline-none"
+              className="bg-transparent border-none focus:ring-0 w-full text-body-lg placeholder:text-outline-variant outline-none"
               placeholder="••••••••"
               type={showPassword ? "text" : "password"}
               {...register("password")}
@@ -136,7 +137,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={login.isPending}
-          className="w-full mt-4 py-4 bg-secondary-container text-white font-headline-md rounded-full shadow-lg shadow-secondary-container/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
+          className="w-full mt-4 py-4 bg-primary text-primary-foreground font-headline-md text-body-lg rounded-lg active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
         >
           {login.isPending ? (
             "Logging in..."
