@@ -16,9 +16,9 @@ export function HomeworkHelpCard({ interaction, className }: HomeworkHelpCardPro
   const config = actionConfig[interaction.action] ?? { icon: "psychology", label: interaction.action.replace(/_/g, " ") }
 
   return (
-    <div className={`rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-md ${className ?? ""}`}>
+    <div className={`rounded-lg bg-white border border-border p-md ${className ?? ""}`}>
       <div className="flex items-center justify-between mb-3">
-        <span className="inline-flex items-center gap-1.5 bg-primary-fixed/20 text-primary font-label-sm text-label-sm px-2.5 py-1 rounded-full">
+        <span className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground font-label-sm text-label-sm px-2.5 py-1 rounded-lg">
           <span className="material-symbols-outlined text-[16px]">{config.icon}</span>
           {config.label}
         </span>
@@ -33,7 +33,7 @@ export function HomeworkHelpCard({ interaction, className }: HomeworkHelpCardPro
       <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">A:</p>
       <p className="font-body-md text-body-md text-on-surface-variant mb-3">{interaction.answer}</p>
 
-      <div className="flex items-center justify-between pt-3 border-t border-outline-variant/10">
+      <div className="flex items-center justify-between pt-3 border-t border-border">
         <span className="font-label-sm text-label-sm text-on-surface-variant">
           {interaction.sources.length > 0
             ? `Sources: ${interaction.sources.length}`

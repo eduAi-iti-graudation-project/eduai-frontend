@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest"
 import axios from "axios"
-import { getErrorMessage, getErrorStatus } from "./api"
+import {
+  getErrorMessage,
+  getErrorStatus,
+  getErrorCode,
+  getSubscriptionRequirement,
+  isAuthEndpointUrl,
+  shouldExpireSession,
+  SESSION_EXPIRED_EVENT,
+} from "./api"
 
 function axiosError(payload: {
   status?: number
@@ -87,5 +95,122 @@ describe("getErrorStatus", () => {
     expect(getErrorStatus(axiosError({ status: 409 }))).toBe(409)
     expect(getErrorStatus(axiosError({ network: true }))).toBeUndefined()
     expect(getErrorStatus(new Error("plain"))).toBeUndefined()
+  })
+})
+
+describe("getErrorCode", () => {
+  it("extracts the backend error code from the envelope", () => {
+    expect(
+      getErrorCode(axiosError({ status: 404, data: { code: "JOIN_CODE_INVALID", message: "not valid" } })),
+    ).toBe("JOIN_CODE_INVALID")
+  })
+
+  it("returns undefined when no code is present", () => {
+    expect(getErrorCode(axiosError({ status: 400, data: { message: "bad" } }))).toBeUndefined()
+    expect(getErrorCode(axiosError({ network: true }))).toBeUndefined()
+    expect(getErrorCode(new Error("plain"))).toBeUndefined()
+  })
+})
+
+describe("getSubscriptionRequirement", () => {
+  it("returns 'subscription' for a 402 with the subscription-required code", () => {
+    expect(
+      getSubscriptionRequirement(
+        axiosError({
+          status: 402,
+          data: {
+            code: "SUBSCRIPTION_REQUIRED",
+            message: "Your organization needs an active subscription to continue using EduAI.",
+          },
+        }),
+      ),
+    ).toEqual({ kind: "subscription" })
+  })
+
+  it("returns 'subscription' for a 402 whose message mentions an active subscription", () => {
+    expect(
+      getSubscriptionRequirement(
+        axiosError({ status: 402, data: { message: "An active subscription is required to access this resource" } }),
+      ),
+    ).toEqual({ kind: "subscription" })
+  })
+
+  it("treats a seat-limit 402 as not subscription-related", () => {
+    expect(
+      getSubscriptionRequirement(
+        axiosError({
+          status: 402,
+          data: {
+            code: "INVITE_SEATS_FULL",
+            message: "Your organization has reached its seat limit. Upgrade to invite more members.",
+          },
+        }),
+      ),
+    ).toEqual({ kind: "none" })
+  })
+
+  it("returns the required tier for a 403 tier-gating message", () => {
+    expect(
+      getSubscriptionRequirement(
+        axiosError({ status: 403, data: { message: "This feature requires the Enterprise plan or higher" } }),
+      ),
+    ).toEqual({ kind: "tier", tier: "Enterprise" })
+  })
+
+  it("treats unrelated 403s as not subscription-related", () => {
+    expect(
+      getSubscriptionRequirement(axiosError({ status: 403, data: { message: "Forbidden" } })),
+    ).toEqual({ kind: "none" })
+  })
+
+  it("returns 'none' for non-subscription errors and plain errors", () => {
+    expect(getSubscriptionRequirement(axiosError({ status: 400 }))).toEqual({ kind: "none" })
+    expect(getSubscriptionRequirement(axiosError({ network: true }))).toEqual({ kind: "none" })
+    expect(getSubscriptionRequirement(new Error("boom"))).toEqual({ kind: "none" })
+  })
+})
+
+describe("isAuthEndpointUrl", () => {
+  it("excludes login and signup URLs so their 401s never expire the session", () => {
+    expect(isAuthEndpointUrl("/auth/login")).toBe(true)
+    expect(isAuthEndpointUrl("/auth/signup")).toBe(true)
+  })
+
+  it("treats protected endpoint URLs as session-expiring", () => {
+    expect(isAuthEndpointUrl("/auth/me")).toBe(false)
+    expect(isAuthEndpointUrl("/organizations/me")).toBe(false)
+    expect(isAuthEndpointUrl("/classes/1/submissions")).toBe(false)
+  })
+
+  it("treats a missing URL as protected (conservative default)", () => {
+    expect(isAuthEndpointUrl(undefined)).toBe(false)
+  })
+})
+
+describe("SESSION_EXPIRED_EVENT", () => {
+  it("names the event the provider listens for", () => {
+    expect(SESSION_EXPIRED_EVENT).toBe("eduai:session-expired")
+  })
+})
+
+describe("shouldExpireSession", () => {
+  it("expires the session on a 401 from a protected endpoint when a token exists", () => {
+    expect(shouldExpireSession(401, "/auth/me", true)).toBe(true)
+    expect(shouldExpireSession(401, "/organizations/me", true)).toBe(true)
+  })
+
+  it("never expires the session for login or signup 401s", () => {
+    expect(shouldExpireSession(401, "/auth/login", true)).toBe(false)
+    expect(shouldExpireSession(401, "/auth/signup", true)).toBe(false)
+  })
+
+  it("ignores 401s when there is no token (expected unauthenticated calls)", () => {
+    expect(shouldExpireSession(401, "/organizations/me", false)).toBe(false)
+  })
+
+  it("ignores non-401 statuses", () => {
+    expect(shouldExpireSession(403, "/auth/me", true)).toBe(false)
+    expect(shouldExpireSession(404, "/auth/me", true)).toBe(false)
+    expect(shouldExpireSession(undefined, "/auth/me", true)).toBe(false)
   })
 })
