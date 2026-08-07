@@ -15,12 +15,12 @@ import * as api from "@/lib/api"
 
 type TabId = "students" | "assignments" | "materials" | "attendance" | "requests"
 
-const TABS: { id: TabId; label: string; icon: string }[] = [
-  { id: "students", label: "Students", icon: "group" },
-  { id: "assignments", label: "Assignments", icon: "assignment" },
-  { id: "materials", label: "Materials", icon: "folder" },
-  { id: "attendance", label: "Attendance", icon: "calendar_month" },
-  { id: "requests", label: "Requests", icon: "person_add" },
+const TABS: { id: TabId; label: string }[] = [
+  { id: "students", label: "Students" },
+  { id: "assignments", label: "Assignments" },
+  { id: "materials", label: "Materials" },
+  { id: "attendance", label: "Attendance" },
+  { id: "requests", label: "Requests" },
 ]
 
 function getInitials(name: string): string {
@@ -32,6 +32,13 @@ function getInitials(name: string): string {
     .slice(0, 2)
 }
 
+const ATTENDANCE_STYLES: Record<string, string> = {
+  PRESENT: "bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]",
+  ABSENT: "bg-error-container text-on-error-container border border-error-container",
+  LATE: "bg-surface-container-high text-on-surface border border-surface-container-high",
+  EXCUSED: "bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB]",
+}
+
 export function ClassDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -41,6 +48,7 @@ export function ClassDetailPage() {
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [uploadTitle, setUploadTitle] = useState("")
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [studentQuery, setStudentQuery] = useState("")
 
   const { detail, assignments, isLoading, isError, error, deleteClass, removeEnrollment } = useClassDetail(id ?? "")
   const { materials, upload, remove: removeMaterial } = useMaterials(id ?? "")
@@ -53,6 +61,13 @@ export function ClassDetailPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const students = cls ? (cls as any).enrollments?.map((e: any) => ({ ...e.student, enrollmentId: e.id })) ?? [] : []
+
+  const q = studentQuery.trim().toLowerCase()
+  const filteredStudents = students.filter(
+    (s: { name: string; email: string }) => s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q),
+  )
+
+  const dates = [...new Set(attendanceRecords.map((r) => r.date))].sort()
 
   const handleDelete = async () => {
     if (!id) return
@@ -71,11 +86,14 @@ export function ClassDetailPage() {
     enabled: !!id,
   })
 
+  const pendingRequests = (requestsQuery.data ?? []).length
+
   const approveMutation = useMutation({
     mutationFn: (enrollmentId: string) => api.approveEnrollment(enrollmentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["class", "requests", id] })
       queryClient.invalidateQueries({ queryKey: ["class", id] })
+      queryClient.invalidateQueries({ queryKey: ["classes"] })
       toast.success("Enrollment approved")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -85,6 +103,8 @@ export function ClassDetailPage() {
     mutationFn: (enrollmentId: string) => api.rejectEnrollment(enrollmentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["class", "requests", id] })
+      queryClient.invalidateQueries({ queryKey: ["class", id] })
+      queryClient.invalidateQueries({ queryKey: ["classes"] })
       toast.success("Enrollment rejected")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -111,13 +131,23 @@ export function ClassDetailPage() {
     }
   }
 
-  const handleRemoveMaterial = async (id: string) => {
+  const handleRemoveMaterial = async (materialId: string) => {
     try {
-      await removeMaterial.mutateAsync(id)
+      await removeMaterial.mutateAsync(materialId)
       toast.success("Material deleted")
     } catch (err) {
       toast.error(api.getErrorMessage(err))
     }
+  }
+
+  const messageStudent = (studentId: string) => {
+    createThread.mutate(
+      { classId: id as string, studentId },
+      {
+        onSuccess: (thread) => navigate(`/chat/${thread.id}`),
+        onError: (err: Error) => toast.error(err.message),
+      },
+    )
   }
 
   const tabContent = (tab: TabId) => {
@@ -125,47 +155,74 @@ export function ClassDetailPage() {
       case "students":
         return (
           <div className="space-y-md">
-            <div className="flex items-center justify-between">
-              <h3 className="font-headline-md text-headline-md text-primary">Class Roster</h3>
-              <p className="font-label-sm text-label-sm text-on-surface-variant">Students join via self-enrollment</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-sm">
+              <h3 className="font-headline-sub text-headline-sub text-on-surface">Enrolled Students ({students.length})</h3>
+              <div className="relative w-full sm:w-64">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[16px] pointer-events-none">search</span>
+                <input
+                  value={studentQuery}
+                  onChange={(e) => setStudentQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 border border-outline-variant rounded-md text-sm font-body-md bg-surface-container-low focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  placeholder="Search students..."
+                  type="text"
+                />
+              </div>
             </div>
 
             {students.length === 0 ? (
-              <EmptyState icon="group" title="No students enrolled" description="Add a student to get started" />
+              <EmptyState icon="group" title="No students enrolled" description="Students can request to join this class from their portal." />
+            ) : filteredStudents.length === 0 ? (
+              <EmptyState icon="search" title="No students match" description="Try a different search term" />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-sm">
-                {students.map((s: { id: string; name: string; email: string; enrollmentId: string }) => (
-                  <div key={s.id} className="bg-white rounded-[24px] p-md shadow-sm border border-outline-variant/10 flex items-center gap-sm group">
-                    <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant font-label-sm font-bold shrink-0">{getInitials(s.name)}</div>
-                    <div className="flex-1 min-w-0">
-                      <Link to={`/students/${s.id}`} className="font-label-md text-label-md text-on-surface hover:text-primary transition-colors truncate block">{s.name}</Link>
-                      <p className="font-label-sm text-label-sm text-on-surface-variant truncate">{s.email}</p>
-                    </div>
-                    <Button
-                      onClick={() =>
-                        createThread.mutate(
-                          { classId: id as string, studentId: s.id },
-                          {
-                            onSuccess: (thread) => navigate(`/chat/${thread.id}`),
-                            onError: (err: Error) => toast.error(err.message),
-                          },
-                        )
-                      }
-                      disabled={createThread.isPending}
-                      className="h-auto w-auto p-1.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-primary/10"
-                      title="Message student"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
-                    </Button>
-                    <Button
-                      onClick={() => handleRemoveStudent(s.id)}
-                      className="h-auto w-auto p-1.5 rounded-full text-on-surface-variant hover:text-error hover:bg-error/10 opacity-0 group-hover:opacity-100 transition-all"
-                      title="Remove student"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">close</span>
-                    </Button>
-                  </div>
-                ))}
+              <div className="border border-outline-variant rounded-lg overflow-hidden bg-surface-container-lowest">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-surface-container-low border-b border-outline-variant">
+                      <th className="py-3 px-4 font-meta text-meta uppercase text-on-surface-variant tracking-wider">Student</th>
+                      <th className="py-3 px-4 font-meta text-meta uppercase text-on-surface-variant tracking-wider hidden sm:table-cell">Email</th>
+                      <th className="py-3 px-4 font-meta text-meta uppercase text-on-surface-variant tracking-wider">Status</th>
+                      <th className="py-3 px-4 font-meta text-meta uppercase text-on-surface-variant tracking-wider text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant">
+                    {filteredStudents.map((s: { id: string; name: string; email: string }) => (
+                      <tr key={s.id} className="hover:bg-surface-container-low transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-label-sm font-bold text-on-surface-variant shrink-0">
+                              {getInitials(s.name)}
+                            </div>
+                            <Link to={`/students/${s.id}`} className="font-body-md text-sm font-medium text-on-surface hover:text-primary transition-colors">{s.name}</Link>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-on-surface-variant hidden sm:table-cell">{s.email}</td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]">Enrolled</span>
+                        </td>
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-sm">
+                            <button
+                              type="button"
+                              onClick={() => messageStudent(s.id)}
+                              disabled={createThread.isPending}
+                              className="bg-surface-container-lowest border border-outline-variant text-primary py-1 px-3 rounded-md text-sm font-medium hover:bg-surface-container transition-colors disabled:opacity-60"
+                            >
+                              Message
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveStudent(s.id)}
+                              title="Remove student"
+                              className="text-on-surface-variant hover:text-error transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
@@ -175,8 +232,8 @@ export function ClassDetailPage() {
         return (
           <div className="space-y-md">
             <div className="flex items-center justify-between">
-              <h3 className="font-headline-md text-headline-md text-primary">Assignments</h3>
-              <Button asChild className="flex items-center gap-xs px-md py-sm h-auto rounded-full bg-primary-container text-white font-label-md text-label-md nudge-hover">
+              <h3 className="font-headline-sub text-headline-sub text-on-surface">Assignments</h3>
+              <Button asChild className="flex items-center gap-2 px-4 py-2 h-auto rounded-md bg-primary text-on-primary font-body-medium text-sm hover:bg-primary/90 transition-colors">
                 <Link to={`/assignments/new?classId=${cls?.id}`}>
                   <span className="material-symbols-outlined text-[18px]">add</span>New Assignment
                 </Link>
@@ -188,9 +245,9 @@ export function ClassDetailPage() {
             ) : (
               <div className="space-y-sm">
                 {assignmentsData.map((a) => (
-                  <Link key={a.id} to={`/assignments/${a.id}`} className="block bg-white rounded-3xl p-md shadow-sm border border-outline-variant/10 flex items-center justify-between group hover:border-primary-container/30 hover:shadow-md transition-all">
-                    <div className="flex items-center gap-md">
-                      <div className="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center text-primary">
+                  <Link key={a.id} to={`/assignments/${a.id}`} className="block bg-surface-container-lowest rounded p-md border border-outline-variant flex items-center justify-between group hover:border-primary hover:shadow-md transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded bg-surface-container flex items-center justify-center text-primary shrink-0">
                         <span className="material-symbols-outlined">description</span>
                       </div>
                       <div>
@@ -199,8 +256,9 @@ export function ClassDetailPage() {
                       </div>
                     </div>
                     <Button
+                      type="button"
                       onClick={(e) => { e.preventDefault(); navigate(`/submissions?assignmentId=${a.id}`) }}
-                      className="h-auto px-md py-2 rounded-2xl bg-primary-container/10 text-primary font-label-sm text-label-sm hover:bg-primary-container/20 transition-colors cursor-pointer"
+                      className="h-auto px-md py-2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high transition-colors"
                     >
                       View Submissions
                     </Button>
@@ -214,12 +272,10 @@ export function ClassDetailPage() {
       case "materials":
         return (
           <div className="space-y-md">
-            <div className="flex items-center justify-between">
-              <h3 className="font-headline-md text-headline-md text-primary">Materials</h3>
-            </div>
+            <h3 className="font-headline-sub text-headline-sub text-on-surface">Materials</h3>
 
-            <div className="bg-white rounded-[24px] p-md shadow-sm border border-outline-variant/10">
-              <h4 className="font-label-md text-label-md text-primary mb-sm">Upload Material</h4>
+            <div className="bg-surface-container-lowest rounded-lg p-md border border-outline-variant">
+              <h4 className="font-label-md text-label-md text-on-surface mb-sm">Upload Material</h4>
               <FileDropzone
                 accept=".pdf"
                 onFileSelect={handleUploadMaterial}
@@ -234,7 +290,7 @@ export function ClassDetailPage() {
                     onChange={(e) => setUploadTitle(e.target.value)}
                     placeholder="Material title"
                     disabled={upload.isPending}
-                    className="w-full px-md py-sm rounded-2xl border border-outline-variant bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:outline-none disabled:opacity-60"
+                    className="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:outline-none disabled:opacity-60"
                   />
                   <div className="flex items-center gap-sm">
                     <p className="font-label-sm text-label-sm text-on-surface-variant flex-1 truncate">{pendingFile.name}</p>
@@ -242,7 +298,7 @@ export function ClassDetailPage() {
                       type="button"
                       onClick={handleUpload}
                       disabled={upload.isPending || !uploadTitle.trim()}
-                      className="h-auto px-md py-sm rounded-full bg-primary-container text-white font-label-md text-label-md hover:opacity-90 transition-colors disabled:opacity-50"
+                      className="h-auto px-md py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 transition-colors disabled:opacity-50"
                     >
                       {upload.isPending ? "Uploading..." : "Upload"}
                     </Button>
@@ -256,9 +312,9 @@ export function ClassDetailPage() {
             ) : (
               <div className="space-y-sm">
                 {materials.map((m) => (
-                  <div key={m.id} className="bg-white rounded-3xl p-md shadow-sm border border-outline-variant/10 flex items-center justify-between group">
+                  <div key={m.id} className="bg-surface-container-lowest rounded-lg p-md border border-outline-variant flex items-center justify-between group">
                     <div className="flex items-center gap-md">
-                      <div className="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center text-primary">
+                      <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
                         <span className="material-symbols-outlined">description</span>
                       </div>
                       <div>
@@ -268,14 +324,14 @@ export function ClassDetailPage() {
                     </div>
                     <div className="flex items-center gap-sm">
                       {m.fileUrl && (
-                        <Button asChild className="h-auto px-md py-2 rounded-2xl bg-primary-container/10 text-primary font-label-sm text-label-sm hover:bg-primary-container/20 transition-colors">
+                        <Button asChild className="h-auto px-md py-2 bg-surface border border-outline-variant text-on-surface-variant font-label-sm text-label-sm rounded-md hover:bg-surface-container-high transition-colors">
                           <a href={m.fileUrl} target="_blank" rel="noreferrer">View</a>
                         </Button>
                       )}
                       <Button
+                        type="button"
                         onClick={() => handleRemoveMaterial(m.id)}
-                        disabled={removeMaterial.isPending}
-                        className="h-auto w-auto p-2 text-on-surface-variant hover:text-error transition-colors disabled:opacity-50"
+                        className="h-auto w-auto p-2 text-on-surface-variant hover:text-error transition-colors"
                         title="Delete"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -292,8 +348,8 @@ export function ClassDetailPage() {
         return (
           <div className="space-y-md">
             <div className="flex items-center justify-between">
-              <h3 className="font-headline-md text-headline-md text-primary">Attendance</h3>
-              <Button asChild className="flex items-center gap-xs px-md py-sm h-auto rounded-full bg-primary-container text-white font-label-md text-label-md nudge-hover">
+              <h3 className="font-headline-sub text-headline-sub text-on-surface">Attendance</h3>
+              <Button asChild className="flex items-center gap-2 px-4 py-2 h-auto rounded-md bg-primary text-on-primary font-body-medium text-sm hover:bg-primary/90 transition-colors">
                 <Link to={`/attendance/import?classId=${id}`}>
                   <span className="material-symbols-outlined text-[18px]">upload</span>Import
                 </Link>
@@ -303,32 +359,26 @@ export function ClassDetailPage() {
             {attendanceRecords.length === 0 ? (
               <EmptyState icon="calendar_month" title="No attendance records" description="Import attendance to see the grid here" />
             ) : (
-              <div className="overflow-x-auto bg-white rounded-[24px] shadow-sm border border-outline-variant/10">
-                <table className="w-full text-sm">
+              <div className="overflow-x-auto bg-surface-container-lowest rounded-lg border border-outline-variant">
+                <table className="w-full text-sm font-body-md">
                   <thead>
-                    <tr className="border-b border-outline-variant/20">
-                      <th className="text-left px-4 py-3 font-label-md text-label-md text-on-surface-variant">Student</th>
-                      {[...new Set(attendanceRecords.map((r) => r.date))].sort().map((date) => (
-                        <th key={date} className="px-3 py-3 font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">{new Date(date).toLocaleDateString()}</th>
+                    <tr className="bg-surface-container-low border-b border-outline-variant">
+                      <th className="text-left px-4 py-3 font-meta text-meta text-on-surface-variant">Student</th>
+                      {dates.map((date) => (
+                        <th key={date} className="px-3 py-3 font-meta text-meta text-on-surface-variant whitespace-nowrap">{new Date(date).toLocaleDateString()}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {students.map((s: { id: string; name: string }) => (
-                      <tr key={s.id} className="border-b border-outline-variant/10 last:border-none">
-                        <td className="px-4 py-3 font-label-md text-label-md text-on-surface whitespace-nowrap">{s.name}</td>
-                        {[...new Set(attendanceRecords.map((r) => r.date))].sort().map((date) => {
+                      <tr key={s.id} className="border-b border-outline-variant last:border-none">
+                        <td className="px-4 py-3 font-body-medium text-sm text-on-surface whitespace-nowrap">{s.name}</td>
+                        {dates.map((date) => {
                           const record = attendanceRecords.find((r) => r.studentId === s.id && r.date === date)
-                          const statusColors: Record<string, string> = {
-                            PRESENT: "bg-green-100 text-green-700",
-                            ABSENT: "bg-red-100 text-red-700",
-                            LATE: "bg-yellow-100 text-yellow-700",
-                            EXCUSED: "bg-gray-100 text-gray-700",
-                          }
                           return (
                             <td key={date} className="px-3 py-3">
                               {record ? (
-                                <span className={`inline-block px-2 py-0.5 rounded-full font-label-sm text-label-sm ${statusColors[record.status] ?? ""}`}>{record.status}</span>
+                                <span className={`inline-flex px-2 py-0.5 rounded font-label-sm text-label-sm ${ATTENDANCE_STYLES[record.status] ?? ""}`}>{record.status}</span>
                               ) : (
                                 <span className="text-on-surface-variant/30">—</span>
                               )}
@@ -347,16 +397,14 @@ export function ClassDetailPage() {
       case "requests":
         return (
           <div className="space-y-md">
-            <div className="flex items-center justify-between">
-              <h3 className="font-headline-md text-headline-md text-primary">Enrollment Requests</h3>
-            </div>
+            <h3 className="font-headline-sub text-headline-sub text-on-surface">Enrollment Requests</h3>
 
             {requestsQuery.isLoading ? (
               <div className="space-y-2">
                 {[1, 2].map((i) => (
-                  <div key={i} className="rounded-[24px] bg-white p-md border border-outline-variant/10 animate-pulse">
-                    <div className="h-5 w-48 bg-surface-container-high rounded-full mb-2" />
-                    <div className="h-4 w-32 bg-surface-container-high rounded-full" />
+                  <div key={i} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant animate-pulse">
+                    <div className="h-5 w-48 bg-surface-variant rounded-lg mb-2" />
+                    <div className="h-4 w-32 bg-surface-variant rounded-lg" />
                   </div>
                 ))}
               </div>
@@ -365,24 +413,26 @@ export function ClassDetailPage() {
             ) : (
               <div className="space-y-2">
                 {(requestsQuery.data ?? []).map((req) => (
-                  <div key={req.id} className="rounded-[24px] bg-white p-md border border-outline-variant/10 flex items-center justify-between">
+                  <div key={req.id} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant flex items-center justify-between">
                     <div>
                       <p className="font-label-md text-label-md text-on-surface">{req.student.name}</p>
                       <p className="font-label-sm text-label-sm text-on-surface-variant">{req.student.email}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
+                        type="button"
                         variant="outline"
                         onClick={() => rejectMutation.mutate(req.id)}
                         disabled={rejectMutation.isPending}
-                        className="h-auto px-md py-sm border-2 border-error text-error font-label-sm text-label-sm rounded-full hover:bg-error/10 transition-colors disabled:opacity-50"
+                        className="h-auto px-md py-sm border border-error text-error font-label-sm text-sm rounded-md hover:bg-error-container transition-colors disabled:opacity-50"
                       >
                         Reject
                       </Button>
                       <Button
+                        type="button"
                         onClick={() => approveMutation.mutate(req.id)}
                         disabled={approveMutation.isPending}
-                        className="h-auto px-md py-sm rounded-full bg-secondary-container text-white font-label-sm text-label-sm hover:opacity-90 transition-colors disabled:opacity-50"
+                        className="h-auto px-md py-sm rounded-md bg-primary text-on-primary font-label-sm text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
                       >
                         Approve
                       </Button>
@@ -403,7 +453,7 @@ export function ClassDetailPage() {
           <span className="material-symbols-outlined text-[48px] text-error mb-md">error</span>
           <h2 className="font-headline-md text-headline-md text-on-surface mb-sm">Class not found</h2>
           <p className="font-body-md text-on-surface-variant mb-lg">{error instanceof Error ? error.message : "Failed to load class"}</p>
-          <Link to="/classes" className="bg-secondary-container text-white px-lg py-sm rounded-full font-label-md nudge-hover inline-block">Back to Classes</Link>
+          <Link to="/classes" className="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-md inline-block">Back to Classes</Link>
         </div>
       </div>
     )
@@ -414,56 +464,57 @@ export function ClassDetailPage() {
   }
 
   return (
-    <>
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="blob absolute -top-20 -left-20 w-96 h-96 bg-primary-fixed rounded-full animate-pulse" />
-        <div className="blob absolute top-1/3 -right-20 w-80 h-80 bg-secondary-fixed rounded-full" style={{ animation: "bounce 10s infinite" }} />
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-xl max-w-7xl mx-auto w-full">
-        <Link to="/classes" className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors mb-md">
-          <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+    <div className="min-h-full bg-surface-container-low">
+      <div className="mx-auto w-full max-w-6xl p-gutter pb-24 md:pb-0">
+        <Link to="/classes" className="inline-flex items-center gap-1 text-on-surface-variant hover:text-primary font-body-md text-sm mb-4 transition-colors">
+          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
           Back to Classes
         </Link>
 
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-md mb-xl">
-          <div className="flex items-center gap-md">
-            <div className="w-16 h-16 bg-primary-container rounded-3xl flex items-center justify-center text-white">
-              <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
-            </div>
-            <div>
-              <h2 className="font-headline-xl text-headline-xl text-primary mb-xs">{cls.name}</h2>
-              <p className="font-body-lg text-body-lg text-on-surface-variant">
-                {cls.description ?? "No description"} &bull; {students.length} Student{students.length !== 1 ? "s" : ""} &bull; {assignmentsData.length} Assignment{assignmentsData.length !== 1 ? "s" : ""}
-              </p>
-            </div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-md">
+          <div>
+            <h2 className="font-headline-xl text-headline-xl text-on-surface">{cls.name}</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+              {cls.description ?? "No description"} &bull; {students.length} Student{students.length !== 1 ? "s" : ""} &bull; {assignmentsData.length} Assignment{assignmentsData.length !== 1 ? "s" : ""}
+            </p>
           </div>
-          <div className="flex items-center gap-sm">
+          <div className="flex items-center gap-2">
+            <Button asChild className="flex items-center gap-2 px-4 py-2 h-auto rounded-md bg-primary text-on-primary font-body-medium text-sm hover:bg-primary/90 transition-colors shadow-sm">
+              <Link to="/assistant">
+                <span className="material-symbols-outlined text-[18px]">smart_toy</span>
+                AI Assistant
+              </Link>
+            </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => setShowDeleteConfirm(true)}
-              className="h-auto px-md py-sm border-2 border-error text-error font-label-md text-label-md rounded-full hover:bg-error/10 transition-colors"
+              className="h-auto px-md py-2 border border-error text-error font-label-md text-label-m rounded-md hover:bg-error-container/50 transition-colors"
             >
               Delete
             </Button>
           </div>
         </div>
 
-        <div className="flex gap-1 mb-xl border-b border-outline-variant/20">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-xs px-md py-3 font-label-md text-label-md border-b-2 transition-colors ${activeTab === tab.id ? "border-primary-container text-primary" : "border-transparent text-on-surface-variant hover:text-primary"}`}
-            >
-              <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden flex flex-col">
+          <div className="border-b border-outline-variant px-6 flex overflow-x-auto shrink-0 hide-scrollbar">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-2 mr-6 font-body-medium text-sm whitespace-nowrap transition-colors ${
+                  activeTab === tab.id ? "text-primary border-b-2 border-primary font-medium" : "text-on-surface-variant hover:text-primary border-b-2 border-transparent"
+                }`}
+              >
+                {tab.label}
+                {tab.id === "requests" && pendingRequests > 0 && (
+                  <span className="inline-flex ml-2 w-2 h-2 bg-primary rounded-full align-middle" />
+                )}
+              </button>
+            ))}
+          </div>
+          <div className="p-6">{tabContent(activeTab)}</div>
         </div>
-
-        {tabContent(activeTab)}
       </div>
 
       <ConfirmDialog
@@ -477,13 +528,6 @@ export function ClassDetailPage() {
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteConfirm(false)}
       />
-
-      <div className="fixed bottom-md right-md z-50">
-        <Link to="/assistant" className="flex items-center gap-sm bg-inverse-surface text-inverse-on-surface px-md py-sm rounded-full shadow-2xl hover:scale-105 transition-transform">
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
-          <span className="font-label-md text-label-md">Ask EduAI Assistant</span>
-        </Link>
-      </div>
-    </>
+    </div>
   )
 }

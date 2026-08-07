@@ -272,13 +272,13 @@ export function QuizEditorPage() {
 
   return (
     <>
-      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
+      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant">
         <div className="flex items-center gap-3">
           <Link to="/quizzes" className="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline">
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>
             Quizzes
           </Link>
-          <h1 className="font-headline-lg text-headline-lg text-primary">
+          <h1 className="font-headline-lg text-headline-lg text-on-surface">
             {isNew ? "New quiz" : "Edit quiz"}
           </h1>
           {!isNew && quiz.data && <QuizStatusBadge status={quiz.data.status} />}
@@ -286,7 +286,7 @@ export function QuizEditorPage() {
         {readOnly ? (
           <Button
             asChild
-            className="bg-primary text-white px-md h-auto py-sm rounded-full font-label-md nudge-hover"
+            className="bg-primary text-white! px-md h-auto py-sm rounded-lg font-label-md nudge-hover"
           >
             <Link to={`/quizzes/${id}/attempts`}>View attempts</Link>
           </Button>
@@ -296,7 +296,7 @@ export function QuizEditorPage() {
               type="button"
               onClick={() => save(false)}
               disabled={saving || !canSave}
-              className="bg-secondary-container text-white px-md h-auto py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+              className="bg-primary text-white! px-md h-auto py-sm rounded-lg font-label-md disabled:opacity-50 nudge-hover"
             >
               {saving ? "Saving…" : "Save draft"}
             </Button>
@@ -304,7 +304,7 @@ export function QuizEditorPage() {
               type="button"
               onClick={() => setPublishOpen(true)}
               disabled={saving || !canSave}
-              className="bg-primary text-white px-md h-auto py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+              className="bg-primary text-white! px-md h-auto py-sm rounded-lg font-label-md disabled:opacity-50 nudge-hover"
             >
               Publish
             </Button>
@@ -314,7 +314,7 @@ export function QuizEditorPage() {
 
       <div className="flex-1 p-md overflow-y-auto">
         {readOnly && (
-          <div className="max-w-3xl mx-auto mb-md bg-primary-fixed/40 text-primary rounded-2xl px-md py-sm font-label-md text-label-md flex items-center gap-2">
+          <div className="max-w-3xl mx-auto mb-md bg-primary-fixed/40 text-primary rounded-lg px-md py-sm font-label-md text-label-md flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px]">lock</span>
             This quiz is {status.toLowerCase()} — questions are locked. Students&apos; results are unaffected.
           </div>
@@ -324,7 +324,7 @@ export function QuizEditorPage() {
           <LoadingState className="flex-1 p-md" />
         ) : (
           <div className="max-w-3xl mx-auto space-y-4">
-            <div className="tactile-card rounded-[24px] bg-surface-container-lowest p-md space-y-4">
+            <div className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant space-y-4 border border-outline-variant">
               <div>
                 <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Title</label>
                 <Input
@@ -332,7 +332,7 @@ export function QuizEditorPage() {
                   onChange={(e) => setTitle(e.target.value)}
                   disabled={readOnly}
                   placeholder="e.g. Chapter 4: Photosynthesis"
-                  className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
+                  className="w-full h-auto rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                 />
               </div>
               <div>
@@ -343,7 +343,7 @@ export function QuizEditorPage() {
                   disabled={readOnly}
                   rows={2}
                   placeholder="Instructions students see before starting"
-                  className="w-full min-h-0 rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 resize-none"
+                  className="w-full min-h-0 rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 resize-none"
                 />
               </div>
               <div>
@@ -353,7 +353,7 @@ export function QuizEditorPage() {
                   onValueChange={(v) => setClassId(v === NO_CLASS ? "" : v)}
                   disabled={!isNew || readOnly}
                 >
-                  <SelectTrigger className="w-full rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60">
+                  <SelectTrigger className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60">
                     <SelectValue placeholder="Select a class" />
                   </SelectTrigger>
                   <SelectContent>
@@ -382,7 +382,7 @@ export function QuizEditorPage() {
                     onChange={(e) => setTimeLimit(e.target.value)}
                     disabled={readOnly}
                     placeholder="No limit"
-                    className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
+                    className="w-full h-auto rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                   />
                 </div>
                 <div>
@@ -394,7 +394,7 @@ export function QuizEditorPage() {
                     onChange={(e) => setPassingScore(e.target.value)}
                     disabled={readOnly}
                     placeholder="Not required"
-                    className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
+                    className="w-full h-auto rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -408,7 +408,7 @@ export function QuizEditorPage() {
                   min={isNew ? toLocalInputValue(new Date().toISOString()) : undefined}
                   onChange={(e) => setClosesAt(e.target.value)}
                   disabled={readOnly}
-                  className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
+                  className="w-full h-auto rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                 />
                 {closesAtError ? (
                   <p className="font-label-sm text-label-sm text-error mt-1">{closesAtError}</p>
@@ -421,14 +421,14 @@ export function QuizEditorPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <h2 className="font-headline-md text-headline-md text-primary">
+              <h2 className="font-headline-md text-headline-md text-on-surface">
                 Questions <span className="text-on-surface-variant text-body-md">· {questions.length} · {totalPoints} pts</span>
               </h2>
               {!readOnly && (
                 <Button
                   type="button"
                   onClick={() => setQuestions((prev) => [...prev, makeQuestion("MCQ")])}
-                  className="bg-primary-fixed text-primary px-md h-auto py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1"
+                  className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md inline-flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-[18px]">add</span>
                   Add question
@@ -437,7 +437,7 @@ export function QuizEditorPage() {
             </div>
 
             {questions.map((q, index) => (
-              <div key={q.localId} className="tactile-card rounded-[24px] bg-surface-container-lowest p-md">
+              <div key={q.localId} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant">
                 <div className="flex items-center gap-2 mb-sm">
                   <span className="font-label-md text-label-md text-on-surface-variant">Q{index + 1}</span>
                   <Select
@@ -445,7 +445,7 @@ export function QuizEditorPage() {
                     onValueChange={(v) => changeType(q.localId, v as QuizQuestionType)}
                     disabled={readOnly}
                   >
-                    <SelectTrigger className="w-auto h-auto rounded-xl border border-outline-variant bg-surface px-3 py-1.5 text-sm text-on-surface form-input-focus disabled:opacity-60">
+                    <SelectTrigger className="w-auto h-auto rounded-lg border border-outline-variant bg-surface px-3 py-1.5 text-sm text-on-surface form-input-focus disabled:opacity-60">
                       <SelectValue placeholder="Type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -463,7 +463,7 @@ export function QuizEditorPage() {
                       value={q.points}
                       onChange={(e) => updateQuestion(q.localId, { points: Math.max(1, Number(e.target.value) || 1) })}
                       disabled={readOnly}
-                      className="w-16 h-auto rounded-xl border border-outline-variant bg-surface px-2 py-1.5 text-sm text-on-surface form-input-focus disabled:opacity-60"
+                      className="w-16 h-auto rounded-lg border border-outline-variant bg-surface px-2 py-1.5 text-sm text-on-surface form-input-focus disabled:opacity-60"
                     />
                   </label>
                   {!readOnly && (
@@ -472,7 +472,7 @@ export function QuizEditorPage() {
                         type="button"
                         onClick={() => moveQuestion(index, -1)}
                         disabled={index === 0}
-                        className="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant disabled:opacity-30 hover:bg-surface-container-high transition-colors"
+                        className="w-8 h-8 rounded-lg bg-surface-container text-on-surface-variant disabled:opacity-30 hover:bg-surface-container-high transition-colors"
                         aria-label="Move up"
                       >
                         <span className="material-symbols-outlined text-[18px]">arrow_upward</span>
@@ -481,7 +481,7 @@ export function QuizEditorPage() {
                         type="button"
                         onClick={() => moveQuestion(index, 1)}
                         disabled={index === questions.length - 1}
-                        className="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant disabled:opacity-30 hover:bg-surface-container-high transition-colors"
+                        className="w-8 h-8 rounded-lg bg-surface-container text-on-surface-variant disabled:opacity-30 hover:bg-surface-container-high transition-colors"
                         aria-label="Move down"
                       >
                         <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
@@ -489,7 +489,7 @@ export function QuizEditorPage() {
                       <Button
                         type="button"
                         onClick={() => removeQuestion(q.localId)}
-                        className="w-8 h-8 rounded-full bg-surface-container text-error hover:bg-error/10 transition-colors"
+                        className="w-8 h-8 rounded-lg bg-surface-container text-error hover:bg-error/10 transition-colors"
                         aria-label="Remove question"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -504,7 +504,7 @@ export function QuizEditorPage() {
                   disabled={readOnly}
                   rows={2}
                   placeholder="Type the question…"
-                  className="w-full min-h-0 rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 mb-sm resize-none"
+                  className="w-full min-h-0 rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 mb-sm resize-none"
                 />
 
                 {(q.type === "MCQ" || q.type === "TRUE_FALSE") && (
@@ -513,28 +513,29 @@ export function QuizEditorPage() {
                       <div key={opt.localId} className="flex items-center gap-2">
                         <Button
                           type="button"
+                          variant="ghost"
                           onClick={() => !readOnly && setCorrectOption(q.localId, opt.localId)}
                           disabled={readOnly}
-                          className={`w-5 h-5 p-0 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                            opt.isCorrect ? "border-primary" : "border-outline-variant"
+                          className={`w-5 h-5 p-0 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+                            opt.isCorrect ? "border-primary bg-primary" : "border-outline-variant bg-surface"
                           }`}
                           aria-label={opt.isCorrect ? "Correct answer" : "Mark as correct"}
                         >
-                          {opt.isCorrect && <span className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                          {opt.isCorrect && <span className="material-symbols-outlined text-[13px] text-primary-foreground font-bold">check</span>}
                         </Button>
                         <Input
                           value={opt.text}
                           onChange={(e) => updateOption(q.localId, opt.localId, { text: e.target.value })}
                           disabled={readOnly}
                           placeholder="Answer option"
-                          className="flex-1 h-auto rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
+                          className="flex-1 h-auto rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                         />
                         {!readOnly && q.type === "MCQ" && (
                           <Button
                             type="button"
                             onClick={() => removeOption(q.localId, opt.localId)}
                             disabled={q.options.length <= 2}
-                            className="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant disabled:opacity-30 hover:bg-error/10 hover:text-error transition-colors"
+                            className="w-8 h-8 rounded-lg bg-surface-container text-on-surface-variant disabled:opacity-30 hover:bg-error/10 hover:text-error transition-colors"
                             aria-label="Remove option"
                           >
                             <span className="material-symbols-outlined text-[18px]">close</span>
@@ -571,7 +572,7 @@ export function QuizEditorPage() {
                   type="button"
                   onClick={() => save(false)}
                   disabled={saving || !canSave}
-                  className="bg-secondary-container text-white px-lg h-auto py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+                  className="bg-primary text-white! px-lg h-auto py-sm rounded-lg font-label-md disabled:opacity-50 nudge-hover"
                 >
                   {saving ? "Saving…" : "Save draft"}
                 </Button>
@@ -579,7 +580,7 @@ export function QuizEditorPage() {
                   type="button"
                   onClick={() => setPublishOpen(true)}
                   disabled={saving || !canSave}
-                  className="bg-primary text-white px-lg h-auto py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+                  className="bg-primary text-white! px-lg h-auto py-sm rounded-lg font-label-md disabled:opacity-50 nudge-hover"
                 >
                   Publish
                 </Button>

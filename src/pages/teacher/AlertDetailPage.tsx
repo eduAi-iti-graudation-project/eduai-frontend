@@ -42,7 +42,7 @@ export function AlertDetailPage() {
           <p className="font-body-md text-body-md text-on-surface-variant mb-lg">
             {error instanceof Error ? error.message : "Something went wrong"}
           </p>
-          <Link to="/alerts" className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md">
+          <Link to="/alerts" className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md">
             Back to Alerts
           </Link>
         </div>
@@ -66,7 +66,7 @@ export function AlertDetailPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="material-symbols-outlined text-[20px] text-on-surface-variant">person</span>
-            <h1 className="font-headline-xl text-headline-xl text-primary">Alert Detail</h1>
+            <h1 className="font-headline-xl text-headline-xl text-on-surface">Alert Detail</h1>
           </div>
           <p className="font-body-lg text-body-lg text-on-surface-variant">
             {detail.diagnosis.issueType?.replace(/_/g, " ") ?? "Student"} issue
@@ -78,7 +78,7 @@ export function AlertDetailPage() {
             type="button"
             onClick={() => resolve.mutate("RESOLVED")}
             disabled={resolve.isPending}
-            className="bg-primary-container text-white px-md h-auto py-sm rounded-full font-label-md text-label-sm hover:opacity-90 disabled:opacity-50 transition-all"
+            className="bg-primary text-primary-foreground px-md h-auto py-sm rounded-lg font-label-md text-label-sm hover:opacity-90 disabled:opacity-50 transition-all"
           >
             Resolve
           </Button>
@@ -86,7 +86,7 @@ export function AlertDetailPage() {
             type="button"
             onClick={() => resolve.mutate("DISMISSED")}
             disabled={resolve.isPending}
-            className="bg-surface-container text-on-surface-variant px-md h-auto py-sm rounded-full font-label-md text-label-sm hover:bg-surface-container-high disabled:opacity-50 transition-all"
+            className="bg-surface-container text-on-surface-variant px-md h-auto py-sm rounded-lg font-label-md text-label-sm hover:bg-surface-container-high disabled:opacity-50 transition-all"
           >
             Dismiss
           </Button>
@@ -108,7 +108,7 @@ export function AlertDetailPage() {
           <div className="flex items-center justify-center pt-2">
             <Button
               asChild
-              className="inline-flex items-center gap-2 bg-surface-container-low text-on-surface-variant px-lg h-auto py-sm rounded-full font-label-md text-label-sm hover:bg-surface-container-high transition-colors"
+              className="inline-flex items-center gap-2 bg-surface-container-low text-on-surface-variant px-lg h-auto py-sm rounded-lg font-label-md text-label-sm hover:bg-surface-container-high transition-colors"
             >
               <Link to="/reports">
                 <span className="material-symbols-outlined text-[18px]">description</span>

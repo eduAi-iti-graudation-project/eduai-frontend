@@ -4,6 +4,8 @@ import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { renderReportSection } from "@/lib/report-sections"
+import { RichText } from "@/components/shared/RichText"
 
 export function ReportsPage() {
   const [studentId, setStudentId] = useState("")
@@ -15,19 +17,19 @@ export function ReportsPage() {
     <div className="flex-1 p-xl max-w-4xl mx-auto w-full">
       <h1 className="font-headline-xl text-headline-xl text-primary mb-xl">Reports</h1>
 
-      <div className="bg-white rounded-[32px] p-md shadow-sm border border-outline-variant/10 mb-xl">
+      <div className="bg-surface-container-lowest rounded-lg p-md border border-outline-variant mb-xl">
         <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Filter by Student ID</label>
         <div className="flex gap-sm">
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Enter student ID..."
-            className="flex-1 h-auto rounded-xl border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
+            className="flex-1 h-auto rounded-lg border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
           />
           <Button
             type="button"
             onClick={() => setStudentId(search)}
-            className="px-md h-auto py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover"
+            className="px-md h-auto py-sm bg-primary text-primary-foreground font-label-md text-label-md rounded-lg nudge-hover"
           >
             Filter
           </Button>
@@ -41,7 +43,7 @@ export function ReportsPage() {
       ) : (
         <div className="space-y-sm">
           {reports.map((r) => (
-            <div key={r.id} className="bg-white rounded-[24px] shadow-sm border border-outline-variant/10 overflow-hidden">
+            <div key={r.id} className="bg-surface-container-lowest rounded-lg border border-outline-variant overflow-hidden">
               <Button
                 type="button"
                 variant="ghost"
@@ -58,14 +60,16 @@ export function ReportsPage() {
               </Button>
               {expandedId === r.id && (
                 <div className="px-md pb-md space-y-sm">
-                  {[
-                    ["Teacher Section", r.teacherSection],
-                    ["Parent Section", r.parentSection],
-                    ["Management Section", r.managementSection],
-                  ].map(([heading, content]) => (
-                    <div key={heading} className="p-sm rounded-xl bg-surface-container">
+                  {(
+                    [
+                      ["Teacher Section", r.teacherSection],
+                      ["Parent Section", r.parentSection],
+                      ["Management Section", r.managementSection],
+                    ] as [string, unknown][]
+                  ).map(([heading, content]) => (
+                    <div key={heading} className="p-sm rounded-lg bg-surface-container">
                       <p className="font-label-sm text-label-sm text-primary mb-xs">{heading}</p>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant whitespace-pre-wrap">{content || "No content available."}</p>
+                      <RichText text={renderReportSection(content)} className="text-on-surface-variant" />
                     </div>
                   ))}
                 </div>

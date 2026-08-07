@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom"
 import { useAttempt, useConfirmAttempt, useUpdateAnswer } from "@/hooks/use-quizzes"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { RichText } from "@/components/shared/RichText"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -67,14 +68,14 @@ export function QuizAttemptDetailPage() {
 
   return (
     <>
-      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
+      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant">
         <div className="flex items-center gap-3">
           <Link to={`/quizzes/${quiz?.id}/attempts`} className="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline">
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>
             Attempts
           </Link>
           <div>
-            <h1 className="font-headline-lg text-headline-lg text-primary">{detail.student?.name ?? "Student"}</h1>
+            <h1 className="font-headline-lg text-headline-lg text-on-surface">{detail.student?.name ?? "Student"}</h1>
             <p className="font-label-sm text-label-sm text-on-surface-variant">{quiz?.title}</p>
           </div>
         </div>
@@ -82,7 +83,7 @@ export function QuizAttemptDetailPage() {
           type="button"
           onClick={() => setConfirmOpen(true)}
           disabled={allConfirmed}
-          className="bg-primary text-white px-md h-auto py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover"
+          className="bg-primary text-white px-md h-auto py-sm rounded-lg font-label-md disabled:opacity-50 nudge-hover"
         >
           {allConfirmed ? "Confirmed" : `Confirm ${unconfirmedCount > 0 ? `${unconfirmedCount} answer${unconfirmedCount > 1 ? "s" : ""}` : "all"}`}
         </Button>
@@ -90,7 +91,7 @@ export function QuizAttemptDetailPage() {
 
       <div className="flex-1 p-md overflow-y-auto">
         <div className="max-w-3xl mx-auto space-y-4">
-          <div className="tactile-card rounded-[24px] bg-surface-container-lowest p-md">
+          <div className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant">
             <div className="flex items-center justify-between mb-2">
               <span className="font-headline-md text-headline-md text-primary">
                 {detail.totalScore != null ? `${detail.totalScore} / ${maxPoints}` : "Not scored yet"}
@@ -107,7 +108,7 @@ export function QuizAttemptDetailPage() {
           </div>
 
           {(detail.violations ?? []).length > 0 && (
-            <div className="tactile-card rounded-[24px] bg-surface-container-lowest p-md">
+            <div className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant">
               <Button
                 type="button"
                 variant="ghost"
@@ -139,7 +140,7 @@ export function QuizAttemptDetailPage() {
             const answer = answerFor(question.id)
             const isConfirmed = answer?.isConfirmed ?? false
             return (
-              <div key={question.id} className="tactile-card rounded-[24px] bg-surface-container-lowest p-md">
+              <div key={question.id} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant">
                 <div className="flex items-start justify-between gap-3 mb-sm">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="font-label-sm text-label-sm text-on-surface-variant shrink-0">Q{index + 1}</span>
@@ -152,7 +153,7 @@ export function QuizAttemptDetailPage() {
                     {!isConfirmed && answer && (
                       <Badge
                         variant="outline"
-                        className="border-transparent font-label-sm text-label-sm px-2 py-0.5 bg-primary-fixed text-primary shrink-0 inline-flex items-center gap-1"
+                        className="border-transparent font-label-sm text-label-sm px-2 py-0.5 bg-primary text-primary-foreground shrink-0 inline-flex items-center gap-1"
                       >
                         <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
                         AI suggestion
@@ -182,7 +183,7 @@ export function QuizAttemptDetailPage() {
                       return (
                         <div
                           key={option.text}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
                             isCorrectOption && showCorrect
                               ? "border-primary bg-primary-fixed/30"
                               : isStudentPick
@@ -211,7 +212,7 @@ export function QuizAttemptDetailPage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="rounded-xl border border-outline-variant bg-surface p-3">
+                    <div className="rounded-lg border border-outline-variant bg-surface p-3">
                       <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">
                         Student&apos;s answer{answer?.answer ? "" : " — no answer"}
                       </p>
@@ -220,12 +221,12 @@ export function QuizAttemptDetailPage() {
                       </p>
                     </div>
                     {answer?.aiFeedback && (
-                      <div className="rounded-xl border border-primary/20 bg-primary-fixed/20 p-3">
+                      <div className="rounded-lg border border-primary/20 bg-primary-fixed/20 p-3">
                         <p className="font-label-sm text-label-sm text-primary mb-1 inline-flex items-center gap-1">
                           <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
                           AI feedback
                         </p>
-                        <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap">{answer.aiFeedback}</p>
+                        <RichText text={answer.aiFeedback} />
                       </div>
                     )}
                   </div>
@@ -239,14 +240,14 @@ export function QuizAttemptDetailPage() {
                       min={0}
                       value={draftPoints[answer?.id ?? ""] ?? ""}
                       onChange={(e) => setDraftPoints((prev) => ({ ...prev, [answer?.id ?? ""]: e.target.value }))}
-                      className="ml-2 w-20 h-auto rounded-xl border border-outline-variant bg-surface px-2 py-1.5 text-sm text-on-surface form-input-focus"
+                      className="ml-2 w-20 h-auto rounded-lg border border-outline-variant bg-surface px-2 py-1.5 text-sm text-on-surface form-input-focus"
                     />
                   </label>
                   <Button
                     type="button"
                     onClick={() => answer && savePoints(answer.id)}
                     disabled={!answer || updateAnswer.isPending}
-                    className="bg-secondary-container text-white px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm disabled:opacity-50 nudge-hover"
+                    className="bg-primary text-primary-foreground px-4 h-auto py-1.5 rounded-lg font-label-md text-label-sm disabled:opacity-50 nudge-hover"
                   >
                     Save
                   </Button>

@@ -61,7 +61,7 @@ export function NotFoundPage() {
           >
             <span className="material-symbols-outlined">help_outline</span>
           </Button>
-          <div className="w-10 h-10 rounded-full bg-surface-variant border border-on-surface/10 overflow-hidden">
+          <div className="w-10 h-10 rounded-lg bg-surface-variant border border-on-surface/10 overflow-hidden">
             <div className="w-full h-full bg-surface-container-high flex items-center justify-center text-on-surface-variant font-label-md text-label-md">
               U
             </div>
@@ -71,7 +71,7 @@ export function NotFoundPage() {
 
       <main className="flex-grow flex items-center justify-center px-margin-mobile md:px-margin-desktop py-12">
         <div className="max-w-2xl w-full flex flex-col items-center">
-          <div ref={cardRef} className="tactile-card p-8 md:p-12 w-full flex flex-col items-center text-center shadow-sm transition-transform duration-200 ease-out rounded-[32px] bg-white">
+          <div ref={cardRef} className="p-8 md:p-12 w-full flex flex-col items-center text-center shadow-sm transition-transform duration-200 ease-out rounded-lg bg-surface-container-lowest border border-outline-variant">
             <div className="w-64 h-64 md:w-80 md:h-80 mb-8 animate-float">
               <img
                 alt="Confused Robot Illustration"
@@ -89,7 +89,7 @@ export function NotFoundPage() {
             <div className="flex flex-col md:flex-row gap-4 w-full justify-center">
               <Button
                 asChild
-                className="bg-secondary-container text-white px-8 py-3 h-auto rounded-full font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:brightness-110 hover:bg-secondary-container active:scale-95 shadow-sm nudge-hover no-underline"
+                className="bg-primary text-primary-foreground px-8 py-3 h-auto rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:brightness-110 hover:bg-primary/90 active:scale-95 shadow-sm nudge-hover no-underline"
               >
                 <Link to="/dashboard">
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
@@ -98,7 +98,7 @@ export function NotFoundPage() {
               </Button>
               <Button
                 asChild
-                className="bg-transparent border-2 border-primary text-primary px-8 py-3 h-auto rounded-full font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:bg-primary/5 hover:text-primary active:scale-95 nudge-hover no-underline"
+                className="bg-transparent border border-primary text-primary px-8 py-3 h-auto rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:bg-primary/5 hover:text-primary active:scale-95 nudge-hover no-underline"
               >
                 <Link to="/">
                   <span className="material-symbols-outlined">home</span>
@@ -107,7 +107,7 @@ export function NotFoundPage() {
               </Button>
             </div>
 
-            <div className="mt-12 p-4 border-[1.5px] border-dashed border-primary bg-primary/5 rounded-xl flex items-start gap-3 text-left max-w-2xl">
+            <div className="mt-12 p-4 border-[1.5px] border-dashed border-primary bg-primary/5 rounded-lg flex items-start gap-3 text-left max-w-2xl">
               <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
               <div>
                 <p className="font-label-md text-label-md text-primary mb-1">Looking for a specific lesson?</p>

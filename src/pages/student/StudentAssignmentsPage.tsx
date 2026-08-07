@@ -17,12 +17,6 @@ import {
 import { ErrorState } from "@/components/shared/ErrorState"
 import { LoadingState } from "@/components/shared/LoadingState"
 
-interface LocalSubmission {
-  id: string
-  assignmentId: string
-  status: string
-}
-
 export function StudentAssignmentsPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
@@ -37,22 +31,18 @@ export function StudentAssignmentsPage() {
     enabled: !!user?.id,
   })
 
-  const localSubmissions = useQuery<LocalSubmission[]>({
-    queryKey: ["my-submissions"],
-    queryFn: () => [],
-    initialData: [],
-    staleTime: Infinity,
+  const mySubmissions = useQuery<api.MySubmission[]>({
+    queryKey: ["my-submissions", user?.id],
+    queryFn: () => api.getMySubmissions(),
+    enabled: !!user?.id,
+    staleTime: 30_000,
   })
 
   const createSubmission = useMutation({
     mutationFn: (data: { assignmentId: string; content: string }) =>
       api.createSubmission(data),
-    onSuccess: (res) => {
-      const existing = queryClient.getQueryData<LocalSubmission[]>(["my-submissions"]) ?? []
-      queryClient.setQueryData<LocalSubmission[]>(["my-submissions"], [
-        ...existing,
-        { id: res.id, assignmentId: res.assignmentId, status: res.status },
-      ])
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-submissions", user?.id] })
       toast.success("Assignment submitted successfully")
       setSubmitModal(null)
       setTextContent("")
@@ -62,12 +52,8 @@ export function StudentAssignmentsPage() {
 
   const createSubmissionPdf = useMutation({
     mutationFn: (formData: FormData) => api.createSubmissionFromPdf(formData),
-    onSuccess: (res) => {
-      const existing = queryClient.getQueryData<LocalSubmission[]>(["my-submissions"]) ?? []
-      queryClient.setQueryData<LocalSubmission[]>(["my-submissions"], [
-        ...existing,
-        { id: res.id, assignmentId: res.assignmentId, status: res.status },
-      ])
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-submissions", user?.id] })
       toast.success("PDF submitted successfully")
       setSubmitModal(null)
       setSelectedFile(null)
@@ -95,7 +81,7 @@ export function StudentAssignmentsPage() {
   }
 
   const classes = studentClasses.data ?? []
-  const submissionMap = new Map((localSubmissions.data ?? []).map((s) => [s.assignmentId, s]))
+  const submissionMap = new Map((mySubmissions.data ?? []).map((s) => [s.assignmentId, s]))
 
   if (classes.length === 0) {
     return (
@@ -105,7 +91,7 @@ export function StudentAssignmentsPage() {
           icon="assignment"
           title="No assignments"
           description="You are not enrolled in any classes yet. Browse available classes to get started."
-          action={<Link to="/student/classes" className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md inline-block">Browse Classes</Link>}
+          action={<Link to="/student/classes" className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md inline-block">Browse Classes</Link>}
         />
       </div>
     )
@@ -133,7 +119,7 @@ export function StudentAssignmentsPage() {
                     return (
                       <div
                         key={a.id}
-                        className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm hover:border-primary-container/30 hover:shadow-md transition-all"
+                        className="rounded-lg bg-white p-md border border-border hover:border-primary-container/30 hover:shadow-md transition-all"
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
@@ -153,25 +139,27 @@ export function StudentAssignmentsPage() {
                           </div>
                           <div className="shrink-0">
                             {isSubmitted && sub ? (
-                              <Link
-                                to={`/student/submissions/${sub.id}`}
-                                className="inline-block"
-                              >
-                                {sub.status === "CONFIRMED" ? (
-                                  <span className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-1 rounded-full cursor-pointer hover:opacity-80 transition-opacity">
-                                    Graded
-                                  </span>
-                                ) : (
-                                  <span className="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm px-sm py-1 rounded-full cursor-pointer hover:opacity-80 transition-opacity">
-                                    Submitted
-                                  </span>
-                                )}
-                              </Link>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  type="button"
+                                  disabled
+                                  className="bg-surface-container text-on-surface-variant font-label-md px-md py-sm rounded-lg h-auto cursor-not-allowed"
+                                  aria-label={`Already ${sub.status === "CONFIRMED" ? "graded" : "submitted"}`}
+                                >
+                                  {sub.status === "CONFIRMED" ? "Graded" : "Submitted"}
+                                </Button>
+                                <Link
+                                  to={`/student/submissions/${sub.id}`}
+                                  className="font-label-md text-label-md text-primary hover:underline"
+                                >
+                                  View
+                                </Link>
+                              </div>
                             ) : (
                               <Button
                                 type="button"
                                 onClick={() => setSubmitModal({ assignmentId: a.id, assignmentTitle: a.title })}
-                                className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md hover:bg-secondary-container/90 active:scale-95 transition-all h-auto"
+                                className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md hover:bg-primary/90/90 active:scale-95 transition-all h-auto"
                               >
                                 Submit
                               </Button>
@@ -196,7 +184,7 @@ export function StudentAssignmentsPage() {
 
       {submitModal && (
         <Dialog open onOpenChange={(next) => { if (!next) setSubmitModal(null) }}>
-          <DialogContent className="rounded-[32px] w-full max-w-[768px] bg-white p-xl shadow-xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="rounded-lg w-full max-w-[768px] bg-white p-xl shadow-xl max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <DialogTitle className="font-headline-md text-headline-md text-primary">Submit Assignment</DialogTitle>
             </div>
@@ -208,14 +196,14 @@ export function StudentAssignmentsPage() {
               <Button
                 type="button"
                 onClick={() => setUploadMode("text")}
-                className={`flex-1 px-md py-sm rounded-full font-label-md transition-all h-auto ${uploadMode === "text" ? "bg-primary-container text-white hover:bg-primary-container/90" : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"}`}
+                className={`flex-1 px-md py-sm rounded-lg font-label-md transition-all h-auto ${uploadMode === "text" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"}`}
               >
                 Type
               </Button>
               <Button
                 type="button"
                 onClick={() => setUploadMode("file")}
-                className={`flex-1 px-md py-sm rounded-full font-label-md transition-all h-auto ${uploadMode === "file" ? "bg-primary-container text-white hover:bg-primary-container/90" : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"}`}
+                className={`flex-1 px-md py-sm rounded-lg font-label-md transition-all h-auto ${uploadMode === "file" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"}`}
               >
                 Upload PDF
               </Button>
@@ -226,7 +214,7 @@ export function StudentAssignmentsPage() {
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
                 placeholder="Type your submission here..."
-                className="w-full min-h-[300px] p-md rounded-2xl border border-outline-variant/20 font-body-md text-body-md text-on-surface bg-surface-container-low resize-none outline-none focus:border-primary focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="w-full min-h-[300px] p-md rounded-lg border border-border font-body-md text-body-md text-on-surface bg-surface-container-low resize-none outline-none focus:border-primary focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             ) : (
               <FileDropzone
@@ -240,13 +228,18 @@ export function StudentAssignmentsPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setSubmitModal(null)}
-                className="border-2 border-error text-error px-md py-sm rounded-full font-label-md hover:bg-transparent hover:text-error h-auto"
+                className="border border-outline-variant text-on-surface-variant px-md py-sm rounded-lg font-label-md hover:bg-surface-container h-auto"
               >
                 Cancel
               </Button>
               <Button
                 type="button"
                 onClick={() => {
+                  if (submissionMap.has(submitModal.assignmentId)) {
+                    toast.error("You have already submitted this assignment")
+                    setSubmitModal(null)
+                    return
+                  }
                   if (uploadMode === "text") {
                     if (!textContent.trim()) {
                       toast.error("Please enter your submission content")
@@ -265,7 +258,7 @@ export function StudentAssignmentsPage() {
                   }
                 }}
                 disabled={createSubmission.isPending || createSubmissionPdf.isPending}
-                className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md hover:bg-secondary-container/90 h-auto"
+                className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md hover:bg-primary/90/90 h-auto"
               >
                 {createSubmission.isPending || createSubmissionPdf.isPending ? "Submitting..." : "Submit"}
               </Button>

@@ -26,14 +26,14 @@ export function QuizAttemptsListPage() {
 
   return (
     <>
-      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant/20">
+      <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant">
         <div className="flex items-center gap-3">
           <Link to="/quizzes" className="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline">
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>
             Quizzes
           </Link>
           <div>
-            <h1 className="font-headline-lg text-headline-lg text-primary">Attempts</h1>
+            <h1 className="font-headline-lg text-headline-lg text-on-surface">Attempts</h1>
             {quiz.data && (
               <p className="font-label-sm text-label-sm text-on-surface-variant">{quiz.data.title}</p>
             )}
@@ -42,7 +42,7 @@ export function QuizAttemptsListPage() {
         {quiz.data && (
           <Button
             asChild
-            className="bg-secondary-container text-white px-md h-auto py-sm rounded-full font-label-md nudge-hover"
+            className="bg-primary text-primary-foreground px-md h-auto py-sm rounded-lg font-label-md nudge-hover"
           >
             <Link to={`/quizzes/${quiz.data.id}`}>View quiz</Link>
           </Button>
@@ -66,10 +66,10 @@ export function QuizAttemptsListPage() {
             description="When students take this quiz, their attempts will appear here for review."
           />
         ) : (
-          <div className="max-w-4xl mx-auto bg-surface-container-lowest rounded-[24px] border border-outline-variant/10 overflow-hidden">
+          <div className="max-w-4xl mx-auto bg-surface-container-lowest rounded-lg border border-outline-variant overflow-hidden">
             <Table className="text-left">
               <TableHeader>
-                <TableRow className="border-outline-variant/20 font-label-sm text-label-sm text-on-surface-variant">
+                <TableRow className="border-outline-variant font-label-sm text-label-sm text-on-surface-variant">
                   <TableHead className="px-4 py-3 h-auto">Student</TableHead>
                   <TableHead className="px-4 py-3 h-auto">Status</TableHead>
                   <TableHead className="px-4 py-3 h-auto">Score</TableHead>
@@ -81,7 +81,7 @@ export function QuizAttemptsListPage() {
                 {(attempts.data ?? []).map((attempt) => {
                   const violations = (attempt.violations ?? []).length
                   return (
-                    <TableRow key={attempt.id} className="border-outline-variant/10">
+                    <TableRow key={attempt.id} className="border-outline-variant">
                       <TableCell className="px-4 py-3 font-body-md text-body-md text-on-surface">
                         {attempt.student?.name ?? "Student"}
                       </TableCell>
@@ -90,7 +90,7 @@ export function QuizAttemptsListPage() {
                           variant="outline"
                           className={`border-transparent font-label-sm text-label-sm px-2 py-0.5 ${
                             attempt.status === "COMPLETED"
-                              ? "bg-primary-fixed text-primary"
+                              ? "bg-primary text-primary-foreground"
                               : "bg-surface-container-high text-on-surface-variant"
                           }`}
                         >
@@ -110,7 +110,7 @@ export function QuizAttemptsListPage() {
                           {violations > 0 && (
                             <Badge
                               variant="outline"
-                              className="border-transparent bg-error/10 text-error font-label-sm text-label-sm px-2 py-0.5 inline-flex items-center gap-1"
+                              className="border-transparent bg-primary-container text-primary font-label-sm text-label-sm px-2 py-0.5 inline-flex items-center gap-1"
                             >
                               <span className="material-symbols-outlined text-[14px]">warning</span>
                               {violations}
@@ -118,7 +118,7 @@ export function QuizAttemptsListPage() {
                           )}
                           <Button
                             asChild
-                            className="bg-primary text-white px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                            className="bg-primary text-white px-4 h-auto py-1.5 rounded-lg font-label-md text-label-sm nudge-hover"
                           >
                             <Link to={`/quizzes/attempts/${attempt.id}`}>Review</Link>
                           </Button>
