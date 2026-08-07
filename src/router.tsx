@@ -56,6 +56,8 @@ import { AdminRequestsPage } from "./pages/admin/AdminRequestsPage"
 import { GradeManagementPage } from "./pages/admin/GradeManagementPage"
 import { StudentManagementPage } from "./pages/admin/StudentManagementPage"
 import { AdminStudentDetailPage } from "./pages/admin/AdminStudentDetailPage"
+import { AdminBulkDocumentsPage } from "./pages/admin/AdminBulkDocumentsPage"
+import { AdminCsvImportPage } from "./pages/admin/AdminCsvImportPage"
 import { TeacherManagementPage } from "./pages/admin/TeacherManagementPage"
 import { AdminTeacherDetailPage } from "./pages/admin/AdminTeacherDetailPage"
 import { InsightsPage } from "./pages/insights/InsightsPage"
@@ -169,6 +171,8 @@ export function adminRoutes() {
       { path: "grades", element: <GradeManagementPage /> },
       { path: "students", element: <StudentManagementPage /> },
       { path: "students/:id", element: <AdminStudentDetailPage /> },
+      { path: "documents", element: <AdminBulkDocumentsPage /> },
+      { path: "import", element: <AdminCsvImportPage /> },
       { path: "teachers", element: <TeacherManagementPage /> },
       { path: "teachers/:id", element: <AdminTeacherDetailPage /> },
       { path: "insights", element: <InsightsPage /> },

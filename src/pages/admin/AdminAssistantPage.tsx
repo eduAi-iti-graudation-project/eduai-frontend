@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { Bot, CalendarDays, ListChecks, Send } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -320,7 +321,7 @@ export function AdminAssistantPage() {
               <div className="px-5 py-8 flex-1">
                 <div className="flex flex-col items-center text-center gap-3 mb-6">
                   <span className="w-12 h-12 rounded-xl bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[24px]">smart_toy</span>
+                    <Bot className="w-6 h-6" />
                   </span>
                   <div>
                     <h3 className="font-headline-md text-headline-md text-on-surface">Ask about the school</h3>
@@ -382,7 +383,7 @@ export function AdminAssistantPage() {
                 aria-label="Send message"
                 className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center disabled:opacity-40"
               >
-                <span className="material-symbols-outlined text-[20px]">send</span>
+                <Send className="w-5 h-5" />
               </Button>
             </div>
           </section>
@@ -432,8 +433,8 @@ function SchoolBriefCard({
   return (
     <div className="rounded-card bg-surface-container-lowest border border-outline-variant p-5">
       <div className="flex items-center gap-2.5 mb-4">
-        <span className="w-8 h-8 rounded-md bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
-          <span className="material-symbols-outlined text-[18px]">today</span>
+        <span className="w-8 h-8 shrink-0 rounded-md bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
+          <CalendarDays className="w-4.5 h-4.5" />
         </span>
         <div>
           <h3 className="font-headline-sm text-headline-sm text-on-surface leading-none">Daily brief</h3>
@@ -441,8 +442,8 @@ function SchoolBriefCard({
         </div>
       </div>
       <dl className="grid grid-cols-2 gap-3">
-        <MiniStat icon="notifications_active" label="Active alerts" value={overview?.activeAlertCount ?? 0} />
-        <MiniStat icon="playlist_add_check" label="Awaiting review" value={queue} />
+        <MiniStat icon="notifications_active" label="Active alerts" value={overview?.activeAlertCount ?? 0} tone={overview?.activeAlertCount ? "danger" : "default"} />
+        <MiniStat icon="playlist_add_check" label="Awaiting review" value={queue} tone={queue ? "warning" : "default"} />
         <MiniStat icon="styles" label="Performance" value={typeof last?.value === "number" ? `${last.value}%` : "—"} />
         <MiniStat icon="confirmation_number" label="Confirmations" value={overview?.pendingConfirmations ?? 0} />
       </dl>
@@ -462,8 +463,13 @@ function SchoolBriefCard({
           </li>
         ))}
         {!insights?.agentInsights.length && (
-          <li className="border-l-2 pl-3 border-[#2c5fb3]">
-            <p className="font-label-md text-label-md text-on-surface font-semibold">Review queue</p>
+          <li className="rounded-md border border-outline-variant bg-surface-container-low px-4 py-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-5 h-5 shrink-0 rounded flex items-center justify-center bg-primary-fixed text-on-primary-fixed-variant">
+                <ListChecks className="w-3.5 h-3.5" />
+              </span>
+              <p className="font-label-md text-label-md text-on-surface font-semibold">Review queue</p>
+            </div>
             <p className="font-label-sm text-label-sm text-on-surface-variant">
               {queue} submission{queue === 1 ? "" : "s"} need attention — keep grading turnaround steady.
             </p>

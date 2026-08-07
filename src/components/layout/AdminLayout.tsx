@@ -9,7 +9,9 @@ const navItems = [
   { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/admin/alerts" },
   { icon: "school", label: "Grades", id: "grades", href: "/admin/grades" },
   { icon: "group", label: "Students", id: "students", href: "/admin/students" },
+  { icon: "folder_open", label: "Documents", id: "documents", href: "/admin/documents" },
   { icon: "co_present", label: "Teachers", id: "teachers", href: "/admin/teachers" },
+  { icon: "table_view", label: "Import", id: "import", href: "/admin/import" },
   { icon: "monitoring", label: "Insights", id: "insights", href: "/admin/insights" },
   { icon: "smart_toy", label: "AI Assistant", id: "assistant", href: "/admin/assistant" },
   { icon: "payments", label: "Billing", id: "billing", href: "/admin/billing" },
@@ -24,7 +26,9 @@ export function AdminLayout() {
     : path.startsWith("/admin/alerts") ? "alerts"
     : path.startsWith("/admin/grades") ? "grades"
     : path.startsWith("/admin/students") ? "students"
+    : path.startsWith("/admin/documents") ? "documents"
     : path.startsWith("/admin/teachers") ? "teachers"
+    : path.startsWith("/admin/import") ? "import"
     : path.startsWith("/admin/insights") ? "insights"
     : path.startsWith("/admin/assistant") ? "assistant"
     : path.startsWith("/admin/billing") ? "billing"

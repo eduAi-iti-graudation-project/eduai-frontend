@@ -1,3 +1,4 @@
+import { BellRing, BookOpen, CalendarCheck, CalendarX, CalendarDays, CheckCheck, Clock, Circle, DoorOpen, GraduationCap, HelpCircle, ListChecks, Palette, Presentation, ShieldCheck, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface MiniStatProps {
@@ -14,16 +15,36 @@ const tones = {
   danger: "bg-[#ffdad6] text-[#93000a]",
 }
 
+const iconMap: Record<string, typeof Circle> = {
+  notifications_active: BellRing,
+  playlist_add_check: ListChecks,
+  styles: Palette,
+  confirmation_number: CheckCheck,
+  event_available: CalendarCheck,
+  event_busy: CalendarX,
+  schedule: Clock,
+  verified_user: ShieldCheck,
+  meeting_room: DoorOpen,
+  menu_book: BookOpen,
+  school: GraduationCap,
+  co_present: Presentation,
+  groups: Users,
+  group: Users,
+  quiz: HelpCircle,
+  today: CalendarDays,
+}
+
 export function MiniStat({ icon, label, value, tone = "default" }: MiniStatProps) {
+  const Icon = iconMap[icon] ?? Circle
   return (
-    <div className="rounded-md border border-outline-variant bg-surface-container-low px-3 py-2.5">
-      <div className="flex items-center gap-1.5 text-on-surface-variant">
-        <span className={cn("w-5 h-5 rounded flex items-center justify-center", tones[tone])}>
-          <span className="material-symbols-outlined text-[13px]">{icon}</span>
+    <div className="rounded-md border border-outline-variant bg-surface-container-low px-3 py-3 min-w-0">
+      <div className="flex items-center gap-2 text-on-surface-variant min-w-0">
+        <span className={cn("w-6 h-6 shrink-0 rounded flex items-center justify-center", tones[tone])}>
+          <Icon className="w-3.5 h-3.5" strokeWidth={2.5} />
         </span>
-        <span className="font-label-sm text-label-sm">{label}</span>
+        <span className="font-label-sm text-label-sm truncate">{label}</span>
       </div>
-      <p className="font-headline-md text-headline-md text-on-surface tabular-nums mt-1">{value}</p>
+      <p className="font-headline-md text-headline-md text-on-surface tabular-nums mt-1.5">{value}</p>
     </div>
   )
 }

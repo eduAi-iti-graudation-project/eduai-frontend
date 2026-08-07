@@ -60,27 +60,21 @@ function fmtBytes(bytes: number | null | undefined) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-const documentTypes: api.DocumentType[] = [
-  "CERTIFICATE",
-  "REPORT_CARD",
-  "TRANSCRIPT",
-  "IMMUNIZATION",
-  "TRANSFER",
-  "ENROLLMENT_FORM",
-  "ID",
-  "MEDICAL",
+const documentCategories: api.StudentDocumentCategory[] = [
+  "BIRTH_CERTIFICATE",
+  "IMMUNIZATION_RECORD",
+  "PREVIOUS_TRANSCRIPT",
+  "PAYMENT_RECEIPT",
+  "ID_DOCUMENT",
   "OTHER",
 ]
 
-const documentTypeLabels: Record<api.DocumentType, string> = {
-  CERTIFICATE: "Certificate",
-  REPORT_CARD: "Report card",
-  TRANSCRIPT: "Transcript",
-  IMMUNIZATION: "Immunization",
-  TRANSFER: "Transfer record",
-  ENROLLMENT_FORM: "Enrollment form",
-  ID: "ID / photo",
-  MEDICAL: "Medical record",
+const documentCategoryLabels: Record<api.StudentDocumentCategory, string> = {
+  BIRTH_CERTIFICATE: "Birth certificate",
+  IMMUNIZATION_RECORD: "Immunization record",
+  PREVIOUS_TRANSCRIPT: "Previous transcript",
+  PAYMENT_RECEIPT: "Payment receipt",
+  ID_DOCUMENT: "ID document",
   OTHER: "Other",
 }
 
@@ -498,7 +492,13 @@ function DocumentsPanel({
               <div className="flex-1 min-w-0">
                 <p className="font-label-md text-label-md text-on-surface font-medium truncate">{d.title}</p>
                 <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5 truncate">
-                  {documentTypeLabels[d.type]}{d.academicYear ? ` · ${d.academicYear}` : ""} · {fmtBytes(d.sizeBytes)} · uploaded {fmtDate(d.createdAt)}
+                  {documentCategoryLabels[d.category]}{d.academicYear ? ` · ${d.academicYear}` : ""} · {fmtBytes(d.sizeBytes)} · uploaded {fmtDate(d.createdAt)}
+                  {d.aiSuggestedCategory && d.aiSuggestedCategory !== d.category ? (
+                    <span className="ml-2 inline-flex items-center gap-1 rounded-md bg-tertiary-fixed px-1.5 py-0.5 font-label-sm text-label-sm text-on-tertiary-fixed">
+                      <span className="material-symbols-outlined text-[12px]">auto_awesome</span>
+                      AI suggested: {documentCategoryLabels[d.aiSuggestedCategory as api.StudentDocumentCategory] ?? d.aiSuggestedCategory}
+                    </span>
+                  ) : null}
                 </p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
@@ -545,23 +545,24 @@ function UploadDocumentDialog({ open, onOpenChange, studentId }: { open: boolean
   const qc = useQueryClient()
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState("")
-  const [type, setType] = useState<api.DocumentType>("OTHER")
+  const [category, setCategory] = useState<api.StudentDocumentCategory | "">("")
   const [academicYear, setAcademicYear] = useState("")
+  const [uploadedDoc, setUploadedDoc] = useState<api.StudentDocument | null>(null)
 
   const uploadM = useMutation({
     mutationFn: () => api.uploadStudentDocument(studentId, {
       file: file!,
       title,
-      type,
+      ...(category ? { category } : {}),
       academicYear: academicYear.trim() || null,
     }),
-    onSuccess: () => {
+    onSuccess: (doc) => {
       toast.success("Document uploaded")
       qc.invalidateQueries({ queryKey: ["admin-student-documents", studentId] })
-      onOpenChange(false)
+      setUploadedDoc(doc)
       setFile(null)
       setTitle("")
-      setType("OTHER")
+      setCategory("")
       setAcademicYear("")
     },
     onError: () => toast.error("Could not upload the document"),
@@ -614,17 +615,18 @@ function UploadDocumentDialog({ open, onOpenChange, studentId }: { open: boolean
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="font-label-sm text-label-sm text-on-surface">Type</Label>
-              <Select value={type} onValueChange={(v) => setType(v as api.DocumentType)}>
+              <Label className="font-label-sm text-label-sm text-on-surface">Category</Label>
+              <Select value={category} onValueChange={(v) => setCategory(v as api.StudentDocumentCategory)}>
                 <SelectTrigger className="mt-1.5 h-auto rounded-md border border-outline-variant bg-surface-container-lowest px-md py-2 font-medium text-body-md focus:outline-none focus-visible:ring-transparent focus-visible:ring-offset-0">
-                  <SelectValue />
+                  <SelectValue placeholder="AI will suggest" />
                 </SelectTrigger>
                 <SelectContent>
-                  {documentTypes.map((t) => (
-                    <SelectItem key={t} value={t}>{documentTypeLabels[t]}</SelectItem>
+                  {documentCategories.map((c) => (
+                    <SelectItem key={c} value={c}>{documentCategoryLabels[c]}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <p className="mt-1 font-label-sm text-label-sm text-on-surface-variant">Leave empty to let AI suggest a category.</p>
             </div>
             <div>
               <Label className="font-label-sm text-label-sm text-on-surface">Academic year</Label>
@@ -636,20 +638,47 @@ function UploadDocumentDialog({ open, onOpenChange, studentId }: { open: boolean
               />
             </div>
           </div>
+
+          {uploadedDoc?.aiSuggestedCategory ? (
+            <div className="rounded-lg border border-tertiary-container bg-tertiary-container/30 px-md py-2.5 flex items-start gap-2">
+              <span className="material-symbols-outlined text-[18px] text-on-tertiary-container mt-0.5">auto_awesome</span>
+              <div>
+                <p className="font-label-sm text-label-sm text-on-tertiary-container">AI suggested category</p>
+                <p className="font-label-md text-label-md text-on-tertiary-container">
+                  {documentCategoryLabels[uploadedDoc.aiSuggestedCategory as api.StudentDocumentCategory] ?? uploadedDoc.aiSuggestedCategory}
+                </p>
+              </div>
+            </div>
+          ) : null}
         </div>
 
         <DialogFooter className="flex gap-md sm:gap-md">
-          <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={uploadM.isPending} className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg">
-            Cancel
-          </Button>
           <Button
             type="button"
-            onClick={() => uploadM.mutate()}
-            disabled={uploadM.isPending || !file || !title.trim()}
-            className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+            variant="secondary"
+            onClick={() => {
+              if (uploadedDoc) {
+                setUploadedDoc(null)
+                onOpenChange(false)
+              } else {
+                onOpenChange(false)
+              }
+            }}
+            disabled={uploadM.isPending}
+            className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg"
           >
-            {uploadM.isPending ? "Uploading…" : "Upload"}
+            {uploadedDoc ? "Done" : "Cancel"}
           </Button>
+          {!uploadedDoc ? (
+            <Button
+              type="button"
+              onClick={() => uploadM.mutate()}
+              disabled={uploadM.isPending || !file || !title.trim()}
+              className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              {uploadM.isPending ? "Uploading…" : "Upload"}
+            </Button>
+          ) : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>

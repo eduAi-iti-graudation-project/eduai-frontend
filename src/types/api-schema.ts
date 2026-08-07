@@ -407,6 +407,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assignments/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Draft an assignment and rubric from the course curriculum material */
+        post: operations["AssignmentsController_generate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assignments/{id}": {
         parameters: {
             query?: never;
@@ -424,6 +441,92 @@ export interface paths {
         head?: never;
         /** Update an assignment */
         patch: operations["AssignmentsController_update"];
+        trace?: never;
+    };
+    "/materials/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload a material file (PDF or text) */
+        post: operations["MaterialsController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/offering/{courseOfferingId}/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search material chunks by semantic similarity */
+        get: operations["MaterialsController_searchChunks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/offering/{courseOfferingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List materials for a course offering */
+        get: operations["MaterialsController_findByOffering"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a material with its chunks */
+        get: operations["MaterialsController_findOne"];
+        put?: never;
+        post?: never;
+        /** Delete a material */
+        delete: operations["MaterialsController_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/{id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a short-lived signed download URL for a material file */
+        get: operations["MaterialsController_getFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/rubrics": {
@@ -802,75 +905,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/materials/upload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Upload a material file (PDF or text) */
-        post: operations["MaterialsController_upload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/materials/offering/{courseOfferingId}/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Search material chunks by semantic similarity */
-        get: operations["MaterialsController_searchChunks"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/materials/offering/{courseOfferingId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List materials for a course offering */
-        get: operations["MaterialsController_findByClass"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/materials/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a material with its chunks */
-        get: operations["MaterialsController_findOne"];
-        put?: never;
-        post?: never;
-        /** Delete a material */
-        delete: operations["MaterialsController_delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/students/{id}/grades": {
         parameters: {
             query?: never;
@@ -1032,7 +1066,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Stream a student document file */
+        /** Get a signed download URL for a student document */
         get: operations["StudentsController_getDocumentFile"];
         put?: never;
         post?: never;
@@ -1093,6 +1127,57 @@ export interface paths {
         head?: never;
         /** Update a fee record */
         patch: operations["StudentsController_updateFee"];
+        trace?: never;
+    };
+    "/documents/bulk-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bulk upload student documents for AI review */
+        post: operations["DocumentsController_bulkUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List unassigned bulk-uploaded documents */
+        get: operations["DocumentsController_listBulk"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}/confirm-assignment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Confirm student + category for a document */
+        patch: operations["DocumentsController_confirmAssignment"];
         trace?: never;
     };
     "/attendance/import": {
@@ -1921,6 +2006,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/migration/csv/analyze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Analyze a CSV and propose a column-to-field mapping */
+        post: operations["MigrationController_analyzeCsv"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/migration/csv/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import students from a confirmed CSV mapping */
+        post: operations["MigrationController_importCsv"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2086,6 +2205,31 @@ export interface components {
             courseOfferingId: string;
             createdAt: string;
             updatedAt: string;
+        };
+        GenerateGroundedResultDto: {
+            /** @enum {string} */
+            status: "grounded";
+            draft: {
+                title: string;
+                description: string;
+                criteria: {
+                    description: string;
+                    maxPoints: number;
+                }[];
+            };
+        };
+        GenerateNotGroundedResultDto: {
+            /** @enum {string} */
+            status: "not_grounded";
+            message: string;
+        };
+        GenerateAssignmentDto: {
+            /** Format: uuid */
+            courseOfferingId: string;
+            topic: string;
+            /** @enum {string} */
+            assignmentType: "essay" | "short_answer" | "project";
+            targetPoints?: number;
         };
         UpdateAssignmentDto: {
             title?: string;
@@ -2281,6 +2425,12 @@ export interface components {
             paidAt?: string | null;
             /** Format: date-time */
             dueDate?: string | null;
+        };
+        ConfirmAssignmentDto: {
+            /** Format: uuid */
+            studentId: string;
+            /** @enum {string} */
+            category: "BIRTH_CERTIFICATE" | "IMMUNIZATION_RECORD" | "PREVIOUS_TRANSCRIPT" | "PAYMENT_RECEIPT" | "ID_DOCUMENT" | "OTHER";
         };
         ImportAttendanceDto: {
             records: {
@@ -2504,6 +2654,17 @@ export interface components {
             name?: string;
             /** @enum {string} */
             role: "TEACHER" | "STUDENT";
+        };
+        AnalyzeCsvDto: {
+            csv: string;
+        };
+        ImportCsvDto: {
+            csv: string;
+            mapping: {
+                sourceColumn: string;
+                /** @enum {string} */
+                mappedField: "STUDENT_NAME" | "EMAIL" | "GRADE_LEVEL" | "SECTION" | "UNMAPPED";
+            }[];
         };
     };
     responses: never;
@@ -3266,6 +3427,29 @@ export interface operations {
             };
         };
     };
+    AssignmentsController_generate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateAssignmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateGroundedResultDto"] | components["schemas"]["GenerateNotGroundedResultDto"];
+                };
+            };
+        };
+    };
     AssignmentsController_findOne: {
         parameters: {
             query?: never;
@@ -3327,6 +3511,135 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AssignmentDto"];
+                };
+            };
+        };
+    };
+    MaterialsController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                    title?: string;
+                    /** Format: uuid */
+                    courseOfferingId?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_searchChunks: {
+        parameters: {
+            query: {
+                q: string;
+                topK: string;
+            };
+            header?: never;
+            path: {
+                courseOfferingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_findByOffering: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                courseOfferingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_getFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        url?: string;
+                    };
                 };
             };
         };
@@ -3831,112 +4144,6 @@ export interface operations {
             };
         };
     };
-    MaterialsController_upload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    file?: string;
-                    title?: string;
-                    /** Format: uuid */
-                    courseOfferingId?: string;
-                };
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MaterialsController_searchChunks: {
-        parameters: {
-            query: {
-                q: string;
-                topK: string;
-            };
-            header?: never;
-            path: {
-                courseOfferingId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MaterialsController_findByClass: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                courseOfferingId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MaterialsController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MaterialsController_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     StudentsController_getGrades: {
         parameters: {
             query?: never;
@@ -4139,7 +4346,8 @@ export interface operations {
                     /** Format: binary */
                     file: string;
                     title: string;
-                    type: string;
+                    /** @enum {string} */
+                    category?: "BIRTH_CERTIFICATE" | "IMMUNIZATION_RECORD" | "PREVIOUS_TRANSCRIPT" | "PAYMENT_RECEIPT" | "ID_DOCUMENT" | "OTHER";
                     academicYear?: string | null;
                 };
             };
@@ -4266,6 +4474,69 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DocumentsController_bulkUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    files: string[];
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DocumentsController_listBulk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DocumentsController_confirmAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmAssignmentDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -4921,7 +5192,7 @@ export interface operations {
     QuizzesController_findAll: {
         parameters: {
             query: {
-                classId: string;
+                courseOfferingId: string;
             };
             header?: never;
             path?: never;
@@ -5209,7 +5480,7 @@ export interface operations {
     HomeworkHelperController_getHistory: {
         parameters: {
             query?: {
-                classId?: string;
+                courseOfferingId?: string;
             };
             header?: never;
             path?: never;
@@ -5539,6 +5810,48 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["InviteMemberDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MigrationController_analyzeCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalyzeCsvDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MigrationController_importCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportCsvDto"];
             };
         };
         responses: {

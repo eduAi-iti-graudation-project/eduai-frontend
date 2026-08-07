@@ -69,12 +69,13 @@ export function InstructorAssignmentForm() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const classId = searchParams.get("classId")
+  const courseOfferingId = searchParams.get("courseOfferingId") ?? classId
 
   const [isDragging, setIsDragging] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  const [rubricMode, setRubricMode] = useState<"manual" | "pdf" | "library">("manual")
+  const [rubricMode, setRubricMode] = useState<"manual" | "pdf" | "library" | "ai">("manual")
   const [rubricTitle, setRubricTitle] = useState("")
   const [criteriaRows, setCriteriaRows] = useState<{ id: string; description: string; maxPoints: number }[]>([])
   const [rubricPdfFile, setRubricPdfFile] = useState<File | null>(null)
@@ -83,6 +84,13 @@ export function InstructorAssignmentForm() {
   const [rubricSubmitting, setRubricSubmitting] = useState(false)
   const [selectedLibraryId, setSelectedLibraryId] = useState("")
   const rubricFileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const [aiTopic, setAiTopic] = useState("")
+  const [aiAssignmentType, setAiAssignmentType] = useState<"essay" | "short_answer" | "project">("essay")
+  const [aiTargetPoints, setAiTargetPoints] = useState("")
+  const [isGeneratingDraft, setIsGeneratingDraft] = useState(false)
+  const [aiNotGroundedMessage, setAiNotGroundedMessage] = useState<string | null>(null)
+  const [aiDraftLoaded, setAiDraftLoaded] = useState(false)
 
   const { data: allRubrics, isLoading: rubricsLoading } = useQuery({
     queryKey: ["rubrics"],
@@ -134,6 +142,46 @@ export function InstructorAssignmentForm() {
     setImportedCriteria(importedCriteria.filter((c) => c.description !== desc))
   }
 
+  async function handleGenerateDraft() {
+    if (!courseOfferingId) {
+      toast.error("No class selected. Please go back and try again.")
+      return
+    }
+    const topic = aiTopic.trim()
+    if (topic.length < 3) {
+      toast.error("Describe the topic you want the assignment to cover")
+      return
+    }
+    setIsGeneratingDraft(true)
+    setAiNotGroundedMessage(null)
+    try {
+      const result = await api.generateAssignmentDraft({
+        courseOfferingId,
+        topic,
+        assignmentType: aiAssignmentType,
+        ...(aiTargetPoints ? { targetPoints: Math.max(1, parseInt(aiTargetPoints, 10) || 0) } : {}),
+      })
+      if (result.status === "not_grounded") {
+        setAiNotGroundedMessage(result.message)
+        setAiDraftLoaded(false)
+        return
+      }
+      const draft = result.draft
+      setRubricTitle(`${draft.title} Rubric`)
+      setCriteriaRows(
+        draft.criteria.map((c) => ({ id: freshCritId(), description: c.description, maxPoints: c.maxPoints })),
+      )
+      setValue("title", draft.title, { shouldValidate: true })
+      setValue("description", draft.description, { shouldValidate: true })
+      setAiDraftLoaded(true)
+      toast.success("AI draft generated — review before publishing")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Generation failed")
+    } finally {
+      setIsGeneratingDraft(false)
+    }
+  }
+
   const critIdCounter = useRef(0)
   function freshCritId() {
     critIdCounter.current += 1
@@ -166,7 +214,7 @@ export function InstructorAssignmentForm() {
   } = form
 
   const onSubmit: SubmitHandler<InstructorAssignmentFormData> = async (data) => {
-    if (!classId) {
+    if (!courseOfferingId) {
       toast.error("No class selected. Please go back and try again.")
       return
     }
@@ -197,7 +245,7 @@ export function InstructorAssignmentForm() {
         description,
         dueDate: new Date(data.dueDate).toISOString(),
         totalPoints: data.totalMarks,
-        classId,
+        courseOfferingId,
       })
 
       const rubric = await api.createRubric({
@@ -209,11 +257,11 @@ export function InstructorAssignmentForm() {
       })
 
       if (data.file) {
-        await api.uploadMaterial(data.title, classId, data.file)
+        await api.uploadMaterial(data.title, courseOfferingId, data.file)
       }
 
       toast.success("Assignment created. Now review and confirm the rubric.")
-      navigate(`/rubrics/confirm/${rubric.id}?classId=${classId}`)
+      navigate(`/rubrics/confirm/${rubric.id}?classId=${courseOfferingId}`)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong")
     } finally {
@@ -266,6 +314,53 @@ export function InstructorAssignmentForm() {
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
+
+  const criteriaEditor = (
+    <div className="space-y-4">
+      {criteriaRows.map((row) => (
+        <div key={row.id} className="flex items-start gap-3 p-4 bg-surface-container-low rounded-lg">
+          <div className="flex-1 space-y-2">
+            <textarea
+              value={row.description}
+              onChange={(e) => updateCriteriaRow(row.id, "description", e.target.value)}
+              placeholder="Criterion description..."
+              rows={2}
+              className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2 font-body-md text-body-md transition-all resize-none"
+            />
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                value={row.maxPoints || ""}
+                onChange={(e) =>
+                  updateCriteriaRow(row.id, "maxPoints", Math.max(1, parseInt(e.target.value) || 0))
+                }
+                className="w-24 bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-2 py-2 font-body-md text-body-md text-center transition-all"
+                placeholder="pts"
+              />
+              <span className="font-label-sm text-label-sm text-on-surface-variant">points</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => removeCriteriaRow(row.id)}
+            className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-error rounded-lg hover:bg-error-container/30 transition-colors shrink-0 mt-1"
+          >
+            <span className="material-symbols-outlined text-lg">close</span>
+          </button>
+        </div>
+      ))}
+
+      <button
+        type="button"
+        onClick={addCriteriaRow}
+        className="flex items-center justify-center gap-sm py-sm px-md bg-primary text-primary-foreground rounded-md font-label-md text-label-md hover:bg-primary/90 transition-all active:scale-95 w-full"
+      >
+        <span className="material-symbols-outlined">add</span>
+        Add Criterion
+      </button>
+    </div>
+  )
 
   return (
     <main className="flex-grow relative flex items-center justify-center p-md lg:p-lg overflow-hidden">
@@ -450,6 +545,13 @@ export function InstructorAssignmentForm() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setRubricMode("ai")}
+                  className={`flex-1 px-md py-sm rounded-md font-label-md transition-all ${rubricMode === "ai" ? "bg-primary text-primary-foreground" : "bg-surface-container text-on-surface-variant"}`}
+                >
+                  Generate with AI
+                </button>
+                <button
+                  type="button"
                   onClick={() => setRubricMode("library")}
                   className={`flex-1 px-md py-sm rounded-md font-label-md transition-all ${rubricMode === "library" ? "bg-primary text-primary-foreground" : "bg-surface-container text-on-surface-variant"}`}
                 >
@@ -458,50 +560,7 @@ export function InstructorAssignmentForm() {
               </div>
 
               {rubricMode === "manual" ? (
-                <div className="space-y-4">
-                  {criteriaRows.map((row) => (
-                    <div key={row.id} className="flex items-start gap-3 p-4 bg-surface-container-low rounded-lg">
-                      <div className="flex-1 space-y-2">
-                        <textarea
-                          value={row.description}
-                          onChange={(e) => updateCriteriaRow(row.id, "description", e.target.value)}
-                          placeholder="Criterion description..."
-                          rows={2}
-                          className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2 font-body-md text-body-md transition-all resize-none"
-                        />
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            min={1}
-                            value={row.maxPoints || ""}
-                            onChange={(e) =>
-                              updateCriteriaRow(row.id, "maxPoints", Math.max(1, parseInt(e.target.value) || 0))
-                            }
-                            className="w-24 bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-2 py-2 font-body-md text-body-md text-center transition-all"
-                            placeholder="pts"
-                          />
-                          <span className="font-label-sm text-label-sm text-on-surface-variant">points</span>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeCriteriaRow(row.id)}
-                        className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-error rounded-lg hover:bg-error-container/30 transition-colors shrink-0 mt-1"
-                      >
-                        <span className="material-symbols-outlined text-lg">close</span>
-                      </button>
-                    </div>
-                  ))}
-
-                  <button
-                    type="button"
-                    onClick={addCriteriaRow}
-                    className="flex items-center justify-center gap-sm py-sm px-md bg-primary text-primary-foreground rounded-md font-label-md text-label-md hover:bg-primary/90 transition-all active:scale-95 w-full"
-                  >
-                    <span className="material-symbols-outlined">add</span>
-                    Add Criterion
-                  </button>
-                </div>
+                criteriaEditor
               ) : rubricMode === "pdf" ? (
                 <div className="space-y-4">
                   <input
@@ -590,6 +649,97 @@ export function InstructorAssignmentForm() {
                       ))}
                     </div>
                   )}
+                </div>
+              ) : rubricMode === "ai" ? (
+                <div className="space-y-4">
+                  <div className="bg-surface-container-low rounded-lg p-4 space-y-3">
+                    <p className="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary">auto_awesome</span>
+                      Generate with AI
+                    </p>
+                    <div className="space-y-2">
+                      <label className="font-label-sm text-label-sm text-on-surface-variant ml-1">Topic or description</label>
+                      <textarea
+                        value={aiTopic}
+                        onChange={(e) => setAiTopic(e.target.value)}
+                        rows={2}
+                        placeholder="e.g. The water cycle and how each stage works"
+                        className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2 font-body-md text-body-md transition-all resize-none"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <label className="font-label-sm text-label-sm text-on-surface-variant ml-1">Assignment type</label>
+                        <select
+                          value={aiAssignmentType}
+                          onChange={(e) => setAiAssignmentType(e.target.value as "essay" | "short_answer" | "project")}
+                          className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2.5 font-body-md text-body-md transition-all"
+                        >
+                          <option value="essay">Essay</option>
+                          <option value="short_answer">Short Answer</option>
+                          <option value="project">Project</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="font-label-sm text-label-sm text-on-surface-variant ml-1">Target points (optional)</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={aiTargetPoints}
+                          onChange={(e) => setAiTargetPoints(e.target.value)}
+                          placeholder="e.g. 100"
+                          className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2.5 font-body-md text-body-md transition-all"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleGenerateDraft}
+                      disabled={isGeneratingDraft}
+                      className="flex items-center justify-center gap-sm w-full py-3 px-md bg-primary text-primary-foreground rounded-md font-label-md text-label-md hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isGeneratingDraft ? (
+                        <>
+                          <span className="material-symbols-outlined animate-spin">progress_activity</span>
+                          Generating draft...
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined">auto_awesome</span>
+                          Generate draft
+                        </>
+                      )}
+                    </button>
+                    <p className="font-label-sm text-label-sm text-on-surface-variant/70">
+                      The draft is grounded in this course's uploaded curriculum material, then you review and edit before it's published.
+                    </p>
+                  </div>
+
+                  {aiNotGroundedMessage && (
+                    <div className="flex items-start gap-3 p-4 rounded-lg border border-dashed border-tertiary bg-tertiary-fixed/60">
+                      <span className="material-symbols-outlined shrink-0 text-on-tertiary-fixed">search_off</span>
+                      <div className="min-w-0">
+                        <p className="font-label-md text-label-md text-on-tertiary-fixed font-bold">No matching curriculum material</p>
+                        <p className="font-body-sm text-body-sm text-on-tertiary-fixed/80 mt-0.5">{aiNotGroundedMessage}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {aiDraftLoaded && (
+                    <div className="flex items-start gap-3 p-4 rounded-lg border border-dashed border-primary/40 bg-primary-container/50">
+                      <span className="material-symbols-outlined shrink-0 text-primary">auto_awesome</span>
+                      <div className="min-w-0">
+                        <p className="font-label-md text-label-md text-on-surface font-bold">
+                          AI-generated draft — review before publishing
+                        </p>
+                        <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                          The assignment title, description, and rubric below were drafted from your course's curriculum material. Edit anything before creating the assignment.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {aiDraftLoaded && criteriaEditor}
                 </div>
               ) : (
                 <div className="space-y-4">
