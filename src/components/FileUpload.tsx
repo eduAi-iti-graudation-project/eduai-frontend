@@ -83,7 +83,7 @@ export function FileUpload({ value, onChange, errorMessage, disabled }: FileUplo
       }} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop}>
         <div
           className={cn(
-            "rounded-[32px] border-2 border-dashed p-14 text-center transition-all duration-500",
+            "rounded-lg border-2 border-dashed p-14 text-center transition-all duration-500",
             isDragging
               ? "scale-105 border-pink-400 bg-pink-500/20 shadow-[0_0_50px_rgba(236,72,153,0.4)]"
               : "border-white/20 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 hover:border-purple-400/50 hover:bg-white/10",
@@ -92,7 +92,7 @@ export function FileUpload({ value, onChange, errorMessage, disabled }: FileUplo
         >
           {value ? (
             <div className="flex items-center justify-center gap-8">
-              <div className="flex h-24 w-24 items-center justify-center rounded-[24px] bg-gradient-to-br from-indigo-500 to-pink-500 shadow-2xl">
+              <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-pink-500 shadow-2xl">
                 <FileUp className="h-12 w-12 text-white" />
               </div>
               <div className="text-left">
@@ -106,7 +106,7 @@ export function FileUpload({ value, onChange, errorMessage, disabled }: FileUplo
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-[18px] border-2 border-white/20 bg-white/10 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:bg-white/15"
+                className="rounded-md border-2 border-white/20 bg-white/10 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:bg-white/15"
                 onClick={(event) => {
                   event.stopPropagation()
                   removeFile()
@@ -119,7 +119,7 @@ export function FileUpload({ value, onChange, errorMessage, disabled }: FileUplo
           ) : (
             <>
               <div className="flex justify-center">
-                <div className="relative inline-flex h-20 w-20 items-center justify-center rounded-[24px] border-[3px] border-black bg-[#ffd84d] shadow-[6px_6px_0_0_#000]">
+                <div className="relative inline-flex h-20 w-20 items-center justify-center rounded-lg border-[3px] border-black bg-[#ffd84d] shadow-[6px_6px_0_0_#000]">
                   <Upload className="h-10 w-10 animate-[bounce_2s_ease-in-out_infinite] text-indigo-300" />
                   <ArrowRightCircle className="absolute -right-2 -bottom-2 h-10 w-10 animate-spin text-pink-400" />
                 </div>

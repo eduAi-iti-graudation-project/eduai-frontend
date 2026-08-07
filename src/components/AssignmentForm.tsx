@@ -115,9 +115,9 @@ export function AssignmentForm() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4">
-      <div className="absolute left-1/4 top-1/4 h-96 w-96 animate-[float_8s_ease-in-out_infinite] rounded-full bg-purple-500 opacity-60 mix-blend-screen blur-3xl" />
-      <div className="absolute right-1/3 top-1/3 h-80 w-80 animate-[float_10s_ease-in-out_infinite_2s] rounded-full bg-pink-500 opacity-50 mix-blend-screen blur-3xl" />
-      <div className="absolute bottom-1/4 left-1/3 h-72 w-72 animate-[float_12s_ease-in-out_infinite_4s] rounded-full bg-blue-500 opacity-40 mix-blend-screen blur-3xl" />
+      <div className="absolute left-1/4 top-1/4 h-96 w-96 animate-[float_8s_ease-in-out_infinite] rounded-lg bg-purple-500 opacity-60 mix-blend-screen blur-3xl" />
+      <div className="absolute right-1/3 top-1/3 h-80 w-80 animate-[float_10s_ease-in-out_infinite_2s] rounded-lg bg-pink-500 opacity-50 mix-blend-screen blur-3xl" />
+      <div className="absolute bottom-1/4 left-1/3 h-72 w-72 animate-[float_12s_ease-in-out_infinite_4s] rounded-lg bg-blue-500 opacity-40 mix-blend-screen blur-3xl" />
 
       <style>{`
         @keyframes float {
@@ -140,7 +140,7 @@ export function AssignmentForm() {
           <CardHeader className="pb-10 pt-10 text-center">
             <div className="mb-6 flex justify-center">
               <div className="relative">
-                <div className="flex h-28 w-28 items-center justify-center rounded-[32px] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-[0_0_40px_rgba(139,92,246,0.5)] transition-all duration-500 hover:scale-110 hover:shadow-[0_0_60px_rgba(217,70,239,0.6)]">
+                <div className="flex h-28 w-28 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-[0_0_40px_rgba(139,92,246,0.5)] transition-all duration-500 hover:scale-110 hover:shadow-[0_0_60px_rgba(217,70,239,0.6)]">
                   {isSuccess ? (
                     <CheckCircle2 className="h-14 w-14 animate-[bounce_0.6s_ease-in-out_infinite] text-white" />
                   ) : (
@@ -176,7 +176,7 @@ export function AssignmentForm() {
                           <Textarea
                             id={field.name}
                             placeholder="Write a brief description of your assignment..."
-                            className="min-h-[200px] resize-none rounded-[24px] border-2 border-white/20 bg-white/5 p-7 text-xl text-white shadow-lg transition-all duration-500 placeholder:text-white/40 focus:border-indigo-400 focus:bg-white/10 focus:ring-4 focus:ring-indigo-500/20"
+                            className="min-h-[200px] resize-none rounded-lg border-2 border-white/20 bg-white/5 p-7 text-xl text-white shadow-lg transition-all duration-500 placeholder:text-white/40 focus:border-indigo-400 focus:bg-white/10 focus:ring-4 focus:ring-indigo-500/20"
                             {...field}
                           />
                         </FormControl>

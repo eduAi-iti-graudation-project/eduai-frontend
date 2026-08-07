@@ -269,17 +269,13 @@ export function InstructorAssignmentForm() {
 
   return (
     <main className="flex-grow relative flex items-center justify-center p-md lg:p-lg overflow-hidden">
-        {/* Background Decorations */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-primary-container blur-blob rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary-container blur-blob rounded-full translate-x-1/3 translate-y-1/3"></div>
-
         {/* Assignment Card */}
-        <section className="relative z-10 w-full max-w-2xl bg-surface-container-lowest rounded-3xl shadow-xl shadow-on-background/5 border border-on-surface/5 p-8 lg:p-[32px]">
+        <section className="relative z-10 w-full max-w-2xl bg-surface-container-lowest rounded-lg border border-outline-variant p-8 lg:p-[32px] shadow-sm">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-base mb-2">
-              <span className="material-symbols-outlined text-4xl sparkle-icon-gradient" style={{ fontVariationSettings: "'FILL' 1" }}>add_task</span>
-              <h2 className="font-headline-lg text-headline-lg text-on-background">Create New Assignment</h2>
+              <span className="material-symbols-outlined text-4xl text-primary">add_task</span>
+              <h2 className="font-headline-lg text-headline-lg text-on-surface">Create New Assignment</h2>
             </div>
             <p className="font-body-md text-body-md text-on-surface-variant">Set up the details and resources for your students.</p>
           </div>
@@ -289,12 +285,12 @@ export function InstructorAssignmentForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Assignment Title */}
               <div className="space-y-2 md:col-span-2">
-                <label className="font-label-md text-label-md text-on-background ml-1" htmlFor="title">Assignment Title</label>
+                <label className="font-label-md text-label-md text-on-surface ml-1" htmlFor="title">Assignment Title</label>
                 <input
                   id="title"
                   type="text"
                   placeholder="e.g. Final Project: E-commerce App"
-                  className="w-full bg-surface-container-low border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-2xl p-4 font-body-md text-body-md transition-all"
+                  className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2.5 font-body-md text-body-md transition-all"
                   {...register("title")}
                 />
                 {errors.title && (
@@ -304,11 +300,11 @@ export function InstructorAssignmentForm() {
 
               {/* Due Date */}
               <div className="space-y-2">
-                <label className="font-label-md text-label-md text-on-background ml-1" htmlFor="due_date">Due Date</label>
+                <label className="font-label-md text-label-md text-on-surface ml-1" htmlFor="due_date">Due Date</label>
                 <input
                   id="due_date"
                   type="date"
-                  className="w-full bg-surface-container-low border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-2xl p-4 font-body-md text-body-md transition-all"
+                  className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2.5 font-body-md text-body-md transition-all"
                   {...register("dueDate")}
                 />
                 {errors.dueDate && (
@@ -318,12 +314,12 @@ export function InstructorAssignmentForm() {
 
               {/* Total Marks */}
               <div className="space-y-2">
-                <label className="font-label-md text-label-md text-on-background ml-1" htmlFor="marks">Total Marks</label>
+                <label className="font-label-md text-label-md text-on-surface ml-1" htmlFor="marks">Total Marks</label>
                 <input
                   id="marks"
                   type="number"
                   placeholder="100"
-                  className="w-full bg-surface-container-low border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-2xl p-4 font-body-md text-body-md transition-all"
+                  className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2.5 font-body-md text-body-md transition-all"
                   {...register("totalMarks", { valueAsNumber: true })}
                 />
                 {errors.totalMarks && (
@@ -333,12 +329,12 @@ export function InstructorAssignmentForm() {
 
               {/* Description */}
               <div className="space-y-2 md:col-span-2">
-                <label className="font-label-md text-label-md text-on-background ml-1" htmlFor="description">Assignment Description</label>
+                <label className="font-label-md text-label-md text-on-surface ml-1" htmlFor="description">Assignment Description</label>
                 <textarea
                   id="description"
                   rows={4}
                   placeholder="Provide detailed instructions for the students..."
-                  className="w-full bg-surface-container-low border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-2xl p-4 font-body-md text-body-md transition-all"
+                  className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2.5 font-body-md text-body-md transition-all"
                   {...register("description")}
                 />
                 {errors.description && (
@@ -349,12 +345,12 @@ export function InstructorAssignmentForm() {
 
               {/* Instructor Notes */}
               <div className="space-y-2 md:col-span-2">
-                <label className="font-label-md text-label-md text-on-background ml-1" htmlFor="instructor_notes">Instructor Notes (Optional)</label>
+                <label className="font-label-md text-label-md text-on-surface ml-1" htmlFor="instructor_notes">Instructor Notes (Optional)</label>
                 <textarea
                   id="instructor_notes"
                   rows={2}
                   placeholder="Internal notes for grading or reference..."
-                  className="w-full bg-surface-container-low border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-2xl p-4 font-body-md text-body-md transition-all"
+                  className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2.5 font-body-md text-body-md transition-all"
                   {...register("instructorNotes")}
                 />
                 {errors.instructorNotes && (
@@ -364,7 +360,7 @@ export function InstructorAssignmentForm() {
 
               {/* Attachment Upload */}
               <div className="space-y-2 md:col-span-2">
-                <label className="font-label-md text-label-md text-on-background ml-1">Attachment Upload (Optional)</label>
+                <label className="font-label-md text-label-md text-on-surface ml-1">Attachment Upload (Optional)</label>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -377,20 +373,20 @@ export function InstructorAssignmentForm() {
                 />
 
                 {selectedFile ? (
-                  <div className="flex items-center justify-between bg-surface-container p-3 rounded-full border border-outline-variant">
+                  <div className="flex items-center justify-between bg-surface-container p-3 rounded-lg border border-outline-variant">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-error">
+                      <div className="w-10 h-10 rounded-lg bg-error-container flex items-center justify-center text-error">
                         <span className="material-symbols-outlined">picture_as_pdf</span>
                       </div>
                       <div>
-                        <p className="font-label-md text-label-md text-on-background">{selectedFile.name}</p>
+                        <p className="font-label-md text-label-md text-on-surface">{selectedFile.name}</p>
                         <p className="text-[10px] text-on-surface-variant leading-none">{formatFileSize(selectedFile.size)} &bull; Ready to submit</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={removeFile}
-                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-highest text-on-surface-variant transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-highest text-on-surface-variant transition-colors"
                     >
                       <span className="material-symbols-outlined text-[20px]">close</span>
                     </button>
@@ -403,11 +399,11 @@ export function InstructorAssignmentForm() {
                     onDragLeave={handleDragLeave}
                     onClick={openFilePicker}
                   >
-                    <div className="flex flex-col items-center justify-center w-full min-h-[180px] bg-[#F5F7FF] border-2 border-dashed border-[#6366F1]/30 rounded-2xl hover:border-[#14B8A6]/50 hover:bg-[#F0F2FF] transition-all p-6 text-center">
-                      <span className="material-symbols-outlined text-5xl mb-3 file-upload-gradient" style={{ fontVariationSettings: "'FILL' 1" }}>cloud_upload</span>
-                      <p className="font-headline-md text-[18px] text-on-background">
+                    <div className="flex flex-col items-center justify-center w-full min-h-[180px] bg-surface-container-low border border-dashed border-outline-variant rounded-lg hover:border-primary hover:bg-primary-container/40 transition-all p-6 text-center">
+                      <span className="material-symbols-outlined text-5xl mb-3 text-primary">cloud_upload</span>
+                      <p className="font-headline-md text-[18px] text-on-surface">
                         {isDragging ? "Drop the file here!" : "Drag & drop resources here, or "}
-                        <span className="text-[#6366F1] font-bold">click to browse</span>
+                        <span className="text-primary font-bold">click to browse</span>
                       </p>
                       <p className="font-label-sm text-label-sm text-on-surface-variant/70 mt-1">PDF only, max 10MB</p>
                     </div>
@@ -420,20 +416,20 @@ export function InstructorAssignmentForm() {
               </div>
 
             {/* ── Rubric (Required) ── */}
-            <div className="md:col-span-2 border-t border-outline-variant/20 pt-6 mt-6">
+            <div className="md:col-span-2 border-t border-outline-variant pt-6 mt-6">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-primary">checklist</span>
-                <h3 className="font-headline-md text-headline-md text-primary">Rubric</h3>
-                <span className="bg-error text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded tracking-widest">Required</span>
+                <h3 className="font-headline-md text-headline-md text-on-surface">Rubric</h3>
+                <span className="bg-primary text-primary-foreground text-[10px] uppercase font-bold px-2 py-0.5 rounded-md tracking-widest">Required</span>
               </div>
 
               <div className="space-y-2 mb-4">
-                <label className="font-label-md text-label-md text-on-background ml-1">Rubric Title</label>
+                <label className="font-label-md text-label-md text-on-surface ml-1">Rubric Title</label>
                 <input
                   value={rubricTitle}
                   onChange={(e) => setRubricTitle(e.target.value)}
                   placeholder="e.g. Final Project Rubric"
-                  className="w-full bg-surface-container-low border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-2xl p-4 font-body-md text-body-md transition-all"
+                  className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2.5 font-body-md text-body-md transition-all"
                 />
               </div>
 
@@ -441,21 +437,21 @@ export function InstructorAssignmentForm() {
                 <button
                   type="button"
                   onClick={() => setRubricMode("manual")}
-                  className={`flex-1 px-md py-sm rounded-full font-label-md transition-all ${rubricMode === "manual" ? "bg-primary-container text-white" : "bg-surface-container text-on-surface-variant"}`}
+                  className={`flex-1 px-md py-sm rounded-md font-label-md transition-all ${rubricMode === "manual" ? "bg-primary text-primary-foreground" : "bg-surface-container text-on-surface-variant"}`}
                 >
                   Manual
                 </button>
                 <button
                   type="button"
                   onClick={() => setRubricMode("pdf")}
-                  className={`flex-1 px-md py-sm rounded-full font-label-md transition-all ${rubricMode === "pdf" ? "bg-primary-container text-white" : "bg-surface-container text-on-surface-variant"}`}
+                  className={`flex-1 px-md py-sm rounded-md font-label-md transition-all ${rubricMode === "pdf" ? "bg-primary text-primary-foreground" : "bg-surface-container text-on-surface-variant"}`}
                 >
                   Upload PDF
                 </button>
                 <button
                   type="button"
                   onClick={() => setRubricMode("library")}
-                  className={`flex-1 px-md py-sm rounded-full font-label-md transition-all ${rubricMode === "library" ? "bg-primary-container text-white" : "bg-surface-container text-on-surface-variant"}`}
+                  className={`flex-1 px-md py-sm rounded-md font-label-md transition-all ${rubricMode === "library" ? "bg-primary text-primary-foreground" : "bg-surface-container text-on-surface-variant"}`}
                 >
                   Use from library
                 </button>
@@ -464,14 +460,14 @@ export function InstructorAssignmentForm() {
               {rubricMode === "manual" ? (
                 <div className="space-y-4">
                   {criteriaRows.map((row) => (
-                    <div key={row.id} className="flex items-start gap-3 p-4 bg-surface-container-low rounded-2xl">
+                    <div key={row.id} className="flex items-start gap-3 p-4 bg-surface-container-low rounded-lg">
                       <div className="flex-1 space-y-2">
                         <textarea
                           value={row.description}
                           onChange={(e) => updateCriteriaRow(row.id, "description", e.target.value)}
                           placeholder="Criterion description..."
                           rows={2}
-                          className="w-full bg-white border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-xl p-3 font-body-md text-body-md transition-all resize-none"
+                          className="w-full bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2 font-body-md text-body-md transition-all resize-none"
                         />
                         <div className="flex items-center gap-2">
                           <input
@@ -481,7 +477,7 @@ export function InstructorAssignmentForm() {
                             onChange={(e) =>
                               updateCriteriaRow(row.id, "maxPoints", Math.max(1, parseInt(e.target.value) || 0))
                             }
-                            className="w-24 bg-white border-2 border-transparent focus:border-primary-container focus:ring-0 rounded-xl p-2 font-body-md text-body-md text-center transition-all"
+                            className="w-24 bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-md px-2 py-2 font-body-md text-body-md text-center transition-all"
                             placeholder="pts"
                           />
                           <span className="font-label-sm text-label-sm text-on-surface-variant">points</span>
@@ -490,7 +486,7 @@ export function InstructorAssignmentForm() {
                       <button
                         type="button"
                         onClick={() => removeCriteriaRow(row.id)}
-                        className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-error rounded-full hover:bg-error-container/30 transition-colors shrink-0 mt-1"
+                        className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-error rounded-lg hover:bg-error-container/30 transition-colors shrink-0 mt-1"
                       >
                         <span className="material-symbols-outlined text-lg">close</span>
                       </button>
@@ -500,7 +496,7 @@ export function InstructorAssignmentForm() {
                   <button
                     type="button"
                     onClick={addCriteriaRow}
-                    className="flex items-center justify-center gap-sm py-sm px-md bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md hover:opacity-90 transition-all active:scale-95 w-full"
+                    className="flex items-center justify-center gap-sm py-sm px-md bg-primary text-primary-foreground rounded-md font-label-md text-label-md hover:bg-primary/90 transition-all active:scale-95 w-full"
                   >
                     <span className="material-symbols-outlined">add</span>
                     Add Criterion
@@ -524,18 +520,18 @@ export function InstructorAssignmentForm() {
                   />
 
                   {isImporting ? (
-                    <div className="flex items-center justify-center gap-3 py-6 bg-surface-container-low rounded-2xl">
+                    <div className="flex items-center justify-center gap-3 py-6 bg-surface-container-low rounded-lg">
                       <span className="material-symbols-outlined animate-spin text-primary">progress_activity</span>
                       <span className="font-label-md text-label-md text-on-surface-variant">Extracting criteria from PDF...</span>
                     </div>
                   ) : rubricPdfFile ? (
-                    <div className="flex items-center justify-between bg-surface-container p-3 rounded-full border border-outline-variant">
+                    <div className="flex items-center justify-between bg-surface-container p-3 rounded-lg border border-outline-variant">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-error">
+                        <div className="w-10 h-10 rounded-lg bg-error-container flex items-center justify-center text-error">
                           <span className="material-symbols-outlined">picture_as_pdf</span>
                         </div>
                         <div>
-                          <p className="font-label-md text-label-md text-on-background">{rubricPdfFile.name}</p>
+                          <p className="font-label-md text-label-md text-on-surface">{rubricPdfFile.name}</p>
                           <p className="text-[10px] text-on-surface-variant leading-none">{formatFileSize(rubricPdfFile.size)}</p>
                         </div>
                       </div>
@@ -546,7 +542,7 @@ export function InstructorAssignmentForm() {
                           setImportedCriteria([])
                           if (rubricFileInputRef.current) rubricFileInputRef.current.value = ""
                         }}
-                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-highest text-on-surface-variant transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-highest text-on-surface-variant transition-colors"
                       >
                         <span className="material-symbols-outlined text-[20px]">close</span>
                       </button>
@@ -555,10 +551,10 @@ export function InstructorAssignmentForm() {
                     <button
                       type="button"
                       onClick={() => rubricFileInputRef.current?.click()}
-                      className="flex flex-col items-center justify-center w-full min-h-[120px] bg-[#F5F7FF] border-2 border-dashed border-[#6366F1]/30 rounded-2xl hover:border-[#14B8A6]/50 hover:bg-[#F0F2FF] transition-all p-6 text-center cursor-pointer"
+                      className="flex flex-col items-center justify-center w-full min-h-[120px] bg-surface-container-low border border-dashed border-outline-variant rounded-lg hover:border-primary hover:bg-primary-container/40 transition-all p-6 text-center cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-4xl mb-2 file-upload-gradient" style={{ fontVariationSettings: "'FILL' 1" }}>description</span>
-                      <p className="font-label-md text-label-md text-on-background">
+                      <span className="material-symbols-outlined text-4xl mb-2 text-primary">description</span>
+                      <p className="font-label-md text-label-md text-on-surface">
                         Upload a PDF with rubric criteria
                       </p>
                       <p className="font-label-sm text-label-sm text-on-surface-variant/70 mt-1">PDF only</p>
@@ -569,7 +565,7 @@ export function InstructorAssignmentForm() {
                     <div className="space-y-2">
                       <p className="font-label-md text-label-md text-primary">AI-Suggested Criteria</p>
                       {importedCriteria.map((c, i) => (
-                        <div key={`ai-${i}`} className="flex items-center justify-between p-3 bg-primary-fixed/10 rounded-xl border border-dashed border-primary-container/30">
+                        <div key={`ai-${i}`} className="flex items-center justify-between p-3 bg-primary-container/50 rounded-md border border-dashed border-primary/30">
                           <div className="flex-1 min-w-0">
                             <p className="font-body-md text-body-md text-on-surface truncate">{c.description}</p>
                             <p className="font-label-sm text-label-sm text-on-surface-variant">{c.maxPoints} pts</p>
@@ -578,14 +574,14 @@ export function InstructorAssignmentForm() {
                             <button
                               type="button"
                               onClick={() => acceptImportedCriterion(c.description, c.maxPoints)}
-                              className="px-3 py-1 bg-primary-container text-white text-xs rounded-full font-bold"
+                              className="px-3 py-1 bg-primary text-primary-foreground text-xs rounded-md font-bold"
                             >
                               Accept
                             </button>
                             <button
                               type="button"
                               onClick={() => dismissImportedCriterion(c.description)}
-                              className="px-3 py-1 bg-surface-container-high text-on-surface-variant text-xs rounded-full font-bold"
+                              className="px-3 py-1 bg-surface-container-high text-on-surface-variant text-xs rounded-md font-bold"
                             >
                               Dismiss
                             </button>
@@ -598,14 +594,14 @@ export function InstructorAssignmentForm() {
               ) : (
                 <div className="space-y-4">
                   {rubricsLoading ? (
-                    <div className="flex items-center justify-center gap-3 py-6 bg-surface-container-low rounded-2xl">
+                    <div className="flex items-center justify-center gap-3 py-6 bg-surface-container-low rounded-lg">
                       <span className="material-symbols-outlined animate-spin text-primary text-lg">progress_activity</span>
                       <span className="font-label-md text-label-md text-on-surface-variant">Loading your rubric library...</span>
                     </div>
                   ) : confirmedRubrics.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-8 px-6 bg-surface-container-low rounded-2xl text-center">
+                    <div className="flex flex-col items-center justify-center py-8 px-6 bg-surface-container-low rounded-lg text-center">
                       <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 mb-2">menu_book</span>
-                      <p className="font-body-md text-body-md text-on-background">No confirmed rubrics yet</p>
+                      <p className="font-body-md text-body-md text-on-surface">No confirmed rubrics yet</p>
                       <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
                         Rubrics become reusable once you confirm them.
                       </p>
@@ -621,18 +617,16 @@ export function InstructorAssignmentForm() {
                               key={rubric.id}
                               type="button"
                               onClick={() => selectLibraryRubric(rubric)}
-                              className={`text-left p-4 rounded-2xl border-2 transition-all ${
+                              className={`text-left p-4 rounded-lg border transition-all ${
                                 selected
-                                  ? "border-primary-container bg-primary-fixed/10"
-                                  : "border-outline-variant/20 bg-white hover:border-primary-container/40"
+                                  ? "border-primary bg-primary-container/40"
+                                  : "border-outline-variant bg-surface-container-lowest hover:border-primary"
                               }`}
                             >
                               <div className="flex items-start justify-between gap-2 mb-1">
-                                <p className="font-label-md text-label-md text-on-background truncate">{rubric.title}</p>
+                                <p className="font-label-md text-label-md text-on-surface truncate">{rubric.title}</p>
                                 {selected && (
-                                  <span className="material-symbols-outlined text-primary text-lg shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                    check_circle
-                                  </span>
+                                  <span className="material-symbols-outlined text-primary text-lg shrink-0">check_circle</span>
                                 )}
                               </div>
                               <p className="font-label-sm text-label-sm text-on-surface-variant">
@@ -662,7 +656,7 @@ export function InstructorAssignmentForm() {
               <button
                 type="submit"
                 disabled={isSubmitting || rubricSubmitting}
-                className="submit-button-gradient text-white flex items-center gap-sm px-8 py-4 rounded-full font-bold transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-primary text-white flex items-center gap-sm px-8 py-4 rounded-md font-bold transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting || rubricSubmitting ? (
                   <>
@@ -679,10 +673,6 @@ export function InstructorAssignmentForm() {
             </div>
             </div>
           </form>
-
-          {/* Decorative low-opacity blobs for internal depth */}
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-container/20 blur-3xl rounded-full pointer-events-none"></div>
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-secondary-container/10 blur-3xl rounded-full pointer-events-none"></div>
         </section>
     </main>
   )
