@@ -25,7 +25,7 @@ export function ErrorState({
             type="button"
             variant="secondary"
             onClick={onRetry}
-            className="rounded-full font-label-md px-lg py-sm h-auto"
+            className="rounded-lg font-label-md px-lg py-sm h-auto"
           >
             Try Again
           </Button>

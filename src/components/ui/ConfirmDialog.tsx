@@ -38,7 +38,7 @@ export function ConfirmDialog({
     <Dialog open={open} onOpenChange={(next) => {
       if (!next && !isLoading) onCancel()
     }}>
-      <DialogContent className={cn("rounded-[32px] max-w-2xl bg-white", className)}>
+      <DialogContent className={cn("rounded-lg max-w-2xl bg-white", className)}>
         <DialogHeader>
           <div className="flex items-center gap-sm">
             <span
@@ -63,7 +63,7 @@ export function ConfirmDialog({
             variant="secondary"
             onClick={onCancel}
             disabled={isLoading}
-            className="flex-1 h-auto py-sm font-label-md text-label-md rounded-full"
+            className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg"
           >
             {cancelLabel}
           </Button>
@@ -73,8 +73,8 @@ export function ConfirmDialog({
             disabled={isLoading}
             variant={variant === "danger" ? "destructive" : "default"}
             className={cn(
-              "flex-1 h-auto py-sm font-label-md text-label-md rounded-full",
-              variant === "default" && "bg-primary-container text-white hover:bg-primary-container/90",
+              "flex-1 h-auto py-sm font-label-md text-label-md rounded-lg",
+              variant === "default" && "bg-primary text-primary-foreground hover:bg-primary/90",
             )}
           >
             {isLoading ? `${confirmLabel}...` : confirmLabel}
