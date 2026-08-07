@@ -8,7 +8,7 @@ function LoadingScreen() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-surface">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+        <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
         </div>
         <p className="font-body-md text-body-md text-on-surface-variant">Loading...</p>
@@ -59,16 +59,4 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated) return <Navigate to="/login" replace />
   if (user?.role === "ADMIN") return <>{children}</>
   return <Navigate to="/" replace />
-}
-
-export function RootRedirect() {
-  const { isAuthenticated, isLoading, user } = useAuth()
-  if (isLoading) return <LoadingScreen />
-  if (isAuthenticated && user?.role) {
-    if (user.role === "ADMIN") return <Navigate to="/admin" replace />
-    if (user.role === "TEACHER") return <Navigate to="/dashboard" replace />
-    if (user.role === "GUARDIAN") return <Navigate to="/guardian" replace />
-    if (user.role === "STUDENT") return <Navigate to="/student" replace />
-  }
-  return <Navigate to="/login" replace />
 }
