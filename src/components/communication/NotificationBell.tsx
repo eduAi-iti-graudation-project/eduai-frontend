@@ -35,19 +35,19 @@ export function NotificationBell() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="relative text-on-surface-variant hover:text-primary-container transition-colors rounded-full p-1"
+        className="relative text-on-surface-variant hover:text-primary-container transition-colors rounded-lg p-1"
       >
         <span className="material-symbols-outlined">notifications</span>
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-error text-[10px] text-white flex items-center justify-center font-bold">
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-lg bg-primary text-[10px] text-white flex items-center justify-center font-bold">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-surface-container-lowest rounded-[24px] shadow-xl border border-outline-variant/10 overflow-hidden z-50">
-          <div className="p-3 border-b border-outline-variant/10">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-surface-container-lowest rounded-lg shadow-xl border border-border overflow-hidden z-50">
+          <div className="p-3 border-b border-border">
             <p className="font-label-md text-label-md text-on-surface font-bold">Notifications</p>
           </div>
 
@@ -82,10 +82,10 @@ export function NotificationBell() {
             )}
           </div>
 
-          <div className="p-2 border-t border-outline-variant/10">
+          <div className="p-2 border-t border-border">
             <button
               onClick={() => { navigate(notificationsPath); setOpen(false) }}
-              className="w-full py-2 text-center font-label-sm text-label-sm text-primary hover:bg-surface-container rounded-full transition-colors"
+              className="w-full py-2 text-center font-label-sm text-label-sm text-primary hover:bg-surface-container rounded-lg transition-colors"
             >
               View All Notifications
             </button>

@@ -28,7 +28,7 @@ export function InsightsPage() {
       <PageHeader
         title={title}
         actions={
-          <div className="flex items-center gap-1 rounded-full bg-surface-container p-1" role="group" aria-label="Time interval">
+          <div className="flex items-center gap-1 rounded-lg bg-surface-container p-1" role="group" aria-label="Time interval">
             {(["week", "month"] as const).map((value) => (
               <Button
                 key={value}
@@ -37,9 +37,9 @@ export function InsightsPage() {
                 size="sm"
                 onClick={() => setInterval(value)}
                 className={cn(
-                  "rounded-full px-4 h-8 font-label-md text-label-md",
+                  "rounded-lg px-4 h-8 font-label-md text-label-md",
                   interval === value
-                    ? "bg-primary-container text-white hover:bg-primary-container/90"
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "text-on-surface-variant hover:bg-surface-container-high",
                 )}
                 aria-pressed={interval === value}
