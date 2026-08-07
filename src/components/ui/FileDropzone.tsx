@@ -62,7 +62,7 @@ export function FileDropzone({
       onDragLeave={handleDragLeave}
       onClick={() => inputRef.current?.click()}
       className={cn(
-        "relative cursor-pointer rounded-xl border-2 border-dashed p-lg text-center transition-all",
+        "relative cursor-pointer rounded-lg border-2 border-dashed p-lg text-center transition-all",
         isDragging
           ? "border-primary bg-primary-fixed/10 scale-[1.02]"
           : "border-outline-variant hover:border-primary hover:bg-surface-container-low",
@@ -84,13 +84,13 @@ export function FileDropzone({
 
       {isUploading ? (
         <div className="space-y-3">
-          <div className="w-12 h-12 rounded-xl bg-primary-fixed/20 flex items-center justify-center mx-auto">
+          <div className="w-12 h-12 rounded-lg bg-primary-fixed/20 flex items-center justify-center mx-auto">
             <span className="material-symbols-outlined text-primary animate-spin">sync</span>
           </div>
           <p className="font-label-md text-label-md text-primary">Uploading...</p>
-          <div className="w-full max-w-2xl mx-auto h-2 rounded-full bg-surface-container-high overflow-hidden">
+          <div className="w-full max-w-2xl mx-auto h-2 rounded-lg bg-surface-container-high overflow-hidden">
             <div
-              className="h-full rounded-full bg-primary-container transition-all duration-300"
+              className="h-full rounded-lg bg-primary-container transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
@@ -98,7 +98,7 @@ export function FileDropzone({
         </div>
       ) : (
         <div className="space-y-2">
-          <div className="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center mx-auto">
+          <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center mx-auto">
             <span className="material-symbols-outlined text-on-surface-variant">upload_file</span>
           </div>
           <p className="font-label-md text-label-md text-on-surface">

@@ -20,7 +20,7 @@ export function EmptyState({
   return (
     <Card className={cn("border-0 shadow-none bg-transparent", className)}>
       <CardContent className="flex flex-col items-center justify-center text-center py-lg">
-        <div className="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-lg bg-surface-container-low flex items-center justify-center mb-4">
           <span className="material-symbols-outlined text-on-surface-variant text-3xl">{icon}</span>
         </div>
         <h3 className="font-headline-md text-headline-md text-primary mb-2">{title}</h3>
