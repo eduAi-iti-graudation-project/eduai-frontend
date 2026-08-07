@@ -3,10 +3,10 @@ import { computeAttendanceStats, monthBuckets, type AttendanceRecordLike } from 
 
 const BAR_MAX = 132
 const SEGMENT_CLASSES: Record<string, string> = {
-  present: "bg-primary",
-  late: "bg-tertiary-fixed-dim",
-  excused: "bg-[#d9ccf2]",
-  absent: "bg-[#c8cad6]",
+  present: "bg-[#16a34a]",
+  late: "bg-[#86efac]",
+  excused: "bg-[#6366f1]",
+  absent: "bg-[#ef4444]",
 }
 
 const SEGMENT_LABELS: Record<string, string> = {
@@ -89,7 +89,7 @@ export function MonthlyAttendanceBars({ records }: { records: AttendanceRecordLi
         })}
       </div>
 
-      <div className="mt-2 flex flex-wrap gap-x-lg gap-y-sm border-t border-outline-variant/10 pt-3">
+      <div className="mt-2 flex flex-wrap gap-x-lg gap-y-sm border-t border-border pt-3">
         {(["present", "late", "excused", "absent"] as const).map((key) => (
           <span key={key} className="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
             <span className={`h-2.5 w-2.5 rounded-[3px] ${SEGMENT_CLASSES[key]}`} />
@@ -102,10 +102,10 @@ export function MonthlyAttendanceBars({ records }: { records: AttendanceRecordLi
 }
 
 const DONUT_COLORS: Record<string, string> = {
-  present: "#006951",
-  late: "#f4be4e",
-  excused: "#d9ccf2",
-  absent: "#c8cad6",
+  present: "#16a34a",
+  late: "#86efac",
+  excused: "#6366f1",
+  absent: "#ef4444",
 }
 
 export function AttendanceDonut({ records }: { records: AttendanceRecordLike[] }) {
@@ -131,10 +131,10 @@ export function AttendanceDonut({ records }: { records: AttendanceRecordLike[] }
   return (
     <div className="flex flex-col items-center gap-lg sm:flex-row">
       <div
-        className="relative h-40 w-40 shrink-0 rounded-full animate-[rise-in_600ms_ease-out_both]"
+        className="relative h-40 w-40 shrink-0 rounded-lg animate-[rise-in_600ms_ease-out_both]"
         style={{ background: `conic-gradient(${stops.join(", ")})` }}
       >
-        <div className="absolute inset-[26%] flex flex-col items-center justify-center rounded-full bg-white">
+        <div className="absolute inset-[26%] flex flex-col items-center justify-center rounded-lg bg-white">
           <p className="font-headline-lg text-headline-lg text-primary leading-none">{stats.presentPercent}%</p>
           <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">attendance</p>
         </div>

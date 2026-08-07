@@ -3,6 +3,7 @@ import {
   computeAttendanceStats,
   computeDayStats,
   dateKey,
+  dayKeyOf,
   lastNDays,
   monthBuckets,
 } from "./attendance-stats"
@@ -24,6 +25,42 @@ describe("computeDayStats", () => {
   it("treats date-only strings as calendar dates regardless of timezone", () => {
     const byDay = computeDayStats([record("2026-01-01", "PRESENT")])
     expect([...byDay.keys()]).toEqual(["2026-01-01"])
+  })
+
+  it("handles full ISO timestamps as returned by the API (Prisma @db.Date)", () => {
+    const byDay = computeDayStats([record("2026-06-10T00:00:00.000Z", "PRESENT")])
+    expect([...byDay.keys()]).toEqual(["2026-06-10"])
+    expect(byDay.get("2026-06-10")).toEqual({ present: 1, absent: 0, late: 0, excused: 0, total: 1 })
+  })
+
+  it("groups mixed date-only and ISO timestamp records onto the same calendar day", () => {
+    const byDay = computeDayStats([
+      record("2026-03-02", "PRESENT"),
+      record("2026-03-02T00:00:00.000Z", "LATE"),
+    ])
+    expect(byDay.get("2026-03-02")).toEqual({ present: 1, absent: 0, late: 1, excused: 0, total: 2 })
+  })
+
+  it("never produces NaN-NaN-NaN keys", () => {
+    const byDay = computeDayStats([
+      record("2026-06-10T00:00:00.000Z", "PRESENT"),
+      record("2026-06-11T00:00:00.000Z", "ABSENT"),
+    ])
+    for (const key of byDay.keys()) {
+      expect(key).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    }
+  })
+
+  it("skips records with unparseable dates", () => {
+    const byDay = computeDayStats([record("not-a-date", "PRESENT")])
+    expect(byDay.size).toBe(0)
+  })
+
+  it("dayKeyOf returns the leading YYYY-MM-DD for date-only and ISO strings, null otherwise", () => {
+    expect(dayKeyOf("2026-06-10")).toBe("2026-06-10")
+    expect(dayKeyOf("2026-06-10T00:00:00.000Z")).toBe("2026-06-10")
+    expect(dayKeyOf("garbage")).toBeNull()
+    expect(dayKeyOf("")).toBeNull()
   })
 })
 
@@ -85,6 +122,29 @@ describe("computeAttendanceStats", () => {
     expect(stats.totalDays).toBe(2)
     expect(stats.presentDays).toBe(1)
     expect(stats.excusedDays).toBe(1)
+  })
+
+  it("aggregates API-shaped ISO timestamp records across 15 days with a sane percentage", () => {
+    const dates = Array.from({ length: 15 }, (_, i) => {
+      const day = String(11 + i).padStart(2, "0")
+      return `2026-05-${day}T00:00:00.000Z`
+    })
+    const statuses = [
+      ...Array(12).fill("PRESENT"),
+      "LATE",
+      "EXCUSED",
+      "ABSENT",
+    ] as const
+    const stats = computeAttendanceStats(
+      dates.map((date, i) => ({ date, status: statuses[i] })),
+    )
+    expect(stats.totalDays).toBe(15)
+    expect(stats.presentDays).toBe(12)
+    expect(stats.lateDays).toBe(1)
+    expect(stats.excusedDays).toBe(1)
+    expect(stats.absentDays).toBe(1)
+    expect(stats.presentPercent).toBe(87)
+    expect(stats.presentPercent).toBeLessThanOrEqual(100)
   })
 })
 
