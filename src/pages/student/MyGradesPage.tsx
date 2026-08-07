@@ -44,7 +44,7 @@ export function MyGradesPage() {
             <Link
               key={cls.id}
               to={`/student/classes/${cls.id}`}
-              className="block rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm hover:border-primary-container/30 hover:shadow-md transition-all"
+              className="block rounded-lg bg-white p-md border border-border hover:border-primary-container/30 hover:shadow-md transition-all"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">

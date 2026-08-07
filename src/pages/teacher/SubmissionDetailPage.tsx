@@ -6,6 +6,7 @@ import { useSubmissionDetail } from "@/hooks/use-submissions"
 import { StatusBadge } from "@/components/ui/StatusBadge"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { RichText } from "@/components/shared/RichText"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import type { SubmissionStatus } from "@/components/ui/StatusBadge"
@@ -82,7 +83,7 @@ export function SubmissionDetailPage() {
 
       {/* Status-specific banner */}
       {(sub.status === "SUBMITTED" || sub.status === "GRADING_IN_PROGRESS") && (
-        <div className="bg-primary-fixed/20 rounded-3xl p-xl mb-xl border border-primary-fixed/30 flex items-center gap-md">
+        <div className="bg-primary-fixed/20 rounded-lg p-xl mb-xl border border-primary-fixed/30 flex items-center gap-md">
           <span className="material-symbols-outlined text-[32px] text-primary">hourglass_top</span>
           <div>
             <h2 className="font-headline-md text-headline-md text-primary mb-xs">Grading in Progress</h2>
@@ -96,7 +97,7 @@ export function SubmissionDetailPage() {
       )}
 
       {sub.status === "REVIEW_READY" && (
-        <div className="bg-secondary-fixed/20 rounded-3xl p-xl mb-xl border border-secondary-fixed/30 flex items-center gap-md">
+        <div className="bg-secondary-fixed/20 rounded-lg p-xl mb-xl border border-secondary-fixed/30 flex items-center gap-md">
           <span className="material-symbols-outlined text-[32px] text-secondary">rate_review</span>
           <div>
             <h2 className="font-headline-md text-headline-md text-secondary mb-xs">Ready for Review</h2>
@@ -106,7 +107,7 @@ export function SubmissionDetailPage() {
       )}
 
       {sub.status === "CONFIRMED" && (
-        <div className="bg-primary-container/20 rounded-3xl p-xl mb-xl border border-primary-container/30 flex items-center gap-md">
+        <div className="bg-primary-container/20 rounded-lg p-xl mb-xl border border-primary-container/30 flex items-center gap-md">
           <span className="material-symbols-outlined text-[32px] text-primary">check_circle</span>
           <div>
             <h2 className="font-headline-md text-headline-md text-primary mb-xs">Confirmed</h2>
@@ -118,13 +119,13 @@ export function SubmissionDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-xl">
         {/* Left panel — Student & Content */}
         <div className="lg:col-span-3 space-y-md">
-          <div className="bg-white rounded-[32px] p-xl shadow-sm border border-outline-variant/10">
+          <div className="bg-surface-container-lowest rounded-lg p-xl border border-outline-variant">
             <div className="flex items-center gap-md mb-lg">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-white font-bold font-label-md">{(sub as any).student?.name?.[0] ?? "S"}</div>
+              <div className="w-12 h-12 rounded-lg bg-primary-container flex items-center justify-center text-white font-bold font-label-md">{(sub as any).student?.name?.[0] ?? "S"}</div>
               <div>
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <h3 className="font-headline-md text-headline-md text-primary">{(sub as any).student?.name ?? "Student"}</h3>
+                <h3 className="font-headline-md text-headline-md text-on-surface">{(sub as any).student?.name ?? "Student"}</h3>
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <p className="font-label-sm text-label-sm text-on-surface-variant">{(sub as any).student?.email ?? ""}</p>
               </div>
@@ -134,7 +135,7 @@ export function SubmissionDetailPage() {
             </div>
 
             {sub.assignment && (
-              <div className="bg-surface-container-low rounded-2xl p-md mb-lg">
+              <div className="bg-surface-container-low rounded-lg p-md mb-lg">
                 <p className="font-label-sm text-label-sm text-on-surface-variant mb-xs">Assignment</p>
                 <p className="font-label-md text-label-md text-on-surface">{sub.assignment.title}</p>
                 <p className="font-label-sm text-label-sm text-on-surface-variant">
@@ -147,11 +148,11 @@ export function SubmissionDetailPage() {
             {sub.chunks && sub.chunks.length > 0 ? (
               <div className="space-y-sm">
                 {sub.chunks.map((chunk, i) => (
-                  <div key={chunk.id} className="bg-surface-container-low rounded-2xl p-md border border-outline-variant/10">
+                  <div key={chunk.id} className="bg-surface-container-low rounded-lg p-md border border-outline-variant">
                     {sub.chunks && sub.chunks.length > 1 && (
                       <p className="font-label-sm text-label-sm text-primary mb-xs">Part {i + 1}</p>
                     )}
-                    <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap">{chunk.content}</p>
+                    <RichText text={chunk.content} />
                   </div>
                 ))}
               </div>
@@ -163,8 +164,8 @@ export function SubmissionDetailPage() {
 
         {/* Right panel — Scores */}
         <div className="lg:col-span-2 space-y-md">
-          <div className="bg-white rounded-[32px] p-xl shadow-sm border border-outline-variant/10">
-            <h3 className="font-headline-md text-headline-md text-primary mb-lg">Scores</h3>
+          <div className="bg-surface-container-lowest rounded-lg p-xl border border-outline-variant">
+            <h3 className="font-headline-md text-headline-md text-on-surface mb-lg">Scores</h3>
 
             {(sub.status === "SUBMITTED" || sub.status === "GRADING_IN_PROGRESS") && (
               <div className="flex flex-col items-center justify-center py-xl text-center">
@@ -184,7 +185,7 @@ export function SubmissionDetailPage() {
             {(sub.status === "REVIEW_READY" || sub.status === "CONFIRMED") && mergedScores.length > 0 && (
               <div className="space-y-md">
                 {mergedScores.map((score) => (
-                  <div key={score.id} className="bg-surface-container-low rounded-2xl p-md border border-outline-variant/10 space-y-sm">
+                  <div key={score.id} className="bg-surface-container-low rounded-lg p-md border border-outline-variant space-y-sm">
                     <div className="flex items-start justify-between gap-sm">
                       <div className="flex-1 min-w-0">
                         <p className="font-label-md text-label-md text-on-surface">{score.criterion?.description ?? "Criterion"}</p>
@@ -194,7 +195,7 @@ export function SubmissionDetailPage() {
                     </div>
 
                     {score.aiFeedback && (
-                      <div className="bg-primary-fixed/10 rounded-xl p-sm">
+                      <div className="bg-primary-fixed/10 rounded-lg p-sm">
                         <p className="font-label-sm text-label-sm text-primary mb-xs">AI Feedback</p>
                         <p className="font-body-sm text-body-sm text-on-surface-variant">{score.aiFeedback}</p>
                       </div>
@@ -202,13 +203,13 @@ export function SubmissionDetailPage() {
 
                     {isReadOnly ? (
                       score.teacherNotes && (
-                        <div className="bg-surface-container-high rounded-xl p-sm">
+                        <div className="bg-surface-container-high rounded-lg p-sm">
                           <p className="font-label-sm text-label-sm text-primary mb-xs">Teacher Notes</p>
                           <p className="font-body-sm text-body-sm text-on-surface-variant">{score.teacherNotes}</p>
                         </div>
                       )
                     ) : (
-                      <div className="space-y-sm pt-sm border-t border-outline-variant/10">
+                      <div className="space-y-sm pt-sm border-t border-outline-variant">
                         <div>
                           <label className="font-label-sm text-label-sm text-on-surface-variant mb-xs block">Points Awarded</label>
                           <input
@@ -217,7 +218,7 @@ export function SubmissionDetailPage() {
                             max={score.criterion?.maxPoints ?? 0}
                             value={score.pointsAwarded}
                             onChange={(e) => handlePointsChange(score.id, Number(e.target.value))}
-                            className="w-full bg-white border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface form-input-focus"
+                            className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface form-input-focus"
                           />
                         </div>
                         <div>
@@ -227,7 +228,7 @@ export function SubmissionDetailPage() {
                             value={score.teacherNotes}
                             onChange={(e) => handleNotesChange(score.id, e.target.value)}
                             placeholder="Add notes for the student..."
-                            className="w-full bg-white border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface form-input-focus resize-none"
+                            className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface form-input-focus resize-none"
                           />
                         </div>
                       </div>
@@ -236,7 +237,7 @@ export function SubmissionDetailPage() {
                 ))}
 
                 {/* Total */}
-                <div className="bg-primary-container/10 rounded-2xl p-md border border-primary-container/20">
+                <div className="bg-primary-container/10 rounded-lg p-md border border-primary-container/20">
                   <div className="flex items-center justify-between">
                     <span className="font-label-md text-label-md text-primary font-bold">Total</span>
                     <span className="font-headline-md text-headline-md text-primary">
@@ -249,10 +250,10 @@ export function SubmissionDetailPage() {
                   <Button
                     onClick={() => confirmAll.mutate()}
                     disabled={confirmAll.isPending}
-                    className="w-full flex items-center justify-center gap-xs px-md py-sm h-auto rounded-full bg-primary-container text-white font-label-md text-label-md shadow-lg nudge-hover active:scale-95 disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-xs px-md py-sm h-auto rounded-lg bg-primary text-primary-foreground font-label-md text-label-md active:scale-95 disabled:opacity-50"
                   >
                     {confirmAll.isPending ? (
-                      <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Confirming...</>
+                      <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-lg animate-spin" />Confirming...</>
                     ) : (
                       <><span className="material-symbols-outlined text-[18px]">check_circle</span>Confirm All Grades</>
                     )}

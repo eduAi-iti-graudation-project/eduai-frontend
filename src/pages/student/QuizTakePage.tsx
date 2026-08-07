@@ -168,16 +168,16 @@ export function QuizTakePage() {
 
   const timerColor =
     remainingMs != null && remainingMs <= 30_000
-      ? "bg-error text-white animate-pulse"
+      ? "bg-primary text-white animate-pulse"
       : remainingMs != null && remainingMs <= 60_000
-        ? "bg-amber-100 text-amber-800"
+        ? "bg-primary text-primary-foreground"
         : "bg-surface-container text-on-surface-variant"
 
   if (phase === "expired") {
     return (
       <div className="flex-1 p-xl max-w-2xl mx-auto w-full flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 rounded-2xl bg-error/10 flex items-center justify-center mb-4">
-          <span className="material-symbols-outlined text-error text-3xl">timer_off</span>
+        <div className="w-16 h-16 rounded-lg bg-accent flex items-center justify-center mb-4">
+          <span className="material-symbols-outlined text-accent-foreground text-3xl">timer_off</span>
         </div>
         <h1 className="font-headline-lg text-headline-lg text-on-surface mb-2">Time&apos;s up</h1>
         <p className="font-body-md text-body-md text-on-surface-variant mb-lg">
@@ -186,7 +186,7 @@ export function QuizTakePage() {
         </p>
         <Link
           to="/student/quizzes"
-          className="bg-primary text-white px-lg py-sm rounded-full font-label-md hover:opacity-90 transition-all"
+          className="bg-primary text-white px-lg py-sm rounded-lg font-label-md hover:opacity-90 transition-all"
         >
           Back to quizzes
         </Link>
@@ -206,7 +206,7 @@ export function QuizTakePage() {
     if (quiz.isError) {
       return (
         <div className="flex-1 p-xl max-w-2xl mx-auto w-full">
-          <div className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-xl text-center">
+          <div className="rounded-lg bg-white border border-border p-xl text-center">
             <span className="material-symbols-outlined text-[48px] text-error mb-md block">error_outline</span>
             <h1 className="font-headline-lg text-headline-lg text-on-surface mb-sm">Couldn&apos;t load this quiz</h1>
             <p className="font-body-md text-body-md text-on-surface-variant mb-md">
@@ -216,13 +216,13 @@ export function QuizTakePage() {
               <Button
                 type="button"
                 onClick={() => quiz.refetch()}
-                className="px-lg py-sm bg-primary text-white font-label-md text-label-md rounded-full hover:opacity-90 transition-all h-auto"
+                className="px-lg py-sm bg-primary text-white font-label-md text-label-md rounded-lg hover:opacity-90 transition-all h-auto"
               >
                 Try again
               </Button>
               <Link
                 to="/student/quizzes"
-                className="px-lg py-sm border-2 border-outline-variant text-on-surface font-label-md text-label-md rounded-full hover:bg-surface-container-low transition-colors"
+                className="px-lg py-sm border border-border text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors"
               >
                 Back to quizzes
               </Link>
@@ -234,7 +234,7 @@ export function QuizTakePage() {
     if (!quiz.data) {
       return (
         <div className="flex-1 p-xl max-w-2xl mx-auto w-full">
-          <div className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-xl text-center">
+          <div className="rounded-lg bg-white border border-border p-xl text-center">
             <span className="material-symbols-outlined text-[48px] text-on-surface-variant/40 mb-md block">quiz</span>
             <h1 className="font-headline-lg text-headline-lg text-on-surface mb-sm">Quiz not found</h1>
             <p className="font-body-md text-body-md text-on-surface-variant mb-lg">
@@ -242,7 +242,7 @@ export function QuizTakePage() {
             </p>
             <Link
               to="/student/quizzes"
-              className="bg-primary text-white px-lg py-sm rounded-full font-label-md hover:opacity-90 transition-all"
+              className="bg-primary text-white px-lg py-sm rounded-lg font-label-md hover:opacity-90 transition-all"
             >
               Back to quizzes
             </Link>
@@ -252,14 +252,14 @@ export function QuizTakePage() {
     }
     return (
       <div className="flex-1 p-xl max-w-2xl mx-auto w-full">
-        <div className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-xl">
+        <div className="rounded-lg bg-white border border-border p-xl">
           <h1 className="font-headline-xl text-headline-xl text-primary mb-xs">{quiz.data?.title ?? "Quiz"}</h1>
           {quiz.data?.description && (
             <p className="font-body-md text-body-md text-on-surface-variant mb-md">{quiz.data.description}</p>
           )}
 
           {questions.length === 0 ? (
-            <div className="rounded-2xl bg-surface-container-low p-md mb-lg">
+            <div className="rounded-lg bg-surface-container-low p-md mb-lg">
               <div className="flex items-start gap-3">
                 <span className="material-symbols-outlined text-[20px] text-on-surface-variant shrink-0">info</span>
                 <p className="font-body-md text-body-md text-on-surface">
@@ -269,7 +269,7 @@ export function QuizTakePage() {
             </div>
           ) : (
             <>
-              <div className="rounded-2xl bg-surface-container-low p-md mb-lg space-y-3">
+              <div className="rounded-lg bg-surface-container-low p-md mb-lg space-y-3">
             <div className="flex items-start gap-3">
               <span className="material-symbols-outlined text-[20px] text-primary shrink-0">quiz</span>
               <p className="font-body-md text-body-md text-on-surface">
@@ -312,7 +312,7 @@ export function QuizTakePage() {
           </div>
 
           {submitError && (
-            <div className="rounded-2xl bg-primary-fixed/20 border border-primary/20 p-md mb-lg flex items-start gap-3">
+            <div className="rounded-lg bg-primary-fixed/20 border border-primary/20 p-md mb-lg flex items-start gap-3">
               <span className="material-symbols-outlined text-[20px] text-primary shrink-0">info</span>
               <p className="font-body-md text-body-md text-on-surface">{submitError}</p>
             </div>
@@ -323,7 +323,7 @@ export function QuizTakePage() {
           )}
 
           {deadlinePassed && (
-            <div className="rounded-2xl bg-error/10 border border-error/20 p-md mb-md text-center">
+            <div className="rounded-lg bg-error/10 border border-error/20 p-md mb-md text-center">
               <p className="font-label-md text-label-md text-error">
                 This quiz closed — you can no longer start it.
               </p>
@@ -334,7 +334,7 @@ export function QuizTakePage() {
             type="button"
             onClick={() => setStartOpen(true)}
             disabled={!quiz.data || deadlinePassed}
-            className="w-full bg-primary text-white py-md rounded-full font-label-lg text-label-lg disabled:opacity-50 nudge-hover h-auto"
+            className="w-full bg-primary text-white py-md rounded-lg font-label-lg text-label-lg disabled:opacity-50 nudge-hover h-auto"
           >
             Start quiz
           </Button>
@@ -367,7 +367,7 @@ export function QuizTakePage() {
 
   return (
     <div className="flex-1 flex flex-col max-w-2xl w-full mx-auto">
-      <div className="sticky top-0 z-20 bg-surface-container-lowest border-b border-outline-variant/20 px-md py-3 flex items-center justify-between">
+      <div className="sticky top-0 z-20 bg-surface-container-lowest border-b border-border px-md py-3 flex items-center justify-between">
         <div className="min-w-0">
           <h1 className="font-headline-md text-headline-md text-primary truncate">{quiz.data.title}</h1>
           <p className="font-label-sm text-label-sm text-on-surface-variant">
@@ -375,7 +375,7 @@ export function QuizTakePage() {
           </p>
         </div>
         {remainingMs != null && (
-          <span className={`font-label-md text-label-md px-3 py-1.5 rounded-full inline-flex items-center gap-1 ${timerColor}`}>
+          <span className={`font-label-md text-label-md px-3 py-1.5 rounded-lg inline-flex items-center gap-1 ${timerColor}`}>
             <span className="material-symbols-outlined text-[16px]">timer</span>
             {formatTime(remainingMs)}
           </span>
@@ -386,11 +386,11 @@ export function QuizTakePage() {
         {questions.map((question, index) => {
           const value = answers[question.id] ?? ""
           return (
-            <section key={question.id} className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-md">
+            <section key={question.id} className="rounded-lg bg-white border border-border p-md">
               <div className="flex items-start justify-between gap-3 mb-sm">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-label-sm text-label-sm text-on-surface-variant shrink-0">Q{index + 1}</span>
-                  <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant shrink-0">
+                  <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-lg bg-surface-container-high text-on-surface-variant shrink-0">
                     {TYPE_HINTS[question.type]}
                   </span>
                 </div>
@@ -408,7 +408,7 @@ export function QuizTakePage() {
                   {(question.options ?? []).map((option) => (
                     <label
                       key={option.text}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border cursor-pointer transition-all ${
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${
                         value === option.text
                           ? "border-primary bg-primary-fixed/20"
                           : "border-outline-variant bg-surface hover:border-primary/40"
@@ -433,9 +433,9 @@ export function QuizTakePage() {
                       type="button"
                       variant="outline"
                       onClick={() => setAnswer(question.id, label)}
-                      className={`py-md rounded-xl border font-label-lg text-label-lg transition-all h-auto hover:bg-transparent ${
+                      className={`py-md rounded-lg border font-label-lg text-label-lg transition-all h-auto hover:bg-transparent ${
                         value === label
-                          ? "border-primary bg-primary-fixed/20 text-primary"
+                          ? "border-primary bg-primary text-primary-foreground"
                           : "border-outline-variant bg-surface text-on-surface-variant hover:border-primary/40"
                       }`}
                     >
@@ -451,7 +451,7 @@ export function QuizTakePage() {
                   onChange={(e) => setAnswer(question.id, e.target.value)}
                   rows={3}
                   placeholder="Write your answer…"
-                  className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface resize-none focus-visible:ring-0"
+                  className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface resize-none focus-visible:ring-0"
                 />
               )}
 
@@ -462,7 +462,7 @@ export function QuizTakePage() {
                     onChange={(e) => setAnswer(question.id, e.target.value)}
                     rows={6}
                     placeholder="Write your full response…"
-                    className="w-full form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface resize-none focus-visible:ring-0"
+                    className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface resize-none focus-visible:ring-0"
                   />
                   <p className="font-label-sm text-label-sm text-on-surface-variant text-right">{value.length} characters</p>
                 </div>
@@ -472,7 +472,7 @@ export function QuizTakePage() {
         })}
       </div>
 
-      <div className="sticky bottom-0 bg-surface-container-lowest border-t border-outline-variant/20 px-md py-3 flex flex-col items-end gap-2">
+      <div className="sticky bottom-0 bg-surface-container-lowest border-t border-border px-md py-3 flex flex-col items-end gap-2">
         {submitError && (
           <p className="font-label-md text-label-md text-error w-full text-center">{submitError}</p>
         )}
@@ -483,7 +483,7 @@ export function QuizTakePage() {
             else runSubmit()
           }}
           disabled={isSubmitting || questions.length === 0}
-          className="bg-primary text-white px-lg py-sm rounded-full font-label-md disabled:opacity-50 nudge-hover h-auto"
+          className="bg-primary text-white px-lg py-sm rounded-lg font-label-md disabled:opacity-50 nudge-hover h-auto"
         >
           {isSubmitting ? "Submitting…" : "Submit quiz"}
         </Button>
@@ -491,7 +491,7 @@ export function QuizTakePage() {
 
       {(isSubmitting || blocker.state === "blocked") && (
         <Dialog open>
-          <DialogContent className="rounded-[32px] max-w-2xl bg-white p-xl shadow-xl text-center [&>button.absolute]:hidden">
+          <DialogContent className="rounded-lg max-w-2xl bg-white p-xl shadow-xl text-center [&>button.absolute]:hidden">
             {blocker.state === "blocked" ? (
               <>
                 <span className="material-symbols-outlined text-[32px] text-primary block mb-sm">logout</span>
@@ -504,14 +504,14 @@ export function QuizTakePage() {
                     type="button"
                     variant="secondary"
                     onClick={() => blocker.reset?.()}
-                    className="flex-1 py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full hover:bg-surface-container-high h-auto"
+                    className="flex-1 py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-lg hover:bg-surface-container-high h-auto"
                   >
                     Stay
                   </Button>
                   <Button
                     type="button"
                     onClick={() => blocker.proceed?.()}
-                    className="flex-1 py-sm bg-primary text-white font-label-md text-label-md rounded-full h-auto"
+                    className="flex-1 py-sm bg-primary text-white font-label-md text-label-md rounded-lg h-auto"
                   >
                     Leave
                   </Button>

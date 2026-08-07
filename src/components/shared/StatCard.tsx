@@ -11,10 +11,17 @@ interface StatCardProps {
 
 export function StatCard({ icon, label, value, color, hint, className }: StatCardProps) {
   return (
-    <div className={cn("rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm", className)}>
-      <span className={cn("material-symbols-outlined text-[22px] mb-2 block", color ?? "text-primary")}>{icon}</span>
+    <div className={cn("rounded-lg bg-card p-4 border border-border", className)}>
+      <div
+        className={cn(
+          "w-9 h-9 rounded-md flex items-center justify-center bg-accent mb-3",
+          color ?? "text-primary",
+        )}
+      >
+        <span className="material-symbols-outlined text-[20px]">{icon}</span>
+      </div>
       <p className="font-label-sm text-label-sm text-on-surface-variant">{label}</p>
-      <p className="font-headline-lg text-headline-lg text-on-surface mt-1">{value}</p>
+      <p className="font-headline-md text-headline-md text-on-surface mt-0.5">{value}</p>
       {hint ? <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">{hint}</p> : null}
     </div>
   )

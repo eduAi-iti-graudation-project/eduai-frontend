@@ -22,9 +22,9 @@ const typeIcons: Record<string, string> = {
 }
 
 const statusStyles: Record<string, string> = {
-  NEW: "bg-red-100 text-red-800 border-0",
-  ACKNOWLEDGED: "bg-yellow-100 text-yellow-800 border-0",
-  RESOLVED: "bg-green-100 text-green-800 border-0",
+  NEW: "bg-primary text-primary-foreground border-0",
+  ACKNOWLEDGED: "bg-surface-container-high text-on-surface border-0",
+  RESOLVED: "bg-surface-container-high text-on-surface-variant border-0",
 }
 
 export function AlertCard({
@@ -40,14 +40,14 @@ export function AlertCard({
   return (
     <Card
       className={cn(
-        "tactile-card rounded-[24px] bg-surface-container-lowest p-4 flex items-start gap-4 border-outline-variant/10 shadow-none",
+        "rounded-lg bg-surface-container-lowest p-4 flex items-start gap-4 border border-outline-variant shadow-none",
         className,
       )}
     >
       <div
         className={cn(
-          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-          status === "NEW" ? "bg-red-100 text-red-600" : "bg-surface-container-low text-on-surface-variant",
+          "w-10 h-10 rounded-md flex items-center justify-center shrink-0",
+          status === "NEW" ? "bg-primary text-primary-foreground" : "bg-surface-container-low text-on-surface-variant",
         )}
       >
         <span className="material-symbols-outlined text-[20px]">
@@ -60,7 +60,7 @@ export function AlertCard({
           <Badge
             variant="outline"
             className={cn(
-              "font-label-sm text-label-sm px-2 py-0.5 rounded-full",
+              "font-label-sm text-label-sm px-2 py-0.5 rounded-md",
               statusStyles[status] ?? "bg-gray-100 text-gray-800 border-0",
             )}
           >
@@ -84,7 +84,7 @@ export function AlertCard({
               <button
                 type="button"
                 onClick={onResolve}
-                className="px-3 py-1.5 bg-primary-container text-white font-label-sm text-label-sm rounded-full hover:opacity-90 active:scale-95 transition-all"
+                className="px-3 py-1.5 bg-primary text-primary-foreground font-label-sm text-label-sm rounded-md hover:opacity-90 active:scale-95 transition-all"
               >
                 Resolve
               </button>
@@ -93,7 +93,7 @@ export function AlertCard({
               <button
                 type="button"
                 onClick={onDismiss}
-                className="px-3 py-1.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full hover:bg-surface-container-high transition-all"
+                className="px-3 py-1.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-md hover:bg-surface-container-high transition-all"
               >
                 Dismiss
               </button>

@@ -9,7 +9,7 @@ export function TeacherFeedbackSection({ content }: TeacherFeedbackSectionProps)
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm overflow-hidden">
+    <div className="rounded-lg bg-white border border-border overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-md hover:bg-surface-container transition-colors text-left"
@@ -28,7 +28,7 @@ export function TeacherFeedbackSection({ content }: TeacherFeedbackSectionProps)
       {open && (
         <div className="px-md pb-md space-y-4">
           {content.feedback && (
-            <div className="bg-surface-container-low rounded-xl p-3">
+            <div className="bg-surface-container-low rounded-lg p-3">
               <p className="font-body-md text-body-md text-on-surface">{content.feedback}</p>
             </div>
           )}

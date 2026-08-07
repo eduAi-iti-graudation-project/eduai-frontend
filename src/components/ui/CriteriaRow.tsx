@@ -38,7 +38,7 @@ export function CriteriaRow({
   }
 
   return (
-    <div className={cn("p-md rounded-xl border-2 border-outline-variant/10 space-y-sm", className)}>
+    <div className={cn("p-md rounded-lg border border-border/10 space-y-sm", className)}>
       <div className="flex items-start justify-between gap-2">
         <p className="font-label-md text-label-md text-on-surface flex-1">{description}</p>
         <span className="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">
@@ -66,13 +66,13 @@ export function CriteriaRow({
             value={teacherScore}
             onChange={(e) => handleScoreChange(e.target.value)}
             placeholder={aiScore !== null ? String(aiScore) : "—"}
-            className="w-20 h-9 px-2 bg-surface border-2 border-outline-variant/30 rounded-xl text-center font-body-md text-body-md text-on-surface focus:border-primary focus:ring-0 transition-all"
+            className="w-20 h-9 px-2 bg-surface border border-border rounded-lg text-center font-body-md text-body-md text-on-surface focus:border-primary focus:ring-0 transition-all"
           />
           {onConfirm && teacherScore !== "" && Number(teacherScore) >= 0 && (
             <button
               type="button"
               onClick={onConfirm}
-              className="px-3 py-1.5 bg-primary-container text-white font-label-sm text-label-sm rounded-full hover:opacity-90 active:scale-95 transition-all"
+              className="px-3 py-1.5 bg-primary text-primary-foreground font-label-sm text-label-sm rounded-lg hover:opacity-90 active:scale-95 transition-all"
             >
               Confirm
             </button>
@@ -81,7 +81,7 @@ export function CriteriaRow({
       )}
 
       {confirmed && (
-        <div className="flex items-center gap-1 text-primary-container">
+        <div className="flex items-center gap-1 text-primary">
           <span className="material-symbols-outlined text-[18px]">check_circle</span>
           <span className="font-label-sm text-label-sm">Confirmed</span>
         </div>

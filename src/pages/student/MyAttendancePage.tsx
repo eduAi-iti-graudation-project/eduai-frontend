@@ -19,8 +19,8 @@ import { LoadingState } from "@/components/shared/LoadingState"
 
 const statusStyles: Record<string, string> = {
   PRESENT: "bg-primary-fixed/40 text-primary",
-  ABSENT: "bg-error-container text-error",
-  LATE: "bg-tertiary-fixed text-on-tertiary-fixed",
+  ABSENT: "bg-error-container text-on-error-container",
+  LATE: "bg-surface-container-high text-on-surface",
   EXCUSED: "bg-surface-container-high text-on-surface-variant",
 }
 
@@ -43,10 +43,10 @@ function StatCard({
 }) {
   return (
     <div
-      className="bg-white rounded-[28px] border border-outline-variant/10 shadow-sm p-md flex items-center gap-md animate-[rise-in_500ms_ease-out_both]"
+      className="bg-white rounded-[28px] border border-border p-md flex items-center gap-md animate-[rise-in_500ms_ease-out_both]"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center ${iconBg}`}>
+      <div className={`w-12 h-12 shrink-0 rounded-lg flex items-center justify-center ${iconBg}`}>
         <span className={`material-symbols-outlined text-[24px] ${iconColor}`}>{icon}</span>
       </div>
       <div className="min-w-0">
@@ -60,7 +60,7 @@ function StatCard({
 
 function Card({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   return (
-    <div className="bg-white rounded-[32px] border border-outline-variant/10 shadow-sm p-xl">
+    <div className="bg-white rounded-lg border border-border p-xl">
       <div className="mb-lg">
         <h2 className="font-headline-md text-headline-md text-on-surface">{title}</h2>
         {subtitle && <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">{subtitle}</p>}
@@ -109,7 +109,7 @@ export function MyAttendancePage() {
           </p>
         </div>
         {stats.currentStreak > 1 && (
-          <div className="inline-flex items-center gap-2 bg-secondary-container/10 text-secondary px-md py-sm rounded-full border border-secondary/20 animate-[rise-in_500ms_ease-out_both]">
+          <div className="inline-flex items-center gap-2 bg-secondary-container/10 text-secondary px-md py-sm rounded-lg border border-secondary/20 animate-[rise-in_500ms_ease-out_both]">
             <span className="material-symbols-outlined text-[18px]">local_fire_department</span>
             <span className="font-label-md text-label-md">
               {stats.currentStreak}-day streak — keep it going!
@@ -147,8 +147,8 @@ export function MyAttendancePage() {
         />
         <StatCard
           icon="emoji_events"
-          iconBg="bg-tertiary-fixed/50"
-          iconColor="text-tertiary"
+          iconBg="bg-accent"
+          iconColor="text-accent-foreground"
           value={String(stats.bestStreak)}
           label="Best streak"
           sub="in days"
@@ -158,7 +158,7 @@ export function MyAttendancePage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-lg">
         <div className="xl:col-span-2 animate-[rise-in_550ms_ease-out_both]" style={{ animationDelay: "120ms" }}>
-          <Card title="Activity" subtitle="Your last 20 weeks, one square per day">
+          <Card title="Activity" subtitle="Your last 26 weeks, one square per day">
             <AttendanceHeatmap records={records ?? []} />
           </Card>
         </div>
@@ -180,7 +180,7 @@ export function MyAttendancePage() {
           <div className="-mx-xl -mb-xl overflow-hidden rounded-b-[32px]">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-outline-variant/10 bg-surface-container-low hover:bg-surface-container-low">
+                <TableRow className="border-b border-border bg-surface-container-low hover:bg-surface-container-low">
                   <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant px-xl py-3 h-auto">Date</TableHead>
                   <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-xl py-3 h-auto">Status</TableHead>
                 </TableRow>
@@ -196,7 +196,7 @@ export function MyAttendancePage() {
                   records.map((r) => (
                     <TableRow
                       key={r.id}
-                      className="border-b border-outline-variant/10 hover:bg-surface-container transition-colors"
+                      className="border-b border-border hover:bg-surface-container transition-colors"
                     >
                       <TableCell className="px-xl py-3 font-body-md text-body-md text-on-surface">
                         {new Date(r.date).toLocaleDateString(undefined, {
@@ -209,7 +209,7 @@ export function MyAttendancePage() {
                       <TableCell className="px-xl py-3 text-right">
                         <Badge
                           variant="outline"
-                          className={`font-label-sm text-label-sm px-sm py-0.5 rounded-full border-0 ${
+                          className={`font-label-sm text-label-sm px-sm py-0.5 rounded-lg border-0 ${
                             statusStyles[r.status] ?? "bg-surface-container-high text-on-surface-variant"
                           }`}
                         >

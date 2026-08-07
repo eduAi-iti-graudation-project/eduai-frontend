@@ -26,15 +26,15 @@ export function NotificationDetailDialog({ notification, onClose }: Notification
       if (!next) onClose()
     }}>
       <DialogContent
-        className="rounded-[32px] max-w-2xl bg-white max-h-[90vh] overflow-y-auto"
+        className="rounded-lg max-w-2xl bg-white max-h-[90vh] overflow-y-auto"
         aria-describedby="notification-detail-body"
       >
         <DialogHeader>
           <div className="flex items-start gap-sm">
             <span
               className={cn(
-                "w-11 h-11 rounded-2xl flex items-center justify-center shrink-0",
-                notification.readAt ? "bg-surface-container-low text-on-surface-variant" : "bg-primary-fixed/20 text-primary",
+                "w-11 h-11 rounded-lg flex items-center justify-center shrink-0",
+                notification.readAt ? "bg-surface-container-low text-on-surface-variant" : "bg-primary text-primary-foreground",
               )}
             >
               <span className="material-symbols-outlined text-[22px]">
@@ -63,7 +63,7 @@ export function NotificationDetailDialog({ notification, onClose }: Notification
             </p>
           )}
 
-          <div className="rounded-2xl bg-surface-container-low p-md space-y-3">
+          <div className="rounded-lg bg-surface-container-low p-md space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-label-sm text-label-sm text-on-surface-variant">Type</span>
               <span className="font-label-md text-label-md text-on-surface capitalize">{prettyType(notification.type)}</span>

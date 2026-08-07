@@ -6,6 +6,7 @@ import * as api from "@/lib/api"
 import { useHomeworkHelpChat } from "@/hooks/use-homework-help"
 import { FeedbackButtons } from "@/components/student/FeedbackButtons"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { RichText } from "@/components/shared/RichText"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -74,7 +75,7 @@ export function HomeworkHelpPage() {
                 setSelectedAssignmentId("")
               }}
             >
-              <SelectTrigger className="form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[170px]">
+              <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[170px]">
                 <SelectValue placeholder="Select a class..." />
               </SelectTrigger>
               <SelectContent>
@@ -88,7 +89,7 @@ export function HomeworkHelpPage() {
               onValueChange={setSelectedAssignmentId}
               disabled={!selectedClassId}
             >
-              <SelectTrigger className="form-input-focus rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[200px] disabled:opacity-50">
+              <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[200px] disabled:opacity-50">
                 <SelectValue
                   placeholder={
                     selectedClassId
@@ -115,7 +116,7 @@ export function HomeworkHelpPage() {
         {messages.length === 0 && (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <span className="material-symbols-outlined text-primary text-3xl">auto_awesome</span>
               </div>
               <h2 className="font-headline-md text-headline-md text-primary mb-2">Stuck on homework?</h2>
@@ -131,7 +132,7 @@ export function HomeworkHelpPage() {
             if (msg.role === "user") {
               return (
                 <div key={msg.id} className="flex justify-end">
-                  <div className="max-w-[80%] rounded-[24px] px-4 py-3 bg-primary text-on-primary rounded-br-[6px]">
+                  <div className="max-w-[80%] rounded-lg px-4 py-3 bg-primary text-on-primary rounded-br-[6px]">
                     <p className="font-body-md text-body-md whitespace-pre-wrap">{msg.content}</p>
                     <p className="font-label-sm text-label-sm mt-1 text-on-primary/60">
                       {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -145,19 +146,19 @@ export function HomeworkHelpPage() {
 
             return (
               <div key={msg.id} className="flex justify-start">
-                <div className="max-w-[80%] rounded-[24px] px-4 py-3 bg-surface-container-low text-on-surface border border-outline-variant/20 rounded-bl-[6px]">
-                  <span className="inline-flex items-center gap-1.5 bg-primary-fixed/20 text-primary font-label-sm text-label-sm px-2 py-0.5 rounded-full mb-2">
+                <div className="max-w-[80%] rounded-lg px-4 py-3 bg-surface-container-low text-on-surface border border-border rounded-bl-[6px]">
+                  <span className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground font-label-sm text-label-sm px-2 py-0.5 rounded-lg mb-2">
                     <span className="material-symbols-outlined text-[14px]">{config.icon}</span>
                     {config.label}
                   </span>
-                  <p className="font-body-md text-body-md whitespace-pre-wrap">{msg.content}</p>
+                  <RichText text={msg.content} />
                   {msg.teacherNotified && (
                     <p className="mt-2 flex items-center gap-1.5 font-label-sm text-label-sm text-primary">
                       <span className="material-symbols-outlined text-[14px]">notifications_active</span>
                       Your teacher has been notified.
                     </p>
                   )}
-                  <div className="mt-3 pt-3 border-t border-outline-variant/10">
+                  <div className="mt-3 pt-3 border-t border-border">
                     <FeedbackButtons interactionId={msg.interactionId} currentFeedback={null} />
                   </div>
                   <p className="font-label-sm text-label-sm mt-2 text-on-surface-variant">
@@ -170,11 +171,11 @@ export function HomeworkHelpPage() {
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] rounded-[24px] rounded-bl-[6px] px-4 py-3 bg-surface-container-low border border-outline-variant/20">
+              <div className="max-w-[80%] rounded-lg rounded-bl-[6px] px-4 py-3 bg-surface-container-low border border-border">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
             </div>
@@ -183,7 +184,7 @@ export function HomeworkHelpPage() {
         </div>
 
         <div className="sticky bottom-0 bg-surface pt-2 pb-4">
-          <div className="flex items-end gap-2 bg-surface-container-low rounded-[24px] border border-outline-variant/20 p-2">
+          <div className="flex items-end gap-2 bg-surface-container-low rounded-lg border border-border p-2">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -198,7 +199,7 @@ export function HomeworkHelpPage() {
               onClick={handleSend}
               disabled={!input.trim() || isLoading || !selectedClassId}
               size="icon"
-              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary disabled:opacity-40 transition-opacity hover:opacity-90 hover:bg-primary"
+              className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary disabled:opacity-40 transition-opacity hover:opacity-90 hover:bg-primary"
             >
               <span className="material-symbols-outlined text-[20px]">send</span>
             </Button>

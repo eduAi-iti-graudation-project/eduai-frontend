@@ -9,7 +9,7 @@ export function TeacherAnalysisSection({ content }: TeacherAnalysisSectionProps)
   const [open, setOpen] = useState(true)
 
   return (
-    <div className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm overflow-hidden">
+    <div className="rounded-lg bg-white border border-border overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-md hover:bg-surface-container transition-colors text-left"
@@ -28,7 +28,7 @@ export function TeacherAnalysisSection({ content }: TeacherAnalysisSectionProps)
       {open && (
         <div className="px-md pb-md space-y-4">
           {content.analysis && (
-            <div className="bg-surface-container-low rounded-xl p-3">
+            <div className="bg-surface-container-low rounded-lg p-3">
               <p className="font-body-md text-body-md text-on-surface">{content.analysis}</p>
             </div>
           )}
@@ -36,13 +36,13 @@ export function TeacherAnalysisSection({ content }: TeacherAnalysisSectionProps)
           {content.skillGaps.length > 0 && (
             <div>
               <h4 className="font-label-md text-label-md text-on-surface mb-2 flex items-center gap-1">
-                <span className="material-symbols-outlined text-[16px] text-error">lightbulb</span>
+                <span className="material-symbols-outlined text-[16px] text-secondary">lightbulb</span>
                 Skill Gaps ({content.skillGaps.length})
               </h4>
               <ul className="space-y-1">
                 {content.skillGaps.map((gap, i) => (
                   <li key={i} className="flex items-start gap-2 font-body-sm text-body-sm text-on-surface-variant">
-                    <span className="text-error mt-0.5">•</span>
+                    <span className="text-secondary mt-0.5">•</span>
                     {gap}
                   </li>
                 ))}
@@ -70,13 +70,13 @@ export function TeacherAnalysisSection({ content }: TeacherAnalysisSectionProps)
           {content.resourceSuggestions.length > 0 && (
             <div>
               <h4 className="font-label-md text-label-md text-on-surface mb-2 flex items-center gap-1">
-                <span className="material-symbols-outlined text-[16px] text-tertiary">menu_book</span>
+                <span className="material-symbols-outlined text-[16px] text-secondary">menu_book</span>
                 Resource Suggestions
               </h4>
               <div className="space-y-1">
                 {content.resourceSuggestions.map((res, i) => (
                   <div key={i} className="flex items-center gap-2 font-body-sm text-body-sm text-on-surface-variant bg-surface-container-low rounded-lg px-3 py-2">
-                    <span className="material-symbols-outlined text-[16px] text-tertiary">article</span>
+                    <span className="material-symbols-outlined text-[16px] text-secondary">article</span>
                     {res}
                   </div>
                 ))}

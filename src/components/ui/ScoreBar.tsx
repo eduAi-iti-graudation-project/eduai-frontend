@@ -14,7 +14,7 @@ export function ScoreBar({ earned, max, className }: ScoreBarProps) {
     <div className={cn("flex items-center gap-3", className)}>
       <Progress
         value={pct}
-        className="flex-1 h-3 rounded-full bg-surface-container-high [&>div]:bg-primary-container [&>div]:transition-all [&>div]:duration-500"
+        className="flex-1 h-3 rounded-lg bg-surface-container-high [&>div]:bg-primary-container [&>div]:transition-all [&>div]:duration-500"
         aria-label={`Score ${earned} out of ${max}`}
       />
       <span className="font-label-md text-label-md text-on-surface-variant whitespace-nowrap">

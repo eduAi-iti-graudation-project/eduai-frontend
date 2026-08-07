@@ -44,7 +44,7 @@ export function FeedbackButtons({ interactionId, currentFeedback, onFeedback, cl
         disabled={disabled}
         title="Helpful"
         className={cn(
-          "w-8 h-8 rounded-full flex items-center justify-center transition-all text-[16px]",
+          "w-8 h-8 rounded-lg flex items-center justify-center transition-all text-[16px]",
           feedback === "HELPFUL"
             ? "bg-primary-container text-on-primary-container"
             : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high",
@@ -59,7 +59,7 @@ export function FeedbackButtons({ interactionId, currentFeedback, onFeedback, cl
         disabled={disabled}
         title="Not helpful"
         className={cn(
-          "w-8 h-8 rounded-full flex items-center justify-center transition-all text-[16px]",
+          "w-8 h-8 rounded-lg flex items-center justify-center transition-all text-[16px]",
           feedback === "NOT_HELPFUL"
             ? "bg-error-container text-on-error-container"
             : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high",

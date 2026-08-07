@@ -1,118 +1,277 @@
-# Design System: EduAI Management Assistant
-**Project ID:** 5189699912508134907
-**Source Screen:** Signup - Desktop (Split Layout)
+---
+name: EduAI Institutional Command Center
+colors:
+  surface: '#faf9ff'
+  surface-dim: '#d5d9ea'
+  surface-bright: '#faf9ff'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#f1f3ff'
+  surface-container: '#e9edfe'
+  surface-container-high: '#e4e8f8'
+  surface-container-highest: '#dee2f3'
+  on-surface: '#161b27'
+  on-surface-variant: '#434752'
+  inverse-surface: '#2b303d'
+  inverse-on-surface: '#edf0ff'
+  outline: '#737783'
+  outline-variant: '#c3c6d3'
+  surface-tint: '#285cb0'
+  primary: '#004699'
+  on-primary: '#ffffff'
+  primary-container: '#2c5fb3'
+  on-primary-container: '#d0ddff'
+  inverse-primary: '#adc6ff'
+  secondary: '#595d75'
+  on-secondary: '#ffffff'
+  secondary-container: '#dde1fd'
+  on-secondary-container: '#5f637b'
+  success: '#15803d'
+  on-success: '#ffffff'
+  success-container: '#dcfce7'
+  on-success-container: '#14532d'
+  warning: '#b45309'
+  on-warning: '#ffffff'
+  warning-container: '#fef3c7'
+  on-warning-container: '#78350f'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#d8e2ff'
+  primary-fixed-dim: '#adc6ff'
+  on-primary-fixed: '#001a41'
+  on-primary-fixed-variant: '#004494'
+  secondary-fixed: '#dde1fd'
+  secondary-fixed-dim: '#c1c5e0'
+  on-secondary-fixed: '#161a2f'
+  on-secondary-fixed-variant: '#41465c'
+  background: '#faf9ff'
+  on-background: '#161b27'
+  surface-variant: '#dee2f3'
+typography:
+  headline-xl:
+    fontFamily: Hanken Grotesk
+    fontSize: 32px
+    fontWeight: '700'
+    lineHeight: 40px
+    letterSpacing: -0.02em
+  headline-lg:
+    fontFamily: Hanken Grotesk
+    fontSize: 24px
+    fontWeight: '700'
+    lineHeight: 32px
+    letterSpacing: -0.01em
+  headline-md:
+    fontFamily: Hanken Grotesk
+    fontSize: 18px
+    fontWeight: '600'
+    lineHeight: 24px
+    letterSpacing: -0.01em
+  headline-sm:
+    fontFamily: Hanken Grotesk
+    fontSize: 14px
+    fontWeight: '600'
+    lineHeight: 20px
+  body-lg:
+    fontFamily: Hanken Grotesk
+    fontSize: 16px
+    fontWeight: '400'
+    lineHeight: 24px
+  body-md:
+    fontFamily: Hanken Grotesk
+    fontSize: 14px
+    fontWeight: '400'
+    lineHeight: 20px
+  body-sm:
+    fontFamily: Hanken Grotesk
+    fontSize: 13px
+    fontWeight: '400'
+    lineHeight: 18px
+  body-xs:
+    fontFamily: Hanken Grotesk
+    fontSize: 12px
+    fontWeight: '400'
+    lineHeight: 16px
+  number-md:
+    fontFamily: Hanken Grotesk
+    fontSize: 22px
+    fontWeight: '700'
+    lineHeight: 28px
+    letterSpacing: -0.01em
+  number-lg:
+    fontFamily: Hanken Grotesk
+    fontSize: 32px
+    fontWeight: '700'
+    lineHeight: 36px
+    letterSpacing: -0.02em
+  label-md:
+    fontFamily: Hanken Grotesk
+    fontSize: 12px
+    fontWeight: '600'
+    lineHeight: 16px
+    letterSpacing: 0.02em
+  label-sm:
+    fontFamily: Hanken Grotesk
+    fontSize: 11px
+    fontWeight: '500'
+    lineHeight: 14px
+    letterSpacing: 0.01em
+  mono-md:
+    fontFamily: 'JetBrains Mono'
+    fontSize: 13px
+    fontWeight: '500'
+    lineHeight: 18px
+fixed-layout:
+  sidebar-width: 256px
+  sidebar-bg: '#151a2e'
+  topbar-height: 64px
+  content-max-width: 1600px
+  page-margin: 24px
+  gutter: 16px
+  card-padding: 20px
+  table-row-height: 44px
+  table-header-height: 36px
+spacing:
+  stack-xs: 2px
+  stack-sm: 4px
+  stack-md: 8px
+  stack-lg: 12px
+  stack-lg2: 16px
+  stack-xl: 24px
+  stack-2xl: 32px
+rounded:
+  sm: 0.1875rem
+  DEFAULT: 0.375rem
+  md: 0.5rem
+  lg: 0.625rem
+  xl: 0.75rem
+  full: 9999px
+elevation:
+  card: '0 1px 2px rgba(22,27,39,0.04)'
+  hover: '0 2px 6px rgba(22,27,39,0.06)'
+  floating: '0 4px 16px rgba(22,27,39,0.10)'
+---
 
-## 1. Visual Theme & Atmosphere
+# EduAI Institutional Command Center — Design System (Admin)
 
-Warm, tactile, and approachable — built around a "Chalkboard Playful" narrative. The interface feels like a modern classroom assistant: soft surfaces, generous whitespace, and friendly geometry. Cream and navy create a stationery-like warmth, while coral CTAs provide energetic focal points. The mood is encouraging and human-centric, not cold or data-dense.
+A **high-density institutional command center** for administrators. The aesthetic is
+"modern institutional intelligence": calm enterprise-grade surfaces, near-grayscale
+neutral foundation, restrained navy accent, and extremely high information density
+without clutter. A senior admin must be able to scan 40+ data rows per screen, read
+a metric trend at a glance, and trust every number.
 
-The aesthetic is **Modern-Tactile**: layered surfaces, soft-edged cards, and human-centric messaging. Every interaction should feel like a helpful assistant providing a nudge, not a rigid database system.
+## 1. Brand & Mood
+- **Scale & Sentiment**: precise, calm, authoritative. Zero decorative flourish.
+  Data is the hero; chrome is invisible.
+- **Reference energy**: modern school-ops dashboards, Bloomberg-terminal density
+  with Figma-level polish. Think "PowerSchool 2026" not "consumer fintech".
+- **Persona**: the person behind the screen is a principal or academic operations
+  lead who reviews the school daily. They are decision-makers, not end-users.
 
-## 2. Color Palette & Roles
+## 2. Color Strategy
+- **Foundation**: near-white `#faf9ff` app background with pure-white card panels
+  separated by `1px` outlines (`#dee2f3`), rarely shadow.
+- **Sidebar**: deep navy `#151a2e` (fixed 256px). Active nav item = `#2c5fb3` pill
+  with white text OR left 3px indicator + `rgba(255,255,255,0.06)` tint.
+- **Accent**: `#2c5fb3` navy reserved ONLY for interactive affordances: primary
+  buttons, active nav, links, focus rings, selected rows, small trend sparklines.
+- **Semantic sets** (use alone, never tone-on-tone unless container-filled):
+  - Success `#15803d` on `#dcfce7` (or plain text w/ delta ▲)
+  - Warning `#b45309` on `#fef3c7`
+  - Danger `#ba1a1a` on `#ffdad6`
+  - Info/Neutral `#595d75` on `#dde1fd`
+- **Data-viz palette** (charts): `#2c5fb3, #7c4dff, #0ea5e9, #f59e0b, #ef4444, #22c55e, #64748b` — 8 grades, always label directly.
+- **Never** use color alone to convey meaning when it is the only signal (add
+  labels, icons, or value text).
 
-### Primary Palette
-- **Chalkboard Teal (#006951)** — `primary`. Used for brand identity, active states, navigation highlights, and link text. Represents growth and stability.
-- **Vibrant Teal (#008467)** — `primary-container`. Used for the active role toggle pill and badge icon tints. A lighter, more energetic teal.
-- **Coral Red (#ae3028)** — `secondary`. Reserved for secondary accents and the "Forgot password?" link hover states.
-- **Coral CTA (#fc695b)** — `secondary-container`. Primary call-to-action buttons ("Login to Dashboard", "Get Started"). High visibility without aggression.
-- **Warm Gold (#785600)** — `tertiary`. Used sparingly for decorative icons and badge highlights.
-- **Golden Yellow (#976d00)** — `tertiary-container`. Used for icon tints (e.g., lightbulb badge).
-- **Error Red (#ba1a1a)** — `error`. Form validation and error messages.
-- **Error Tint (#ffdad6)** — `error-container`. Error state backgrounds.
+## 3. Typography
+- **Hanken Grotesk** everywhere. Mono variant `JetBrains Mono` for IDs, join codes.
+- Hierarchy for dense dashboards:
+  - Page title: `32px/700` (never dupe a redundant "page header" label).
+  - Card title: `14px/600` with a small gray kicker when needed.
+  - Stat number: `22px/700` tabular; large hero numbers `32px/700`.
+  - Body: `14px` default; `13px` for secondary metadata; `12px` for
+    table subtitles, chips, footer meta.
+- **Tabular-numeric**: metric numbers should be `font-variant-numeric: tabular-nums`
+  to avoid jitter in live data.
+- Line height tight: `1.43` body, `1.3` headings. Keep the "dense but legible".
 
-### Surface Palette
-- **Cream Background (#faf8ff)** — `surface`, `background`, `surface-bright`. The global background. Softer on the eyes than pure white.
-- **White Card (#ffffff)** — `surface-container-lowest`. Used for form cards, floating badges, and input fields to create distinction from the cream background.
-- **Lavender Tint (#f3f2ff)** — `surface-container-low`. The right-side form section background. Creates subtle visual separation.
-- **Lavender (#ebedff)** — `surface-container`. Used for the role toggle's inactive track background.
-- **Soft Lavender (#e3e7ff)** — `surface-container-high`.
-- **Periwinkle (#dce1ff)** — `surface-container-highest`. Used for input field borders and divider lines.
-- **Faded Lavender (#d0d8ff)** — `surface-dim`.
+## 4. Density & Layout System
+- **Base grid**: 8px. Everything is a multiple of 4px, ideally 8px. Page gutter 24px,
+  inter-card 16px. Card internal padding 20px.
+- **Content width**: max `1600px` centered; the admin shell stretches further than
+  other roles deliberately for tables & charts.
+- **Scannable cards**: every data card gets a compact header row (title + one
+  right-aligned action) with a `1px` bottom divider when content is long.
+- **Tables** (the workhorse of admin):
+  - Row height 44px (dense 40px); header 36px, `11px` uppercase gray labels.
+  - No zebra stripes; horizontal 1px dividers `#eceef5`.
+  - Hover row: `#f6f8ff` wash, no border jump.
+  - Numeric columns right-aligned with tabular nums.
+- **Avatar**: `32px` circle w/ initial (navy on `#e9edfe`), `20px` when inline in
+  tight lists, `44px` on profile heads. Provide colored "math-of-name" initials.
 
-### Text & Borders
-- **Deep Navy (#0a1842)** — `on-surface`, `on-background`. Primary text color for headings, labels, and body copy. High contrast on cream.
-- **Slate Gray (#3d4944)** — `on-surface-variant`. Secondary text for subtitles, descriptions, and placeholder text.
-- **Muted Sage (#6d7a74)** — `outline`. Icon tints, non-focus states.
-- **Soft Sage (#bccac2)** — `outline-variant`. Divider text, subtle borders.
+## 5. Components
+- **StatCard (precision variant)**: icon chip (square, 28px, tinted bg) + label
+  (12px gray) + value (28px 700) + **delta pill** (▲/▼ + % text) + optional
+  **mini sparkline** (40x24 inline SVG) in card footer. Never stack value + delta
+  in the same color as primary.
+- **Delta chip**: 10.5px uppercase, colored pair (green up, red down, gray flat),
+  borderless, `font-weight 500`, padding 2px 6px, radius 6px.
+- **Search / Command**: global search at topbar right (280px), `Search` glyph,
+  shortcut hint chip `⌘K`. Entity search filters typed results inline.
+- **Entity/profile row**: avatar + two-line (name 600 / sub meta 12px gray),
+  right-side trailing value, chevron only when navigable.
+- **Insight/AI card**: top header (AI icon, "AI", title), body 2-3 lines of
+  analysis narrative with soft gradient border-left `2px gold/indigo`, footer
+  "Ask AI" affordance. Never pretend deterministic certainty—use "Likely",
+  "Trend suggests", "Review".
+- **Callout / alert banner**: left 3px accent rail, tinted container bg, title +
+  message + action button right-aligned. Tint = severity semantics above.
+- **StatusChip**: 4px radius, no border, 11px label uppercase. Use the
+  semantic tint pairs in §2.
+- **Tag filter row**: segmented chips (All | Students | Teachers | Classes) 32px
+  height, active = `#2c5fb3` text + `#eef3fc` bg underline, inactive gray.
+- **Empty/Error**: centered 120px glyph + 16px title + 13px description +
+  primary ghost action button.
 
-## 3. Typography Rules
+## 6. Admin-specific personas (screen patterns)
+- **Command Center (Dashboard)** is the *decision* surface: 6 StatCards w/ delta +
+  sparkline, 2-3 trend charts, an at-risk/flagged ranked list (max 6 rows),
+  and a 1-column "What to watch" AI narrative. It must answer "what changed
+  today/week" in one glance.
+- **People/Roster**: always a two-pane master/detail. List pane `320–360px`
+  (search + compact rows), detail pane rich-profile with stacked sections:
+  identity card → key stats → grades by class → attendance drill → alerts →
+  AI brief. Never a bare name+email.
+- **Directory of roles (Teachers/Faculty)**: card grid with avatar init 8-bit,
+  name, dept/grade scope, class count, avg class grade honor, flagged indicator.
+- **AI Assistant**: full-height three-column (entity picker list / conversation /
+  sticky composer). Replies render as Markdown-ish cards; square encloses
+  structured payloads (analytics) inside an indented bordered block.
+- Every entity surface ends with an **"Ask AI" affordance** (auto-fill that
+  entity into the assistant context).
 
-### Headlines — Quicksand (Rounded, Friendly, Bold)
-- **Headline XL (40px / 48px line-height / -0.02em tracking / 700 weight)** — Reserved for the hero "EduAI" brand mark on the left panel.
-- **Headline LG (32px / 40px / 700 weight)** — Card titles ("Create Account", "Welcome Back"). Friendly yet authoritative.
-- **Headline MD (24px / 32px / 600 weight)** — Section headers within dense content.
-- **Headline LG Mobile (28px / 36px / 700 weight)** — Card titles on mobile screens to prevent overflow.
+## 7. Charts & Data-viz
+- Prefer SVG built-ins; consistent 8px stroke; 12px labels; grey-grid (no
+  vertical grid lines).
+- Line/area for trends; bar for comparisons; donut only when parts-of-whole
+  matter (attendance status breakdown); radar for skill-gap profiles.
+- Include explicit `min/max` value labels on any line endpoint to kill guesswork.
+- Interactive tooltips (hover) with name + value + delta.
 
-### Body — Inter (Clean, Legible, Systematic)
-- **Body LG (18px / 28px / 400 weight)** — Tagline text on the left branding panel.
-- **Body MD (16px / 24px / 400 weight)** — Input values, footer text, and general body copy.
+## 8. Navigation & Shell
+- Sidebar section groups: **Overview** (Dashboard, Insights), **People** (Students,
+  Teachers), **Academic** (Grades, Attendance, Alerts), **Operations** (Requests,
+  Billing).
+- Active item: `#2c5fb3` tinted `#eff3fc` bg + primary text + 3px navy rail.
+- Topbar: breadcrumb/title left, search center (⌘K), notification bell + avatar
+  right. System status = subtle `[· Live data]` chip.
+- No clutter: hide secondary nav items behind "More".
 
-### Labels — Inter (Structured, Professional)
-- **Label MD (14px / 20px / 600 weight / 0.01em tracking)** — Form field labels, role toggle text, social button text.
-- **Label SM (12px / 16px / 500 weight)** — Divider text ("OR CONTINUE WITH"), forgot password link, error messages.
-
-## 4. Component Stylings
-
-### Buttons
-- **Primary CTA (Coral):** Pill-shaped (`rounded-full`), `bg-secondary-container` (#fc695b) with white text. Full-width within forms. Includes a `shadow-lg shadow-secondary-container/20` for depth. On hover: `scale-[1.02]`. On click: `scale-95`. The arrow icon shifts right on hover via `group-hover:translate-x-1`.
-- **Social Login (Google / Microsoft):** Squared (`rounded-xl`) with a `border-2 border-surface-container-highest`. White background with navy text. On hover: `bg-surface` (#faf8ff). Contains brand SVG icon + text.
-- **Forgot Password:** Ghost link-style button. `font-label-sm text-primary hover:underline`. No background or border.
-- **Role Toggle Button (Teacher/Student):** Inside a segmented pill (`rounded-full bg-surface-variant`). Active state uses `bg-primary-container text-on-primary-container`. Inactive uses `text-on-surface-variant`. Transitions smoothly.
-
-### Cards & Containers
-- **Form Card:** Deeply rounded (`rounded-3xl` = 1.5rem). White background (`bg-surface-container-lowest`). Padding: `p-8 md:p-10` (32px / 40px). Subtle border (`tactile-card`: 1.5px solid rgba(35,48,90,0.08)). Shadow: `shadow-[0_20px_50px_rgba(10,24,66,0.05)]`.
-- **Floating Badges:** `rounded-2xl` (1rem). White background (`bg-surface-container-lowest`). Same `tactile-card` 1.5px border. Padding: `p-4`. No shadow. Icon (text-3xl) + label stack. Positioned absolutely with float animation.
-- **Branding Card (Left Panel):** No formal card. Just `p-margin-desktop` (40px) with image and tagline.
-
-### Inputs & Forms
-- **Input Container:** Flex row with icon + input. White background (`bg-white`). `border-2 border-surface-container-highest` (#dce1ff). `rounded-xl` (0.75rem). Padding: `gap-3 px-4 py-3`.
-- **Input Field:** Transparent background (`bg-transparent`). No border (`border-none`). No ring on focus (`focus:ring-0`). Full width (`w-full`). `text-body-md` (16px). Placeholder uses `text-outline-variant` (#bccac2).
-- **Focus State:** Container border shifts to `border-primary` (#006951) with `shadow-[0_0_0_4px_rgba(0,105,81,0.1)]`.
-- **Hover State:** Icon tints shift to primary teal via `group-hover/input:text-primary`.
-- **Label:** `font-label-md` (14px/600). `ml-1` (4px left offset to align visually with input text). `text-on-background` (#0a1842).
-- **Error State:** Container border shifts to `border-error` (#ba1a1a). Error message below: `text-error text-label-sm ml-1 mt-1`.
-- **Form Layout:** `space-y-5` (20px) between field groups. Each field group: `space-y-1.5` (6px) between label + input wrapper.
-
-### Dividers
-- **OR Divider:** Flex row with horizontal rule (`h-[1px] bg-surface-container-highest`), centered uppercase label (`font-label-sm text-outline-variant tracking-widest uppercase`), and closing rule. Gap: `gap-4`. Margin: `my-8` (32px).
-
-### Toggles / Segmented Controls
-- **Role Toggle:** Pill-shaped container (`rounded-full bg-surface-variant`). `p-1` (4px inner padding). Two flex buttons. Active pill slides via `bg-primary-container text-on-primary-container`. No visible slider animation — active state is simply toggled.
-
-## 5. Layout Principles
-
-### Split Screen Structure
-- **Desktop (≥1280px):** Two equal halves (`md:w-1/2`). Left: branding panel. Right: form panel. Constrained to 1920px max-width.
-- **Laptop (≥1024px):** Split preserves. Section padding: 40px (`p-margin-desktop`).
-- **Tablet (≤768px):** Stacks vertically. Left panel hidden. Right form full-width.
-- **Mobile (≤480px):** Section padding: 16px (`p-margin-mobile`). Card fills available width. Max card width: 460px.
-
-### Left Panel (Branding)
-- `flex-col justify-between` — logo at top, image centered, tagline at bottom.
-- Padding: `p-margin-desktop` (40px all sides).
-- Image: centered within `max-w-md` (448px). `w-full h-auto drop-shadow-2xl`. Hover: `scale-105` with 700ms transition.
-- Floating badges: absolute positioned at `top-1/4 left-1/4` and `bottom-1/4 right-1/4`. Float animation (4s cycle, 15px vertical displacement).
-
-### Right Panel (Form)
-- `flex items-center justify-center`. Centered vertically and horizontally.
-- Padding: `p-margin-mobile` (16px) mobile, `md:p-margin-desktop` (40px) tablet/desktop, `xl:p-24` (96px) wide desktop.
-- Background: `bg-surface-container-low` for subtle panel separation.
-
-### Spacing Scale
-Based on 8px grid with custom tokens:
-- `xs`: 4px (label offset, inner pill padding)
-- `base`: 8px
-- `sm`: 12px (field group inner spacing)
-- `md`: 24px (standard between sections)
-- `lg`: 48px
-- `xl`: 80px
-- `gutter`: 24px
-- `margin-mobile`: 16px
-- `margin-desktop`: 40px
-
-### Responsive Behavior
-- The form card (`max-w-[460px]`) never exceeds 460px on any screen.
-- Social buttons use `grid grid-cols-2 gap-4` and collapse gracefully.
-- The role toggle spans full card width, each button `flex-1`.
-- CTA button is always `w-full` within the form.
-- Error messages are inline below inputs (`text-label-sm`), never overlapping.
+## 9. Motion & Interactions
+- 120–180ms ease transitions on hover/focus only. No entrance animations for
+  full-screen chrome; micro-only.
+- Sparklines draw on mount (200ms). Chart hover shows crosshair + tooltip.
+- Row hover: 120ms bg wash; card hover: `1px darken` + slight translate-y 1px +
+  0.2s. Respect `prefers-reduced-motion`.

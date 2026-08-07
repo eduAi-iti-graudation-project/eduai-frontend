@@ -6,7 +6,7 @@ interface ManagementSummarySectionProps {
 
 export function ManagementSummarySection({ summary }: ManagementSummarySectionProps) {
   return (
-    <div className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm p-md">
+    <div className="rounded-lg bg-white border border-border p-md">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-8 h-8 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
           <span className="material-symbols-outlined text-[18px] text-primary">analytics</span>
@@ -16,7 +16,7 @@ export function ManagementSummarySection({ summary }: ManagementSummarySectionPr
 
       <div className="space-y-3">
         {summary.summary && (
-          <div className="bg-surface-container-low rounded-xl p-3">
+          <div className="bg-surface-container-low rounded-lg p-3">
             <p className="font-body-md text-body-md text-on-surface">{summary.summary}</p>
           </div>
         )}

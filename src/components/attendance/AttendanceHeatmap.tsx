@@ -1,23 +1,16 @@
 import type { DayAttendance } from "@/lib/attendance-stats"
 import { computeDayStats, dateKey, type AttendanceRecordLike, lastNDays } from "@/lib/attendance-stats"
 
-const CELL = 13
-const GAP = 3
+const CELL = 16
+const GAP = 4
 const STEP = CELL + GAP
-const WEEKS = 20
-
-const LEVEL_CLASSES = [
-  "bg-primary-fixed",
-  "bg-primary-fixed-dim",
-  "bg-primary-container",
-  "bg-primary",
-]
+const WEEKS = 26
 
 const STATUS_COLORS: Record<string, string> = {
-  PRESENT: "bg-primary-container",
-  LATE: "bg-tertiary-fixed-dim",
-  EXCUSED: "bg-[#d9ccf2]",
-  ABSENT: "bg-[#c8cad6]",
+  PRESENT: "bg-[#22c55e]",
+  LATE: "bg-[#86efac]",
+  EXCUSED: "bg-[#6366f1]",
+  ABSENT: "bg-[#ef4444]",
   EMPTY: "bg-surface-container",
 }
 
@@ -41,13 +34,7 @@ function cellAppearance(day: DayAttendance | undefined): { className: string; su
   if (!day || day.total === 0) {
     return { className: STATUS_COLORS.EMPTY, summary: "No record" }
   }
-  if (day.present > 0) {
-    const level = Math.min(day.present, 4)
-    return {
-      className: LEVEL_CLASSES[level - 1],
-      summary: `${day.present} present${day.present > 1 ? "s" : ""}`,
-    }
-  }
+  if (day.present > 0) return { className: STATUS_COLORS.PRESENT, summary: "Present" }
   if (day.late > 0) return { className: STATUS_COLORS.LATE, summary: "Late" }
   if (day.excused > 0) return { className: STATUS_COLORS.EXCUSED, summary: "Excused" }
   return { className: STATUS_COLORS.ABSENT, summary: "Absent" }
@@ -124,9 +111,9 @@ export function AttendanceHeatmap({ records }: { records: AttendanceRecordLike[]
                   </span>
                 ))}
               </div>
-              <div className="flex gap-[3px]">
+              <div className="flex gap-[4px]">
                 {columns.map((column, columnIndex) => (
-                  <div key={columnIndex} className="flex flex-col gap-[3px]">
+                  <div key={columnIndex} className="flex flex-col gap-[4px]">
                     {column.map((date) => {
                       const key = dateKey(date)
                       const day = byDay.get(key)
@@ -170,17 +157,10 @@ export function AttendanceHeatmap({ records }: { records: AttendanceRecordLike[]
       <div className="mt-md flex flex-wrap items-center gap-x-lg gap-y-sm">
         {(["PRESENT", "LATE", "EXCUSED", "ABSENT"] as const).map((status) => (
           <span key={status} className="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
-            <span className={`h-2.5 w-2.5 rounded-[3px] ${STATUS_COLORS[status]}`} />
+            <span className={`h-3 w-3 rounded-[3px] ${STATUS_COLORS[status]}`} />
             {STATUS_LABELS[status]}
           </span>
         ))}
-        <span className="ml-auto inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
-          Less
-          {["bg-surface-container", ...LEVEL_CLASSES].map((className, i) => (
-            <span key={i} className={`h-2.5 w-2.5 rounded-[3px] ${className}`} />
-          ))}
-          More
-        </span>
       </div>
     </div>
   )

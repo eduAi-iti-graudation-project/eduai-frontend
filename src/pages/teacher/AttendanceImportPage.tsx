@@ -11,8 +11,8 @@ type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED"
 
 const STATUS_OPTIONS: { value: AttendanceStatus; label: string; color: string }[] = [
   { value: "PRESENT", label: "Present", color: "bg-green-100 text-green-700 border-green-300" },
-  { value: "ABSENT", label: "Absent", color: "bg-red-100 text-red-700 border-red-300" },
-  { value: "LATE", label: "Late", color: "bg-yellow-100 text-yellow-700 border-yellow-300" },
+  { value: "ABSENT", label: "Absent", color: "bg-accent text-foreground border-accent" },
+  { value: "LATE", label: "Late", color: "bg-surface-container-high text-on-surface border-surface-container-high" },
   { value: "EXCUSED", label: "Excused", color: "bg-gray-100 text-gray-700 border-gray-300" },
 ]
 
@@ -59,9 +59,9 @@ export function AttendanceImportPage() {
         Back to Class
       </Link>
 
-      <h1 className="font-headline-xl text-headline-xl text-primary mb-xl">Import Attendance</h1>
+      <h1 className="font-headline-xl text-headline-xl text-on-surface mb-xl">Import Attendance</h1>
 
-      <div className="bg-white rounded-[32px] p-xl shadow-sm border border-outline-variant/10 mb-xl">
+      <div className="bg-surface-container-lowest rounded-lg p-xl border border-outline-variant mb-xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-md mb-lg">
           {!classIdParam && (
             <div>
@@ -70,7 +70,7 @@ export function AttendanceImportPage() {
                 value={selectedClassId}
                 onChange={(e) => setSelectedClassId(e.target.value)}
                 placeholder="Class ID..."
-                className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
+                className="w-full h-auto rounded-lg border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
               />
             </div>
           )}
@@ -80,7 +80,7 @@ export function AttendanceImportPage() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full h-auto rounded-xl border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
+              className="w-full h-auto rounded-lg border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
             />
           </div>
         </div>
@@ -96,7 +96,7 @@ export function AttendanceImportPage() {
             <p className="font-label-md text-label-md text-primary mb-md">{students.length} students</p>
             <div className="space-y-sm max-h-[500px] overflow-y-auto">
               {students.map((s: { id: string; name: string }) => (
-                <div key={s.id} className="flex items-center justify-between p-sm rounded-2xl bg-surface-container hover:bg-surface-container-low transition-colors">
+                <div key={s.id} className="flex items-center justify-between p-sm rounded-lg bg-surface-container hover:bg-surface-container-low transition-colors">
                   <span className="font-label-md text-label-md text-on-surface">{s.name}</span>
                   <div className="flex gap-1">
                     {STATUS_OPTIONS.map((opt) => (
@@ -104,7 +104,7 @@ export function AttendanceImportPage() {
                         key={opt.value}
                         type="button"
                         onClick={() => setStatus(s.id, opt.value)}
-                        className={`px-3 py-1 h-auto rounded-full font-label-sm text-label-sm border transition-all ${
+                        className={`px-3 py-1 h-auto rounded-lg font-label-sm text-label-sm border transition-all ${
                           records[s.id] === opt.value
                             ? `${opt.color} border-2 font-semibold`
                             : "border-outline-variant text-on-surface-variant hover:border-primary-container"
@@ -118,13 +118,13 @@ export function AttendanceImportPage() {
               ))}
             </div>
 
-            <div className="flex items-center justify-between mt-lg pt-lg border-t border-outline-variant/20">
+            <div className="flex items-center justify-between mt-lg pt-lg border-t border-outline-variant">
               <span className="font-label-md text-label-md text-on-surface-variant">{selectedCount} student{selectedCount !== 1 ? "s" : ""} marked</span>
               <Button
                 type="button"
                 onClick={handleSubmit}
                 disabled={selectedCount === 0 || importAttendance.isPending}
-                className="px-lg h-auto py-sm bg-primary-container text-white font-label-md text-label-md rounded-full nudge-hover disabled:opacity-50"
+                className="px-lg h-auto py-sm bg-primary text-primary-foreground font-label-md text-label-md rounded-lg nudge-hover disabled:opacity-50"
               >
                 {importAttendance.isPending ? "Importing..." : `Import Attendance (${selectedCount})`}
               </Button>

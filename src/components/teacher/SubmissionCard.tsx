@@ -12,19 +12,19 @@ interface SubmissionCardProps {
 const statusConfigs: Record<string, { label: string; badge: string }> = {
   SUBMITTED: {
     label: "Submitted",
-    badge: "bg-tertiary-fixed text-on-tertiary-fixed",
+    badge: "bg-surface-container-high text-on-surface",
   },
   GRADING_IN_PROGRESS: {
     label: "Grading...",
-    badge: "bg-primary-fixed/20 text-primary",
+    badge: "bg-surface-container-high text-on-surface",
   },
   REVIEW_READY: {
     label: "Review Ready",
-    badge: "bg-secondary-container text-white",
+    badge: "bg-primary text-primary-foreground",
   },
   CONFIRMED: {
     label: "Confirmed",
-    badge: "bg-primary-container text-white",
+    badge: "bg-primary text-primary-foreground",
   },
 }
 
@@ -48,10 +48,9 @@ export function SubmissionCard({
   const totalPoints = submission.scores?.reduce((sum, s) => sum + s.pointsAwarded, 0) ?? 0
 
   return (
-    <div className="bg-white rounded-[32px] p-md shadow-sm border border-outline-variant/10 flex items-center gap-md group hover:shadow-md transition-all nudge-hover relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-primary-fixed/10 rounded-bl-[100px] -z-0" />
+    <div className="bg-white rounded-lg p-md border border-border flex items-center gap-md group hover:shadow-md transition-all nudge-hover relative overflow-hidden">
       <div className="relative z-10 flex items-center gap-md w-full">
-        <div className="w-14 h-14 bg-surface-container rounded-3xl flex items-center justify-center text-primary-container shrink-0">
+        <div className="w-14 h-14 bg-surface-container rounded-lg flex items-center justify-center text-primary shrink-0">
           <span className="material-symbols-outlined text-3xl">{iconKey}</span>
         </div>
 
@@ -60,7 +59,7 @@ export function SubmissionCard({
             <span className="font-headline-md text-headline-md text-primary truncate">
               {submission.student?.name ?? "Unknown Student"}
             </span>
-            <span className={`font-label-sm text-label-sm px-sm py-1 rounded-full ${config.badge}`}>
+            <span className={`font-label-sm text-label-sm px-sm py-1 rounded-lg ${config.badge}`}>
               {config.label}
             </span>
           </div>
@@ -75,7 +74,7 @@ export function SubmissionCard({
         <div className="flex items-center gap-3 shrink-0">
           <Link
             to={`/submissions/${submission.id}`}
-            className="flex items-center gap-1 px-md py-sm border-2 border-primary-container text-primary-container rounded-full font-label-md text-label-md hover:bg-primary-container hover:text-white transition-all"
+            className="flex items-center gap-1 px-md py-sm border border-primary text-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-white transition-all"
           >
             <span className="material-symbols-outlined text-[16px]">visibility</span>
             View Submission
@@ -83,7 +82,7 @@ export function SubmissionCard({
 
           {submission.scores && submission.scores.length > 0 && (
             <div className="text-right">
-              <p className="font-headline-md text-headline-md text-primary-container">{totalPoints}</p>
+              <p className="font-headline-md text-headline-md text-primary">{totalPoints}</p>
               <p className="font-label-sm text-label-sm text-on-surface-variant">points</p>
             </div>
           )}
@@ -92,7 +91,7 @@ export function SubmissionCard({
             <button
               onClick={() => gradeMutation.mutate(submission.id)}
               disabled={gradeMutation.isPending}
-              className="flex items-center gap-1 px-md py-sm bg-secondary-container text-white rounded-full font-label-md text-label-md shadow-lg nudge-hover active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-1 px-md py-sm bg-primary text-primary-foreground rounded-lg font-label-md text-label-md active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
               Grade
@@ -105,7 +104,7 @@ export function SubmissionCard({
                 confirmMutation.mutate(submission)
               }}
               disabled={confirmMutation.isPending}
-              className="flex items-center gap-1 px-md py-sm bg-primary-container text-white rounded-full font-label-md text-label-md shadow-lg nudge-hover active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-1 px-md py-sm bg-primary text-primary-foreground rounded-lg font-label-md text-label-md active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[16px]">check_circle</span>
               Confirm
@@ -114,7 +113,7 @@ export function SubmissionCard({
 
           {submission.status === "GRADING_IN_PROGRESS" && (
             <div className="flex items-center gap-2 px-md py-sm">
-              <span className="w-2 h-2 bg-tertiary-fixed rounded-full animate-pulse" />
+              <span className="w-2 h-2 bg-primary-fixed-dim rounded-lg animate-pulse" />
               <span className="font-label-sm text-label-sm text-on-surface-variant">Grading...</span>
             </div>
           )}

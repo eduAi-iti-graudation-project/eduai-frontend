@@ -69,7 +69,7 @@ export function StudentSearchInput({
 
   return (
     <div ref={wrapperRef} className={cn("relative", className)}>
-      <div className="flex items-center gap-2 px-4 py-3 bg-white border-2 border-surface-container-highest rounded-xl focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(0,105,81,0.1)] transition-all">
+      <div className="flex items-center gap-2 px-4 py-3 bg-white border border-border rounded-lg focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(79,70,229,0.15)] transition-all">
         <span className="material-symbols-outlined text-outline text-[20px] group-focus-within/input:text-primary">
           search
         </span>
@@ -81,12 +81,12 @@ export function StudentSearchInput({
           className="flex-1 bg-transparent border-none outline-none text-body-md text-body-md text-on-surface placeholder:text-outline-variant"
         />
         {isSearching && (
-          <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-lg animate-spin" />
         )}
       </div>
 
       {showResults && (
-        <div className="absolute z-50 mt-1 w-full bg-white rounded-xl shadow-xl border border-outline-variant/20 py-2 max-h-60 overflow-y-auto">
+        <div className="absolute z-50 mt-1 w-full bg-white rounded-lg shadow-xl border border-border py-2 max-h-60 overflow-y-auto">
           {results.map((student) => (
             <button
               key={student.id}
@@ -94,7 +94,7 @@ export function StudentSearchInput({
               onClick={() => handleSelect(student)}
               className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-surface-container transition-colors text-left"
             >
-              <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant font-label-sm font-bold shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant font-label-sm font-bold shrink-0">
                 {student.name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">

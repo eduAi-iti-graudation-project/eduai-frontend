@@ -4,8 +4,10 @@ import { useQuery } from "@tanstack/react-query"
 import * as api from "@/lib/api"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/shared/ErrorState"
+import { RichText } from "@/components/shared/RichText"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
+import { renderReportSection } from "@/lib/report-sections"
 import { Badge } from "@/components/ui/badge"
 import {
   Table,
@@ -20,8 +22,8 @@ type Tab = "grades" | "attendance" | "reports"
 
 const statusStyles: Record<string, string> = {
   PRESENT: "bg-primary-fixed/30 text-primary",
-  ABSENT: "bg-error-container text-error",
-  LATE: "bg-tertiary-fixed text-on-tertiary-fixed",
+  ABSENT: "bg-error-container text-on-error-container",
+  LATE: "bg-surface-container-high text-on-surface",
   EXCUSED: "bg-surface-container-high text-on-surface-variant",
 }
 
@@ -55,7 +57,7 @@ export function ChildDetailPage() {
           message="Something went wrong loading the child's data."
         />
         <div className="pb-xl">
-          <Link to="/guardian" className="bg-secondary-container text-white px-md py-sm rounded-full font-label-md">
+          <Link to="/guardian" className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md">
             Back to Dashboard
           </Link>
         </div>
@@ -72,7 +74,7 @@ export function ChildDetailPage() {
   return (
     <div className="flex-1 p-xl max-w-5xl mx-auto w-full">
       <div className="flex items-center gap-3 mb-6">
-        <Button asChild variant="ghost" size="icon" className="w-8 h-8 rounded-full hover:bg-surface-container shrink-0">
+        <Button asChild variant="ghost" size="icon" className="w-8 h-8 rounded-lg hover:bg-surface-container shrink-0">
           <Link to="/guardian" aria-label="Back to Dashboard">
             <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
           </Link>
@@ -87,9 +89,9 @@ export function ChildDetailPage() {
             type="button"
             variant="ghost"
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-md py-sm rounded-full font-label-md text-label-md h-auto transition-all ${
+            className={`flex items-center gap-2 px-md py-sm rounded-lg font-label-md text-label-md h-auto transition-all ${
               activeTab === tab.id
-                ? "bg-primary-container text-white hover:bg-primary-container hover:text-white"
+                ? "bg-primary text-primary-foreground hover:bg-primary-container hover:text-white"
                 : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface-variant"
             }`}
           >
@@ -107,12 +109,12 @@ export function ChildDetailPage() {
             <EmptyState icon="grade" title="No grades yet" description="Confirmed grades will appear here." />
           ) : (
             grades.data.filter((g) => g.isConfirmed).map((g) => (
-              <div key={g.id} className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
+              <div key={g.id} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant">
                 <div className="flex items-start justify-between mb-2">
                   <p className="font-label-sm text-label-sm text-on-surface-variant">Points Awarded</p>
                   <Badge
                     variant="outline"
-                    className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-full border-0"
+                    className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-lg border-0"
                   >
                     {g.pointsAwarded}
                   </Badge>
@@ -133,24 +135,24 @@ export function ChildDetailPage() {
           ) : !attendance.data || attendance.data.length === 0 ? (
             <EmptyState icon="calendar_today" title="No attendance records" description="Attendance records will appear here once logged." />
           ) : (
-            <div className="rounded-[32px] bg-white border border-outline-variant/10 shadow-sm overflow-hidden">
+            <div className="rounded-lg bg-surface-container-lowest border border-outline-variant overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b border-outline-variant/10 bg-surface-container-low hover:bg-transparent">
+                  <TableRow className="border-b border-outline-variant bg-surface-container-low hover:bg-transparent">
                     <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Date</TableHead>
                     <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {attendance.data.map((r) => (
-                    <TableRow key={r.id} className="border-b border-outline-variant/10 hover:bg-surface-container">
+                    <TableRow key={r.id} className="border-b border-outline-variant hover:bg-surface-container">
                       <TableCell className="px-md py-3 font-body-md text-body-md text-on-surface">
                         {new Date(r.date).toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" })}
                       </TableCell>
                       <TableCell className="px-md py-3 text-right">
                         <Badge
                           variant="outline"
-                          className={`font-label-sm text-label-sm px-sm py-0.5 rounded-full border-0 ${statusStyles[r.status] ?? "bg-surface-container-high text-on-surface-variant"}`}
+                          className={`font-label-sm text-label-sm px-sm py-0.5 rounded-lg border-0 ${statusStyles[r.status] ?? "bg-surface-container-high text-on-surface-variant"}`}
                         >
                           {r.status}
                         </Badge>
@@ -172,11 +174,11 @@ export function ChildDetailPage() {
             <EmptyState icon="description" title="No reports" description="Reports will appear here once generated." />
           ) : (
             reports.data.map((r) => (
-              <div key={r.id} className="rounded-[32px] bg-white p-md border border-outline-variant/10 shadow-sm">
+              <div key={r.id} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant">
                 <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">
                   {new Date(r.createdAt).toLocaleDateString()}
                 </p>
-                <p className="font-body-md text-body-md text-on-surface">{r.parentSection}</p>
+                <RichText text={renderReportSection(r.parentSection)} className="text-on-surface" />
               </div>
             ))
           )}

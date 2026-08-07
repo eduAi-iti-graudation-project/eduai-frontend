@@ -35,10 +35,17 @@ export function parseDateKey(key: string): Date {
   return new Date(`${key}T12:00:00`)
 }
 
+export function dayKeyOf(recordDate: string): string | null {
+  const key = recordDate.slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) return null
+  return key
+}
+
 export function computeDayStats(records: AttendanceRecordLike[]): Map<string, DayAttendance> {
   const byDay = new Map<string, DayAttendance>()
   for (const record of records) {
-    const key = dateKey(new Date(`${record.date}T12:00:00`))
+    const key = dayKeyOf(record.date)
+    if (!key) continue
     let day = byDay.get(key)
     if (!day) {
       day = { present: 0, absent: 0, late: 0, excused: 0, total: 0 }
