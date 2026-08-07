@@ -18,7 +18,7 @@ export function DeltaBadge({ deltaPercent, direction, className }: DeltaBadgePro
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 font-label-md text-label-md px-2.5 py-1 rounded-full",
+        "inline-flex items-center gap-1 font-label-md text-label-md px-2.5 py-1 rounded-lg",
         directionStyles[direction],
         className,
       )}

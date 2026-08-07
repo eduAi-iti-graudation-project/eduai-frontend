@@ -9,14 +9,14 @@ export function GuardianMessagePreview({ content }: GuardianMessagePreviewProps)
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="rounded-[24px] bg-white border border-outline-variant/10 shadow-sm overflow-hidden">
+    <div className="rounded-lg bg-white border border-border overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-md hover:bg-surface-container transition-colors text-left"
       >
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-tertiary-fixed/20 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[18px] text-tertiary">family_history</span>
+          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+            <span className="material-symbols-outlined text-[18px] text-accent-foreground">family_history</span>
           </div>
           <h3 className="font-headline-md text-headline-md text-primary">Guardian Notification</h3>
         </div>
@@ -27,7 +27,7 @@ export function GuardianMessagePreview({ content }: GuardianMessagePreviewProps)
 
       {open && (
         <div className="px-md pb-md space-y-4">
-          <div className="bg-tertiary-fixed/10 rounded-xl p-4 border border-tertiary-fixed/20">
+          <div className="bg-accent rounded-lg p-4 border border-outline-variant">
             <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap">{content.message}</p>
           </div>
 

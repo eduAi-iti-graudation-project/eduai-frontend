@@ -11,7 +11,7 @@ export function InsightSectionCard({ section }: InsightSectionCardProps) {
   const empty = isEmptySection(section)
 
   return (
-    <div className="tactile-card rounded-[24px] bg-surface-container-lowest p-md border border-outline-variant/10">
+    <div className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant">
       <div className="flex items-center justify-between gap-2 mb-md">
         <h3 className="font-headline-md text-headline-md text-on-surface leading-snug">{section.title}</h3>
         {section.delta ? (
