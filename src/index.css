@@ -1,111 +1,281 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import "tailwindcss";
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+/* ── Tailwind v4 Theme Tokens ────────────────────────────────── */
+@theme {
+  /* ── Colors ── */
+  --color-background: #f9f9ff;
+  --color-foreground: #1a1c20;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1c20;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a1c20;
+  --color-primary-foreground: #ffffff;
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #f3f3f9;
+  --color-muted-foreground: #464555;
+  --color-accent: #eef2ff;
+  --color-accent-foreground: #4338ca;
+  --color-destructive: #ba1a1a;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #c9c7d8;
+  --color-input: #c9c7d8;
+  --color-ring: #4f46e5;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f3f9;
+  --color-surface-container: #ededf3;
+  --color-surface-container-high: #e8e8ed;
+  --color-surface-container-highest: #e2e2e8;
+  --color-surface-dim: #d9d9df;
+  --color-surface-bright: #f9f9ff;
+  --color-surface: #f9f9ff;
+  --color-surface-tint: #4d44e3;
+  --color-surface-variant: #e2e2e8;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --color-on-surface: #1a1c20;
+  --color-on-surface-variant: #42404e;
+  --color-on-background: #1a1c20;
+  --color-inverse-surface: #2f3035;
+  --color-inverse-on-surface: #f0f0f6;
+  --color-inverse-primary: #c3c0ff;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --color-primary: #4f46e5;
+  --color-primary-container: #eef2ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #4338ca;
+  --color-on-primary-fixed: #0f0069;
+  --color-on-primary-fixed-variant: #3323cc;
+  --color-primary-fixed: #e2dfff;
+  --color-primary-fixed-dim: #c3c0ff;
+
+  --color-secondary: #5c5f60;
+  --color-secondary-container: #dee0e2;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #606365;
+  --color-on-secondary-fixed: #191c1e;
+  --color-on-secondary-fixed-variant: #444749;
+  --color-secondary-fixed: #e1e2e4;
+  --color-secondary-fixed-dim: #c5c7c8;
+
+  --color-tertiary: #7e3000;
+  --color-tertiary-container: #a44100;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #ffd2be;
+  --color-on-tertiary-fixed: #351000;
+  --color-on-tertiary-fixed-variant: #7b2f00;
+  --color-tertiary-fixed: #ffdbcc;
+  --color-tertiary-fixed-dim: #ffb695;
+
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  --color-outline: #625f70;
+  --color-outline-variant: #b6b3c4;
+
+  /* ── Font families (Inter only ── */
+  --font-headline-xl: "Inter", sans-serif;
+  --font-headline-lg: "Inter", sans-serif;
+  --font-headline-lg-mobile: "Inter", sans-serif;
+  --font-headline-md: "Inter", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-label-md: "Inter", sans-serif;
+  --font-label-sm: "Inter", sans-serif;
+  --font-label-sm-mobile: "Inter", sans-serif;
+
+  /* ── Font sizes ── */
+  --text-headline-xl: 36px;
+  --text-headline-xl-leading: 44px;
+  --text-headline-xl-tracking: -0.02em;
+
+  --text-headline-lg: 24px;
+  --text-headline-lg-leading: 32px;
+
+  --text-headline-lg-mobile: 20px;
+  --text-headline-lg-mobile-leading: 28px;
+
+  --text-headline-md: 20px;
+  --text-headline-md-leading: 28px;
+
+  --text-headline-sm: 16px;
+  --text-headline-sm-leading: 24px;
+
+  --text-body-lg: 16px;
+  --text-body-lg-leading: 24px;
+
+  --text-body-md: 14px;
+  --text-body-md-leading: 20px;
+
+  --text-body-sm: 13px;
+  --text-body-sm-leading: 18px;
+
+  --text-label-md: 12px;
+  --text-label-md-leading: 16px;
+  --text-label-md-tracking: 0.02em;
+
+  --text-label-sm: 11px;
+  --text-label-sm-leading: 14px;
+
+  --text-label-sm-mobile: 11px;
+  --text-label-sm-mobile-leading: 14px;
+
+  /* ── Spacing ── */
+  --spacing-xs: 4px;
+  --spacing-sm: 12px;
+  --spacing-base: 8px;
+  --spacing-md: 24px;
+  --spacing-lg: 48px;
+  --spacing-xl: 80px;
+  --spacing-gutter: 16px;
+  --spacing-margin-mobile: 16px;
+  --spacing-margin-desktop: 40px;
+
+  /* ── Border radius ── */
+  --radius-sm: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
+/* ── body styles ─────────────────────────────────────────────── */
 body {
-  margin: 0;
+  background-color: var(--color-surface);
+  font-family: var(--font-body-md);
+  overflow-x: hidden;
+  min-height: 100dvh;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
+/* Solid indigo/purple surfaces always carry white text.
+   Declared in a mid layer so explicit text utilities still win,
+   but a stripped `text-primary-foreground` can never leave it black. */
+@layer components {
+  .bg-primary,
+  .bg-primary\/90,
+  .bg-primary\/80,
+  .bg-primary\/70,
+  .bg-indigo-600 {
+    color: var(--color-primary-foreground);
+  }
+}
+
+/* Clickable elements always show a pointer cursor */
+button,
+[role="button"],
+a,
+select,
+input[type="checkbox"],
+input[type="radio"],
+summary,
+label[for] {
+  cursor: pointer;
+}
+button:disabled,
+[role="button"][aria-disabled="true"],
+select:disabled,
+input:disabled {
+  cursor: not-allowed;
+}
+
+/* ── Utility classes from HTML design ────────────────────────── */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  vertical-align: middle;
+}
+
+.nudge-hover:hover {
+  transform: translateY(-2px) scale(1.01);
+  transition: all 0.2s ease;
+}
+
+.upload-zone {
+  border: 1px dashed var(--color-outline-variant);
+  background-color: var(--color-surface-container-low);
+  transition: all 0.2s ease;
+}
+
+.upload-zone:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-accent);
+}
+
+/* ── Font weight utilities for headline/body tokens ──────────── */
+.font-headline-xl,
+.font-headline-lg,
+.font-headline-lg-mobile,
+.font-headline-md,
+.font-headline-sm {
+  font-weight: 600;
+}
+
+.font-label-md {
   font-weight: 500;
-  color: var(--text-h);
+  letter-spacing: 0.02em;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+.font-label-sm,
+.font-label-sm-mobile {
+  font-weight: 500;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
+.font-body-lg,
+.font-body-md,
+.font-body-sm {
+  font-weight: 400;
+}
+
+/* ── Responsive adjustments ──────────────────────────────────── */
+@media (min-width: 768px) {
+  .md\:hidden {
+    display: none !important;
+  }
+}
+
+/* Safe area padding for mobile bottom nav */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Attendance charts ─────────────────────────────────────── */
+@keyframes heatmap-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.form-input-focus:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-accent);
+}
+
+.btn-hover-arrow:hover span[data-icon="arrow_forward"] {
+  transform: translateX(4px);
+}
+
+/* Custom scrollbar for clean UI */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
   border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
 }

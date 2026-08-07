@@ -1,0 +1,34 @@
+{
+  "projectId": "5189699912508134907",
+  "title": "EduAI Management Assistant",
+  "deviceType": "DESKTOP",
+  "Last Sync Time": "2026-07-21T11:10:00.000000Z",
+  "screens": {
+    "signup-desktop": {
+      "id": "4694c805475a434cb960aa5073c95508",
+      "label": "Signup - Desktop (Split Layout)",
+      "sourceScreen": "projects/5189699912508134907/screens/4694c805475a434cb960aa5073c95508",
+      "width": 2560,
+      "height": 1142
+    },
+    "classes-teacher-portal": {
+      "id": "8342c683ddb24ba3bae848fb8c660bdf",
+      "label": "Classes - Teacher Portal",
+      "sourceScreen": "projects/5189699912508134907/screens/8342c683ddb24ba3bae848fb8c660bdf",
+      "width": 2560,
+      "height": 3314
+    },
+    "submissions-queue-desktop": {
+      "id": "4ccbd18fac0a4dff94bf3c426675dc90",
+      "label": "Submissions Queue - Desktop",
+      "sourceScreen": "projects/5189699912508134907/screens/4ccbd18fac0a4dff94bf3c426675dc90",
+      "width": 2560,
+      "height": 2048,
+      "canvasPosition": {
+        "x": 17645,
+        "y": -967,
+        "instanceId": "62bddb89a2f4452d8cccbb52d64f8bb3"
+      }
+    }
+  }
+}
