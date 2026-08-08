@@ -5,6 +5,7 @@ import { SubscriptionBanner } from "@/components/billing/SubscriptionBanner"
 
 const navItems = [
   { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/student" },
+  { icon: "calendar_month", label: "Timetable", id: "timetable", href: "/student/timetable" },
   { icon: "school", label: "Classes", id: "classes", href: "/student/classes" },
   { icon: "assignment", label: "Assignments", id: "assignments", href: "/student/assignments" },
   { icon: "auto_awesome", label: "Homework Help", id: "homework-help", href: "/student/homework-help" },
@@ -25,6 +26,7 @@ export function StudentLayout() {
   const path = location.pathname
 
   const activeItem = path === "/student" ? "dashboard"
+    : path.startsWith("/student/timetable") ? "timetable"
     : path.startsWith("/student/classes") ? "classes"
     : path.startsWith("/student/assignments") ? "assignments"
     : path.startsWith("/student/submissions") ? "assignments"

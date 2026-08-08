@@ -9,6 +9,7 @@ import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
 import { renderReportSection } from "@/lib/report-sections"
 import { Badge } from "@/components/ui/badge"
+import { WeeklyTimetableGrid } from "@/components/timetable/WeeklyTimetableGrid"
 import {
   Table,
   TableBody,
@@ -18,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-type Tab = "grades" | "attendance" | "reports"
+type Tab = "grades" | "attendance" | "reports" | "schedule"
 
 const statusStyles: Record<string, string> = {
   PRESENT: "bg-primary-fixed/30 text-primary",
@@ -49,6 +50,27 @@ export function ChildDetailPage() {
     enabled: !!id,
   })
 
+  const studentClasses = useQuery({
+    queryKey: ["student", "classes", id],
+    queryFn: () => api.getStudentClasses(id!),
+    enabled: !!id,
+  })
+
+  const sectionIds = (studentClasses.data ?? []).map((s) => s.id)
+
+  const timetable = useQuery({
+    queryKey: ["timetable", "student-sections", sectionIds.join(",")],
+    queryFn: async () => {
+      const all: api.TimetableSlotWithOffering[] = []
+      for (const sectionId of sectionIds) {
+        const list = await api.getSectionTimetable(sectionId)
+        all.push(...list)
+      }
+      return all
+    },
+    enabled: sectionIds.length > 0,
+  })
+
   if (grades.isError && attendance.isError) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
@@ -68,6 +90,7 @@ export function ChildDetailPage() {
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: "grades", label: "Grades", icon: "grade" },
     { id: "attendance", label: "Attendance", icon: "calendar_today" },
+    { id: "schedule", label: "Schedule", icon: "calendar_month" },
     { id: "reports", label: "Reports", icon: "description" },
   ]
 
@@ -162,6 +185,22 @@ export function ChildDetailPage() {
                 </TableBody>
               </Table>
             </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "schedule" && (
+        <div>
+          {studentClasses.isLoading ? (
+            <LoadingState className="w-full" />
+          ) : sectionIds.length === 0 ? (
+            <EmptyState icon="calendar_month" title="Not enrolled in any classes" description="This student is not enrolled in any classes yet." />
+          ) : timetable.isLoading ? (
+            <LoadingState className="w-full" />
+          ) : !timetable.data || timetable.data.length === 0 ? (
+            <EmptyState icon="calendar_month" title="No classes scheduled" description="The school hasn't published a timetable for these classes yet." />
+          ) : (
+            <WeeklyTimetableGrid slots={timetable.data} showSection />
           )}
         </div>
       )}

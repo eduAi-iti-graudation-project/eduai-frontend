@@ -6,6 +6,7 @@ import { LoginPage } from "./pages/LoginPage"
 import { SignupPage } from "./pages/SignupPage"
 import { LandingPage } from "./pages/LandingPage"
 import { TeacherDashboardPage } from "./pages/TeacherDashboardPage"
+import { TimetablePage } from "./pages/teacher/TimetablePage"
 import { ClassesPage } from "./pages/teacher/ClassesPage"
 import { GradeListPage } from "./pages/teacher/GradeListPage"
 import { ClassesInGradePage } from "./pages/teacher/ClassesInGradePage"
@@ -28,6 +29,7 @@ import { StudentDetailPage } from "./pages/teacher/StudentDetailPage"
 import { AttendanceImportPage } from "./pages/teacher/AttendanceImportPage"
 import { ReportsPage } from "./pages/ReportsPage"
 import { StudentDashboardPage } from "./pages/student/StudentDashboardPage"
+import { StudentTimetablePage } from "./pages/student/StudentTimetablePage"
 import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage"
 import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
 import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
@@ -50,6 +52,7 @@ import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
 import { ChildDetailPage } from "./pages/guardian/ChildDetailPage"
 import { AdminLayout } from "./components/layout/AdminLayout"
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage"
+import { AdminTimetablePage } from "./pages/admin/AdminTimetablePage"
 import { AdminAssistantPage } from "./pages/admin/AdminAssistantPage"
 import { AdminBillingPage } from "./pages/admin/AdminBillingPage"
 import { AdminRequestsPage } from "./pages/admin/AdminRequestsPage"
@@ -66,6 +69,7 @@ import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const TEACHER_ROUTES = [
   { path: "/dashboard", element: <TeacherDashboardPage /> },
+  { path: "/timetable", element: <TimetablePage /> },
   { path: "/classes", element: <ClassesPage /> },
   { path: "/grades", element: <GradeListPage /> },
   { path: "/grades/:gradeId", element: <ClassesInGradePage /> },
@@ -99,6 +103,7 @@ export const TEACHER_ROUTES = [
 
 export const STUDENT_ROUTES = [
   { path: "/student", element: <StudentDashboardPage /> },
+  { path: "/student/timetable", element: <StudentTimetablePage /> },
   { path: "/student/classes", element: <AvailableClassesPage /> },
   { path: "/student/classes/:classId", element: <StudentClassGradesPage /> },
   { path: "/student/classes/:classId/assignments/:assignmentId", element: <StudentAssignmentGradePage /> },
@@ -164,6 +169,7 @@ export function adminRoutes() {
     element: <AdminRoute><AdminLayout /></AdminRoute>,
     children: [
       { index: true, element: <AdminDashboardPage /> },
+      { path: "timetable", element: <AdminTimetablePage /> },
       { path: "assistant", element: <AdminAssistantPage /> },
       { path: "alerts", element: <AdminAlertsPage /> },
       { path: "grades", element: <GradeManagementPage /> },

@@ -1643,3 +1643,81 @@ export async function regenerateJoinCode(): Promise<Organization> {
   const res = await api.post<Organization>("/organizations/me/join-code")
   return res.data
 }
+
+// ── Timetable ─────────────────────────────────────────────────────
+
+export type DayOfWeek = components["schemas"]["TimetableSlotDto"]["dayOfWeek"]
+
+export const DAY_ORDER: DayOfWeek[] = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+]
+
+export type TimetableSlot = components["schemas"]["TimetableSlotDto"]
+export type TimetableSlotWithOffering = components["schemas"]["TimetableSlotWithOfferingDto"]
+export type CreateTimetableSlotData = components["schemas"]["CreateTimetableSlotDto"]
+export type UpdateTimetableSlotData = components["schemas"]["UpdateTimetableSlotDto"]
+export type SlotConflict = NonNullable<components["schemas"]["CheckConflictResultDto"]["conflict"]>
+
+export interface CourseOffering {
+  id: string
+  course: { id: string; name: string; colorTag: string | null }
+  section: { id: string; name: string; gradeLevelId: string }
+  teacher: { id: string; name: string }
+}
+
+export async function getOfferings(): Promise<CourseOffering[]> {
+  const res = await api.get<CourseOffering[]>("/offerings")
+  return res.data
+}
+
+export async function getAllTimetableSlots(): Promise<TimetableSlotWithOffering[]> {
+  const res = await api.get<TimetableSlotWithOffering[]>("/timetable/slots")
+  return res.data
+}
+
+export async function getSectionTimetable(sectionId: string): Promise<TimetableSlotWithOffering[]> {
+  const res = await api.get<TimetableSlotWithOffering[]>(`/timetable/sections/${sectionId}`)
+  return res.data
+}
+
+export async function getTeacherTimetable(teacherId: string): Promise<TimetableSlotWithOffering[]> {
+  const res = await api.get<TimetableSlotWithOffering[]>(`/timetable/teachers/${teacherId}`)
+  return res.data
+}
+
+export async function createTimetableSlot(data: CreateTimetableSlotData): Promise<TimetableSlot> {
+  const res = await api.post<TimetableSlot>("/timetable/slots", data)
+  return res.data
+}
+
+export async function updateTimetableSlot(
+  id: string,
+  data: UpdateTimetableSlotData,
+): Promise<TimetableSlot> {
+  const res = await api.patch<TimetableSlot>(`/timetable/slots/${id}`, data)
+  return res.data
+}
+
+export async function deleteTimetableSlot(id: string): Promise<void> {
+  await api.delete(`/timetable/slots/${id}`)
+}
+
+export async function checkTimetableConflict(params: {
+  courseOfferingId: string
+  day: DayOfWeek
+  start: string
+  end: string
+  excludeSlotId?: string
+}): Promise<{ conflict: SlotConflict | null }> {
+  const res = await api.get<{ conflict: SlotConflict | null }>(
+    "/timetable/slots/check-conflict",
+    { params },
+  )
+  return res.data
+}
