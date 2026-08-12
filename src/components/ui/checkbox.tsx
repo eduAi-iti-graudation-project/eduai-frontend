@@ -10,6 +10,7 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
   ({ className, checked, onCheckedChange, disabled, ...props }, ref) => (
     <button
       ref={ref}
+      type="button"
       role="checkbox"
       aria-checked={checked}
       disabled={disabled}

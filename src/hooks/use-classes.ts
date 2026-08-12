@@ -1,21 +1,36 @@
+import { useMemo } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import * as api from "@/lib/api"
 import { useAuth } from "@/providers/use-auth"
+import * as api from "@/lib/api"
 import { toast } from "sonner"
 
 export function useClasses() {
   const queryClient = useQueryClient()
+  const { user } = useAuth()
 
   const classes = useQuery({
     queryKey: ["classes"],
     queryFn: api.getClasses,
   })
 
-  const { user } = useAuth()
+  const offerings = useQuery({
+    queryKey: ["teacher-offerings", user?.id],
+    queryFn: () => api.getTeacherOfferings(user!.id),
+    enabled: !!user?.id,
+  })
+
+  const taughtSectionIds = useMemo(
+    () => new Set((offerings.data ?? []).map((o) => o.section.id)),
+    [offerings.data],
+  )
 
   const createClass = useMutation({
-    mutationFn: (data: { name: string; description?: string }) =>
-      api.createClass({ ...data, teacherId: user?.id ?? "" }),
+    mutationFn: (data: { name: string; description?: string; gradeLevelId?: string }) =>
+      api.createClass({
+        name: data.name,
+        description: data.description,
+        gradeLevelId: data.gradeLevelId ?? "",
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] })
       toast.success("Class created")
@@ -72,18 +87,24 @@ export function useClasses() {
     },
   })
 
-  return {
-    classes,
-    isLoading: classes.isLoading,
-    isError: classes.isError,
-    error: classes.error,
-    classCards: (classes.data ?? []).map((c) => ({
+  const classCards = (classes.data ?? [])
+    .filter((c) => taughtSectionIds.has(c.id))
+    .map((c) => ({
       id: c.id,
       name: c.name,
       section: c.description ?? "No description",
+      courses: c.courses ?? [],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      students: (c as any).enrollments?.length ?? 0,
-    })),
+      students: c._count?.enrollments ?? (c as any).enrollments?.length ?? 0,
+    }))
+
+  return {
+    classes,
+    isLoading: classes.isLoading || offerings.isLoading,
+    isError: classes.isError || offerings.isError,
+    error: classes.error ?? offerings.error,
+    classCards,
+    taughtSectionCount: taughtSectionIds.size,
     createClass,
     updateClass,
     deleteClass,
@@ -137,7 +158,7 @@ export function useClassDetail(id: string) {
 
   const createAssignment = useMutation({
     mutationFn: (data: { title: string; description?: string; dueDate: string; totalPoints: number }) =>
-      api.createAssignment({ ...data, classId: id }),
+      api.createAssignment({ ...data, courseOfferingId: id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assignments", id] })
       queryClient.invalidateQueries({ queryKey: ["assignments"] })

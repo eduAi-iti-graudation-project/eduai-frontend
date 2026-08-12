@@ -1,18 +1,24 @@
+import { useState } from "react"
 import { Outlet, Link, useLocation } from "react-router-dom"
 import { MobileNav } from "./MobileNav"
 import { TopNavBar } from "./TopNavBar"
+import { GlobalSearchBox } from "./GlobalSearchBox"
 import { SubscriptionBanner } from "@/components/billing/SubscriptionBanner"
 
 const navItems = [
   { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/student" },
-  { icon: "school", label: "Classes", id: "classes", href: "/student/classes" },
+  { icon: "calendar_month", label: "Timetable", id: "timetable", href: "/student/timetable" },
+  { icon: "school", label: "Sections", id: "classes", href: "/student/classes" },
   { icon: "assignment", label: "Assignments", id: "assignments", href: "/student/assignments" },
   { icon: "auto_awesome", label: "Homework Help", id: "homework-help", href: "/student/homework-help" },
+  { icon: "auto_stories", label: "Study Lab", id: "study-lab", href: "/student/study-lab" },
+  { icon: "science", label: "Lab Simulations", id: "labs", href: "/student/labs" },
   { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/student/quizzes" },
   { icon: "grade", label: "My Grades", id: "grades", href: "/student/grades" },
   { icon: "monitoring", label: "Insights", id: "insights", href: "/student/insights" },
   { icon: "chat_bubble", label: "Messages", id: "chat", href: "/student/chat" },
   { icon: "calendar_today", label: "Attendance", id: "attendance", href: "/student/attendance" },
+  { icon: "video_camera_front", label: "Meetings", id: "meetings", href: "/student/meetings" },
   { icon: "notifications", label: "Notifications", id: "notifications", href: "/student/notifications" },
 ]
 
@@ -22,24 +28,29 @@ const bottomItems = [
 
 export function StudentLayout() {
   const location = useLocation()
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const path = location.pathname
 
   const activeItem = path === "/student" ? "dashboard"
+    : path.startsWith("/student/timetable") ? "timetable"
     : path.startsWith("/student/classes") ? "classes"
     : path.startsWith("/student/assignments") ? "assignments"
     : path.startsWith("/student/submissions") ? "assignments"
     : path.startsWith("/student/grades") ? "grades"
     : path.startsWith("/student/attendance") ? "attendance"
+    : path.startsWith("/student/meetings") ? "meetings"
     : path.startsWith("/student/insights") ? "insights"
     : path.startsWith("/student/chat") ? "chat"
     : path.startsWith("/student/homework-help") ? "homework-help"
+    : path.startsWith("/student/study-lab") ? "study-lab"
+    : path.startsWith("/student/labs") ? "labs"
     : path.startsWith("/student/quizzes") ? "quizzes"
     : path.startsWith("/student/notifications") ? "notifications"
     : path.startsWith("/student/settings") ? "settings"
     : "dashboard"
 
   return (
-    <div className="flex min-h-screen bg-surface-container-low">
+    <div className="flex h-dvh overflow-hidden bg-surface-container-low">
       {/* Mobile Header */}
       <header className="md:hidden flex items-center justify-between px-margin-mobile py-4 bg-surface-container-lowest border-b border-border">
         <div className="flex items-center gap-2">
@@ -49,8 +60,19 @@ export function StudentLayout() {
           <h1 className="font-headline-md text-headline-md text-on-surface font-bold">EduAI</h1>
         </div>
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-on-surface-variant">search</span>
-          <Link to="/notifications" className="material-symbols-outlined text-on-surface-variant">notifications</Link>
+          {mobileSearchOpen ? (
+            <GlobalSearchBox className="w-48 sm:w-64" />
+          ) : (
+            <button
+              type="button"
+              className="material-symbols-outlined text-on-surface-variant p-1 cursor-pointer"
+              aria-label="Search"
+              onClick={() => setMobileSearchOpen(true)}
+            >
+              search
+            </button>
+          )}
+          <Link to="/student/notifications" className="material-symbols-outlined text-on-surface-variant">notifications</Link>
         </div>
       </header>
 
@@ -103,10 +125,10 @@ export function StudentLayout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0">
         <TopNavBar />
         <SubscriptionBanner />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 min-h-0 overflow-y-auto">
           <Outlet />
         </main>
       </div>

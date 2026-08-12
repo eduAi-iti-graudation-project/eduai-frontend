@@ -1,26 +1,23 @@
 import { useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useClassDetail } from "@/hooks/use-classes"
-import { useMaterials } from "@/hooks/use-materials"
 import { useClassAttendance } from "@/hooks/use-attendance"
 import { useCreateChatThread } from "@/hooks/use-chat-threads"
-import { FileDropzone } from "@/components/ui/FileDropzone"
+import { useAuth } from "@/providers/use-auth"
+import { ClassMaterialsTab } from "./ClassMaterialsTab"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
-import * as api from "@/lib/api"
 
-type TabId = "students" | "assignments" | "materials" | "attendance" | "requests"
+type TabId = "students" | "assignments" | "materials" | "attendance"
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "students", label: "Students" },
   { id: "assignments", label: "Assignments" },
   { id: "materials", label: "Materials" },
   { id: "attendance", label: "Attendance" },
-  { id: "requests", label: "Requests" },
 ]
 
 function getInitials(name: string): string {
@@ -42,16 +39,12 @@ const ATTENDANCE_STYLES: Record<string, string> = {
 export function ClassDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<TabId>("students")
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [pendingFile, setPendingFile] = useState<File | null>(null)
-  const [uploadTitle, setUploadTitle] = useState("")
-  const [uploadProgress, setUploadProgress] = useState(0)
   const [studentQuery, setStudentQuery] = useState("")
 
+  const { user } = useAuth()
   const { detail, assignments, isLoading, isError, error, deleteClass, removeEnrollment } = useClassDetail(id ?? "")
-  const { materials, upload, remove: removeMaterial } = useMaterials(id ?? "")
   const attendanceQuery = useClassAttendance(id ?? "")
   const createThread = useCreateChatThread()
 
@@ -80,69 +73,22 @@ export function ClassDetailPage() {
     await removeEnrollment.mutateAsync(studentId)
   }
 
-  const requestsQuery = useQuery({
-    queryKey: ["class", "requests", id],
-    queryFn: () => api.getClassRequests(id!),
-    enabled: !!id,
-  })
-
-  const pendingRequests = (requestsQuery.data ?? []).length
-
-  const approveMutation = useMutation({
-    mutationFn: (enrollmentId: string) => api.approveEnrollment(enrollmentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class", "requests", id] })
-      queryClient.invalidateQueries({ queryKey: ["class", id] })
-      queryClient.invalidateQueries({ queryKey: ["classes"] })
-      toast.success("Enrollment approved")
-    },
-    onError: (err: Error) => toast.error(err.message),
-  })
-
-  const rejectMutation = useMutation({
-    mutationFn: (enrollmentId: string) => api.rejectEnrollment(enrollmentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["class", "requests", id] })
-      queryClient.invalidateQueries({ queryKey: ["class", id] })
-      queryClient.invalidateQueries({ queryKey: ["classes"] })
-      toast.success("Enrollment rejected")
-    },
-    onError: (err: Error) => toast.error(err.message),
-  })
-
-  const handleUploadMaterial = (file: File) => {
-    const base = file.name.replace(/\.pdf$/i, "")
-    setUploadTitle(base)
-    setPendingFile(file)
-    setUploadProgress(0)
-  }
-
-  const handleUpload = async () => {
-    if (!pendingFile || !uploadTitle.trim()) return
-    try {
-      await upload.mutateAsync({ title: uploadTitle.trim(), file: pendingFile, onProgress: setUploadProgress })
-      toast.success("Material uploaded")
-    } catch (err) {
-      toast.error(api.getErrorMessage(err))
-    } finally {
-      setPendingFile(null)
-      setUploadTitle("")
-      setUploadProgress(0)
-    }
-  }
-
-  const handleRemoveMaterial = async (materialId: string) => {
-    try {
-      await removeMaterial.mutateAsync(materialId)
-      toast.success("Material deleted")
-    } catch (err) {
-      toast.error(api.getErrorMessage(err))
-    }
+  const resolveCourseOfferingId = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const offerings: any[] = (cls as any)?.offerings ?? []
+    return offerings.find((o) => o.teacher?.id === user?.id)?.id ?? offerings[0]?.id
   }
 
   const messageStudent = (studentId: string) => {
+    const courseOfferingId = resolveCourseOfferingId()
+
+    if (!courseOfferingId) {
+      toast.error("This class has no course/teacher assigned yet.")
+      return
+    }
+
     createThread.mutate(
-      { classId: id as string, studentId },
+      { courseOfferingId, studentId },
       {
         onSuccess: (thread) => navigate(`/chat/${thread.id}`),
         onError: (err: Error) => toast.error(err.message),
@@ -270,79 +216,7 @@ export function ClassDetailPage() {
         )
 
       case "materials":
-        return (
-          <div className="space-y-md">
-            <h3 className="font-headline-sub text-headline-sub text-on-surface">Materials</h3>
-
-            <div className="bg-surface-container-lowest rounded-lg p-md border border-outline-variant">
-              <h4 className="font-label-md text-label-md text-on-surface mb-sm">Upload Material</h4>
-              <FileDropzone
-                accept=".pdf"
-                onFileSelect={handleUploadMaterial}
-                isUploading={upload.isPending}
-                uploadProgress={uploadProgress}
-              />
-              {pendingFile && (
-                <div className="mt-sm space-y-sm">
-                  <input
-                    type="text"
-                    value={uploadTitle}
-                    onChange={(e) => setUploadTitle(e.target.value)}
-                    placeholder="Material title"
-                    disabled={upload.isPending}
-                    className="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:outline-none disabled:opacity-60"
-                  />
-                  <div className="flex items-center gap-sm">
-                    <p className="font-label-sm text-label-sm text-on-surface-variant flex-1 truncate">{pendingFile.name}</p>
-                    <Button
-                      type="button"
-                      onClick={handleUpload}
-                      disabled={upload.isPending || !uploadTitle.trim()}
-                      className="h-auto px-md py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 transition-colors disabled:opacity-50"
-                    >
-                      {upload.isPending ? "Uploading..." : "Upload"}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {materials.length === 0 ? (
-              <EmptyState icon="folder" title="No materials uploaded" description="Upload a PDF to make it searchable for students" />
-            ) : (
-              <div className="space-y-sm">
-                {materials.map((m) => (
-                  <div key={m.id} className="bg-surface-container-lowest rounded-lg p-md border border-outline-variant flex items-center justify-between group">
-                    <div className="flex items-center gap-md">
-                      <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
-                        <span className="material-symbols-outlined">description</span>
-                      </div>
-                      <div>
-                        <h4 className="font-label-md text-label-md text-on-surface">{m.title}</h4>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant">{new Date(m.createdAt).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-sm">
-                      {m.fileUrl && (
-                        <Button asChild className="h-auto px-md py-2 bg-surface border border-outline-variant text-on-surface-variant font-label-sm text-label-sm rounded-md hover:bg-surface-container-high transition-colors">
-                          <a href={m.fileUrl} target="_blank" rel="noreferrer">View</a>
-                        </Button>
-                      )}
-                      <Button
-                        type="button"
-                        onClick={() => handleRemoveMaterial(m.id)}
-                        className="h-auto w-auto p-2 text-on-surface-variant hover:text-error transition-colors"
-                        title="Delete"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )
+        return <ClassMaterialsTab classId={cls!.id} />
 
       case "attendance":
         return (
@@ -393,56 +267,6 @@ export function ClassDetailPage() {
             )}
           </div>
         )
-
-      case "requests":
-        return (
-          <div className="space-y-md">
-            <h3 className="font-headline-sub text-headline-sub text-on-surface">Enrollment Requests</h3>
-
-            {requestsQuery.isLoading ? (
-              <div className="space-y-2">
-                {[1, 2].map((i) => (
-                  <div key={i} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant animate-pulse">
-                    <div className="h-5 w-48 bg-surface-variant rounded-lg mb-2" />
-                    <div className="h-4 w-32 bg-surface-variant rounded-lg" />
-                  </div>
-                ))}
-              </div>
-            ) : (requestsQuery.data ?? []).length === 0 ? (
-              <EmptyState icon="person_add" title="No pending requests" description="Students can request to join this class from their portal." />
-            ) : (
-              <div className="space-y-2">
-                {(requestsQuery.data ?? []).map((req) => (
-                  <div key={req.id} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant flex items-center justify-between">
-                    <div>
-                      <p className="font-label-md text-label-md text-on-surface">{req.student.name}</p>
-                      <p className="font-label-sm text-label-sm text-on-surface-variant">{req.student.email}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => rejectMutation.mutate(req.id)}
-                        disabled={rejectMutation.isPending}
-                        className="h-auto px-md py-sm border border-error text-error font-label-sm text-sm rounded-md hover:bg-error-container transition-colors disabled:opacity-50"
-                      >
-                        Reject
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={() => approveMutation.mutate(req.id)}
-                        disabled={approveMutation.isPending}
-                        className="h-auto px-md py-sm rounded-md bg-primary text-on-primary font-label-sm text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
-                      >
-                        Approve
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )
     }
   }
 
@@ -460,15 +284,17 @@ export function ClassDetailPage() {
   }
 
   if (isLoading || !cls) {
-    return <LoadingState label="Loading class..." />
+    return <LoadingState label="Loading section..." />
   }
+
+  const assistantOfferingId = resolveCourseOfferingId()
 
   return (
     <div className="min-h-full bg-surface-container-low">
       <div className="mx-auto w-full max-w-6xl p-gutter pb-24 md:pb-0">
         <Link to="/classes" className="inline-flex items-center gap-1 text-on-surface-variant hover:text-primary font-body-md text-sm mb-4 transition-colors">
           <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          Back to Classes
+          Back to Sections
         </Link>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-md">
@@ -480,7 +306,7 @@ export function ClassDetailPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button asChild className="flex items-center gap-2 px-4 py-2 h-auto rounded-md bg-primary text-on-primary font-body-medium text-sm hover:bg-primary/90 transition-colors shadow-sm">
-              <Link to="/assistant">
+              <Link to={assistantOfferingId ? `/assistant?offeringId=${assistantOfferingId}` : "/assistant"}>
                 <span className="material-symbols-outlined text-[18px]">smart_toy</span>
                 AI Assistant
               </Link>
@@ -507,9 +333,6 @@ export function ClassDetailPage() {
                 }`}
               >
                 {tab.label}
-                {tab.id === "requests" && pendingRequests > 0 && (
-                  <span className="inline-flex ml-2 w-2 h-2 bg-primary rounded-full align-middle" />
-                )}
               </button>
             ))}
           </div>

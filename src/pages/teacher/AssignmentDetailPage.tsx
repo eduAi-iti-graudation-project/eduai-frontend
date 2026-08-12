@@ -27,7 +27,7 @@ export function AssignmentDetailPage() {
   const subs = submissionsQuery.data ?? []
   const rubricList = rubricsQuery.data ?? []
   const confirmedRubric = rubricList.find((r) => r.isConfirmed)
-  const classId = assignment?.classId
+  const classId = assignment?.courseOfferingId
 
   const submittedCount = subs.filter((s) => s.status === "SUBMITTED").length
   const gradedCount = subs.filter(

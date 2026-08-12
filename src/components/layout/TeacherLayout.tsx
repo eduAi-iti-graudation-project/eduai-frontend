@@ -6,12 +6,12 @@ import { SubscriptionBanner } from "@/components/billing/SubscriptionBanner"
 
 export function TeacherLayout() {
   return (
-    <div className="min-h-screen bg-surface-container-low">
+    <div className="h-dvh overflow-hidden bg-surface-container-low">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-h-screen md:pl-[280px]">
+      <div className="flex h-full flex-col md:pl-[280px]">
         <TopNavBar />
         <SubscriptionBanner />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 min-h-0 overflow-y-auto">
           <Outlet />
         </main>
       </div>

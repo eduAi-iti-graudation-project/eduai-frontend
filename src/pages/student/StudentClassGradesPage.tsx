@@ -22,6 +22,28 @@ export function StudentClassGradesPage() {
 
   const cls = studentClasses?.find((c) => c.id === classId)
 
+  const { data: classDetail } = useQuery({
+    queryKey: ["class", classId],
+    queryFn: () => api.getClass(classId!),
+    enabled: !!classId,
+  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const courseOfferingId = (classDetail as any)?.offerings?.[0]?.id as string | undefined
+
+  const messageTeacher = () => {
+    if (!courseOfferingId) {
+      toast.error("This section has no course/teacher assigned yet.")
+      return
+    }
+    createThread.mutate(
+      { courseOfferingId },
+      {
+        onSuccess: (thread) => navigate(`/student/chat/${thread.id}`),
+        onError: (err: Error) => toast.error(err.message),
+      },
+    )
+  }
+
   const { data: grades, isLoading: gradesLoading } = useQuery({
     queryKey: ["student-grades", user?.id],
     queryFn: () => api.getStudentGrades(user!.id),
@@ -54,7 +76,7 @@ export function StudentClassGradesPage() {
   if (!cls) {
     return (
       <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
-        <EmptyState icon="school" title="Class not found" description="This class doesn't exist or you're not enrolled." />
+        <EmptyState icon="school" title="Section not found" description="This section doesn't exist or you're not enrolled." />
       </div>
     )
   }
@@ -77,27 +99,31 @@ export function StudentClassGradesPage() {
             <p className="font-label-sm text-label-sm text-on-surface-variant">Teacher</p>
             <p className="font-body-md text-body-md text-on-surface">{cls.teacherName}</p>
           </div>
-          <Button
-            onClick={() =>
-              createThread.mutate(
-                { classId: classId as string },
-                {
-                  onSuccess: (thread) => navigate(`/student/chat/${thread.id}`),
-                  onError: (err: Error) => toast.error(err.message),
-                },
-              )
-            }
-            disabled={createThread.isPending}
-            className="rounded-lg shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
-            Message
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              asChild
+              variant="outline"
+              className="rounded-lg shrink-0"
+            >
+              <Link to={`/student/classes/${classId}/materials`}>
+                <span className="material-symbols-outlined text-[18px]">folder_open</span>
+                Materials
+              </Link>
+            </Button>
+            <Button
+              onClick={messageTeacher}
+              disabled={createThread.isPending}
+              className="rounded-lg shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
+              Message
+            </Button>
+          </div>
         </div>
       </div>
 
       {cls.assignments.length === 0 ? (
-        <EmptyState icon="assignment" title="No assignments yet" description="This class doesn't have any assignments." />
+        <EmptyState icon="assignment" title="No assignments yet" description="This section doesn't have any assignments yet." />
       ) : (
         <div className="space-y-3">
           {cls.assignments.map((assignment) => {

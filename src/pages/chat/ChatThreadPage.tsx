@@ -135,7 +135,7 @@ export function ChatThreadPage() {
         </div>
       )}
 
-      <footer className="border-t border-outline-variant bg-surface-container-lowest p-md">
+      <footer className="border-t border-outline-variant bg-surface-container-lowest p-md mb-24 md:mb-0">
         <div className="flex items-end gap-2 max-w-3xl mx-auto w-full">
           <textarea
             value={draft}

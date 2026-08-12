@@ -6,10 +6,7 @@ import { toast } from "sonner"
 import { useAuth } from "@/providers/use-auth"
 import { loginSchema, type LoginFormData } from "@/lib/validations"
 import { cn } from "@/lib/utils"
-import { RoleToggle } from "./RoleToggle"
 import { SocialLogin } from "./SocialLogin"
-
-type Role = "teacher" | "student"
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -20,7 +17,6 @@ function getGreeting() {
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const [role, setRole] = useState<Role>("teacher")
   const { login } = useAuth()
   const navigate = useNavigate()
 
@@ -61,8 +57,6 @@ export function LoginForm() {
         </p>
       </header>
 
-      <RoleToggle value={role} onChange={setRole} className="mb-6" />
-
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-1.5">
           <label className="text-body-md font-label-md text-on-background ml-1" htmlFor="email">
@@ -96,9 +90,9 @@ export function LoginForm() {
             <label className="text-body-md font-label-md text-on-background" htmlFor="password">
               Password
             </label>
-            <button type="button" className="font-label-sm text-label-sm text-primary hover:underline">
+            <Link to="/forgot-password" className="font-label-sm text-label-sm text-primary hover:underline">
               Forgot password?
-            </button>
+            </Link>
           </div>
           <div
             className={cn(

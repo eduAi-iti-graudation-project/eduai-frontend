@@ -37,7 +37,7 @@ export function useDashboardData() {
   for (const sub of submissionsData) {
     const assignment = assignmentMap.get(sub.assignmentId)
     if (!assignment) continue
-    const classId = assignment.classId
+    const classId = assignment.courseOfferingId
     const existing = submissionsByClass.get(classId) ?? []
     existing.push(sub)
     submissionsByClass.set(classId, existing)
@@ -45,16 +45,13 @@ export function useDashboardData() {
 
   const classCards = classesData.map((c) => {
     const classSubmissions = submissionsByClass.get(c.id) ?? []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const enrollments = ((c as any).enrollments as Array<{ status: string }> | undefined) ?? []
-    const pendingRequests = enrollments.filter((e) => e.status === "PENDING").length
     const confirmed = classSubmissions.filter((s) => s.status === "CONFIRMED").length
     return {
       id: c.id,
       name: c.name,
       section: c.description ?? "No description",
-      students: enrollments.filter((e) => e.status === "APPROVED").length,
-      pending: pendingRequests,
+      students: c._count?.enrollments ?? 0,
+      pending: 0,
       total: classSubmissions.length,
       confirmed,
     }

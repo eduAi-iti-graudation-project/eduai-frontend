@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -159,11 +159,15 @@ export function AdminTeacherDetailPage() {
         <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-5">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3 min-w-0">
-              <Avatar className="h-12 w-12 rounded-full shrink-0">
-                <AvatarFallback className="bg-primary-fixed text-on-primary-fixed-variant font-headline-md text-headline-md">
-                  {initials(profile.name)}
-                </AvatarFallback>
-              </Avatar>
+              {profile.avatarUrl ? (
+                <img src={api.teacherAvatarUrl(profile.id)} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
+              ) : (
+                <Avatar className="h-12 w-12 rounded-full shrink-0">
+                  <AvatarFallback className="bg-primary/10 text-on-primary-fixed-variant font-headline-md text-headline-md">
+                    {initials(profile.name)}
+                  </AvatarFallback>
+                </Avatar>
+              )}
               <div className="min-w-0">
                 <h2 className="font-headline-md text-headline-md text-on-surface leading-none truncate">{profile.name}</h2>
                 <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 truncate">{profile.email}</p>
@@ -206,6 +210,8 @@ export function AdminTeacherDetailPage() {
             <GenderEditor gender={profile.gender} teacherId={profile.id} />
           </div>
         </div>
+
+        <PersonalInfoCard profile={profile} />
 
         <Tabs defaultValue="classes">
           <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-1.5">
@@ -894,6 +900,265 @@ function SalaryEditorDialog({
             className="flex-1 h-auto py-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {saveM.isPending ? "Saving…" : editing ? "Save changes" : "Add record"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function PersonalInfoCard({ profile }: { profile: api.AdminTeacherProfile }) {
+  const qc = useQueryClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [revealedSsn, setRevealedSsn] = useState<string | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [ssnOpen, setSsnOpen] = useState(false)
+
+  const avatarM = useMutation({
+    mutationFn: (file: File) => api.uploadTeacherAvatar(profile.id, file),
+    onSuccess: () => {
+      toast.success("Photo updated")
+      qc.invalidateQueries({ queryKey: ["admin-teacher-profile", profile.id] })
+    },
+    onError: () => toast.error("Could not update the photo"),
+  })
+
+  const revealM = useMutation({
+    mutationFn: () => api.revealTeacherSsn(profile.id),
+    onSuccess: (res) => setRevealedSsn(res.ssn),
+    onError: () => toast.error("Could not reveal the SSN"),
+  })
+
+  const ec = profile.emergencyContact
+  const rows: { label: string; value: string | null; icon: string }[] = [
+    { label: "Phone", value: profile.phone, icon: "call" },
+    { label: "Address", value: profile.street && profile.city ? `${profile.street}, ${profile.city}` : profile.street ?? profile.city, icon: "home" },
+    { label: "Nationality", value: profile.nationality, icon: "travel_explore" },
+    { label: "Personal email", value: profile.personalEmail, icon: "alternate_email" },
+    { label: "Date of birth", value: profile.dateOfBirth ? fmtDate(profile.dateOfBirth) : null, icon: "cake" },
+    { label: "Emergency contact", value: ec.name ? [ec.name, ec.phone, ec.relationship].filter(Boolean).join(" · ") : ec.phone ?? null, icon: "emergency" },
+  ]
+
+  return (
+    <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-5">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <h3 className="font-headline-sm text-headline-sm text-on-surface">Personal info</h3>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" className="rounded-md font-label-md text-label-md" onClick={() => fileInputRef.current?.click()}>
+            <span className="material-symbols-outlined text-[16px]">photo_camera</span>
+            {profile.avatarUrl ? "Change photo" : "Add photo"}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) avatarM.mutate(file)
+              e.target.value = ""
+            }}
+          />
+          <Button variant="outline" size="sm" className="rounded-md font-label-md text-label-md" onClick={() => setEditOpen(true)}>
+            <span className="material-symbols-outlined text-[16px]">edit</span>
+            Edit details
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mt-4">
+        {rows.map((row) => (
+          <div key={row.label} className="flex items-start gap-2 min-w-0">
+            <span className="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5 shrink-0">{row.icon}</span>
+            <div className="min-w-0">
+              <p className="font-label-sm text-label-sm text-on-surface-variant">{row.label}</p>
+              <p className="font-body-md text-body-md text-on-surface truncate">{row.value ?? "—"}</p>
+            </div>
+          </div>
+        ))}
+        <div className="flex items-start gap-2 min-w-0">
+          <span className="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5 shrink-0">badge</span>
+          <div className="min-w-0 flex-1">
+            <p className="font-label-sm text-label-sm text-on-surface-variant">National ID / SSN</p>
+            <p className="font-body-md text-body-md text-on-surface truncate">{revealedSsn ?? profile.ssnMasked ?? "—"}</p>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            {profile.ssnMasked && (
+              <Button variant="ghost" size="sm" className="rounded-md font-label-md text-label-md" onClick={() => (revealedSsn ? setRevealedSsn(null) : revealM.mutate())}>
+                <span className="material-symbols-outlined text-[16px]">{revealedSsn ? "visibility_off" : "visibility"}</span>
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" className="rounded-md font-label-md text-label-md" onClick={() => setSsnOpen(true)}>
+              <span className="material-symbols-outlined text-[16px]">edit</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <PersonalDetailsDialog open={editOpen} onOpenChange={setEditOpen} profile={profile} />
+      <SsnDialog open={ssnOpen} onOpenChange={setSsnOpen} profile={profile} />
+    </div>
+  )
+}
+
+function PersonalDetailsDialog({
+  open,
+  onOpenChange,
+  profile,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  profile: api.AdminTeacherProfile
+}) {
+  const qc = useQueryClient()
+  const [phone, setPhone] = useState(profile.phone ?? "")
+  const [street, setStreet] = useState(profile.street ?? "")
+  const [city, setCity] = useState(profile.city ?? "")
+  const [nationality, setNationality] = useState(profile.nationality ?? "")
+  const [personalEmail, setPersonalEmail] = useState(profile.personalEmail ?? "")
+  const [dateOfBirth, setDateOfBirth] = useState(profile.dateOfBirth ? profile.dateOfBirth.slice(0, 10) : "")
+  const [ecName, setEcName] = useState(profile.emergencyContact.name ?? "")
+  const [ecPhone, setEcPhone] = useState(profile.emergencyContact.phone ?? "")
+  const [ecRel, setEcRel] = useState(profile.emergencyContact.relationship ?? "")
+
+  const saveM = useMutation({
+    mutationFn: () =>
+      api.updateTeacherProfile(profile.id, {
+        phone,
+        street,
+        city,
+        nationality,
+        personalEmail: personalEmail || null,
+        dateOfBirth,
+        emergencyContactName: ecName || null,
+        emergencyContactPhone: ecPhone || null,
+        emergencyContactRelationship: ecRel || null,
+      }),
+    onSuccess: () => {
+      toast.success("Profile updated")
+      qc.invalidateQueries({ queryKey: ["admin-teacher-profile", profile.id] })
+      onOpenChange(false)
+    },
+    onError: () => toast.error("Could not update the profile"),
+  })
+
+  const ready = phone.trim() && street.trim() && city.trim() && nationality.trim() && dateOfBirth
+
+  const field = (label: string, value: string, onChange: (v: string) => void) => (
+    <div>
+      <Label className="font-label-sm text-label-sm text-on-surface">{label}</Label>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1.5 rounded-md border border-outline-variant bg-surface-container-lowest font-medium text-body-md"
+      />
+    </div>
+  )
+
+  return (
+    <Dialog open={open} onOpenChange={(next) => { if (!next && !saveM.isPending) onOpenChange(false) }}>
+      <DialogContent className="rounded-lg max-w-lg bg-white max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-headline-md text-headline-md text-on-surface">Edit personal info</DialogTitle>
+          <DialogDescription className="font-body-md text-body-md text-on-surface-variant">
+            Update the teacher's contact and personal details.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {field("Phone", phone, setPhone)}
+            <div>
+              <Label className="font-label-sm text-label-sm text-on-surface">Date of birth</Label>
+              <Input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="mt-1.5 rounded-md border border-outline-variant bg-surface-container-lowest font-medium text-body-md" />
+            </div>
+          </div>
+          {field("Street address", street, setStreet)}
+          {field("City", city, setCity)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {field("Nationality", nationality, setNationality)}
+            <div>
+              <Label className="font-label-sm text-label-sm text-on-surface">Personal email</Label>
+              <Input type="email" value={personalEmail} onChange={(e) => setPersonalEmail(e.target.value)} className="mt-1.5 rounded-md border border-outline-variant bg-surface-container-lowest font-medium text-body-md" />
+            </div>
+          </div>
+          <div className="rounded-lg border border-outline-variant p-4 space-y-4">
+            <p className="font-label-md text-label-md text-on-surface">Emergency contact</p>
+            {field("Name", ecName, setEcName)}
+            {field("Phone", ecPhone, setEcPhone)}
+            {field("Relationship", ecRel, setEcRel)}
+          </div>
+        </div>
+        <DialogFooter className="flex gap-md sm:gap-md">
+          <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={saveM.isPending} className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg">
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={() => saveM.mutate()}
+            disabled={saveM.isPending || !ready}
+            className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            {saveM.isPending ? "Saving…" : "Save changes"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function SsnDialog({
+  open,
+  onOpenChange,
+  profile,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  profile: api.AdminTeacherProfile
+}) {
+  const qc = useQueryClient()
+  const [ssn, setSsn] = useState("")
+  const valid = /^\d{3}[- ]?\d{2}[- ]?\d{4}$/.test(ssn)
+
+  const saveM = useMutation({
+    mutationFn: () => api.updateTeacherProfile(profile.id, { ssn }),
+    onSuccess: () => {
+      toast.success("SSN updated")
+      qc.invalidateQueries({ queryKey: ["admin-teacher-profile", profile.id] })
+      onOpenChange(false)
+      setSsn("")
+    },
+    onError: () => toast.error("Could not update the SSN"),
+  })
+
+  return (
+    <Dialog open={open} onOpenChange={(next) => { if (!next && !saveM.isPending) onOpenChange(false) }}>
+      <DialogContent className="rounded-lg max-w-sm bg-white">
+        <DialogHeader>
+          <DialogTitle className="font-headline-md text-headline-md text-on-surface">Update SSN</DialogTitle>
+          <DialogDescription className="font-body-md text-body-md text-on-surface-variant">
+            The new number replaces the stored one (encrypted, e.g. 123-45-6789).
+          </DialogDescription>
+        </DialogHeader>
+        <div>
+          <Label className="font-label-sm text-label-sm text-on-surface">SSN</Label>
+          <Input
+            value={ssn}
+            onChange={(e) => setSsn(e.target.value)}
+            placeholder="123-45-6789"
+            className="mt-1.5 rounded-md border border-outline-variant bg-surface-container-lowest font-medium text-body-md"
+          />
+        </div>
+        <DialogFooter className="flex gap-md sm:gap-md">
+          <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={saveM.isPending} className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg">
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={() => saveM.mutate()}
+            disabled={saveM.isPending || !valid}
+            className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            {saveM.isPending ? "Saving…" : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>

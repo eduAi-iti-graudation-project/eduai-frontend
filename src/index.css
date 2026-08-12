@@ -70,6 +70,8 @@
   --color-on-error: #ffffff;
   --color-on-error-container: #93000a;
 
+  --color-success: #15803d;
+
   --color-outline: #625f70;
   --color-outline-variant: #b6b3c4;
 
@@ -157,6 +159,17 @@ body {
   .bg-primary\/70,
   .bg-indigo-600 {
     color: var(--color-primary-foreground);
+  }
+}
+
+/* Keep the vertical scrollbar track visible from first paint. The loading
+   gate toggles body overflow:hidden, which otherwise makes the scrollbar
+   appear/disappear and resizes the viewport — the WebGL EffectComposer
+   raced that resize into producing all-black frames. A permanently
+   reserved track means the canvas size never changes. */
+@layer base {
+  html {
+    overflow-y: scroll;
   }
 }
 

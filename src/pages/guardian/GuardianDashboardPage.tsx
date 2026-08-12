@@ -13,7 +13,8 @@ interface ChildSummary {
   className: string
   overallAverage: number
   attendanceRate: number
-  activeAlerts: number
+  activeAlertCount: number
+  activeAlertId: string | null
 }
 
 interface GuardianDashboardOverview {
@@ -71,16 +72,16 @@ export function GuardianDashboardPage() {
                   <h2 className="font-headline-md text-headline-md text-primary">{child.name}</h2>
                   <p className="font-body-md text-body-md text-on-surface-variant">{child.className}</p>
                 </div>
-                {child.activeAlerts > 0 && (
+                {child.activeAlertCount > 0 && child.activeAlertId && (
                   <Badge
                     variant="outline"
                     className="bg-primary-container text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-lg border-0 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation()
-                      navigate(`/guardian/alerts/${child.id}`)
+                      navigate(`/guardian/alerts/${child.activeAlertId}`)
                     }}
                   >
-                    {child.activeAlerts} alert{child.activeAlerts !== 1 ? "s" : ""}
+                    {child.activeAlertCount} alert{child.activeAlertCount !== 1 ? "s" : ""}
                   </Badge>
                 )}
               </div>
