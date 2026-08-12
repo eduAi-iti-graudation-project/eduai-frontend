@@ -566,6 +566,15 @@ export async function deleteAssignment(id: string): Promise<void> {
   await api.delete(`/assignments/${id}`)
 }
 
+export type GenerateAssignmentDraftResult =
+  | components["schemas"]["GenerateGroundedResultDto"]
+  | components["schemas"]["GenerateNotGroundedResultDto"]
+
+export async function generateAssignmentDraft(data: components["schemas"]["GenerateAssignmentDto"]): Promise<GenerateAssignmentDraftResult> {
+  const res = await api.post<GenerateAssignmentDraftResult>("/assignments/generate", data)
+  return res.data
+}
+
 // ── Rubrics ───────────────────────────────────────────────────────
 
 export async function getRubrics(assignmentId?: string): Promise<Rubric[]> {
@@ -766,27 +775,29 @@ export interface StudentHistory {
   years: HistoryYear[]
 }
 
-export type DocumentType =
-  | "CERTIFICATE"
-  | "REPORT_CARD"
-  | "TRANSCRIPT"
-  | "IMMUNIZATION"
-  | "TRANSFER"
-  | "ENROLLMENT_FORM"
-  | "ID"
-  | "MEDICAL"
+export type StudentDocumentCategory =
+  | "BIRTH_CERTIFICATE"
+  | "IMMUNIZATION_RECORD"
+  | "PREVIOUS_TRANSCRIPT"
+  | "PAYMENT_RECEIPT"
+  | "ID_DOCUMENT"
   | "OTHER"
 
 export interface StudentDocument {
   id: string
-  studentId: string
-  type: DocumentType
+  studentId: string | null
+  organizationId: string
+  category: StudentDocumentCategory
   title: string
   academicYear: string | null
   fileName: string
   fileUrl: string
   mimeType: string | null
   sizeBytes: number | null
+  aiSuggestedCategory: string | null
+  aiSuggestedStudentId: string | null
+  aiMatchConfidence: number | null
+  aiSuggestedStudent?: { id: string; name: string; email: string } | null
   uploadedById: string | null
   createdAt: string
   uploadedBy?: { id: string; name: string } | null
@@ -846,12 +857,12 @@ export async function getStudentDocuments(studentId: string): Promise<StudentDoc
 
 export async function uploadStudentDocument(
   studentId: string,
-  data: { file: File; title: string; type: DocumentType; academicYear?: string | null },
+  data: { file: File; title: string; category?: StudentDocumentCategory; academicYear?: string | null },
 ): Promise<StudentDocument> {
   const form = new FormData()
   form.append("file", data.file)
   form.append("title", data.title)
-  form.append("type", data.type)
+  if (data.category) form.append("category", data.category)
   if (data.academicYear) form.append("academicYear", data.academicYear)
   const res = await api.post<StudentDocument>(`/students/${studentId}/documents`, form)
   return res.data
@@ -864,6 +875,39 @@ export async function getStudentDocumentUrl(studentId: string, documentId: strin
 
 export async function deleteStudentDocument(studentId: string, documentId: string): Promise<void> {
   await api.delete(`/students/${studentId}/documents/${documentId}`)
+}
+
+export interface BulkUploadResult {
+  created: Array<{
+    id: string
+    fileName: string
+    aiSuggestedCategory: string | null
+    aiSuggestedStudentId: string | null
+    aiMatchConfidence: number | null
+    category: StudentDocumentCategory
+    studentId: string | null
+  }>
+  failed: Array<{ fileName: string; reason: string }>
+}
+
+export async function bulkUploadStudentDocuments(files: File[]): Promise<BulkUploadResult> {
+  const form = new FormData()
+  for (const file of files) form.append("files", file)
+  const res = await api.post<BulkUploadResult>("/documents/bulk-upload", form)
+  return res.data
+}
+
+export async function listBulkDocuments(): Promise<StudentDocument[]> {
+  const res = await api.get<StudentDocument[]>("/documents/bulk")
+  return res.data
+}
+
+export async function confirmDocumentAssignment(
+  documentId: string,
+  data: { studentId: string; category: StudentDocumentCategory },
+): Promise<StudentDocument> {
+  const res = await api.patch<StudentDocument>(`/documents/${documentId}/confirm-assignment`, data)
+  return res.data
 }
 
 export async function getStudentFees(studentId: string): Promise<StudentFee[]> {
@@ -1421,7 +1465,7 @@ export interface GradeCourse {
 
 export interface AdminUser { id: string; email: string; name: string; role: string; gradeId: string | null }
 
-export async function getUsers(params?: { role?: string; q?: string }): Promise<AdminUser[]> {
+export async function getUsers(params?: { role?: string; q?: string; take?: number }): Promise<AdminUser[]> {
   const res = await api.get<AdminUser[]>("/users", { params })
   return res.data
 }
@@ -2667,6 +2711,38 @@ export async function fetchImportTemplate(): Promise<string> {
     responseType: 'blob',
   })
   return res.data.text()
+}
+
+export interface CsvAnalyzeResult {
+  columns: Array<{
+    sourceColumn: string
+    sampleValues: string[]
+    suggestedField: "STUDENT_NAME" | "EMAIL" | "GRADE_LEVEL" | "SECTION" | "UNMAPPED"
+    confidence: number
+    masked: boolean
+  }>
+  totalRows: number
+  maskedColumns: string[]
+}
+
+export async function analyzeCsv(csv: string): Promise<CsvAnalyzeResult> {
+  const res = await api.post<CsvAnalyzeResult>("/migration/csv/analyze", { csv })
+  return res.data
+}
+
+export interface CsvImportResult {
+  created: number
+  duplicates: number
+  errors: Array<{ row: number; reason: string }>
+  flagged: Array<{ row: number; reason: string }>
+}
+
+export async function importCsv(
+  csv: string,
+  mapping: Array<{ sourceColumn: string; mappedField: string }>,
+): Promise<CsvImportResult> {
+  const res = await api.post<CsvImportResult>("/migration/csv/import", { csv, mapping })
+  return res.data
 }
 
 export interface UnassignedStudent {
