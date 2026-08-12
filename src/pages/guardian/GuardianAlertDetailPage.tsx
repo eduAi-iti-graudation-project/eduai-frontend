@@ -1,6 +1,5 @@
 import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { useAlertDetail } from "@/hooks/use-alert-detail"
 import { HomeStrategiesList } from "@/components/communication/HomeStrategiesList"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/shared/ErrorState"
@@ -17,24 +16,28 @@ import * as api from "@/lib/api"
 
 export function GuardianAlertDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { data: detail, isLoading, isError, error } = useAlertDetail(id ?? "")
-
-  const grades = useQuery({
-    queryKey: ["student-grades", id],
-    queryFn: () => api.getStudentGrades(id!),
+  const detail = useQuery({
+    queryKey: ["guardian-alert", id],
+    queryFn: () => api.getGuardianAlertDetail(id!),
     enabled: !!id,
   })
 
-  if (isLoading) {
+  const grades = useQuery({
+    queryKey: ["student-grades", detail.data?.studentId],
+    queryFn: () => api.getStudentGrades(detail.data!.studentId),
+    enabled: !!detail.data?.studentId,
+  })
+
+  if (detail.isLoading) {
     return <LoadingState />
   }
 
-  if (isError || !detail) {
+  if (detail.isError || !detail.data) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <ErrorState
           title="Failed to load alert"
-          message={error instanceof Error ? error.message : "Something went wrong"}
+          message={detail.error instanceof Error ? detail.error.message : "Something went wrong"}
         />
         <div className="pb-xl">
           <Link to="/guardian" className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md">
@@ -44,6 +47,8 @@ export function GuardianAlertDetailPage() {
       </div>
     )
   }
+
+  const { guardianContent, diagnosis } = detail.data
 
   return (
     <div className="flex-1 p-xl max-w-4xl mx-auto w-full">
@@ -59,7 +64,7 @@ export function GuardianAlertDetailPage() {
         <h1 className="font-headline-xl text-headline-xl text-primary">Academic Update</h1>
       </div>
 
-      {detail.guardianContent && (
+      {guardianContent && (
         <div className="space-y-6">
           <div className="rounded-lg bg-white border border-border p-md">
             <div className="flex items-center gap-2 mb-3">
@@ -70,18 +75,18 @@ export function GuardianAlertDetailPage() {
             </div>
             <div className="bg-accent rounded-lg p-4 border border-outline-variant">
               <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap">
-                {detail.guardianContent.message}
+                {guardianContent.message}
               </p>
             </div>
           </div>
 
-          <HomeStrategiesList strategies={detail.guardianContent.homeSupport} />
+          <HomeStrategiesList strategies={guardianContent.homeSupport} />
         </div>
       )}
 
-      {!detail.guardianContent && detail.diagnosis.summary && (
+      {!guardianContent && diagnosis.summary && (
         <div className="rounded-lg bg-white border border-border p-md">
-          <p className="font-body-md text-body-md text-on-surface">{detail.diagnosis.summary}</p>
+          <p className="font-body-md text-body-md text-on-surface">{diagnosis.summary}</p>
         </div>
       )}
 

@@ -5,7 +5,7 @@ import { useAuth } from "@/providers/use-auth"
 
 export function NotificationBell() {
   const { user } = useAuth()
-  const { notifications, markRead } = useNotifications(user?.id)
+  const { notifications, markRead } = useNotifications()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()

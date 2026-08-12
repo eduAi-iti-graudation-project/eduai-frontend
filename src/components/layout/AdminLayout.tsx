@@ -11,10 +11,12 @@ const navItems = [
   { icon: "school", label: "Grades", id: "grades", href: "/admin/grades" },
   { icon: "group", label: "Students", id: "students", href: "/admin/students" },
   { icon: "co_present", label: "Teachers", id: "teachers", href: "/admin/teachers" },
+  { icon: "import_export", label: "Import Students", id: "migration", href: "/admin/migration" },
   { icon: "monitoring", label: "Insights", id: "insights", href: "/admin/insights" },
   { icon: "smart_toy", label: "AI Assistant", id: "assistant", href: "/admin/assistant" },
   { icon: "payments", label: "Billing", id: "billing", href: "/admin/billing" },
   { icon: "person_add", label: "Requests", id: "requests", href: "/admin/requests" },
+  { icon: "how_to_reg", label: "Join Approvals", id: "join-approvals", href: "/admin/join-approvals" },
 ]
 
 export function AdminLayout() {
@@ -28,13 +30,15 @@ export function AdminLayout() {
     : path.startsWith("/admin/students") ? "students"
     : path.startsWith("/admin/teachers") ? "teachers"
     : path.startsWith("/admin/insights") ? "insights"
+    : path.startsWith("/admin/migration") ? "migration"
     : path.startsWith("/admin/assistant") ? "assistant"
     : path.startsWith("/admin/billing") ? "billing"
     : path.startsWith("/admin/requests") ? "requests"
+    : path.startsWith("/admin/join-approvals") ? "join-approvals"
     : "dashboard"
 
   return (
-    <div className="flex min-h-screen bg-surface-container-low">
+    <div className="flex h-dvh overflow-hidden bg-surface-container-low">
       <aside className="hidden md:flex flex-col h-screen w-64 bg-[#151A2E] py-4 px-3 border-r border-[#232f4e] sticky top-0 shrink-0">
         <div className="flex items-center gap-2.5 px-2 mb-6">
           <div className="w-9 h-9 rounded-lg bg-[#2C5FB3] flex items-center justify-center text-white shrink-0">
@@ -67,7 +71,7 @@ export function AdminLayout() {
         </nav>
       </aside>
 
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0">
         <header className="hidden md:flex items-center justify-between px-6 py-4 bg-surface-container-lowest border-b border-border">
           <h1 className="font-headline-md text-headline-md text-on-surface">
             {navItems.find((n) => n.id === activeItem)?.label ?? "Admin"}
@@ -78,7 +82,7 @@ export function AdminLayout() {
           </div>
         </header>
         <SubscriptionBanner />
-        <main className="flex-1 overflow-y-auto min-w-0 w-full">
+        <main className="flex-1 min-h-0 overflow-y-auto min-w-0 w-full">
           <Outlet />
         </main>
       </div>

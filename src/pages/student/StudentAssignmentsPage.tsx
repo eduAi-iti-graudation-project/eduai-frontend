@@ -61,6 +61,15 @@ export function StudentAssignmentsPage() {
     onError: (err: Error) => toast.error(err.message),
   })
 
+  const handleOpenMaterial = async (materialId: string) => {
+    try {
+      const url = await api.getMaterialFileUrl(materialId)
+      window.open(url, "_blank", "noopener,noreferrer")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to open attachment")
+    }
+  }
+
   if (studentClasses.isLoading) {
     return (
       <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
@@ -127,6 +136,23 @@ export function StudentAssignmentsPage() {
                             {a.description && (
                               <p className="font-body-md text-body-md text-on-surface-variant mt-1">{a.description}</p>
                             )}
+                            {a.materials.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-2 mt-2">
+                                {a.materials.map((m) => (
+                                  <button
+                                    key={m.id}
+                                    type="button"
+                                    onClick={() => handleOpenMaterial(m.id)}
+                                    className="inline-flex items-center gap-1.5 px-sm py-1 rounded-md bg-surface-container-low border border-outline-variant hover:border-primary hover:text-primary transition-colors font-label-sm text-label-sm text-on-surface-variant"
+                                    title="Download attachment"
+                                  >
+                                    <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+                                    {m.title}
+                                    <span className="material-symbols-outlined text-[14px]">download</span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                             <div className="flex items-center gap-4 mt-2">
                               <span className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
                                 <span className="material-symbols-outlined text-[16px]">schedule</span>
@@ -140,14 +166,12 @@ export function StudentAssignmentsPage() {
                           <div className="shrink-0">
                             {isSubmitted && sub ? (
                               <div className="flex items-center gap-2">
-                                <Button
-                                  type="button"
-                                  disabled
-                                  className="bg-surface-container text-on-surface-variant font-label-md px-md py-sm rounded-lg h-auto cursor-not-allowed"
+                                <span
+                                  className="bg-surface-container text-on-surface-variant font-label-md px-md py-sm rounded-lg h-auto inline-flex items-center"
                                   aria-label={`Already ${sub.status === "CONFIRMED" ? "graded" : "submitted"}`}
                                 >
                                   {sub.status === "CONFIRMED" ? "Graded" : "Submitted"}
-                                </Button>
+                                </span>
                                 <Link
                                   to={`/student/submissions/${sub.id}`}
                                   className="font-label-md text-label-md text-primary hover:underline"

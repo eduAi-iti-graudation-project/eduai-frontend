@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  ScopeSearch,
+} from "@/components/assistant/ScopeSearch"
+import {
+  scopeLabel,
+  type AssistantScope,
+  type ScopeGroup,
+} from "@/components/assistant/scope"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/PageHeader"
@@ -19,7 +20,7 @@ import { MiniStat } from "@/components/admin/MiniStat"
 import type { components } from "@/types/api-schema"
 import * as api from "@/lib/api"
 
-type Scope = { kind: "all" } | { kind: "student"; id: string; name: string } | { kind: "teacher"; id: string; name: string }
+type Scope = AssistantScope
 
 interface Message {
   id: string
@@ -95,7 +96,7 @@ function answerFor(
 
   if (text.includes("student")) {
     const n = ctx.students.length
-    return `Your roster holds ${n} enrolled student${n === 1 ? "" : "s"}. You can scope into one in the dropdown above to ask about attendance, classes, and performance.`
+    return `Your roster holds ${n} enrolled student${n === 1 ? "" : "s"}. You can scope into one in the search above to ask about attendance, classes, and performance.`
   }
 
   if (text.includes("teacher") || text.includes("faculty")) {
@@ -145,7 +146,7 @@ function answerFor(
 
   return (
     "I can answer questions about: counts (students / teachers / classes), at-risk & flagged students, the review queue, performance trends, and (per profile) attendance, classes and overall status. " +
-    "Tip: use the scope dropdown to target a specific student or teacher."
+    "Tip: use the scope search above to target a specific student or teacher."
   )
 }
 
@@ -198,6 +199,14 @@ export function AdminAssistantPage() {
 
   const students = useMemo(() => (usersQ.data ?? []).filter((u) => u.role === "STUDENT"), [usersQ.data])
   const teachers = useMemo(() => (usersQ.data ?? []).filter((u) => u.role === "TEACHER"), [usersQ.data])
+
+  const scopeGroups = useMemo<ScopeGroup[]>(
+    () => [
+      { label: "Students", kind: "student", items: students.map((s) => ({ id: s.id, name: s.name })) },
+      { label: "Teachers", kind: "teacher", items: teachers.map((t) => ({ id: t.id, name: t.name })) },
+    ],
+    [students, teachers],
+  )
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -262,9 +271,6 @@ export function AdminAssistantPage() {
     return <LoadingState label="Preparing data…" />
   }
 
-  const scopedStudent = scope.kind === "student" ? { name: scope.name, id: scope.id } : null
-  void scopedStudent
-
   return (
     <div className="flex-1 px-6 py-6">
       <div className="max-w-[1600px] mx-auto space-y-4">
@@ -272,29 +278,14 @@ export function AdminAssistantPage() {
           title="AI Assistant"
           subtitle="Ask questions about your school or a specific profile — answers are computed from live data."
           actions={
-            <Select
-              value={scope.kind === "all" ? "all" : scope.kind === "student" ? `student:${scope.id}` : `teacher:${scope.id}`}
-              onValueChange={(v) => {
-                if (v === "all") return switchScope({ kind: "all" })
-                const [kind, id] = v.split(":")
-                const name =
-                  kind === "student"
-                    ? students.find((s) => s.id === id)?.name ?? id
-                    : teachers.find((t) => t.id === id)?.name ?? id
-                switchScope((kind === "student" ? { kind, id, name } : { kind, id, name }) as unknown as Scope)
-              }}
-            >
-              <SelectTrigger className="w-auto min-w-[220px] rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
-                <SelectValue placeholder="School-wide…" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">School-wide</SelectItem>
-                <SelectItem value="div" disabled>Students</SelectItem>
-                {students.map((s) => <SelectItem key={s.id} value={`student:${s.id}`}>{s.name}</SelectItem>)}
-                <SelectItem value="div2" disabled>Teachers</SelectItem>
-                {teachers.map((t) => <SelectItem key={t.id} value={`teacher:${t.id}`}>{t.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <ScopeSearch
+              value={scope}
+              groups={scopeGroups}
+              placeholder="Search students or teachers…"
+              clearLabel="School-wide"
+              onChange={(next) => switchScope(next)}
+              className="w-full min-w-[220px] max-sm:w-[220px] sm:w-[280px]"
+            />
           }
         />
 
@@ -303,7 +294,7 @@ export function AdminAssistantPage() {
             <div className="px-5 py-3 border-b border-outline-variant flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#22c55e]" />
               <span className="font-label-md text-label-md text-on-surface-variant">
-                {scopeLabel(scope)}
+                {scopeLabel(scope, "School-wide")}
               </span>
               {messages.length > 0 && (
                 <button
@@ -329,20 +320,21 @@ export function AdminAssistantPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {suggestionsFor(scope).map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => { ask(s); setInput("") }}
-                      className="font-label-md text-label-md px-3 py-1.5 rounded-md border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container-high transition-colors"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
               </div>
             )}
+
+            <div className="px-5 pb-2 flex flex-wrap justify-center gap-2">
+              {suggestionsFor(scope).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => { ask(s); setInput("") }}
+                  className="font-label-md text-label-md px-3 py-1.5 rounded-md border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container-high transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
 
             <div className="px-5 py-4 flex-1 space-y-3 overflow-y-auto max-h-[420px]">
               {messages.map((m) => (
@@ -397,12 +389,6 @@ export function AdminAssistantPage() {
       </div>
     </div>
   )
-}
-
-function scopeLabel(s: Scope): string {
-  if (s.kind === "student") return `Student: ${s.name}`
-  if (s.kind === "teacher") return `Teacher: ${s.name}`
-  return "School-wide"
 }
 
 function suggestionsFor(scope: Scope): string[] {

@@ -1,6 +1,10 @@
 import { createBrowserRouter, Link, Outlet } from "react-router-dom"
 import { TeacherLayout } from "./components/layout/TeacherLayout"
 import { StudentLayout } from "./components/layout/StudentLayout"
+import { MeetingsListPage } from "./pages/meetings/MeetingsListPage"
+import { ScheduleMeetingPage } from "./pages/meetings/ScheduleMeetingPage"
+import { MeetingDetailPage } from "./pages/meetings/MeetingDetailPage"
+import { MeetingCallPage } from "./pages/meetings/MeetingCallPage"
 import { TeacherRoute, StudentRoute, GuardianRoute, AdminRoute, GuestRoute } from "./components/auth/RouteGuards"
 import { LoginPage } from "./pages/LoginPage"
 import { SignupPage } from "./pages/SignupPage"
@@ -9,7 +13,8 @@ import { TeacherDashboardPage } from "./pages/TeacherDashboardPage"
 import { TimetablePage } from "./pages/teacher/TimetablePage"
 import { ClassesPage } from "./pages/teacher/ClassesPage"
 import { GradeListPage } from "./pages/teacher/GradeListPage"
-import { ClassesInGradePage } from "./pages/teacher/ClassesInGradePage"
+import { GradeDetailPage } from "./pages/teacher/GradeDetailPage"
+import { CoursePage } from "./pages/teacher/CoursePage"
 import { ClassDetailPage } from "./pages/teacher/ClassDetailPage"
 import { InstructorAssignmentForm } from "./components/InstructorAssignmentForm"
 import { AssignmentDetailPage } from "./pages/teacher/AssignmentDetailPage"
@@ -34,9 +39,11 @@ import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage"
 import { AvailableClassesPage } from "./pages/student/AvailableClassesPage"
 import { SubmissionStatusPage } from "./pages/student/SubmissionStatusPage"
 import { StudentClassGradesPage } from "./pages/student/StudentClassGradesPage"
+import { StudentMaterialsPage } from "./pages/student/StudentMaterialsPage"
 import { StudentAssignmentGradePage } from "./pages/student/StudentAssignmentGradePage"
 import { HomeworkHelpPage } from "./pages/student/HomeworkHelpPage"
 import { HomeworkHelpHistoryPage } from "./pages/student/HomeworkHelpHistoryPage"
+import { StudyLabPage } from "./pages/student/StudyLabPage"
 import { StudentQuizzesPage } from "./pages/student/StudentQuizzesPage"
 import { QuizTakePage } from "./pages/student/QuizTakePage"
 import { StudentQuizResultPage } from "./pages/student/StudentQuizResultPage"
@@ -46,6 +53,10 @@ import { QuizAttemptsListPage } from "./pages/teacher/QuizAttemptsListPage"
 import { QuizAttemptDetailPage } from "./pages/teacher/QuizAttemptDetailPage"
 import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
+import { StudentLabsPage } from "./pages/student/StudentLabsPage"
+import { StudentLabDetailPage } from "./pages/student/StudentLabDetailPage"
+import { LabsPage } from "./pages/teacher/LabsPage"
+import { LabDetailPage } from "./pages/teacher/LabDetailPage"
 import { UserMenu } from "@/components/ui/UserMenu"
 import { NotificationBell } from "@/components/communication/NotificationBell"
 import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
@@ -56,7 +67,9 @@ import { AdminTimetablePage } from "./pages/admin/AdminTimetablePage"
 import { AdminAssistantPage } from "./pages/admin/AdminAssistantPage"
 import { AdminBillingPage } from "./pages/admin/AdminBillingPage"
 import { AdminRequestsPage } from "./pages/admin/AdminRequestsPage"
+import { AdminJoinApprovalsPage } from "./pages/admin/AdminJoinApprovalsPage"
 import { GradeManagementPage } from "./pages/admin/GradeManagementPage"
+import { MigrationWizardPage } from "./pages/admin/MigrationWizardPage"
 import { StudentManagementPage } from "./pages/admin/StudentManagementPage"
 import { AdminStudentDetailPage } from "./pages/admin/AdminStudentDetailPage"
 import { TeacherManagementPage } from "./pages/admin/TeacherManagementPage"
@@ -66,13 +79,20 @@ import { StudentInsightsPage } from "./pages/insights/StudentInsightsPage"
 import { ChatListPage } from "./pages/chat/ChatListPage"
 import { ChatThreadPage } from "./pages/chat/ChatThreadPage"
 import { NotFoundPage } from "./pages/NotFoundPage"
+import { AuthCallbackPage } from "./pages/AuthCallbackPage"
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage"
+import { VerifyPage } from "./pages/VerifyPage"
+import { PrivacyPage } from "./pages/PrivacyPage"
+import { TermsPage } from "./pages/TermsPage"
+import { PricingPage } from "./pages/PricingPage"
 
 export const TEACHER_ROUTES = [
   { path: "/dashboard", element: <TeacherDashboardPage /> },
   { path: "/timetable", element: <TimetablePage /> },
   { path: "/classes", element: <ClassesPage /> },
   { path: "/grades", element: <GradeListPage /> },
-  { path: "/grades/:gradeId", element: <ClassesInGradePage /> },
+  { path: "/grades/:gradeId", element: <GradeDetailPage /> },
+  { path: "/courses/:courseId", element: <CoursePage /> },
   { path: "/classes/:id", element: <ClassDetailPage /> },
   { path: "/assignments/new", element: <InstructorAssignmentForm /> },
   { path: "/assignments/:id", element: <AssignmentDetailPage /> },
@@ -87,6 +107,8 @@ export const TEACHER_ROUTES = [
   { path: "/quizzes/:id", element: <QuizEditorPage /> },
   { path: "/quizzes/:id/attempts", element: <QuizAttemptsListPage /> },
   { path: "/quizzes/attempts/:id", element: <QuizAttemptDetailPage /> },
+  { path: "/labs", element: <LabsPage /> },
+  { path: "/labs/:id", element: <LabDetailPage /> },
   { path: "/alerts", element: <AlertsPage /> },
   { path: "/alerts/:alertId", element: <AlertDetailPage /> },
   { path: "/insights", element: <InsightsPage /> },
@@ -97,6 +119,10 @@ export const TEACHER_ROUTES = [
   { path: "/notifications", element: <NotificationsListPage /> },
   { path: "/reports", element: <ReportsPage /> },
   { path: "/attendance/import", element: <AttendanceImportPage /> },
+  { path: "/meetings", element: <MeetingsListPage /> },
+  { path: "/meetings/new", element: <ScheduleMeetingPage /> },
+  { path: "/meetings/:id", element: <MeetingDetailPage /> },
+  { path: "/meetings/:id/call", element: <MeetingCallPage /> },
   { path: "/settings", element: <SettingsPage /> },
   { path: "/support", element: <SupportPage /> },
 ]
@@ -106,6 +132,7 @@ export const STUDENT_ROUTES = [
   { path: "/student/timetable", element: <StudentTimetablePage /> },
   { path: "/student/classes", element: <AvailableClassesPage /> },
   { path: "/student/classes/:classId", element: <StudentClassGradesPage /> },
+  { path: "/student/classes/:classId/materials", element: <StudentMaterialsPage /> },
   { path: "/student/classes/:classId/assignments/:assignmentId", element: <StudentAssignmentGradePage /> },
   { path: "/student/assignments", element: <StudentAssignmentsPage /> },
   { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
@@ -113,6 +140,9 @@ export const STUDENT_ROUTES = [
   { path: "/student/attendance", element: <MyAttendancePage /> },
   { path: "/student/homework-help", element: <HomeworkHelpPage /> },
   { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },
+  { path: "/student/study-lab", element: <StudyLabPage /> },
+  { path: "/student/labs", element: <StudentLabsPage /> },
+  { path: "/student/labs/:id", element: <StudentLabDetailPage /> },
   { path: "/student/quizzes", element: <StudentQuizzesPage /> },
   { path: "/student/quizzes/:id/take", element: <QuizTakePage /> },
   { path: "/student/quizzes/:id/result", element: <StudentQuizResultPage /> },
@@ -120,6 +150,10 @@ export const STUDENT_ROUTES = [
   { path: "/student/chat", element: <ChatListPage /> },
   { path: "/student/chat/:threadId", element: <ChatThreadPage /> },
   { path: "/student/notifications", element: <NotificationsListPage /> },
+  { path: "/student/meetings", element: <MeetingsListPage /> },
+  { path: "/student/meetings/:id", element: <MeetingDetailPage /> },
+  { path: "/student/meetings/:id/call", element: <MeetingCallPage /> },
+  { path: "/student/support", element: <SupportPage /> },
   { path: "/student/settings", element: <SettingsPage /> },
 ]
 
@@ -173,6 +207,7 @@ export function adminRoutes() {
       { path: "assistant", element: <AdminAssistantPage /> },
       { path: "alerts", element: <AdminAlertsPage /> },
       { path: "grades", element: <GradeManagementPage /> },
+      { path: "migration", element: <MigrationWizardPage /> },
       { path: "students", element: <StudentManagementPage /> },
       { path: "students/:id", element: <AdminStudentDetailPage /> },
       { path: "teachers", element: <TeacherManagementPage /> },
@@ -181,6 +216,7 @@ export function adminRoutes() {
       { path: "insights/students/:id", element: <StudentInsightsPage /> },
       { path: "billing", element: <AdminBillingPage /> },
       { path: "requests", element: <AdminRequestsPage /> },
+      { path: "join-approvals", element: <AdminJoinApprovalsPage /> },
     ],
   }
 }
@@ -209,6 +245,30 @@ export const router = createBrowserRouter([
         <SignupPage />
       </GuestRoute>
     ),
+  },
+  {
+    path: "/auth/callback",
+    element: <AuthCallbackPage />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: "/verify",
+    element: <VerifyPage />,
+  },
+  {
+    path: "/privacy",
+    element: <PrivacyPage />,
+  },
+  {
+    path: "/terms",
+    element: <TermsPage />,
+  },
+  {
+    path: "/pricing",
+    element: <PricingPage />,
   },
   teacherRoutes(),
   studentRoutes(),

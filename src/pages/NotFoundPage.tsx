@@ -1,12 +1,26 @@
 import { useEffect, useRef, useCallback } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/providers/use-auth"
 
 const ROBOT_IMAGE =
   "https://lh3.googleusercontent.com/aida/AP1WRLvatK0oa70OgXYI1xwN07td_mPBmF4_jxbseRXIHjLqWfi-6Sddpc-OBnETMJlXbf4FqW1dafFVBrN6gcf76rrXRfcTqZXbeizOCyHlL0mhatN0HzPO_942mJDmaUDjyxE3wG0s4dLW4LAD7HJaz2G2PoCML2srU-Gppv9aKB1Yx_RDu48E1aGSlNG6M6NaVfTm5gh-2gsrMjsWw2LaB23PuSGy-Ukcpe4KJ9ALdMi5taaoQXiPpvLeIYw"
 
 export function NotFoundPage() {
   const cardRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { user } = useAuth()
+
+  const isTeacher = user?.role === "TEACHER" || user?.role === "ADMIN"
+  const notificationsPath = isTeacher ? "/notifications" : "/student/notifications"
+  const supportPath = isTeacher ? "/support" : "/student/support"
+  const dashboardPath = isTeacher ? "/dashboard" : "/student"
+  const classroomPath = isTeacher ? "/classes" : "/student/classes"
+  const lessonsPath = isTeacher ? "/assistant" : "/student/homework-help"
+
+  // Reading-only fallback when called outside the auth tree (e.g. 404 on /login).
+  void location
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!cardRef.current) return
@@ -38,9 +52,9 @@ export function NotFoundPage() {
           <span className="font-headline-md text-headline-md font-bold text-primary">EduAI</span>
         </div>
         <nav className="hidden md:flex gap-8 items-center">
-          <Link to="/dashboard" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md no-underline">Dashboard</Link>
-          <Link to="/classes" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md no-underline">Classroom</Link>
-          <Link to="/assistant" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md no-underline">Lessons</Link>
+          <Link to={dashboardPath} className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md no-underline">Dashboard</Link>
+          <Link to={classroomPath} className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md no-underline">Classroom</Link>
+          <Link to={lessonsPath} className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md no-underline">Lessons</Link>
         </nav>
         <div className="flex items-center gap-4">
           <Button
@@ -49,6 +63,7 @@ export function NotFoundPage() {
             size="icon"
             className="text-on-surface-variant hover:text-primary hover:bg-transparent active:scale-95 transition-colors"
             aria-label="Notifications"
+            onClick={() => navigate(notificationsPath)}
           >
             <span className="material-symbols-outlined">notifications</span>
           </Button>
@@ -58,6 +73,7 @@ export function NotFoundPage() {
             size="icon"
             className="text-on-surface-variant hover:text-primary hover:bg-transparent active:scale-95 transition-colors"
             aria-label="Help"
+            onClick={() => navigate(supportPath)}
           >
             <span className="material-symbols-outlined">help_outline</span>
           </Button>
@@ -91,7 +107,7 @@ export function NotFoundPage() {
                 asChild
                 className="bg-primary text-primary-foreground px-8 py-3 h-auto rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 transition-all hover:brightness-110 hover:bg-primary/90 active:scale-95 shadow-sm nudge-hover no-underline"
               >
-                <Link to="/dashboard">
+                <Link to={dashboardPath}>
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
                   Back to Dashboard
                 </Link>
@@ -117,8 +133,8 @@ export function NotFoundPage() {
           </div>
 
           <div className="mt-8 flex gap-6 text-on-surface-variant/60 font-label-sm text-label-sm">
-            <a href="#" className="hover:text-primary transition-colors underline underline-offset-4">Report an issue</a>
-            <a href="#" className="hover:text-primary transition-colors underline underline-offset-4">Status Page</a>
+            <Link to={supportPath} className="hover:text-primary transition-colors underline underline-offset-4">Report an issue</Link>
+            <Link to={supportPath} className="hover:text-primary transition-colors underline underline-offset-4">Help Center</Link>
           </div>
         </div>
       </main>
