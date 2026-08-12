@@ -23,6 +23,7 @@ const filterOptions = [
 
 export function SubmissionsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("")
+  const [view, setView] = useState<"list" | "grid">("list")
   const [bulkState, setBulkState] = useState<{ pending: number; total: number } | null>(null)
   const { submissions, isLoading, isError, error, gradeSubmission, confirmGrade } = useSubmissions(statusFilter || undefined)
 
@@ -105,8 +106,28 @@ export function SubmissionsPage() {
             </Select>
           </div>
           <div className="flex gap-sm">
-            <button className="p-xs text-primary bg-primary-fixed/20 rounded-lg material-symbols-outlined">grid_view</button>
-            <button className="p-xs text-on-surface-variant hover:bg-surface-container rounded-lg material-symbols-outlined">list</button>
+            <button
+              type="button"
+              onClick={() => setView("grid")}
+              aria-label="Grid view"
+              aria-pressed={view === "grid"}
+              className={`p-xs rounded-lg material-symbols-outlined transition-colors ${
+                view === "grid" ? "text-primary bg-primary-fixed/20" : "text-on-surface-variant hover:bg-surface-container"
+              }`}
+            >
+              grid_view
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("list")}
+              aria-label="List view"
+              aria-pressed={view === "list"}
+              className={`p-xs rounded-lg material-symbols-outlined transition-colors ${
+                view === "list" ? "text-primary bg-primary-fixed/20" : "text-on-surface-variant hover:bg-surface-container"
+              }`}
+            >
+              list
+            </button>
           </div>
         </div>
 
@@ -121,7 +142,7 @@ export function SubmissionsPage() {
             />
           </div>
         ) : (
-          <div className="space-y-md">
+          <div className={view === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-md" : "space-y-md"}>
             {submissions.data?.map((sub, idx) => (
               <SubmissionCard key={sub.id} submission={sub} iconIndex={idx} gradeMutation={gradeSubmission} confirmMutation={confirmGrade} />
             ))}

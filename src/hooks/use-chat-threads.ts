@@ -15,8 +15,8 @@ export function useChatThreads(): UseQueryResult<api.ChatThreadListItem[]> {
 export function useCreateChatThread() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ classId, studentId }: { classId: string; studentId?: string }) =>
-      api.createOrGetChatThread(classId, studentId),
+    mutationFn: ({ courseOfferingId, studentId }: { courseOfferingId: string; studentId?: string }) =>
+      api.createOrGetChatThread(courseOfferingId, studentId),
     onSuccess: (thread) => {
       queryClient.invalidateQueries({ queryKey: chatThreadsQueryKey() })
       return thread

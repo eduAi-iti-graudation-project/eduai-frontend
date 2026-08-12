@@ -6,9 +6,18 @@ import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
 
+function StatChip({ icon, value, label }: { icon: string; value: number; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-surface-container text-on-surface-variant">
+      <span className="material-symbols-outlined text-[15px]">{icon}</span>
+      <span className="font-label-sm text-label-sm font-semibold text-on-surface tabular-nums">{value}</span>
+      <span className="font-label-sm text-label-sm">{label}</span>
+    </span>
+  )
+}
+
 export function GradeListPage() {
   const { user } = useAuth()
-
   const { data: grades, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["teacher-grades", user?.id],
     queryFn: () => api.getTeacherGrades(user!.id),
@@ -37,11 +46,11 @@ export function GradeListPage() {
   if (list.length === 0) {
     return (
       <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
-        <h1 className="font-headline-lg text-headline-lg text-on-surface mb-4">My Grades</h1>
+        <h1 className="font-headline-lg text-headline-lg text-on-surface mb-4">Grades & Levels</h1>
         <EmptyState
-          icon="school"
+          icon="account_tree"
           title="No grades assigned"
-          description="Ask your admin to assign you to the grades you teach."
+          description="Grades you teach will appear here once you're assigned to courses."
         />
       </div>
     )
@@ -51,8 +60,10 @@ export function GradeListPage() {
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
       <div className="flex items-center justify-between mb-lg">
         <div>
-          <h1 className="font-headline-xl text-headline-xl text-on-surface">My Grades</h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">{list.length} grade{list.length !== 1 ? "s" : ""}</p>
+          <h1 className="font-headline-xl text-headline-xl text-on-surface">Grades & Levels</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+            {list.length} grade{list.length !== 1 ? "s" : ""} · each grade has sections that share the same courses
+          </p>
         </div>
       </div>
 
@@ -74,8 +85,13 @@ export function GradeListPage() {
                 <p className="font-body-sm text-body-sm text-on-surface-variant truncate">{grade.name || "—"}</p>
               </div>
             </div>
+            <div className="flex flex-wrap gap-sm mb-3">
+              <StatChip icon="groups" value={grade.sections} label={grade.sections === 1 ? "section" : "sections"} />
+              <StatChip icon="menu_book" value={grade.courses} label={grade.courses === 1 ? "course" : "courses"} />
+              <StatChip icon="person" value={grade.students} label={grade.students === 1 ? "student" : "students"} />
+            </div>
             <div className="flex items-center justify-between border-t border-outline-variant pt-3">
-              <span className="font-label-sm text-label-sm text-on-surface-variant">View classes & assignments</span>
+              <span className="font-label-sm text-label-sm text-on-surface-variant">View sections & courses</span>
               <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors">
                 arrow_forward
               </span>

@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
 import { LoadingState } from "@/components/shared/LoadingState"
@@ -45,7 +44,6 @@ function StatCard({ label, icon, iconClass, value, caption }: { label: string; i
 
 export function TeacherDashboardPage() {
   const { isLoading, isError, error, classCards, submissionRate, avgGrade, totalSubmissions, alerts, confirmedSubmissions } = useDashboardData()
-  const [dateFilter, setDateFilter] = useState("Today")
 
   if (isError) {
     return <ErrorState message={error} onRetry={() => window.location.reload()} className="p-margin-desktop" />
@@ -55,7 +53,7 @@ export function TeacherDashboardPage() {
     return <LoadingState label="Loading dashboard..." />
   }
 
-  const activeAlertCount = alerts.filter((a) => a.status === "ACTIVE" || a.status === "NEW").length
+  const activeAlertCount = alerts.filter((a) => a.status !== "RESOLVED" && a.status !== "DISMISSED").length
   const resolvedAlertCount = alerts.filter((a) => a.status === "RESOLVED").length
   const pendingCount = totalSubmissions - confirmedSubmissions
 
@@ -65,10 +63,10 @@ export function TeacherDashboardPage() {
       : "—"
 
   const stats = [
-    { label: "Active Alerts", icon: "warning", iconClass: "text-primary", value: activeAlertCount, caption: "Requires attention" },
-    { label: "Resolved", icon: "check_circle", iconClass: "text-[#059669]", value: resolvedAlertCount, caption: "All good this week" },
+    { label: "Active Alerts", icon: "warning", iconClass: "text-primary", value: activeAlertCount, caption: "Needs your attention" },
+    { label: "Resolved", icon: "check_circle", iconClass: "text-[#059669]", value: resolvedAlertCount, caption: "All good" },
     { label: "Pending Review", icon: "pending_actions", iconClass: "text-primary", value: pendingCount, caption: "Awaiting your review" },
-    { label: "Avg Class Score", icon: "analytics", iconClass: "text-primary", value: totalSubmissions > 0 ? `${submissionRate}%` : avgGradeDisplay, caption: "Submission rate" },
+    { label: "Avg Section Score", icon: "analytics", iconClass: "text-primary", value: totalSubmissions > 0 ? `${submissionRate}%` : avgGradeDisplay, caption: "Submission rate" },
   ]
 
   return (
@@ -79,20 +77,6 @@ export function TeacherDashboardPage() {
           <div>
             <h2 className="text-2xl md:text-3xl font-headline-lg font-bold tracking-tight text-on-surface mb-1">Overview</h2>
             <p className="font-body-md text-body-md text-on-surface-variant">Here&apos;s what&apos;s happening in your classes today.</p>
-          </div>
-          <div className="hidden md:flex gap-2">
-            <div className="relative">
-              <select
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="px-4 py-2 bg-surface-container-lowest text-on-surface border border-outline-variant rounded-md font-body-md text-body-md hover:bg-surface-variant transition-colors appearance-none cursor-pointer pr-10 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm"
-              >
-                <option>Today</option>
-                <option>This Week</option>
-                <option>This Month</option>
-              </select>
-              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" style={{ fontSize: 18 }}>calendar_month</span>
-            </div>
           </div>
         </div>
 
@@ -105,22 +89,22 @@ export function TeacherDashboardPage() {
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Main: Active Classes */}
+          {/* Main: Active Sections */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             <div className="flex justify-between items-center">
-              <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">Active Classes</h3>
+              <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">Active Sections</h3>
               {classCards.length > 0 && (
                 <Link to="/classes" className="text-sm font-medium text-primary hover:underline cursor-pointer">View All</Link>
               )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-xl">
               {classCards.length === 0 && (
                 <div className="col-span-full bg-surface-container-lowest border border-dashed border-outline-variant rounded-lg p-md flex flex-col items-center justify-center text-center shadow-sm">
                   <div className="w-12 h-12 rounded-lg border border-border flex items-center justify-center text-outline mb-sm">
                     <span className="material-symbols-outlined">school</span>
                   </div>
-                  <h4 className="font-headline-md text-headline-md text-on-surface-variant mb-sm">No classes yet</h4>
-                  <p className="text-on-surface-variant text-sm max-w-[200px]">Create your first class to get started with grading</p>
+                  <h4 className="font-headline-md text-headline-md text-on-surface-variant mb-sm">No sections yet</h4>
+                  <p className="text-on-surface-variant text-sm max-w-[200px]">Create your first section to get started with grading</p>
                 </div>
               )}
               {classCards.map((c) => (
@@ -162,7 +146,7 @@ export function TeacherDashboardPage() {
                   <div className="mt-auto pt-4 border-t border-surface-variant flex justify-between items-center">
                     <span className="text-xs text-on-surface-variant">{c.section}</span>
                     <span className="text-sm font-medium text-primary group-hover:text-primary-container flex items-center gap-1">
-                      Open Class
+                      Open Section
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>arrow_forward</span>
                     </span>
                   </div>
@@ -213,7 +197,7 @@ export function TeacherDashboardPage() {
                 to="/alerts"
                 className="w-full py-3 text-sm font-medium text-primary hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest cursor-pointer shadow-sm"
               >
-                View all alerts
+                View all alerts ({alerts.length})
                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>expand_more</span>
               </Link>
             )}

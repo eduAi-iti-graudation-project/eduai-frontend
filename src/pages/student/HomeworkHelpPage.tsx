@@ -57,7 +57,7 @@ export function HomeworkHelpPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex h-full flex-col">
       <PageHeader
         title="Homework Help"
         actions={
@@ -112,7 +112,7 @@ export function HomeworkHelpPage() {
         }
       />
 
-      <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full p-md gap-4 overflow-y-auto">
+      <div className="flex-1 min-h-0 flex flex-col max-w-3xl mx-auto w-full p-md gap-4 overflow-y-auto">
         {messages.length === 0 && (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
@@ -183,7 +183,7 @@ export function HomeworkHelpPage() {
           <div ref={chatEndRef} />
         </div>
 
-        <div className="sticky bottom-0 bg-surface pt-2 pb-4">
+        <div className="max-w-3xl mx-auto w-full px-md pb-md md:pb-6 mb-24 md:mb-0">
           <div className="flex items-end gap-2 bg-surface-container-low rounded-lg border border-border p-2">
             <textarea
               value={input}

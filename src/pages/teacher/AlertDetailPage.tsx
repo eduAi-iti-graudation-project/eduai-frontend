@@ -10,6 +10,7 @@ import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
 import * as api from "@/lib/api"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
 export function AlertDetailPage() {
   const { alertId } = useParams<{ alertId: string }>()
@@ -101,6 +102,45 @@ export function AlertDetailPage() {
         {detail.teacherFeedback && <TeacherFeedbackSection content={detail.teacherFeedback} />}
 
         {detail.guardianContent && <GuardianMessagePreview content={detail.guardianContent} />}
+
+        {detail.recommendations && detail.recommendations.length > 0 && (
+          <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+            <h2 className="font-label-md text-label-md text-primary flex items-center gap-2 mb-3">
+              <span className="material-symbols-outlined text-[18px]">spark</span>
+              Recommended practice
+            </h2>
+            <div className="space-y-2">
+              {detail.recommendations.map((r) => (
+                <div
+                  key={r.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="font-label-md text-label-md text-on-surface truncate">{r.topic}</p>
+                    <p className="font-label-sm text-label-sm text-on-surface-variant">
+                      {new Date(r.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <span
+                    className={cn(
+                      "font-label-sm text-label-sm rounded-full px-2 py-0.5 shrink-0",
+                      r.status === "READY"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : r.status === "FAILED"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-amber-100 text-amber-700",
+                    )}
+                  >
+                    {r.status === "PROCESSING" ? r.stage : r.status.toLowerCase()}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="font-label-sm text-label-sm text-on-surface-variant mt-3">
+              The student sees this practice set in Study Lab under "Recommended practice" — remind them to complete it before the next assessment.
+            </p>
+          </div>
+        )}
 
         {detail.managementSummary && <ManagementSummarySection summary={detail.managementSummary} />}
 

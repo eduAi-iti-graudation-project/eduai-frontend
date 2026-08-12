@@ -13,7 +13,7 @@ type NotificationDto = components["schemas"]["NotificationDto"]
 
 export function NotificationsListPage() {
   const { user } = useAuth()
-  const { notifications, isLoading, isError, error, markRead, refetch } = useNotifications(user?.id)
+  const { notifications, isLoading, isError, error, markRead, refetch } = useNotifications()
   const myNotifications = notifications.filter((n) => !user?.id || n.userId === user.id)
   const [selected, setSelected] = useState<NotificationDto | null>(null)
 

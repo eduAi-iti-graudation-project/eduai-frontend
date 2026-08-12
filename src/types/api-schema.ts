@@ -37,6 +37,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/signup/teacher": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Teacher joins a school with personal details and photo */
+        post: operations["AuthController_signupTeacher"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -116,6 +133,57 @@ export interface paths {
         put?: never;
         /** Refresh an access token using a refresh token */
         post: operations["AuthController_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/forgot-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a password reset link to an email address */
+        post: operations["AuthController_forgotPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set a new password using a reset link access token */
+        post: operations["AuthController_resetPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change the current user password */
+        post: operations["AuthController_changePassword"];
         delete?: never;
         options?: never;
         head?: never;
@@ -211,23 +279,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/sections/available": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List available sections for self-enrollment */
-        get: operations["SectionsController_findAvailable"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/sections/{id}": {
         parameters: {
             query?: never;
@@ -258,40 +309,6 @@ export interface paths {
         put?: never;
         /** Enroll a student in a section */
         post: operations["SectionsController_addEnrollment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/sections/{id}/join": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Student self-join a section */
-        post: operations["SectionsController_join"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/sections/{id}/requests": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List pending section enrollment requests */
-        get: operations["SectionsController_getRequests"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -359,7 +376,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List all course offerings */
+        /**
+         * List all course offerings
+         * @description Optionally filter by courseId, or by teacherId (ADMIN only; teachers are always scoped to themselves).
+         */
         get: operations["OfferingsController_findAll"];
         put?: never;
         /** Create a course offering (assign a teacher) */
@@ -734,6 +754,333 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assistant/study-lab/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate a podcast, slide deck, or study material */
+        post: operations["StudyLabController_generate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/study-lab/offerings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the student's approved course offerings for study-lab generation */
+        get: operations["StudyLabController_offerings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/study-lab/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the student's study generations */
+        get: operations["StudyLabController_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/study-lab/{generationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a study generation with its payload */
+        get: operations["StudyLabController_detail"];
+        put?: never;
+        post?: never;
+        /** Delete a study generation and its files */
+        delete: operations["StudyLabController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistant/study-lab/{generationId}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download the generated file (slides or podcast audio) */
+        get: operations["StudyLabController_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload a material file (PDF or text) */
+        post: operations["MaterialsController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/chapters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a material chapter in a class */
+        post: operations["MaterialsController_createChapter"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/chapters/offering/{courseOfferingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List material chapters with their materials, plus ungrouped ones */
+        get: operations["MaterialsController_findByOfferingGrouped"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/chapters/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a chapter (materials become ungrouped) */
+        delete: operations["MaterialsController_deleteChapter"];
+        options?: never;
+        head?: never;
+        /** Rename or reorder a material chapter */
+        patch: operations["MaterialsController_updateChapter"];
+        trace?: never;
+    };
+    "/materials/chapters/{id}/materials/{materialId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Link an existing material to a chapter */
+        post: operations["MaterialsController_moveMaterialToChapter"];
+        /** Unlink a material from its chapter */
+        delete: operations["MaterialsController_removeMaterialFromChapter"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/assignment/{assignmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List materials linked to an assignment */
+        get: operations["MaterialsController_findByAssignment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/offering/{courseOfferingId}/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search material chunks by semantic similarity */
+        get: operations["MaterialsController_searchChunks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/course/{courseId}/chapters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a material chapter for a course */
+        post: operations["MaterialsController_createCourseChapter"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/course/{courseId}/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search material chunks across a course */
+        get: operations["MaterialsController_searchCourseChunks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/chapters/course/{courseId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List material chapters for a course, plus ungrouped materials */
+        get: operations["MaterialsController_findByCourseGrouped"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/course/{courseId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List materials for a course */
+        get: operations["MaterialsController_findByCourse"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/offering/{courseOfferingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List materials for a course offering */
+        get: operations["MaterialsController_findByOffering"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a material with its chunks */
+        get: operations["MaterialsController_findOne"];
+        put?: never;
+        post?: never;
+        /** Delete a material */
+        delete: operations["MaterialsController_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/{id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a short-lived signed download URL for a material file */
+        get: operations["MaterialsController_getFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/alerts": {
         parameters: {
             query?: never;
@@ -760,6 +1107,23 @@ export interface paths {
         };
         /** Get structured analysis data for an alert */
         get: operations["AlertsController_getTeacherDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/alerts/{id}/guardian-detail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get guardian-facing alert content for a child */
+        get: operations["AlertsController_getGuardianDetail"];
         put?: never;
         post?: never;
         delete?: never;
@@ -802,70 +1166,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/materials/upload": {
+    "/students/unassigned": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
-        /** Upload a material file (PDF or text) */
-        post: operations["MaterialsController_upload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/materials/offering/{courseOfferingId}/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Search material chunks by semantic similarity */
-        get: operations["MaterialsController_searchChunks"];
+        /** List students with no grade and/or no section — the post-import follow-up queue */
+        get: operations["StudentsController_listUnassigned"];
         put?: never;
         post?: never;
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/materials/offering/{courseOfferingId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List materials for a course offering */
-        get: operations["MaterialsController_findByClass"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/materials/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a material with its chunks */
-        get: operations["MaterialsController_findOne"];
-        put?: never;
-        post?: never;
-        /** Delete a material */
-        delete: operations["MaterialsController_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1197,24 +1509,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/enrollments/{id}/approve": {
+    "/teachers/me/profile": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Get own teacher profile (TEACHER self-service) */
+        get: operations["TeachersController_getMeProfile"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Approve a pending enrollment request */
-        patch: operations["EnrollmentsController_approve"];
+        /** Update own teacher profile (no SSN/gender changes) */
+        patch: operations["TeachersController_updateMeProfile"];
         trace?: never;
     };
-    "/enrollments/{id}/reject": {
+    "/teachers/me/avatar": {
         parameters: {
             query?: never;
             header?: never;
@@ -1223,12 +1536,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
+        /** Upload own avatar photo */
+        post: operations["TeachersController_updateMeAvatar"];
         delete?: never;
         options?: never;
         head?: never;
-        /** Reject a pending enrollment request */
-        patch: operations["EnrollmentsController_reject"];
+        patch?: never;
         trace?: never;
     };
     "/teachers/{id}/grades": {
@@ -1243,6 +1556,23 @@ export interface paths {
         put?: never;
         /** Assign a grade to a teacher */
         post: operations["TeachersController_addGrade"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teachers/{id}/grades/{gradeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one grade with its sections and courses for a teacher */
+        get: operations["TeachersController_getGrade"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1298,6 +1628,40 @@ export interface paths {
         head?: never;
         /** Update teacher profile fields */
         patch: operations["TeachersController_updateProfile"];
+        trace?: never;
+    };
+    "/teachers/{id}/ssn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Reveal a teacher SSN (admin only) */
+        get: operations["TeachersController_getSsn"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teachers/{id}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload a teacher avatar photo */
+        post: operations["TeachersController_updateAvatar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/teachers/{id}/classes": {
@@ -1420,6 +1784,23 @@ export interface paths {
         head?: never;
         /** Update a salary record */
         patch: operations["TeachersController_updateSalary"];
+        trace?: never;
+    };
+    "/users/{id}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stream a user avatar photo */
+        get: operations["UsersController_getAvatar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/users": {
@@ -1921,6 +2302,611 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/timetable/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get every timetable slot in the organization */
+        get: operations["TimetableController_allSlots"];
+        put?: never;
+        /** Create a timetable slot (rejects conflicts) */
+        post: operations["TimetableController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/timetable/slots/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a timetable slot */
+        delete: operations["TimetableController_remove"];
+        options?: never;
+        head?: never;
+        /** Update a timetable slot (rejects conflicts, excluding itself) */
+        patch: operations["TimetableController_update"];
+        trace?: never;
+    };
+    "/timetable/slots/check-conflict": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read-only conflict check for a proposed slot (same logic as create/update) */
+        get: operations["TimetableController_checkConflict"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/timetable/sections/{sectionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a section's full weekly schedule */
+        get: operations["TimetableController_sectionSchedule"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/timetable/teachers/{teacherId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a teacher's personal weekly schedule */
+        get: operations["TimetableController_teacherSchedule"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List meetings the caller is allowed to see */
+        get: operations["MeetingsController_list"];
+        put?: never;
+        /** Schedule a one-off meeting. TEACHER: CLASS meeting for an offering they teach. ADMIN: AD_HOC meeting with an explicit participant list. */
+        post: operations["MeetingsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a meeting with participants and attendance */
+        get: operations["MeetingsController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{id}/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Get a short-lived LiveKit access token. Only permitted for users allowed in the room; records attendance. */
+        post: operations["MeetingsController_join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{id}/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark the caller's attendance row as left */
+        post: operations["MeetingsController_leave"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{id}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** End a meeting (host only) */
+        patch: operations["MeetingsController_end"];
+        trace?: never;
+    };
+    "/meetings/{id}/recording": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a past meeting's recording URL. Gated by the same permission as joining the live meeting. */
+        get: operations["MeetingsController_recording"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Toggle recording for a meeting (host only). When enabled, every participant sees a persistent recording indicator. */
+        patch: operations["MeetingsController_setRecording"];
+        trace?: never;
+    };
+    "/meetings/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** In-meeting chat history (newest first, paged) */
+        get: operations["MeetingsController_messages"];
+        put?: never;
+        /** Send an in-meeting chat message (broadcast over socket.io) */
+        post: operations["MeetingsController_sendMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{id}/transcript": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Meeting transcript (timestamped segments) once the recording has been transcribed. */
+        get: operations["MeetingsController_transcript"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/webhook/livekit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** LiveKit webhook endpoint (HMAC-verified): attendance on join/leave, room end, egress finalization, transcript trigger. */
+        post: operations["LivekitWebhookController_handleLivekit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meetings/{id}/struggle-signals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List post-meeting struggle signals for a meeting: pending class-wide clusters, pending individual signals, and dispatched history. */
+        get: operations["StruggleSignalsController_getStruggleSignals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/struggle-signals/{id}/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a struggle signal to its student: generates a scoped quiz and a homework-helper explanation. Nothing is dispatched automatically. */
+        post: operations["StruggleSignalsController_sendSignal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/struggle-signals/{id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dismiss a pending struggle signal (teacher decided it is a non-issue). */
+        post: operations["StruggleSignalsController_dismissSignal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/migration/csv/analyze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Analyze a CSV and propose a column-to-field mapping */
+        post: operations["MigrationController_analyzeCsv"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/migration/csv/analyze-pasted": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Analyze pasted tab-separated rows and propose a field mapping */
+        post: operations["MigrationController_analyzePasted"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/migration/csv/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import students from a confirmed CSV mapping */
+        post: operations["MigrationController_importCsv"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/migration/csv/template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download the blank student import template (CSV) */
+        get: operations["MigrationController_downloadTemplate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/auth/school/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resolve a school (name + grades) by its code */
+        get: operations["JoinRequestsController_schoolByCode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/auth/signup/student": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Student self-registration — creates a pending join request; roster rows auto-fill the grade */
+        post: operations["JoinRequestsController_signupStudent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/students/join-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List join requests with status/source filters */
+        get: operations["AdminJoinRequestsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/students/join-requests/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bulk approve join requests (ROSTER rows get a gmail + password) */
+        post: operations["AdminJoinRequestsController_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/students/join-requests/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject a batch of pending join requests */
+        post: operations["AdminJoinRequestsController_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/students/join-requests/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reopen a rejected join request */
+        post: operations["AdminJoinRequestsController_reopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/classes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all classes with their assigned teacher */
+        get: operations["ClassesController_findAll"];
+        put?: never;
+        /** Create a class within a grade level */
+        post: operations["ClassesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/classes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a class with its roster and offerings */
+        get: operations["ClassesController_findOne"];
+        put?: never;
+        post?: never;
+        /** Delete a class */
+        delete: operations["ClassesController_remove"];
+        options?: never;
+        head?: never;
+        /** Update a class */
+        patch: operations["ClassesController_update"];
+        trace?: never;
+    };
+    "/classes/{id}/teacher": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign a teacher to a class (via its offering) */
+        post: operations["ClassesController_assignTeacher"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/classes/{id}/enrollments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enroll a student in a class */
+        post: operations["ClassesController_addEnrollment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/classes/{sectionId}/enrollments/{studentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a student from a class */
+        delete: operations["ClassesController_removeEnrollment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/grades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all grade levels (console) */
+        get: operations["GradeConsoleController_findAll"];
+        put?: never;
+        /** Create a grade level (console) */
+        post: operations["GradeConsoleController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/grades/{gradeId}/classes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List classes inside a grade level */
+        get: operations["GradeConsoleController_findGradeClasses"];
+        put?: never;
+        /** Add an existing class to a grade level */
+        post: operations["GradeConsoleController_addClassToGrade"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/grades/{gradeId}/classes/{classId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a class from a grade level */
+        delete: operations["GradeConsoleController_removeClassFromGrade"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1965,6 +2951,18 @@ export interface components {
         RefreshResponseDto: {
             accessToken: string;
             refreshToken: string;
+        };
+        ForgotPasswordDto: {
+            /** Format: email */
+            email: string;
+        };
+        ResetPasswordDto: {
+            token: string;
+            password: string;
+        };
+        ChangePasswordDto: {
+            currentPassword: string;
+            newPassword: string;
         };
         UserDto: {
             /** Format: uuid */
@@ -2119,6 +3117,18 @@ export interface components {
             status: "SUBMITTED" | "GRADING_IN_PROGRESS" | "REVIEW_READY" | "CONFIRMED";
             createdAt: string;
             updatedAt: string;
+            student?: {
+                /** Format: uuid */
+                id: string;
+                email: string;
+                name: string | null;
+            };
+            assignment?: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                description: string | null;
+            };
         };
         NotificationDto: {
             /** Format: uuid */
@@ -2158,6 +3168,142 @@ export interface components {
                 recommendation: string;
             };
             createdAt: string;
+        };
+        GenerateStudyRequestDto: {
+            /** Format: uuid */
+            courseOfferingId: string;
+            /** @enum {string} */
+            kind: "PODCAST" | "SLIDES" | "STUDY_MATERIAL";
+            /** @enum {string} */
+            materialKind?: "STUDY_GUIDE" | "FLASHCARDS" | "PRACTICE_QUESTIONS" | "CHEAT_SHEET";
+            /** @enum {string} */
+            preset?: "OVERVIEW" | "DEEP_DIVE" | "EXAM_CRAM" | "CASUAL" | "BREAKDOWN";
+            topic: string;
+        };
+        StudyGenerationSubmitDto: {
+            /** Format: uuid */
+            generationId: string;
+            status: string;
+        };
+        StudyGenerationListDto: {
+            generations: {
+                /** Format: uuid */
+                id: string;
+                kind: string;
+                materialKind: string | null;
+                preset: string | null;
+                topic: string;
+                status: string;
+                stage: string;
+                error: string | null;
+                /** Format: uuid */
+                recommendedForAnalysisId: string | null;
+                createdAt: string;
+                completedAt: string | null;
+                payload: unknown;
+                audioUrl: string | null;
+                fileUrl: string | null;
+            }[];
+        };
+        StudyGenerationDetailDto: {
+            generation: {
+                /** Format: uuid */
+                id: string;
+                kind: string;
+                materialKind: string | null;
+                preset: string | null;
+                topic: string;
+                status: string;
+                stage: string;
+                error: string | null;
+                /** Format: uuid */
+                recommendedForAnalysisId: string | null;
+                createdAt: string;
+                completedAt: string | null;
+                payload: unknown;
+                audioUrl: string | null;
+                fileUrl: string | null;
+            };
+        };
+        CreateMaterialChapterDto: {
+            /** Format: uuid */
+            courseOfferingId: string;
+            title: string;
+        };
+        UpdateMaterialChapterDto: {
+            title?: string;
+            order?: number;
+        };
+        CreateCourseChapterDto: {
+            title: string;
+        };
+        MaterialChapterDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            courseOfferingId: string | null;
+            /** Format: uuid */
+            courseId: string | null;
+            title: string;
+            order: number;
+            createdAt: string;
+            updatedAt: string;
+        };
+        ChunkSearchResultDto: {
+            /** Format: uuid */
+            id: string;
+            content: string;
+            distance: number;
+            /** Format: uuid */
+            materialId: string;
+            materialTitle: string;
+            /** Format: uuid */
+            chapterId: string | null;
+            chapterTitle: string | null;
+        };
+        MaterialGroupedDto: {
+            chapters: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                order: number;
+                materials: {
+                    /** Format: uuid */
+                    id: string;
+                    title: string;
+                    fileUrl: string | null;
+                    /** Format: uuid */
+                    courseOfferingId: string;
+                    /** Format: uuid */
+                    courseId: string | null;
+                    createdAt: string;
+                    updatedAt: string;
+                }[];
+            }[];
+            unassigned: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                fileUrl: string | null;
+                /** Format: uuid */
+                courseOfferingId: string;
+                /** Format: uuid */
+                courseId: string | null;
+                createdAt: string;
+                updatedAt: string;
+            }[];
+        };
+        MaterialDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            fileUrl: string | null;
+            /** Format: uuid */
+            courseOfferingId: string;
+            /** Format: uuid */
+            courseId: string | null;
+            createdAt: string;
+            updatedAt: string;
         };
         AlertDto: {
             /** Format: uuid */
@@ -2341,6 +3487,18 @@ export interface components {
             }[];
             unreadNotifications: number;
         };
+        UpdateTeacherMeDto: {
+            phone?: string | null;
+            street?: string | null;
+            city?: string | null;
+            nationality?: string | null;
+            /** Format: email */
+            personalEmail?: string | null;
+            dateOfBirth?: string | null;
+            emergencyContactName?: string | null;
+            emergencyContactPhone?: string | null;
+            emergencyContactRelationship?: string | null;
+        };
         AddTeacherGradeDto: {
             /** Format: uuid */
             offeringId: string;
@@ -2348,6 +3506,17 @@ export interface components {
         UpdateTeacherProfileDto: {
             /** @enum {string|null} */
             gender?: "MALE" | "FEMALE" | "OTHER" | null;
+            ssn?: string;
+            phone?: string | null;
+            street?: string | null;
+            city?: string | null;
+            nationality?: string | null;
+            /** Format: email */
+            personalEmail?: string | null;
+            dateOfBirth?: string | null;
+            emergencyContactName?: string | null;
+            emergencyContactPhone?: string | null;
+            emergencyContactRelationship?: string | null;
         };
         CreateSalaryDto: {
             period: string;
@@ -2505,6 +3674,243 @@ export interface components {
             /** @enum {string} */
             role: "TEACHER" | "STUDENT";
         };
+        CreateTimetableSlotDto: {
+            /** Format: uuid */
+            courseOfferingId: string;
+            /** @enum {string} */
+            dayOfWeek: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+            startTime: string;
+            endTime: string;
+            room?: string | null;
+        };
+        TimetableSlotDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            courseOfferingId: string;
+            /** Format: uuid */
+            organizationId: string;
+            /** @enum {string} */
+            dayOfWeek: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+            startTime: string;
+            endTime: string;
+            room: string | null;
+            createdAt: string;
+        };
+        UpdateTimetableSlotDto: {
+            /** @enum {string} */
+            dayOfWeek?: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+            startTime?: string;
+            endTime?: string;
+            room?: string | null;
+        };
+        TimetableSlotWithOfferingDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            courseOfferingId: string;
+            /** Format: uuid */
+            organizationId: string;
+            /** @enum {string} */
+            dayOfWeek: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+            startTime: string;
+            endTime: string;
+            room: string | null;
+            createdAt: string;
+            courseOffering: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                courseId: string;
+                /** Format: uuid */
+                sectionId: string;
+                /** Format: uuid */
+                teacherId: string;
+                course: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                    colorTag: string | null;
+                };
+                section: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                    /** Format: uuid */
+                    gradeLevelId: string;
+                };
+                teacher: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                };
+            };
+        };
+        CheckConflictResultDto: {
+            conflict: {
+                /** @enum {string} */
+                kind: "teacher" | "section";
+                conflictingSlot: {
+                    /** Format: uuid */
+                    id: string;
+                    /** @enum {string} */
+                    dayOfWeek: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+                    startTime: string;
+                    endTime: string;
+                    /** Format: uuid */
+                    courseOfferingId: string;
+                    courseName: string;
+                    sectionName: string;
+                };
+            } | null;
+        };
+        CreateMeetingDto: {
+            title: string;
+            /** @enum {string} */
+            type: "CLASS" | "AD_HOC";
+            /** Format: uuid */
+            courseOfferingId?: string;
+            /** Format: date-time */
+            scheduledStart: string;
+            /** Format: date-time */
+            scheduledEnd: string;
+            /** @default false */
+            recordingEnabled: boolean;
+            participantIds?: string[];
+        };
+        UpdateRecordingDto: {
+            enabled: boolean;
+        };
+        SendChatMessageDto: {
+            text: string;
+        };
+        StruggleSignalsResponseDto: {
+            pending: {
+                classWide: {
+                    concept: string;
+                    studentCount: number;
+                    signals: {
+                        /** Format: uuid */
+                        id: string;
+                        /** Format: uuid */
+                        studentId: string;
+                        studentName: string | null;
+                        concept: string;
+                        explanation: string;
+                        /** @enum {string} */
+                        status: "PENDING" | "SENT" | "DISMISSED";
+                        classWide: boolean;
+                        /** Format: uuid */
+                        quizId: string | null;
+                        /** Format: uuid */
+                        interactionId: string | null;
+                        createdAt: string;
+                    }[];
+                }[];
+                individual: {
+                    /** Format: uuid */
+                    id: string;
+                    /** Format: uuid */
+                    studentId: string;
+                    studentName: string | null;
+                    concept: string;
+                    explanation: string;
+                    /** @enum {string} */
+                    status: "PENDING" | "SENT" | "DISMISSED";
+                    classWide: boolean;
+                    /** Format: uuid */
+                    quizId: string | null;
+                    /** Format: uuid */
+                    interactionId: string | null;
+                    createdAt: string;
+                }[];
+            };
+            history: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                studentId: string;
+                studentName: string | null;
+                concept: string;
+                explanation: string;
+                /** @enum {string} */
+                status: "PENDING" | "SENT" | "DISMISSED";
+                classWide: boolean;
+                /** Format: uuid */
+                quizId: string | null;
+                /** Format: uuid */
+                interactionId: string | null;
+                createdAt: string;
+            }[];
+        };
+        SendSignalResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "SENT";
+            /** Format: uuid */
+            quizId: string;
+        };
+        DismissSignalResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "DISMISSED";
+        };
+        AnalyzeCsvDto: {
+            csv: string;
+        };
+        AnalyzePastedDto: {
+            text: string;
+        };
+        ImportCsvDto: {
+            csv: string;
+            mapping: {
+                sourceColumn: string;
+                /** @enum {string} */
+                mappedField: "STUDENT_NAME" | "FIRST_NAME" | "LAST_NAME" | "EMAIL" | "GRADE_LEVEL" | "SECTION" | "GUARDIAN_NAME" | "GUARDIAN_EMAIL" | "GUARDIAN_SSN" | "GUARDIAN_PHONE" | "GUARDIAN_NATIONALITY" | "UNMAPPED";
+            }[];
+        };
+        SignupStudentDto: {
+            schoolCode: string;
+            firstName: string;
+            lastName?: string;
+            /** Format: email */
+            email: string;
+            password: string;
+            guardianName?: string;
+            /** Format: email */
+            guardianEmail?: string;
+            guardianSsn?: string;
+            guardianPhone?: string;
+            guardianNationality?: string;
+        };
+        DecideJoinRequestsDto: {
+            ids: string[];
+        };
+        ClassDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            organizationId: string;
+            /** Format: uuid */
+            gradeLevelId: string;
+            name: string;
+            description: string | null;
+            /** Format: uuid */
+            teacherId?: string | null;
+            courses?: string[];
+            createdAt: string;
+            updatedAt: string;
+        };
+        AssignClassTeacherDto: {
+            /** Format: uuid */
+            teacherId: string;
+        };
+        AddClassToGradeDto: {
+            /** Format: uuid */
+            classId: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -2551,6 +3957,45 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AuthResponseDto"];
                 };
+            };
+        };
+    };
+    AuthController_signupTeacher: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    photo: string;
+                    name: string;
+                    email: string;
+                    password: string;
+                    joinCode: string;
+                    ssn: string;
+                    phone: string;
+                    street: string;
+                    city: string;
+                    nationality?: string;
+                    personalEmail?: string;
+                    dateOfBirth: string;
+                    emergencyContactName?: string;
+                    emergencyContactPhone?: string;
+                    emergencyContactRelationship?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Pending teacher membership request */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2657,6 +4102,69 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["RefreshResponseDto"];
                 };
+            };
+        };
+    };
+    AuthController_forgotPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForgotPasswordDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_resetPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_changePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2845,23 +4353,6 @@ export interface operations {
             };
         };
     };
-    SectionsController_findAvailable: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     SectionsController_findOne: {
         parameters: {
             query?: never;
@@ -2943,44 +4434,6 @@ export interface operations {
         };
         responses: {
             201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SectionsController_join: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SectionsController_getRequests: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3117,7 +4570,10 @@ export interface operations {
     };
     OfferingsController_findAll: {
         parameters: {
-            query?: never;
+            query: {
+                teacherId: string;
+                courseId: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3663,9 +5119,7 @@ export interface operations {
     };
     NotificationsController_findAll: {
         parameters: {
-            query?: {
-                userId?: string;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -3704,7 +5158,7 @@ export interface operations {
     ReportsController_findAll: {
         parameters: {
             query?: {
-                studentId?: string;
+                studentId?: unknown;
             };
             header?: never;
             path?: never;
@@ -3743,6 +5197,489 @@ export interface operations {
             };
         };
     };
+    StudyLabController_generate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateStudyRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyGenerationSubmitDto"];
+                };
+            };
+        };
+    };
+    StudyLabController_offerings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StudyLabController_history: {
+        parameters: {
+            query?: {
+                courseOfferingId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyGenerationListDto"];
+                };
+            };
+        };
+    };
+    StudyLabController_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                generationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyGenerationDetailDto"];
+                };
+            };
+        };
+    };
+    StudyLabController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                generationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StudyLabController_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                generationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                    title?: string;
+                    /** Format: uuid */
+                    courseOfferingId?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_createChapter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMaterialChapterDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_findByOfferingGrouped: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                courseOfferingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_deleteChapter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_updateChapter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMaterialChapterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_moveMaterialToChapter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                materialId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_removeMaterialFromChapter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                materialId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_findByAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_searchChunks: {
+        parameters: {
+            query: {
+                q: string;
+                topK: string;
+                chapterId: string;
+            };
+            header?: never;
+            path: {
+                courseOfferingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_createCourseChapter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                courseId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCourseChapterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialChapterDto"];
+                };
+            };
+        };
+    };
+    MaterialsController_searchCourseChunks: {
+        parameters: {
+            query: {
+                q: string;
+                topK: string;
+                chapterId: string;
+            };
+            header?: never;
+            path: {
+                courseId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChunkSearchResultDto"][];
+                };
+            };
+        };
+    };
+    MaterialsController_findByCourseGrouped: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                courseId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialGroupedDto"];
+                };
+            };
+        };
+    };
+    MaterialsController_findByCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                courseId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDto"][];
+                };
+            };
+        };
+    };
+    MaterialsController_findByOffering: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                courseOfferingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_getFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        url?: string;
+                    };
+                };
+            };
+        };
+    };
     AlertsController_findAll: {
         parameters: {
             query?: {
@@ -3765,6 +5702,25 @@ export interface operations {
         };
     };
     AlertsController_getTeacherDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AlertsController_getGuardianDetail: {
         parameters: {
             query?: never;
             header?: never;
@@ -3831,100 +5787,11 @@ export interface operations {
             };
         };
     };
-    MaterialsController_upload: {
+    StudentsController_listUnassigned: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    file?: string;
-                    title?: string;
-                    /** Format: uuid */
-                    courseOfferingId?: string;
-                };
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MaterialsController_searchChunks: {
-        parameters: {
-            query: {
-                q: string;
-                topK: string;
-            };
-            header?: never;
-            path: {
-                courseOfferingId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MaterialsController_findByClass: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                courseOfferingId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MaterialsController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MaterialsController_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
             cookie?: never;
         };
         requestBody?: never;
@@ -4406,13 +6273,11 @@ export interface operations {
             };
         };
     };
-    EnrollmentsController_approve: {
+    TeachersController_getMeProfile: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                id: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -4425,18 +6290,44 @@ export interface operations {
             };
         };
     };
-    EnrollmentsController_reject: {
+    TeachersController_updateMeProfile: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                id: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTeacherMeDto"];
+            };
+        };
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TeachersController_updateMeAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    photo: string;
+                };
+            };
+        };
+        responses: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4480,6 +6371,27 @@ export interface operations {
         };
         responses: {
             /** @description Grade assigned */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TeachersController_getGrade: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                gradeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Grade detail scoped to the teacher */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4544,6 +6456,51 @@ export interface operations {
         };
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TeachersController_getSsn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TeachersController_updateAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    photo: string;
+                };
+            };
+        };
+        responses: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4758,6 +6715,25 @@ export interface operations {
             };
         };
     };
+    UsersController_getAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     UsersController_findAll: {
         parameters: {
             query?: {
@@ -4920,9 +6896,7 @@ export interface operations {
     };
     QuizzesController_findAll: {
         parameters: {
-            query: {
-                classId: string;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -5209,7 +7183,7 @@ export interface operations {
     HomeworkHelperController_getHistory: {
         parameters: {
             query?: {
-                classId?: string;
+                courseOfferingId?: string;
             };
             header?: never;
             path?: never;
@@ -5543,6 +7517,1022 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TimetableController_allSlots: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimetableSlotWithOfferingDto"][];
+                };
+            };
+        };
+    };
+    TimetableController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTimetableSlotDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimetableSlotDto"];
+                };
+            };
+        };
+    };
+    TimetableController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TimetableController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTimetableSlotDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimetableSlotDto"];
+                };
+            };
+        };
+    };
+    TimetableController_checkConflict: {
+        parameters: {
+            query: {
+                courseOfferingId: string;
+                day: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+                start: string;
+                end: string;
+                excludeSlotId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckConflictResultDto"];
+                };
+            };
+        };
+    };
+    TimetableController_sectionSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimetableSlotWithOfferingDto"][];
+                };
+            };
+        };
+    };
+    TimetableController_teacherSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                teacherId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimetableSlotWithOfferingDto"][];
+                };
+            };
+        };
+    };
+    MeetingsController_list: {
+        parameters: {
+            query?: {
+                scope?: "upcoming" | "past" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeetingsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMeetingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeetingsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeetingsController_join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeetingsController_leave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeetingsController_end: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeetingsController_recording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeetingsController_setRecording: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRecordingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeetingsController_messages: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: unknown;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeetingsController_sendMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendChatMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeetingsController_transcript: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LivekitWebhookController_handleLivekit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StruggleSignalsController_getStruggleSignals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StruggleSignalsResponseDto"];
+                };
+            };
+            /** @description Not authenticated. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not the meeting teacher. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Meeting not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StruggleSignalsController_sendSignal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SendSignalResponseDto"];
+                };
+            };
+            /** @description Not authenticated. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not the meeting teacher. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Signal not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Signal is not pending anymore. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StruggleSignalsController_dismissSignal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DismissSignalResponseDto"];
+                };
+            };
+            /** @description Not authenticated. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not the meeting teacher. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Signal not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Signal is not pending anymore. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MigrationController_analyzeCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalyzeCsvDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MigrationController_analyzePasted: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalyzePastedDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MigrationController_importCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportCsvDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MigrationController_downloadTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    JoinRequestsController_schoolByCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    JoinRequestsController_signupStudent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignupStudentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminJoinRequestsController_list: {
+        parameters: {
+            query?: {
+                status?: "PENDING" | "APPROVED" | "REJECTED";
+                source?: "ROSTER" | "SELF";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminJoinRequestsController_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideJoinRequestsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminJoinRequestsController_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideJoinRequestsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminJoinRequestsController_reopen: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ClassesController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassDto"][];
+                };
+            };
+        };
+    };
+    ClassesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSectionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassDto"];
+                };
+            };
+        };
+    };
+    ClassesController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassDto"];
+                };
+            };
+        };
+    };
+    ClassesController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ClassesController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSectionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassDto"];
+                };
+            };
+        };
+    };
+    ClassesController_assignTeacher: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignClassTeacherDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassDto"];
+                };
+            };
+        };
+    };
+    ClassesController_addEnrollment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddSectionEnrollmentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ClassesController_removeEnrollment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sectionId: string;
+                studentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GradeConsoleController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeLevelDto"][];
+                };
+            };
+        };
+    };
+    GradeConsoleController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateGradeLevelDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeLevelDto"];
+                };
+            };
+        };
+    };
+    GradeConsoleController_findGradeClasses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gradeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassDto"][];
+                };
+            };
+        };
+    };
+    GradeConsoleController_addClassToGrade: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gradeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddClassToGradeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassDto"];
+                };
+            };
+        };
+    };
+    GradeConsoleController_removeClassFromGrade: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gradeId: string;
+                classId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -10,13 +10,13 @@ export interface ChatMessageDisplay {
   timestamp: Date
 }
 
-export function useAssistantChat(classId: string | null) {
+export function useAssistantChat(courseOfferingId: string | null) {
   const [messages, setMessages] = useState<ChatMessageDisplay[]>([])
 
   const chatMutation = useMutation({
     mutationFn: (newMessage: string) =>
       api.sendChatMessage(
-        classId!,
+        courseOfferingId!,
         messages.map((m) => ({ role: m.role, content: m.content })),
         newMessage,
       ),
@@ -38,14 +38,14 @@ export function useAssistantChat(classId: string | null) {
 
   const sendMessage = useCallback(
     (content: string) => {
-      if (!classId || !content.trim()) return
+      if (!courseOfferingId || !content.trim()) return
       setMessages((prev) => [
         ...prev,
         { id: crypto.randomUUID(), role: "user", content, timestamp: new Date() },
       ])
       chatMutation.mutate(content)
     },
-    [classId, chatMutation],
+    [courseOfferingId, chatMutation],
   )
 
   const clearMessages = useCallback(() => {

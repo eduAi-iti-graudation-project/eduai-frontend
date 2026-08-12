@@ -144,13 +144,34 @@ export interface Material {
   title: string
   classId: string
   fileUrl?: string
+  assignmentId?: string | null
+  chapterId?: string | null
   createdAt: string
+  chunkCount?: number
+  detectedChapterCount?: number
+  _count?: { chunks: number }
+}
+
+export interface MaterialChapter {
+  id: string
+  title: string
+  order: number
+  materials: Material[]
+  createdAt?: string
+}
+
+export interface MaterialGrouped {
+  chapters: MaterialChapter[]
+  unassigned: Material[]
 }
 
 export interface MaterialChunk {
   id: string
   content: string
   materialId: string
+  materialTitle?: string
+  chapterId?: string | null
+  chapterTitle?: string | null
   similarity?: number
 }
 
@@ -180,9 +201,13 @@ export interface ImportAttendanceRecord {
   status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED"
 }
 
+// Backend schema renamed classes → sections (SectionDto); keep the legacy local names
 type ClassDto = components["schemas"]["ClassDto"]
+type CreateClassDto = components["schemas"]["CreateSectionDto"]
+type UpdateClassDto = components["schemas"]["UpdateSectionDto"]
 export interface ClassEnriched extends ClassDto {
   _count?: { enrollments: number; assignments: number }
+  courses?: string[]
 }
 
 // ── Backward-compat types (will be removed in Phase 5) ────────────
@@ -339,6 +364,49 @@ export async function getMe(): Promise<User> {
   return res.data
 }
 
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  const res = await api.post<{ message: string }>("/auth/forgot-password", { email })
+  return res.data
+}
+
+export async function resetPassword(token: string, password: string): Promise<AuthResponse> {
+  const res = await api.post<AuthResponse>("/auth/reset-password", { token, password })
+  storeToken(res.data.accessToken)
+  return res.data
+}
+
+export interface VerifyEmailResult {
+  email: string
+  password: string
+  schoolCode: string | null
+}
+
+export async function verifyEmail(token: string): Promise<VerifyEmailResult> {
+  const res = await api.post<VerifyEmailResult>("/auth/verify-email", { token })
+  return res.data
+}
+
+export async function resendCredentials(personalEmail: string): Promise<{ message: string }> {
+  const res = await api.post<{ message: string }>("/auth/credentials/resend", { personalEmail })
+  return res.data
+}
+
+export async function oauthAuthorize(provider: "google" | "microsoft"): Promise<{ url: string }> {
+  const res = await api.post<{ url: string }>(`/auth/oauth/${provider}/authorize`)
+  return res.data
+}
+
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ message: string }> {
+  const res = await api.post<{ message: string }>("/auth/change-password", {
+    currentPassword,
+    newPassword,
+  })
+  return res.data
+}
+
 // ── Communication Agent Types ────────────────────────────────────
 
 export interface DiagnosisPayload {
@@ -373,16 +441,38 @@ export interface ManagementSummaryPayload {
   recommendation: string
 }
 
+export interface PracticeRecommendation {
+  id: string
+  topic: string
+  status: string
+  stage: string
+  error: string | null
+  createdAt: string
+}
+
 export interface AlertDetail {
   diagnosis: DiagnosisPayload
   teacherContent: TeacherContentPayload | null
   guardianContent: GuardianContentPayload | null
   teacherFeedback: TeacherFeedbackPayload | null
   managementSummary: ManagementSummaryPayload | null
+  recommendations: PracticeRecommendation[] | null
 }
 
 export async function getAlertDetail(id: string): Promise<AlertDetail> {
   const res = await api.get<AlertDetail>(`/alerts/${id}/teacher-detail`)
+  return res.data
+}
+
+export interface GuardianAlertDetail {
+  studentId: string
+  studentName: string
+  diagnosis: { summary: string | null }
+  guardianContent: GuardianContentPayload | null
+}
+
+export async function getGuardianAlertDetail(id: string): Promise<GuardianAlertDetail> {
+  const res = await api.get<GuardianAlertDetail>(`/alerts/${id}/guardian-detail`)
   return res.data
 }
 
@@ -395,37 +485,33 @@ export async function getDashboard(): Promise<DashboardOverview> {
 
 // ── Classes ───────────────────────────────────────────────────────
 
-export async function getClasses(): Promise<components["schemas"]["ClassDto"][]> {
-  const res = await api.get<components["schemas"]["ClassDto"][]>("/classes")
+export async function getClasses(): Promise<ClassEnriched[]> {
+  const res = await api.get<ClassEnriched[]>("/classes")
   return res.data
 }
 
-export async function getClass(id: string): Promise<components["schemas"]["ClassDto"]> {
-  const res = await api.get<components["schemas"]["ClassDto"]>(`/classes/${id}`)
+export async function getClass(id: string): Promise<ClassDto> {
+  const res = await api.get<ClassDto>(`/classes/${id}`)
   return res.data
 }
 
-export async function createClass(data: components["schemas"]["CreateClassDto"]): Promise<components["schemas"]["ClassDto"]> {
-  const res = await api.post<components["schemas"]["ClassDto"]>("/classes", data)
+export async function createClass(data: CreateClassDto): Promise<ClassDto> {
+  const res = await api.post<ClassDto>("/classes", data)
   return res.data
 }
 
-export async function updateClass(id: string, data: components["schemas"]["UpdateClassDto"]): Promise<components["schemas"]["ClassDto"]> {
-  const res = await api.patch<components["schemas"]["ClassDto"]>(`/classes/${id}`, data)
+export async function updateClass(id: string, data: UpdateClassDto): Promise<ClassDto> {
+  const res = await api.patch<ClassDto>(`/classes/${id}`, data)
+  return res.data
+}
+
+export async function assignTeacherToClass(classId: string, teacherId: string): Promise<ClassDto> {
+  const res = await api.post<ClassDto>(`/classes/${classId}/teacher`, { teacherId })
   return res.data
 }
 
 export async function deleteClass(id: string): Promise<void> {
   await api.delete(`/classes/${id}`)
-}
-
-export async function getAvailableClasses(): Promise<components["schemas"]["ClassDto"][]> {
-  const res = await api.get<components["schemas"]["ClassDto"][]>("/classes/available")
-  return res.data
-}
-
-export async function joinClass(classId: string): Promise<void> {
-  await api.post(`/classes/${classId}/join`)
 }
 
 // ── Enrollments ───────────────────────────────────────────────────
@@ -438,25 +524,19 @@ export async function removeEnrollment(classId: string, studentId: string): Prom
   await api.delete(`/classes/${classId}/enrollments/${studentId}`)
 }
 
-export async function getClassRequests(classId: string): Promise<{ id: string; studentId: string; status: string; student: { id: string; name: string; email: string } }[]> {
-  const res = await api.get(`/classes/${classId}/requests`)
-  return res.data
-}
-
-export async function approveEnrollment(enrollmentId: string): Promise<void> {
-  await api.patch(`/enrollments/${enrollmentId}/approve`)
-}
-
-export async function rejectEnrollment(enrollmentId: string): Promise<void> {
-  await api.patch(`/enrollments/${enrollmentId}/reject`)
-}
-
 export interface StudentClass {
   id: string
   name: string
   description: string | null
   teacherName: string
-  assignments: { id: string; title: string; description: string | null; dueDate: string; totalPoints: number }[]
+  assignments: {
+    id: string
+    title: string
+    description: string | null
+    dueDate: string
+    totalPoints: number
+    materials: { id: string; title: string }[]
+  }[]
 }
 
 // ── Assignments ───────────────────────────────────────────────────
@@ -530,11 +610,11 @@ export async function createRubricFromPdfDirect(formData: FormData): Promise<Rub
 
 // ── Submissions ───────────────────────────────────────────────────
 
-export async function getSubmissions(status?: string, assignmentId?: string): Promise<components["schemas"]["SubmissionDto"][]> {
+export async function getSubmissions(status?: string, assignmentId?: string): Promise<SubmissionDetail[]> {
   const params: Record<string, string> = {}
   if (status) params.status = status
   if (assignmentId) params.assignmentId = assignmentId
-  const res = await api.get<components["schemas"]["SubmissionDto"][]>("/submissions", { params })
+  const res = await api.get<SubmissionDetail[]>("/submissions", { params })
   return res.data
 }
 
@@ -735,6 +815,20 @@ export async function getAdminStudentProfile(studentId: string): Promise<AdminSt
   return res.data
 }
 
+export interface ResetStudentCredentialsResult {
+  email: string
+  password: string
+}
+
+export async function resetStudentCredentials(
+  studentId: string,
+): Promise<ResetStudentCredentialsResult> {
+  const res = await api.post<ResetStudentCredentialsResult>(
+    `/students/${studentId}/credentials/reset`,
+  )
+  return res.data
+}
+
 export async function getStudentQuizGrades(studentId: string): Promise<StudentQuizGrade[]> {
   const res = await api.get<StudentQuizGrade[]>(`/students/${studentId}/quiz-grades`)
   return res.data
@@ -810,7 +904,25 @@ export async function deleteStudentFee(studentId: string, feeId: string): Promis
 
 export type TeacherGender = "MALE" | "FEMALE" | "OTHER"
 
-export interface AdminTeacherProfile {
+export interface EmergencyContact {
+  name: string | null
+  phone: string | null
+  relationship: string | null
+}
+
+export interface TeacherPersonalFields {
+  avatarUrl: string | null
+  ssnMasked: string | null
+  phone: string | null
+  street: string | null
+  city: string | null
+  nationality: string | null
+  personalEmail: string | null
+  dateOfBirth: string | null
+  emergencyContact: EmergencyContact
+}
+
+export type AdminTeacherProfile = {
   id: string
   name: string
   email: string
@@ -831,6 +943,24 @@ export interface AdminTeacherProfile {
   quizCount: number
   documentsCount: number
   salaryRecordsCount: number
+} & TeacherPersonalFields
+
+export interface TeacherProfileUpdate {
+  gender?: TeacherGender | null
+  ssn?: string
+  phone?: string | null
+  street?: string | null
+  city?: string | null
+  nationality?: string | null
+  personalEmail?: string | null
+  dateOfBirth?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  emergencyContactRelationship?: string | null
+}
+
+export function teacherAvatarUrl(teacherId: string): string {
+  return `${API_URL}/users/${teacherId}/avatar`
 }
 
 export interface TeacherClass {
@@ -904,6 +1034,52 @@ export async function updateTeacherGender(
   return res.data
 }
 
+export function signupTeacher(form: FormData): Promise<PendingSignupResult> {
+  return api
+    .post<PendingSignupResult>("/auth/signup/teacher", form)
+    .then((res) => res.data)
+}
+
+export async function updateTeacherProfile(
+  teacherId: string,
+  data: TeacherProfileUpdate,
+): Promise<TeacherPersonalFields> {
+  const res = await api.patch<TeacherPersonalFields>(`/teachers/${teacherId}/profile`, data)
+  return res.data
+}
+
+export async function revealTeacherSsn(teacherId: string): Promise<{ ssn: string }> {
+  const res = await api.get<{ ssn: string }>(`/teachers/${teacherId}/ssn`)
+  return res.data
+}
+
+export async function uploadTeacherAvatar(
+  teacherId: string,
+  file: File,
+): Promise<{ avatarUrl: string }> {
+  const form = new FormData()
+  form.append("photo", file)
+  const res = await api.post<{ avatarUrl: string }>(`/teachers/${teacherId}/avatar`, form)
+  return res.data
+}
+
+export async function getMyTeacherProfile(): Promise<TeacherPersonalFields & { id: string; name: string; email: string; gender: TeacherGender | null; createdAt: string }> {
+  const res = await api.get("/teachers/me/profile")
+  return res.data
+}
+
+export async function updateMyTeacherProfile(data: TeacherProfileUpdate): Promise<TeacherPersonalFields> {
+  const res = await api.patch<TeacherPersonalFields>("/teachers/me/profile", data)
+  return res.data
+}
+
+export async function uploadMyTeacherAvatar(file: File): Promise<{ avatarUrl: string }> {
+  const form = new FormData()
+  form.append("photo", file)
+  const res = await api.post<{ avatarUrl: string }>("/teachers/me/avatar", form)
+  return res.data
+}
+
 export async function getTeacherClasses(teacherId: string): Promise<TeacherClass[]> {
   const res = await api.get<TeacherClass[]>(`/teachers/${teacherId}/classes`)
   return res.data
@@ -974,9 +1150,8 @@ export async function deleteTeacherSalary(teacherId: string, salaryId: string): 
 
 // ── Notifications ─────────────────────────────────────────────────
 
-export async function getNotifications(userId?: string): Promise<components["schemas"]["NotificationDto"][]> {
-  const params = userId ? { userId } : undefined
-  const res = await api.get<components["schemas"]["NotificationDto"][]>("/notifications", { params })
+export async function getNotifications(): Promise<components["schemas"]["NotificationDto"][]> {
+  const res = await api.get<components["schemas"]["NotificationDto"][]>("/notifications")
   return res.data
 }
 
@@ -1000,15 +1175,84 @@ export async function getReport(id: string): Promise<components["schemas"]["Repo
 // ── Materials ─────────────────────────────────────────────────────
 
 export async function getMaterials(classId: string): Promise<Material[]> {
-  const res = await api.get<Material[]>(`/materials/class/${classId}`)
+  const res = await api.get<Material[]>(`/materials/offering/${classId}`)
   return res.data
 }
 
-export async function searchMaterials(classId: string, q: string, topK?: number): Promise<MaterialChunk[]> {
+export async function searchMaterials(classId: string, q: string, topK?: number, chapterId?: string): Promise<MaterialChunk[]> {
   const params: Record<string, string> = { q }
   if (topK) params.topK = String(topK)
-  const res = await api.get<MaterialChunk[]>(`/materials/class/${classId}/search`, { params })
+  if (chapterId) params.chapterId = chapterId
+  const res = await api.get<MaterialChunk[]>(`/materials/offering/${classId}/search`, { params })
   return res.data
+}
+
+export async function getMaterialChapters(classId: string): Promise<MaterialGrouped> {
+  const res = await api.get<MaterialGrouped>(`/materials/chapters/offering/${classId}`)
+  return res.data
+}
+
+export async function getCourseMaterials(courseId: string): Promise<Material[]> {
+  const res = await api.get<Material[]>(`/materials/course/${courseId}`)
+  return res.data
+}
+
+export async function getCourseMaterialChapters(courseId: string): Promise<MaterialGrouped> {
+  const res = await api.get<MaterialGrouped>(`/materials/chapters/course/${courseId}`)
+  return res.data
+}
+
+export async function createCourseChapter(courseId: string, title: string): Promise<MaterialChapter> {
+  const res = await api.post<MaterialChapter>(`/materials/course/${courseId}/chapters`, { title })
+  return res.data
+}
+
+export async function searchCourseMaterials(courseId: string, q: string, topK?: number, chapterId?: string): Promise<MaterialChunk[]> {
+  const params: Record<string, string> = { q }
+  if (topK) params.topK = String(topK)
+  if (chapterId) params.chapterId = chapterId
+  const res = await api.get<MaterialChunk[]>(`/materials/course/${courseId}/search`, { params })
+  return res.data
+}
+
+export async function createMaterialChapter(classId: string, title: string): Promise<MaterialChapter> {
+  const res = await api.post<MaterialChapter>("/materials/chapters", { courseOfferingId: classId, title })
+  return res.data
+}
+
+export async function renameMaterialChapter(
+  id: string,
+  data: { title?: string; order?: number },
+): Promise<MaterialChapter> {
+  const res = await api.patch<MaterialChapter>(`/materials/chapters/${id}`, data)
+  return res.data
+}
+
+export async function deleteMaterialChapter(id: string): Promise<void> {
+  await api.delete(`/materials/chapters/${id}`)
+}
+
+export async function moveMaterialToChapter(
+  materialId: string,
+  chapterId: string | null,
+  fromChapterId?: string,
+): Promise<void> {
+  if (chapterId) {
+    await api.post(`/materials/chapters/${chapterId}/materials/${materialId}`)
+  } else {
+    const source = fromChapterId ?? "ungrouped"
+    await api.delete(`/materials/chapters/${source}/materials/${materialId}`)
+  }
+}
+
+export async function getAssignmentMaterials(assignmentId: string): Promise<Material[]> {
+  const res = await api.get<Material[]>(`/materials/assignment/${assignmentId}`)
+  return res.data
+}
+
+export async function getMaterialFileUrl(id: string): Promise<string> {
+  const res = await api.get<{ url: string }>(`/materials/${id}/file`)
+  return res.data.url
 }
 
 export async function uploadMaterial(
@@ -1016,11 +1260,15 @@ export async function uploadMaterial(
   classId: string,
   file: File,
   onProgress?: (percent: number) => void,
+  assignmentId?: string,
+  chapterId?: string,
 ): Promise<Material> {
   const fd = new FormData()
   fd.append("file", file)
   fd.append("title", title)
-  fd.append("classId", classId)
+  fd.append("courseOfferingId", classId)
+  if (assignmentId) fd.append("assignmentId", assignmentId)
+  if (chapterId) fd.append("chapterId", chapterId)
   const res = await api.post<Material>("/materials/upload", fd, {
     headers: { "Content-Type": "multipart/form-data" },
     onUploadProgress: (e) => {
@@ -1082,30 +1330,91 @@ export async function getStudentClasses(studentId: string): Promise<StudentClass
   return res.data
 }
 
-// ── Grades ────────────────────────────────────────────────────────
+// ── Grades & Levels (teacher hierarchy view) ──────────────────────
 
-export interface TeacherGrade { id: string; level: number; name: string; createdAt: string }
-
-interface TeacherGradeRow {
+export interface TeacherGrade {
   id: string
-  teacherId: string
-  gradeId: string
-  grade: { id: string; level: number; name: string; createdAt: string }
+  level: number
+  name: string
+  createdAt: string
 }
 
-export async function getTeacherGrades(teacherId: string): Promise<TeacherGrade[]> {
-  const res = await api.get<TeacherGradeRow[]>(`/teachers/${teacherId}/grades`)
+export interface TeacherGradeWithCounts extends TeacherGrade {
+  sections: number
+  courses: number
+  students: number
+}
+
+export async function getTeacherGrades(teacherId: string): Promise<TeacherGradeWithCounts[]> {
+  const res = await api.get<
+    {
+      id: string
+      teacherId: string
+      gradeId: string
+      grade: { id: string; level: number; name: string | null; createdAt: string }
+      _count?: { sections: number; courses: number; students: number }
+    }[]
+  >(`/teachers/${teacherId}/grades`)
   return res.data.map((row) => ({
     id: row.grade.id,
     level: row.grade.level,
-    name: row.grade.name,
+    name: row.grade.name ?? "",
     createdAt: row.grade.createdAt,
+    sections: row._count?.sections ?? 0,
+    courses: row._count?.courses ?? 0,
+    students: row._count?.students ?? 0,
   }))
 }
 
-export async function getGradeClasses(gradeId: string): Promise<components["schemas"]["ClassDto"][]> {
-  const res = await api.get<components["schemas"]["ClassDto"][]>(`/grades/${gradeId}/classes`)
+export interface TeacherGradeDetail {
+  id: string
+  level: number
+  name: string | null
+  students: number
+  sections: GradeSection[]
+  courses: GradeCourse[]
+}
+
+export async function getTeacherGrade(teacherId: string, gradeId: string): Promise<TeacherGradeDetail> {
+  const res = await api.get<{
+    id: string
+    level: number
+    name: string | null
+    students: number
+    sections: {
+      id: string
+      name: string
+      description: string | null
+      enrollments: number
+      courses: { id: string; name: string; description: string | null }[]
+    }[]
+    courses: { id: string; name: string; description: string | null }[]
+  }>(`/teachers/${teacherId}/grades/${gradeId}`)
   return res.data
+}
+
+export async function getGradeClasses(gradeId: string): Promise<ClassEnriched[]> {
+  const res = await api.get<ClassEnriched[]>(`/grades/${gradeId}/classes`)
+  return res.data
+}
+
+export interface GradeSectionCourse {
+  id: string
+  name: string
+}
+
+export interface GradeSection {
+  id: string
+  name: string
+  description: string | null
+  enrollments: number
+  courses: GradeSectionCourse[]
+}
+
+export interface GradeCourse {
+  id: string
+  name: string
+  description: string | null
 }
 
 // ── Admin ─────────────────────────────────────────────────────────
@@ -1143,14 +1452,6 @@ export async function linkGuardianToStudent(studentId: string, guardianId: strin
   await api.post(`/students/${studentId}/guardian`, { guardianId })
 }
 
-export async function assignGradeToTeacher(teacherId: string, gradeId: string): Promise<void> {
-  await api.post(`/teachers/${teacherId}/grades`, { gradeId })
-}
-
-export async function removeGradeFromTeacher(teacherId: string, gradeId: string): Promise<void> {
-  await api.delete(`/teachers/${teacherId}/grades/${gradeId}`)
-}
-
 export async function addClassToGrade(gradeId: string, classId: string): Promise<void> {
   await api.post(`/grades/${gradeId}/classes`, { classId })
 }
@@ -1162,11 +1463,11 @@ export async function removeClassFromGrade(gradeId: string, classId: string): Pr
 // ── Assistant Chat ────────────────────────────────────────────────
 
 export async function sendChatMessage(
-  classId: string,
+  courseOfferingId: string,
   messages: AssistantChatMessage[],
   newMessage: string,
 ): Promise<ChatResponse> {
-  const res = await api.post<ChatResponse>("/assistant/chat", { classId, messages, newMessage })
+  const res = await api.post<ChatResponse>("/assistant/chat", { courseOfferingId, messages, newMessage })
   return res.data
 }
 
@@ -1506,8 +1807,8 @@ export async function getChatThreads(): Promise<ChatThreadListItem[]> {
   return res.data
 }
 
-export async function createOrGetChatThread(classId: string, studentId?: string): Promise<ChatThread> {
-  const res = await api.post<ChatThread>("/chat/threads", { classId, studentId })
+export async function createOrGetChatThread(courseOfferingId: string, studentId?: string): Promise<ChatThread> {
+  const res = await api.post<ChatThread>("/chat/threads", { courseOfferingId, studentId })
   return res.data
 }
 
@@ -1641,5 +1942,747 @@ export async function rejectMembershipRequest(requestId: string): Promise<Member
 
 export async function regenerateJoinCode(): Promise<Organization> {
   const res = await api.post<Organization>("/organizations/me/join-code")
+  return res.data
+}
+
+// ── Student join requests (roster import + self-registration) ─────
+
+export type JoinRequestSource = "ROSTER" | "SELF"
+export type JoinRequestKind = "STUDENT" | "GUARDIAN"
+export type JoinRequestStatus = "PENDING" | "APPROVED" | "REJECTED"
+
+export interface SchoolByCode {
+  id: string
+  name: string
+  gradeLevels: Array<{ id: string; level: number; name: string | null }>
+}
+
+export interface StudentSignupResult {
+  requestId: string
+  matchedFromRoster: boolean
+  gradeLevelName: string | null
+  status: "PENDING"
+}
+
+export interface GuardianSignupResult {
+  requestId: string
+  status: "PENDING"
+}
+
+export interface JoinRequestItem {
+  id: string
+  source: JoinRequestSource
+  kind: JoinRequestKind
+  status: JoinRequestStatus
+  email: string
+  name: string
+  gradeId: string | null
+  gradeLevelName: string | null
+  sectionId: string | null
+  sectionName: string | null
+  targetStudentEmail: string | null
+  guardianName: string | null
+  guardianEmail: string | null
+  guardianPhone: string | null
+  guardianNationality: string | null
+  appliedAt: string
+  decidedAt: string | null
+}
+
+export interface JoinRequestList {
+  items: JoinRequestItem[]
+  counts: { pending: number; approved: number; rejected: number }
+}
+
+export interface JoinApprovalResult {
+  approved: Array<{
+    id: string
+    email: string
+    name: string
+    kind?: JoinRequestKind
+    generatedPassword?: boolean
+  }>
+  failed: Array<{ id: string; reason: string }>
+}
+
+export function fetchSchoolByCode(code: string): Promise<SchoolByCode> {
+  return api
+    .get<SchoolByCode>(`/auth/school/${encodeURIComponent(code)}`)
+    .then((res) => res.data)
+}
+
+export function signStudentUp(input: {
+  schoolCode: string
+  firstName: string
+  lastName?: string
+  email: string
+  password: string
+  guardianName?: string
+  guardianEmail?: string
+  guardianSsn?: string
+  guardianPhone?: string
+  guardianNationality?: string
+}): Promise<StudentSignupResult> {
+  return api
+    .post<StudentSignupResult>("/auth/signup/student", input)
+    .then((res) => res.data)
+}
+
+export function signupGuardian(input: {
+  schoolCode: string
+  name: string
+  personalEmail: string
+  password: string
+  childSchoolEmail: string
+  phone?: string
+  nationality?: string
+}): Promise<GuardianSignupResult> {
+  return api
+    .post<GuardianSignupResult>("/auth/signup/guardian", input)
+    .then((res) => res.data)
+}
+
+export function getJoinRequests(
+  params?: { status?: JoinRequestStatus; source?: JoinRequestSource },
+): Promise<JoinRequestList> {
+  return api
+    .get<JoinRequestList>("/students/join-requests", { params })
+    .then((res) => res.data)
+}
+
+export function approveJoinRequests(ids: string[]): Promise<JoinApprovalResult> {
+  return api
+    .post<JoinApprovalResult>("/students/join-requests/approve", { ids })
+    .then((res) => res.data)
+}
+
+export function rejectJoinRequests(ids: string[]): Promise<{ rejected: number }> {
+  return api
+    .post<{ rejected: number }>("/students/join-requests/reject", { ids })
+    .then((res) => res.data)
+}
+
+export function reopenJoinRequest(id: string): Promise<JoinRequestItem> {
+  return api
+    .post<JoinRequestItem>(`/students/join-requests/${id}/reopen`)
+    .then((res) => res.data)
+}
+
+// ── Timetable ─────────────────────────────────────────────────────
+
+export type DayOfWeek = components["schemas"]["TimetableSlotDto"]["dayOfWeek"]
+
+export const DAY_ORDER: DayOfWeek[] = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+]
+
+export type TimetableSlot = components["schemas"]["TimetableSlotDto"]
+export type TimetableSlotWithOffering = components["schemas"]["TimetableSlotWithOfferingDto"]
+export type CreateTimetableSlotData = components["schemas"]["CreateTimetableSlotDto"]
+export type UpdateTimetableSlotData = components["schemas"]["UpdateTimetableSlotDto"]
+export type SlotConflict = NonNullable<components["schemas"]["CheckConflictResultDto"]["conflict"]>
+
+export interface CourseOffering {
+  id: string
+  course: { id: string; name: string; colorTag: string | null }
+  section: { id: string; name: string; gradeLevelId: string }
+  teacher: { id: string; name: string }
+}
+
+export async function getOfferings(filters?: { teacherId?: string; courseId?: string }): Promise<CourseOffering[]> {
+  const res = await api.get<CourseOffering[]>("/offerings", { params: filters })
+  return res.data
+}
+
+export async function getTeacherOfferings(teacherId: string, courseId?: string): Promise<CourseOffering[]> {
+  return getOfferings({ teacherId, ...(courseId ? { courseId } : {}) })
+}
+
+export async function getCourse(courseId: string): Promise<components["schemas"]["CourseDto"]> {
+  const res = await api.get<components["schemas"]["CourseDto"]>(`/courses/${courseId}`)
+  return res.data
+}
+
+export async function getAllTimetableSlots(): Promise<TimetableSlotWithOffering[]> {
+  const res = await api.get<TimetableSlotWithOffering[]>("/timetable/slots")
+  return res.data
+}
+
+export async function getSectionTimetable(sectionId: string): Promise<TimetableSlotWithOffering[]> {
+  const res = await api.get<TimetableSlotWithOffering[]>(`/timetable/sections/${sectionId}`)
+  return res.data
+}
+
+export async function getTeacherTimetable(teacherId: string): Promise<TimetableSlotWithOffering[]> {
+  const res = await api.get<TimetableSlotWithOffering[]>(`/timetable/teachers/${teacherId}`)
+  return res.data
+}
+
+export async function createTimetableSlot(data: CreateTimetableSlotData): Promise<TimetableSlot> {
+  const res = await api.post<TimetableSlot>("/timetable/slots", data)
+  return res.data
+}
+
+export async function updateTimetableSlot(
+  id: string,
+  data: UpdateTimetableSlotData,
+): Promise<TimetableSlot> {
+  const res = await api.patch<TimetableSlot>(`/timetable/slots/${id}`, data)
+  return res.data
+}
+
+export async function deleteTimetableSlot(id: string): Promise<void> {
+  await api.delete(`/timetable/slots/${id}`)
+}
+
+export async function checkTimetableConflict(params: {
+  courseOfferingId: string
+  day: DayOfWeek
+  start: string
+  end: string
+  excludeSlotId?: string
+}): Promise<{ conflict: SlotConflict | null }> {
+  const res = await api.get<{ conflict: SlotConflict | null }>(
+    "/timetable/slots/check-conflict",
+    { params },
+  )
+  return res.data
+}
+
+// ── Study Lab ──────────────────────────────────────────────────────
+
+export type StudyLabKind = "PODCAST" | "SLIDES" | "STUDY_MATERIAL"
+export type StudyLabMaterialKind =
+  | "STUDY_GUIDE"
+  | "FLASHCARDS"
+  | "PRACTICE_QUESTIONS"
+  | "CHEAT_SHEET"
+export type StudyLabPreset =
+  | "OVERVIEW"
+  | "DEEP_DIVE"
+  | "EXAM_CRAM"
+  | "CASUAL"
+  | "BREAKDOWN"
+export type StudyLabStatus = "PROCESSING" | "READY" | "FAILED"
+
+export interface StudyLabOffering {
+  id: string
+  courseName: string
+  sectionName: string
+  teacherName: string | null
+}
+
+export interface PodcastSegment {
+  speaker: "HOST" | "GUEST"
+  text: string
+}
+
+export interface PodcastScript {
+  title: string
+  description: string
+  segments: PodcastSegment[]
+  audioAvailable: boolean
+}
+
+export interface Slide {
+  title: string
+  bullets: string[]
+  code?: string
+  speakerNote?: string
+}
+
+export interface Deck {
+  title: string
+  slides: Slide[]
+}
+
+export interface StudyGuideSection {
+  heading: string
+  content: string
+}
+
+export interface StudyGuide {
+  title: string
+  summary: string
+  sections: StudyGuideSection[]
+}
+
+export interface Flashcard {
+  front: string
+  back: string
+}
+
+export interface Flashcards {
+  title: string
+  cards: Flashcard[]
+}
+
+export interface PracticeQuestion {
+  question: string
+  options: string[]
+  answerIndex: number
+  explanation: string
+}
+
+export interface PracticeSet {
+  title: string
+  questions: PracticeQuestion[]
+}
+
+export interface CheatSheetSection {
+  heading: string
+  bullets: string[]
+}
+
+export interface CheatSheet {
+  title: string
+  sections: CheatSheetSection[]
+}
+
+export interface StudyGeneration {
+  id: string
+  kind: StudyLabKind
+  materialKind: StudyLabMaterialKind | null
+  preset: StudyLabPreset | null
+  topic: string
+  status: StudyLabStatus
+  stage: string
+  error: string | null
+  recommendedForAnalysisId: string | null
+  createdAt: string
+  completedAt: string | null
+  payload:
+    | PodcastScript
+    | Deck
+    | StudyGuide
+    | Flashcards
+    | PracticeSet
+    | CheatSheet
+    | null
+  audioUrl: string | null
+  fileUrl: string | null
+}
+
+export interface GenerateStudyLabInput {
+  courseOfferingId: string
+  kind: StudyLabKind
+  materialKind?: StudyLabMaterialKind
+  preset?: StudyLabPreset
+  topic: string
+}
+
+export async function getStudyLabOfferings(): Promise<StudyLabOffering[]> {
+  const res = await api.get<{ offerings: StudyLabOffering[] }>(
+    "/assistant/study-lab/offerings",
+  )
+  return res.data.offerings
+}
+
+export async function generateStudyLab(
+  input: GenerateStudyLabInput,
+): Promise<{ generationId: string; status: string }> {
+  const res = await api.post("/assistant/study-lab/generate", input)
+  return res.data
+}
+
+export async function getStudyLabHistory(
+  courseOfferingId?: string,
+): Promise<StudyGeneration[]> {
+  const res = await api.get<{ generations: StudyGeneration[] }>(
+    "/assistant/study-lab/history",
+    { params: courseOfferingId ? { courseOfferingId } : undefined },
+  )
+  return res.data.generations
+}
+
+export async function getStudyLabGeneration(
+  generationId: string,
+): Promise<StudyGeneration> {
+  const res = await api.get<{ generation: StudyGeneration }>(
+    `/assistant/study-lab/${generationId}`,
+  )
+  return res.data.generation
+}
+
+export async function deleteStudyLabGeneration(
+  generationId: string,
+): Promise<void> {
+  await api.delete(`/assistant/study-lab/${generationId}`)
+}
+
+export function studyLabFileUrl(generationId: string): string {
+  return `${API_URL}/assistant/study-lab/${generationId}/download`
+}
+
+export async function fetchFileBlob(url: string): Promise<Blob> {
+  const res = await api.get<Blob>(url, { responseType: "blob" })
+  return res.data
+}
+
+// ─── Lab Simulations (AI-generated Matter.js sandbox labs) ──
+export type LabStatus =
+  | "GENERATING"
+  | "AI_REVIEW_FAILED"
+  | "PENDING_TEACHER_REVIEW"
+  | "PUBLISHED"
+  | "REJECTED"
+
+export interface LabReviewFlags {
+  flags: string[]
+  reasoning: string
+}
+
+export interface Lab {
+  id: string
+  courseOfferingId: string
+  topic: string
+  status: LabStatus
+  generatedCode: string | null
+  reviewApproved: boolean | null
+  reviewFlags: LabReviewFlags | null
+  teacherNotes: string | null
+  publishedAt: string | null
+  createdAt: string
+}
+
+export interface GenerateLabInput {
+  courseOfferingId: string
+  topic: string
+}
+
+export interface GenerateLabResponse {
+  grounded: boolean
+  labId: string | null
+  status: LabStatus | null
+  message: string | null
+  reviewApproved: boolean | null
+  reviewFlags: LabReviewFlags | null
+}
+
+export async function generateLab(input: GenerateLabInput): Promise<GenerateLabResponse> {
+  const res = await api.post<GenerateLabResponse>("/labs/generate", input)
+  return res.data
+}
+
+export async function getLabs(courseOfferingId?: string): Promise<Lab[]> {
+  const res = await api.get<Lab[]>("/labs", {
+    params: courseOfferingId ? { courseOfferingId } : undefined,
+  })
+  return res.data
+}
+
+export async function getLab(id: string): Promise<Lab> {
+  const res = await api.get<Lab>(`/labs/${id}`)
+  return res.data
+}
+
+export async function publishLab(id: string): Promise<Lab> {
+  const res = await api.post<Lab>(`/labs/${id}/publish`)
+  return res.data
+}
+
+export async function rejectLab(id: string, notes?: string): Promise<Lab> {
+  const res = await api.post<Lab>(`/labs/${id}/reject`, { notes })
+  return res.data
+}
+
+// ─── Meetings ───────────────────────────────────────────
+export type MeetingType = "CLASS" | "AD_HOC"
+export type MeetingStatus = "SCHEDULED" | "LIVE" | "ENDED" | "CANCELED"
+export type TranscriptStatus = "PENDING" | "PROCESSING" | "READY" | "FAILED"
+
+export interface MeetingSummary {
+  id: string
+  title: string
+  type: MeetingType
+  status: MeetingStatus
+  transcriptStatus: TranscriptStatus
+  courseOfferingId: string | null
+  courseName: string | null
+  sectionName: string | null
+  scheduledStart: string
+  scheduledEnd: string
+  recordingEnabled: boolean
+  recordingUrl: string | null
+  createdBy: string
+  hostName: string
+  participantCount: number
+  isHost: boolean
+  canJoin: boolean
+}
+
+export interface MeetingDetail extends MeetingSummary {
+  participants: { userId: string; name: string }[]
+  attendance: { userId: string; name: string; joinedAt: string; leftAt: string | null }[]
+}
+
+export interface MeetingMessage {
+  id: string
+  meetingId: string
+  userId: string
+  name: string
+  text: string
+  createdAt: string
+}
+
+export interface TranscriptSegment {
+  startMs: number
+  endMs: number
+  text: string
+}
+
+export type StruggleSignalStatus = 'PENDING' | 'SENT' | 'DISMISSED'
+
+export interface StruggleSignal {
+  id: string
+  studentId: string
+  studentName: string | null
+  concept: string
+  explanation: string
+  status: StruggleSignalStatus
+  classWide: boolean
+  quizId: string | null
+  interactionId: string | null
+  createdAt: string
+}
+
+export interface ClassWideCluster {
+  concept: string
+  studentCount: number
+  signals: StruggleSignal[]
+}
+
+export interface StruggleSignalsForMeeting {
+  pending: {
+    classWide: ClassWideCluster[]
+    individual: StruggleSignal[]
+  }
+  history: StruggleSignal[]
+}
+
+export interface MeetingTranscript {
+  status: TranscriptStatus
+  segments: TranscriptSegment[]
+}
+
+export interface JoinMeetingResponse {
+  token: string
+  url: string
+  roomName: string
+  identity: string
+}
+
+export interface CreateMeetingInput {
+  title: string
+  type: MeetingType
+  courseOfferingId?: string
+  scheduledStart: string
+  scheduledEnd: string
+  recordingEnabled?: boolean
+  participantIds?: string[]
+}
+
+export async function listMeetings(scope: "upcoming" | "past" | "all" = "all"): Promise<{ meetings: MeetingSummary[] }> {
+  const res = await api.get<{ meetings: MeetingSummary[] }>("/meetings", { params: { scope } })
+  return res.data
+}
+
+export async function getMeeting(id: string): Promise<MeetingDetail> {
+  const res = await api.get<MeetingDetail>(`/meetings/${id}`)
+  return res.data
+}
+
+export async function createMeeting(input: CreateMeetingInput): Promise<MeetingDetail> {
+  const res = await api.post<MeetingDetail>("/meetings", input)
+  return res.data
+}
+
+export async function joinMeeting(id: string): Promise<JoinMeetingResponse> {
+  const res = await api.post<JoinMeetingResponse>(`/meetings/${id}/join`)
+  return res.data
+}
+
+export async function leaveMeeting(id: string): Promise<{ leftAt: string }> {
+  const res = await api.post<{ leftAt: string }>(`/meetings/${id}/leave`)
+  return res.data
+}
+
+export async function endMeeting(id: string): Promise<MeetingDetail> {
+  const res = await api.patch<MeetingDetail>(`/meetings/${id}/end`)
+  return res.data
+}
+
+export async function setMeetingRecording(id: string, enabled: boolean): Promise<MeetingDetail> {
+  const res = await api.patch<MeetingDetail>(`/meetings/${id}/recording`, { enabled })
+  return res.data
+}
+
+export async function getMeetingRecording(id: string): Promise<{ recordingUrl: string }> {
+  const res = await api.get<{ recordingUrl: string }>(`/meetings/${id}/recording`)
+  return res.data
+}
+
+export async function getMeetingMessages(id: string): Promise<{ messages: MeetingMessage[] }> {
+  const res = await api.get<{ messages: MeetingMessage[] }>(`/meetings/${id}/messages`)
+  return res.data
+}
+
+export async function sendMeetingMessage(id: string, text: string): Promise<MeetingMessage> {
+  const res = await api.post<MeetingMessage>(`/meetings/${id}/messages`, { text })
+  return res.data
+}
+
+export async function getMeetingTranscript(id: string): Promise<MeetingTranscript> {
+  const res = await api.get<MeetingTranscript>(`/meetings/${id}/transcript`)
+  return res.data
+}
+
+export async function getStruggleSignalsForMeeting(
+  meetingId: string,
+): Promise<StruggleSignalsForMeeting> {
+  const res = await api.get<StruggleSignalsForMeeting>(
+    `/meetings/${meetingId}/struggle-signals`,
+  )
+  return res.data
+}
+
+export async function sendStruggleSignal(
+  signalId: string,
+): Promise<{ id: string; status: 'SENT'; quizId: string }> {
+  const res = await api.post<{ id: string; status: 'SENT'; quizId: string }>(
+    `/struggle-signals/${signalId}/send`,
+  )
+  return res.data
+}
+
+export async function dismissStruggleSignal(
+  signalId: string,
+): Promise<{ id: string; status: 'DISMISSED' }> {
+  const res = await api.post<{ id: string; status: 'DISMISSED' }>(
+    `/struggle-signals/${signalId}/dismiss`,
+  )
+  return res.data
+}
+
+// ── Student CSV migration ─────────────────────────────────────────
+
+export type MigrateField =
+  | 'STUDENT_NAME'
+  | 'FIRST_NAME'
+  | 'LAST_NAME'
+  | 'EMAIL'
+  | 'GRADE_LEVEL'
+  | 'SECTION'
+  | 'UNMAPPED'
+
+export const IMPORTABLE_FIELDS: MigrateField[] = [
+  'STUDENT_NAME',
+  'FIRST_NAME',
+  'LAST_NAME',
+  'EMAIL',
+  'GRADE_LEVEL',
+  'SECTION',
+]
+
+export interface MigrateColumn {
+  sourceColumn: string
+  sampleValues: string[]
+  suggestedField: MigrateField
+  confidence: number
+  masked: boolean
+}
+
+export interface MigrateAnalyzeResult {
+  columns: MigrateColumn[]
+  totalRows: number
+  maskedColumns: string[]
+}
+
+export interface ImportFollowUpRow {
+  row: number
+  reason: string
+}
+
+export interface UnassignedImportRow {
+  row: number
+  studentId: string
+  reason: string
+}
+
+export interface UnmatchedImportRow {
+  row: number
+  providedValue: string
+}
+
+export interface MigrateImportResult {
+  imported: number
+  unassignedGradeOrSection: UnassignedImportRow[]
+  needsFollowUp: ImportFollowUpRow[]
+  unmatchedSectionsOrGrades: UnmatchedImportRow[]
+}
+
+export interface ImportFieldMapping {
+  sourceColumn: string
+  mappedField: MigrateField
+}
+
+export async function analyzeMigrationCsv(
+  csv: string,
+): Promise<MigrateAnalyzeResult> {
+  const res = await api.post<MigrateAnalyzeResult>('/migration/csv/analyze', {
+    csv,
+  })
+  return res.data
+}
+
+export async function analyzeMigrationPasted(
+  text: string,
+): Promise<MigrateAnalyzeResult> {
+  const res = await api.post<MigrateAnalyzeResult>(
+    '/migration/csv/analyze-pasted',
+    { text },
+  )
+  return res.data
+}
+
+export async function importStudentsCsv(
+  csv: string,
+  mapping: ImportFieldMapping[],
+): Promise<MigrateImportResult> {
+  const res = await api.post<MigrateImportResult>('/migration/csv/import', {
+    csv,
+    mapping,
+  })
+  return res.data
+}
+
+export async function fetchImportTemplate(): Promise<string> {
+  const res = await api.get('/migration/csv/template', {
+    responseType: 'blob',
+  })
+  return res.data.text()
+}
+
+export interface UnassignedStudent {
+  id: string
+  name: string
+  email: string
+  gradeId: string | null
+  grade: { id: string; level: number; name: string | null } | null
+  enrollments: Array<{
+    sectionId: string
+    section: { id: string; name: string } | null
+  }>
+  createdAt: string
+}
+
+export async function getUnassignedStudents(): Promise<UnassignedStudent[]> {
+  const res = await api.get<UnassignedStudent[]>('/students/unassigned')
   return res.data
 }

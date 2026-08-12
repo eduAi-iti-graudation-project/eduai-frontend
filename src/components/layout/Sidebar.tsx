@@ -9,14 +9,17 @@ export function Sidebar() {
   const path = location.pathname
 
   const activeItem = path === "/dashboard" ? "dashboard"
+    : path.startsWith("/timetable") ? "timetable"
     : path.startsWith("/classes") ? "classes"
     : path.startsWith("/assignments") ? "assignments"
     : path.startsWith("/rubrics") ? "rubrics"
     : path.startsWith("/submissions") ? "submissions"
     : path.startsWith("/quizzes") ? "quizzes"
+    : path.startsWith("/labs") ? "labs"
     : path.startsWith("/alerts") ? "alerts"
     : path.startsWith("/insights") ? "insights"
     : path.startsWith("/chat") ? "chat"
+    : path.startsWith("/meetings") ? "meetings"
     : path.startsWith("/notifications") ? "notifications"
     : path.startsWith("/assistant") ? "assistant"
     : path.startsWith("/grades") ? "grades"
@@ -24,17 +27,20 @@ export function Sidebar() {
 
   const navItems = [
     { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/dashboard" },
-    { icon: "school", label: "Classes", id: "classes", href: "/classes" },
+    { icon: "calendar_month", label: "Timetable", id: "timetable", href: "/timetable" },
+    { icon: "account_tree", label: "Grades & Levels", id: "grades", href: "/grades" },
+    { icon: "school", label: "Sections", id: "classes", href: "/classes" },
     { icon: "assignment", label: "Assignments", id: "assignments", href: "/assignments/new" },
     { icon: "assignment_turned_in", label: "Rubrics", id: "rubrics", href: "/rubrics" },
     { icon: "list_alt", label: "Submissions", id: "submissions", href: "/submissions" },
     { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/quizzes" },
+    { icon: "science", label: "Lab Simulations", id: "labs", href: "/labs" },
     { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/alerts" },
     { icon: "monitoring", label: "Insights", id: "insights", href: "/insights" },
     { icon: "chat_bubble", label: "Messages", id: "chat", href: "/chat" },
     { icon: "notifications", label: "Notifications", id: "notifications", href: "/notifications" },
     { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/assistant" },
-    { icon: "grade", label: "My Grades", id: "grades", href: "/grades" },
+    { icon: "video_camera_front", label: "Meetings", id: "meetings", href: "/meetings" },
   ]
 
   const bottomItems = [{ icon: "contact_support", label: "Help Center", id: "help", href: "/support" }]

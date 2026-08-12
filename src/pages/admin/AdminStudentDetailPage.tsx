@@ -163,6 +163,14 @@ export function AdminStudentDetailPage() {
     onError: () => toast.error("Could not delete the document"),
   })
 
+  const resetM = useMutation({
+    mutationFn: () => api.resetStudentCredentials(id),
+    onSuccess: () => {
+      toast.success("Password reset — share the new credentials with the student.")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+
   if (profileQ.isLoading || (id && !profileQ.data)) {
     return (
       <div className="flex-1 px-4 py-4 min-w-0">
@@ -213,6 +221,16 @@ export function AdminStudentDetailPage() {
                   {profile.guardian.name}
                 </span>
               )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-md font-label-md text-label-md"
+                disabled={resetM.isPending}
+                onClick={() => resetM.mutate()}
+              >
+                <span className="material-symbols-outlined text-[16px]">key</span>
+                {resetM.isPending ? "Resetting…" : "Reset password"}
+              </Button>
             </div>
           </div>
 
@@ -278,8 +296,72 @@ export function AdminStudentDetailPage() {
             />
           </TabsContent>
         </Tabs>
+
+        <CredentialsDialog
+          open={resetM.data !== undefined}
+          onOpenChange={() => resetM.reset()}
+          credentials={resetM.data ?? null}
+        />
       </div>
     </div>
+  )
+}
+
+function CredentialsDialog({
+  open,
+  onOpenChange,
+  credentials,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  credentials: api.ResetStudentCredentialsResult | null
+}) {
+  const copyValue = async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value)
+      toast.success("Copied to clipboard.")
+    } catch {
+      toast.error("Could not copy. Please copy it manually.")
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="rounded-lg max-w-lg bg-white">
+        <DialogHeader>
+          <DialogTitle className="font-headline-md text-headline-md text-on-surface">New login credentials</DialogTitle>
+          <DialogDescription className="font-body-md text-body-md text-on-surface-variant">
+            The new password works right away and the old one stops working. These are shown once — share them with the student.
+          </DialogDescription>
+        </DialogHeader>
+        {credentials && (
+          <div className="space-y-3">
+            <div className="rounded-md border border-border bg-surface-container-low p-4">
+              <p className="font-label-sm text-label-sm text-on-surface-variant">School email</p>
+              <p className="font-body-md text-body-md text-on-background break-all">{credentials.email}</p>
+            </div>
+            <div className="rounded-md border border-border bg-surface-container-low p-4">
+              <p className="font-label-sm text-label-sm text-on-surface-variant">New password</p>
+              <p className="font-body-md text-body-md text-on-background break-all">{credentials.password}</p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => copyValue(`Email: ${credentials.email}\nPassword: ${credentials.password}`)}
+            >
+              <span className="material-symbols-outlined text-[16px]">content_copy</span>
+              Copy both
+            </Button>
+          </div>
+        )}
+        <DialogFooter className="gap-2">
+          <Button type="button" className="w-full" onClick={() => onOpenChange(false)}>
+            Done
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 

@@ -89,11 +89,14 @@ export function GradeManagementPage() {
   const createAndAssignClass = useMutation({
     mutationFn: async () => {
       const cls = await api.createClass({
+        gradeLevelId: expandedGrade!,
         name: newClassName.trim(),
         description: newClassDesc.trim() || undefined,
-        teacherId: newClassTeacher,
       })
       await api.addClassToGrade(expandedGrade!, cls.id)
+      if (newClassTeacher) {
+        await api.assignTeacherToClass(cls.id, newClassTeacher)
+      }
       return cls
     },
     onSuccess: () => {
@@ -111,7 +114,7 @@ export function GradeManagementPage() {
 
   const changeTeacher = useMutation({
     mutationFn: ({ classId, teacherId }: { classId: string; teacherId: string }) =>
-      api.updateClass(classId, { teacherId }),
+      api.assignTeacherToClass(classId, teacherId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grade-classes", expandedGrade] })
       queryClient.invalidateQueries({ queryKey: ["admin-classes"] })
@@ -126,14 +129,14 @@ export function GradeManagementPage() {
   const classNames = new Map((allClasses.data ?? []).map((c) => [c.id, c.name]))
 
   const gradeClassesList = (gradeClasses.data ?? []).filter(
-    (c) => org?.id != null && (c as { organizationId?: string }).organizationId === org.id,
+    (c) => org?.id != null && c.organizationId === org.id,
   )
 
   const gradeClassIds = new Set(gradeClassesList.map((c) => c.id))
   const unassignedClasses = (allClasses.data ?? []).filter((c) => !gradeClassIds.has(c.id))
 
   const classesByTeacher = gradeClassesList.reduce<Map<string, typeof gradeClassesList>>((acc, c) => {
-    const tid = (c as unknown as { teacherId: string }).teacherId ?? "unassigned"
+    const tid = c.teacherId ?? "unassigned"
     if (!acc.has(tid)) acc.set(tid, [])
     acc.get(tid)!.push(c)
     return acc
@@ -250,7 +253,7 @@ export function GradeManagementPage() {
                             </div>
                             <div className="space-y-2">
                               {list.map((c) => {
-                                const currentTid = (c as unknown as { teacherId: string }).teacherId ?? ""
+                                const currentTid = c.teacherId ?? ""
                                 return (
                                 <div key={c.id} className="flex items-center justify-between bg-surface-container-low rounded-lg px-md py-2 ml-6">
                                   <span className="font-label-md text-label-md text-on-surface">{classNames.get(c.id) || c.name || `Class (${c.id.slice(0, 8)})`}</span>
