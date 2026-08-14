@@ -42,6 +42,11 @@ const FIELD_LABELS: Record<string, string> = {
   EMAIL: "Email",
   GRADE_LEVEL: "Grade level",
   SECTION: "Section",
+  GUARDIAN_NAME: "Guardian name",
+  GUARDIAN_EMAIL: "Guardian email",
+  GUARDIAN_SSN: "Guardian SSN",
+  GUARDIAN_PHONE: "Guardian phone",
+  GUARDIAN_NATIONALITY: "Guardian nationality",
   UNMAPPED: "Skip (not imported)",
 }
 
@@ -499,7 +504,7 @@ export function MigrationWizardPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
         title="Import summary"
-        subtitle="Every student in your file is now staged as a pending join request. Approve them from the Join Approvals page to create their accounts."
+        subtitle="Rows with complete data are imported right away — accounts are created and credentials emailed. Rows that still need fixing (or whose auto-approval failed) are staged for review in Join Approvals."
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
