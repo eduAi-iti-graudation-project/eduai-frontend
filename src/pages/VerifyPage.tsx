@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import * as api from "@/lib/api"
 
-type Phase = "idle" | "loading" | "revealed" | "failed"
+type Phase = "idle" | "loading" | "set-password" | "revealed" | "failed"
 
 export function VerifyPage() {
   const [searchParams] = useSearchParams()
@@ -17,12 +17,14 @@ export function VerifyPage() {
   const [credentials, setCredentials] = useState<api.VerifyEmailResult | null>(null)
   const [failure, setFailure] = useState("")
   const [resent, setResent] = useState(false)
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
 
   const verify = useMutation({
     mutationFn: (t: string) => api.verifyEmail(t),
     onSuccess: (data) => {
       setCredentials(data)
-      setPhase("revealed")
+      setPhase(data.needsPassword ? "set-password" : "revealed")
     },
     onError: (err: Error) => {
       setFailure(err.message)
@@ -36,6 +38,15 @@ export function VerifyPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
+
+  const setPasswordM = useMutation({
+    mutationFn: (pw: string) => api.verifyEmail(token!, pw),
+    onSuccess: (data) => {
+      setCredentials(data)
+      setPhase("revealed")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
 
   const resend = useMutation({
     mutationFn: (email: string) => api.resendCredentials(email),
@@ -57,7 +68,7 @@ export function VerifyPage() {
 
   return (
     <div className="min-h-screen bg-surface-container-low flex items-center justify-center p-xl">
-      <div className="w-full max-w-md bg-surface-container-lowest rounded-lg p-6 md:p-8 shadow-[0_20px_50px_rgba(10,24,66,0.05)]">
+      <div className="w-full max-w-[36rem] bg-surface-container-lowest rounded-lg p-6 md:p-8 shadow-[0_20px_50px_rgba(10,24,66,0.05)]">
         {phase === "loading" && (
           <>
             <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">
@@ -69,14 +80,63 @@ export function VerifyPage() {
           </>
         )}
 
+        {phase === "set-password" && credentials && (
+          <>
+            <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">
+              Choose a password
+            </h1>
+            <p className="font-body-md text-body-md text-on-surface-variant mb-6">
+              Your school account is ready. Pick a password (at least 8 characters) to
+              sign in with your school email.
+            </p>
+            <form
+              className="space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault()
+                if (password) setPasswordM.mutate(password)
+              }}
+            >
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    minLength={8}
+                    required
+                    autoFocus
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-outline transition-colors hover:text-primary"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <Button type="submit" className="w-full" disabled={setPasswordM.isPending}>
+                {setPasswordM.isPending ? "Setting password…" : "Set password"}
+              </Button>
+            </form>
+          </>
+        )}
+
         {phase === "revealed" && credentials && (
           <>
             <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">
-              Your login details
+              Your school account is ready
             </h1>
             <p className="font-body-md text-body-md text-on-surface-variant mb-6">
-              Save these now — they are shown only once. Sign in at{" "}
-              {window.location.origin}/login with the school email and password below.
+              Sign in at {window.location.origin}/login with the school email below.
             </p>
             <div className="space-y-3">
               <div className="rounded-md border border-border bg-surface-container-low p-4">
@@ -88,19 +148,6 @@ export function VerifyPage() {
                   size="sm"
                   className="mt-2"
                   onClick={() => copyValue(credentials.email)}
-                >
-                  Copy
-                </Button>
-              </div>
-              <div className="rounded-md border border-border bg-surface-container-low p-4">
-                <p className="font-label-sm text-label-sm text-on-surface-variant">Password</p>
-                <p className="font-body-md text-body-md text-on-background break-all">{credentials.password}</p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => copyValue(credentials.password)}
                 >
                   Copy
                 </Button>

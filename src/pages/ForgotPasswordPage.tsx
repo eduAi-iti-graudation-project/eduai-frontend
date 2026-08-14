@@ -46,7 +46,7 @@ export function ForgotPasswordPage() {
   if (token) {
     return (
       <div className="min-h-screen bg-surface-container-low flex items-center justify-center p-xl">
-        <div className="w-full max-w-md bg-surface-container-lowest rounded-lg p-6 md:p-8 shadow-[0_20px_50px_rgba(10,24,66,0.05)]">
+        <div className="w-full max-w-[36rem] bg-surface-container-lowest rounded-lg p-6 md:p-8 shadow-[0_20px_50px_rgba(10,24,66,0.05)]">
           <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">Choose a new password</h1>
           <p className="font-body-md text-body-md text-on-surface-variant mb-6">
             It must be at least 8 characters long.
@@ -85,7 +85,7 @@ export function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen bg-surface-container-low flex items-center justify-center p-xl">
-      <div className="w-full max-w-md bg-surface-container-lowest rounded-lg p-6 md:p-8 shadow-[0_20px_50px_rgba(10,24,66,0.05)]">
+      <div className="w-full max-w-[36rem] bg-surface-container-lowest rounded-lg p-6 md:p-8 shadow-[0_20px_50px_rgba(10,24,66,0.05)]">
         <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">
           {sent ? "Check your inbox" : "Reset your password"}
         </h1>

@@ -6,7 +6,6 @@ import { toast } from "sonner"
 import { useAuth } from "@/providers/use-auth"
 import { loginSchema, type LoginFormData } from "@/lib/validations"
 import { cn } from "@/lib/utils"
-import { SocialLogin } from "./SocialLogin"
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -145,16 +144,6 @@ export function LoginForm() {
           )}
         </button>
       </form>
-
-      <div className="flex items-center gap-4 my-6">
-        <div className="h-[1px] flex-1 bg-surface-container-highest" />
-        <span className="font-label-sm text-label-sm text-outline-variant tracking-widest uppercase whitespace-nowrap">
-          OR CONTINUE WITH
-        </span>
-        <div className="h-[1px] flex-1 bg-surface-container-highest" />
-      </div>
-
-      <SocialLogin />
 
       <footer className="mt-6 text-center">
         <p className="font-body-md text-body-md text-on-surface-variant">
