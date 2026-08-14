@@ -51,7 +51,7 @@ export function GuardianAlertDetailPage() {
   const { guardianContent, diagnosis } = detail.data
 
   return (
-    <div className="flex-1 p-xl max-w-4xl mx-auto w-full">
+    <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
       <Link
         to="/guardian"
         className="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant hover:text-primary mb-4"

@@ -43,7 +43,7 @@ export function GuardianDashboardPage() {
   }
 
   return (
-    <div className="flex-1 p-xl max-w-5xl mx-auto w-full">
+    <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
       <header className="mb-6">
         <h1 className="font-headline-xl text-headline-xl text-primary">Guardian Dashboard</h1>
         <p className="font-body-lg text-body-lg text-on-surface-variant">Stay updated on your children's progress</p>

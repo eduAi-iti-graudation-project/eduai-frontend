@@ -496,6 +496,22 @@ export async function getGuardianAlertDetail(id: string): Promise<GuardianAlertD
   return res.data
 }
 
+export interface GuardianAlertSummary {
+  id: string
+  type: string
+  reason: string
+  status: string
+  studentId: string
+  createdAt: string
+  studentName: string
+  severity: string | null
+}
+
+export async function getGuardianAlerts(): Promise<GuardianAlertSummary[]> {
+  const res = await api.get<GuardianAlertSummary[]>("/alerts/guardian")
+  return res.data
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────
 
 export async function getDashboard(): Promise<DashboardOverview> {
