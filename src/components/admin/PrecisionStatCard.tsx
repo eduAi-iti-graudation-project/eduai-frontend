@@ -34,21 +34,21 @@ const deltaGlyph: Record<Delta["direction"], string> = {
 export function PrecisionStatCard({ icon, label, value, iconClass, delta, spark, footer, className }: PrecisionStatCardProps) {
   return (
     <div className={cn("rounded-lg bg-surface-container-lowest border border-outline-variant p-5 hover:shadow-sm transition-all group", className)}>
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <div className={cn("w-7 h-7 rounded-md flex items-center justify-center shrink-0", iconClass ?? "bg-primary-fixed text-on-primary-fixed-variant")}>
-            <span className="material-symbols-outlined text-[18px]">{icon}</span>
+<div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={cn("w-7 h-7 rounded-md flex items-center justify-center shrink-0", iconClass ?? "bg-primary-fixed text-on-primary-fixed-variant")}>
+              <span className="material-symbols-outlined text-[18px]">{icon}</span>
+            </div>
+            <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider truncate">{label}</p>
           </div>
-          <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">{label}</p>
-        </div>
-        {delta ? (
-          <span
-            className={cn(
-              "inline-flex items-center gap-0.5 font-label-sm text-label-sm px-1.5 py-0.5 rounded-[6px] font-medium",
+          {delta ? (
+            <span
+              className={cn(
+                "inline-flex items-center gap-px font-label-sm text-[9px] px-1 py-0.5 rounded-[4px] font-medium leading-none shrink-0 whitespace-nowrap",
               deltaTones[delta.tone ?? (delta.direction === "up" ? "positive" : delta.direction === "down" ? "negative" : "neutral")],
             )}
           >
-            <span className="material-symbols-outlined text-[13px]">{deltaGlyph[delta.direction]}</span>
+            <span className="material-symbols-outlined text-[8px] leading-none">{deltaGlyph[delta.direction]}</span>
             {delta.label}
           </span>
         ) : null}

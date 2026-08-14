@@ -160,7 +160,7 @@ export function AdminStudentDetailPage() {
   const resetM = useMutation({
     mutationFn: () => api.resetStudentCredentials(id),
     onSuccess: () => {
-      toast.success("Password reset — share the new credentials with the student.")
+      toast.success("Set-password invite sent to the student.")
     },
     onError: (err: Error) => toast.error(err.message),
   })
@@ -310,22 +310,13 @@ function CredentialsDialog({
   onOpenChange: (v: boolean) => void
   credentials: api.ResetStudentCredentialsResult | null
 }) {
-  const copyValue = async (value: string) => {
-    try {
-      await navigator.clipboard.writeText(value)
-      toast.success("Copied to clipboard.")
-    } catch {
-      toast.error("Could not copy. Please copy it manually.")
-    }
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-lg max-w-lg bg-white">
         <DialogHeader>
-          <DialogTitle className="font-headline-md text-headline-md text-on-surface">New login credentials</DialogTitle>
+          <DialogTitle className="font-headline-md text-headline-md text-on-surface">Invite sent</DialogTitle>
           <DialogDescription className="font-body-md text-body-md text-on-surface-variant">
-            The new password works right away and the old one stops working. These are shown once — share them with the student.
+            The student can set a new password from the invite we emailed them. No password is shown here.
           </DialogDescription>
         </DialogHeader>
         {credentials && (
@@ -334,19 +325,9 @@ function CredentialsDialog({
               <p className="font-label-sm text-label-sm text-on-surface-variant">School email</p>
               <p className="font-body-md text-body-md text-on-background break-all">{credentials.email}</p>
             </div>
-            <div className="rounded-md border border-border bg-surface-container-low p-4">
-              <p className="font-label-sm text-label-sm text-on-surface-variant">New password</p>
-              <p className="font-body-md text-body-md text-on-background break-all">{credentials.password}</p>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => copyValue(`Email: ${credentials.email}\nPassword: ${credentials.password}`)}
-            >
-              <span className="material-symbols-outlined text-[16px]">content_copy</span>
-              Copy both
-            </Button>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              We emailed a set-password invite to the student's inbox — the link is valid for 72 hours.
+            </p>
           </div>
         )}
         <DialogFooter className="gap-2">
