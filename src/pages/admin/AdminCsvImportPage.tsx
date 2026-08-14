@@ -23,17 +23,43 @@ import { EmptyState } from "@/components/ui/EmptyState"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { cn } from "@/lib/utils"
 
-type Field = "STUDENT_NAME" | "EMAIL" | "GRADE_LEVEL" | "SECTION" | "UNMAPPED"
+type Field =
+  | "STUDENT_NAME"
+  | "EMAIL"
+  | "GRADE_LEVEL"
+  | "SECTION"
+  | "GUARDIAN_NAME"
+  | "GUARDIAN_EMAIL"
+  | "GUARDIAN_SSN"
+  | "GUARDIAN_PHONE"
+  | "GUARDIAN_NATIONALITY"
+  | "UNMAPPED"
 
 const fieldLabels: Record<Field, string> = {
   STUDENT_NAME: "Student name",
   EMAIL: "Email",
   GRADE_LEVEL: "Grade level",
   SECTION: "Section",
+  GUARDIAN_NAME: "Guardian name",
+  GUARDIAN_EMAIL: "Guardian email",
+  GUARDIAN_SSN: "Guardian SSN",
+  GUARDIAN_PHONE: "Guardian phone",
+  GUARDIAN_NATIONALITY: "Guardian nationality",
   UNMAPPED: "Not imported",
 }
 
-const fieldOptions: Field[] = ["STUDENT_NAME", "EMAIL", "GRADE_LEVEL", "SECTION", "UNMAPPED"]
+const fieldOptions: Field[] = [
+  "STUDENT_NAME",
+  "EMAIL",
+  "GRADE_LEVEL",
+  "SECTION",
+  "GUARDIAN_NAME",
+  "GUARDIAN_EMAIL",
+  "GUARDIAN_SSN",
+  "GUARDIAN_PHONE",
+  "GUARDIAN_NATIONALITY",
+  "UNMAPPED",
+]
 
 const confidenceLabel = (c: number) => {
   if (c >= 0.9) return "High"
@@ -323,50 +349,93 @@ export function AdminCsvImportPage() {
 
           <div className="grid grid-cols-3 gap-3 mb-5">
             <div className="rounded-xl bg-primary-container/60 px-4 py-3">
-              <p className="font-headline-lg text-headline-lg text-on-primary-container">{importResult.created}</p>
-              <p className="font-label-sm text-label-sm text-on-primary-container/80">Students imported</p>
-            </div>
-            <div className="rounded-xl bg-surface-container-high px-4 py-3">
-              <p className="font-headline-lg text-headline-lg text-on-surface">{importResult.duplicates}</p>
-              <p className="font-label-sm text-label-sm text-on-surface-variant">Skipped (already in school)</p>
+              <p className="font-headline-lg text-headline-lg text-on-primary-container">{importResult.autoApproved}</p>
+              <p className="font-label-sm text-label-sm text-on-primary-container/80">Students imported instantly</p>
             </div>
             <div className="rounded-xl bg-tertiary-fixed px-4 py-3">
-              <p className="font-headline-lg text-headline-lg text-on-tertiary-fixed">{importResult.errors.length + importResult.flagged.length}</p>
-              <p className="font-label-sm text-label-sm text-on-tertiary-fixed">Need attention</p>
+              <p className="font-headline-lg text-headline-lg text-on-tertiary-fixed">{importResult.queued}</p>
+              <p className="font-label-sm text-label-sm text-on-tertiary-fixed">Queued for review</p>
+            </div>
+            <div className="rounded-xl bg-surface-container-high px-4 py-3">
+              <p className="font-headline-lg text-headline-lg text-on-surface">
+                {importResult.needsFollowUp.length + importResult.unassignedGradeOrSection.length + importResult.unmatchedSectionsOrGrades.length}
+              </p>
+              <p className="font-label-sm text-label-sm text-on-surface-variant">Need attention</p>
             </div>
           </div>
 
-          {importResult.created > 0 && importResult.errors.length === 0 && importResult.flagged.length === 0 ? (
+          {importResult.autoApproved > 0 && importResult.queued === 0 && importResult.needsFollowUp.length === 0 && importResult.unassignedGradeOrSection.length === 0 && importResult.unmatchedSectionsOrGrades.length === 0 ? (
             <div className="flex items-center gap-2 rounded-lg bg-primary-container/40 px-4 py-3 mb-4">
               <span className="material-symbols-outlined text-[18px] text-on-primary-container">check_circle</span>
               <p className="font-body-md text-body-md text-on-primary-container">
-                All rows imported successfully. Students are now in your school.
+                All rows imported successfully — accounts were created and credentials emailed. Students are now in your school.
               </p>
             </div>
           ) : null}
 
-          {importResult.errors.length > 0 ? (
+          {importResult.autoApproved > 0 ? (
+            <div className="flex items-center gap-2 rounded-lg bg-surface-container-lowest border border-primary/30 px-4 py-3 mb-4">
+              <span className="material-symbols-outlined text-[18px] text-primary">bolt</span>
+              <p className="font-body-md text-body-md text-on-surface">
+                {importResult.autoApproved} row{importResult.autoApproved === 1 ? "" : "s"} had complete data and were imported right away — no approval needed. A temporary password was emailed to each student.
+              </p>
+            </div>
+          ) : null}
+
+          {importResult.queued > 0 ? (
+            <div className="mb-4">
+              <p className="font-label-sm text-label-sm text-on-tertiary-fixed mb-1.5">Queued for review (account creation failed — fix and approve in Admin → Join Approvals)</p>
+              <div className="rounded-xl border border-border divide-y divide-border">
+                {importResult.needsFollowUp
+                  .filter((n) => n.reason.startsWith("Auto-approval failed"))
+                  .map((e, i) => (
+                    <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                      <span className="w-14 shrink-0 font-label-md text-label-md text-on-surface-variant">Row {e.row}</span>
+                      <span className="font-body-sm text-body-sm text-on-surface">{e.reason}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ) : null}
+
+          {importResult.needsFollowUp.filter((n) => !n.reason.startsWith("Auto-approval failed")).length > 0 ? (
             <div className="mb-4">
               <p className="font-label-sm text-label-sm text-error mb-1.5">Rows that could not be imported</p>
               <div className="rounded-xl border border-border divide-y divide-border">
-                {importResult.errors.map((e, i) => (
+                {importResult.needsFollowUp
+                  .filter((n) => !n.reason.startsWith("Auto-approval failed"))
+                  .map((e, i) => (
+                    <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                      <span className="w-14 shrink-0 font-label-md text-label-md text-on-surface-variant">Row {e.row}</span>
+                      <span className="font-body-sm text-body-sm text-on-surface">{e.reason}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ) : null}
+
+          {importResult.unassignedGradeOrSection.length > 0 ? (
+            <div className="mb-4">
+              <p className="font-label-sm text-label-sm text-on-tertiary-fixed mb-1.5">Imported but no grade/section (missing or unmatched)</p>
+              <div className="rounded-xl border border-border divide-y divide-border">
+                {importResult.unassignedGradeOrSection.map((u, i) => (
                   <div key={i} className="flex items-center gap-3 px-4 py-2.5">
-                    <span className="w-14 shrink-0 font-label-md text-label-md text-on-surface-variant">Row {e.row}</span>
-                    <span className="font-body-sm text-body-sm text-on-surface">{e.reason}</span>
+                    <span className="w-14 shrink-0 font-label-md text-label-md text-on-surface-variant">Row {u.row}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface">{u.reason}</span>
                   </div>
                 ))}
               </div>
             </div>
           ) : null}
 
-          {importResult.flagged.length > 0 ? (
+          {importResult.unmatchedSectionsOrGrades.length > 0 ? (
             <div className="mb-4">
-              <p className="font-label-sm text-label-sm text-on-tertiary-fixed mb-1.5">Rows flagged for review (not imported)</p>
+              <p className="font-label-sm text-label-sm text-on-surface-variant mb-1.5">Grade/section values that could not be matched</p>
               <div className="rounded-xl border border-border divide-y divide-border">
-                {importResult.flagged.map((f, i) => (
+                {importResult.unmatchedSectionsOrGrades.map((m, i) => (
                   <div key={i} className="flex items-center gap-3 px-4 py-2.5">
-                    <span className="w-14 shrink-0 font-label-md text-label-md text-on-surface-variant">Row {f.row}</span>
-                    <span className="font-body-sm text-body-sm text-on-surface">{f.reason}</span>
+                    <span className="w-14 shrink-0 font-label-md text-label-md text-on-surface-variant">Row {m.row}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface">"{m.providedValue}" did not match anything</span>
                   </div>
                 ))}
               </div>

@@ -2623,6 +2623,11 @@ export type MigrateField =
   | 'EMAIL'
   | 'GRADE_LEVEL'
   | 'SECTION'
+  | 'GUARDIAN_NAME'
+  | 'GUARDIAN_EMAIL'
+  | 'GUARDIAN_SSN'
+  | 'GUARDIAN_PHONE'
+  | 'GUARDIAN_NATIONALITY'
   | 'UNMAPPED'
 
 export const IMPORTABLE_FIELDS: MigrateField[] = [
@@ -2632,6 +2637,11 @@ export const IMPORTABLE_FIELDS: MigrateField[] = [
   'EMAIL',
   'GRADE_LEVEL',
   'SECTION',
+  'GUARDIAN_NAME',
+  'GUARDIAN_EMAIL',
+  'GUARDIAN_SSN',
+  'GUARDIAN_PHONE',
+  'GUARDIAN_NATIONALITY',
 ]
 
 export interface MigrateColumn {
@@ -2730,11 +2740,29 @@ export async function analyzeCsv(csv: string): Promise<CsvAnalyzeResult> {
   return res.data
 }
 
+export interface CsvImportRowNote {
+  row: number
+  reason: string
+}
+
+export interface CsvUnassignedRow {
+  row: number
+  studentId?: string
+  reason: string
+}
+
+export interface CsvUnmatchedRow {
+  row: number
+  providedValue: string
+}
+
 export interface CsvImportResult {
-  created: number
-  duplicates: number
-  errors: Array<{ row: number; reason: string }>
-  flagged: Array<{ row: number; reason: string }>
+  imported: number
+  autoApproved: number
+  queued: number
+  unassignedGradeOrSection: CsvUnassignedRow[]
+  needsFollowUp: CsvImportRowNote[]
+  unmatchedSectionsOrGrades: CsvUnmatchedRow[]
 }
 
 export async function importCsv(
