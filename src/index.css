@@ -133,6 +133,18 @@
   --spacing-margin-mobile: 16px;
   --spacing-margin-desktop: 40px;
 
+  /* ── Container (max-width) scale ── */
+  /* Declared explicitly so `max-w-md/lg/xl` resolve to real widths instead of
+     falling back to the spacing tokens above (24/48/80px). */
+  --container-sm: 24rem;
+  --container-md: 28rem;
+  --container-lg: 32rem;
+  --container-xl: 36rem;
+  --max-width-sm: 24rem;
+  --max-width-md: 28rem;
+  --max-width-lg: 32rem;
+  --max-width-xl: 36rem;
+
   /* ── Border radius ── */
   --radius-sm: 0.25rem;
   --radius-lg: 0.5rem;

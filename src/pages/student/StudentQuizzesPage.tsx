@@ -41,7 +41,7 @@ export function StudentQuizzesPage() {
     studentClasses.data?.find((c) => c.id === classId)?.name ?? "Class"
 
   return (
-    <div className="flex-1 p-xl max-w-3xl mx-auto w-full">
+    <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
       <header className="mb-lg">
         <h1 className="font-headline-xl text-headline-xl text-primary mb-xs">Quizzes</h1>
         <p className="font-body-lg text-body-lg text-on-surface-variant">
@@ -63,7 +63,7 @@ export function StudentQuizzesPage() {
           description="When your teacher publishes a quiz, it will show up here."
         />
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
           {published.map((quiz) => {
             const totalPoints = (quiz.questions ?? []).reduce((sum, q) => sum + q.points, 0)
             const badge = quiz.attemptStatus ? attemptBadge[quiz.attemptStatus] : undefined

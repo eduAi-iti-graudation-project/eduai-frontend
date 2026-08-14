@@ -30,7 +30,7 @@ export function LoadingGate({ children, onReady }: { children: React.ReactNode; 
             </span>
           </div>
           {failed ? (
-            <div className="max-w-md px-6 text-center">
+            <div className="max-w-[36rem] px-6 text-center">
               <p className="font-headline-md text-headline-md text-on-surface">Some assets failed to load</p>
               <p className="mt-2 text-body-md text-on-surface-variant">
                 {errors[0].replace(/^https?:\/\/[^/]+/, "")} — verify the file exists and your{" "}

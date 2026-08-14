@@ -72,7 +72,7 @@ export function StudentAssignmentsPage() {
 
   if (studentClasses.isLoading) {
     return (
-      <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+      <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
         <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Assignments</h1>
         <LoadingState />
       </div>
@@ -94,13 +94,13 @@ export function StudentAssignmentsPage() {
 
   if (classes.length === 0) {
     return (
-      <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+      <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
         <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Assignments</h1>
         <EmptyState
           icon="assignment"
           title="No assignments"
           description="You are not enrolled in any classes yet. Browse available classes to get started."
-          action={<Link to="/student/classes" className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md inline-block">Browse Classes</Link>}
+          action={<Link to="/student/classes" className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md inline-block">Browse Courses</Link>}
         />
       </div>
     )
@@ -108,7 +108,7 @@ export function StudentAssignmentsPage() {
 
   return (
     <>
-      <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+      <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
         <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Assignments</h1>
         <div className="space-y-6">
           {classes.map((cls) => {
@@ -121,7 +121,7 @@ export function StudentAssignmentsPage() {
                   <h2 className="font-headline-md text-headline-md text-primary">{cls.name}</h2>
                   <span className="font-label-sm text-label-sm text-on-surface-variant">&middot; {cls.teacherName}</span>
                 </div>
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {classAssignments.map((a) => {
                     const sub = submissionMap.get(a.id)
                     const isSubmitted = !!sub

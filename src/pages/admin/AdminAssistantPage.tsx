@@ -316,7 +316,7 @@ export function AdminAssistantPage() {
                   </span>
                   <div>
                     <h3 className="font-headline-md text-headline-md text-on-surface">Ask about the school</h3>
-                    <p className="font-body-sm text-body-sm text-on-surface-variant max-w-md mx-auto mt-1">
+                    <p className="font-body-sm text-body-sm text-on-surface-variant max-w-[31.25rem] mx-auto mt-1">
                       Answers are assembled from your live API data — school counts, alerts, queues and trend signals. No chat request leaves the frontend.
                     </p>
                   </div>
