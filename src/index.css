@@ -294,7 +294,38 @@ input:disabled {
   transform: translateX(4px);
 }
 
-/* Custom scrollbar for clean UI */
+/* ── Homework agent orbit graph ─────────────────────────────── */
+@keyframes agent-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes agent-orbit-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.agent-orbit {
+  position: absolute;
+  inset: 0;
+  animation: agent-orbit var(--orbit-duration, 18s) linear infinite;
+  will-change: transform;
+}
+
+.agent-orbit-reverse {
+  animation: agent-orbit-reverse var(--orbit-duration, 18s) linear infinite;
+  will-change: transform;
+}
+
+/* ── Custom scrollbar for clean UI ───────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
 }

@@ -1,12 +1,13 @@
 import { useRef, useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/providers/use-auth"
 import * as api from "@/lib/api"
 import { useHomeworkHelpChat } from "@/hooks/use-homework-help"
 import { FeedbackButtons } from "@/components/student/FeedbackButtons"
+import { HomeworkAgentGraph } from "@/components/student/HomeworkAgentGraph"
+import { TypewriterText } from "@/components/student/TypewriterText"
 import { PageHeader } from "@/components/shared/PageHeader"
-import { RichText } from "@/components/shared/RichText"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -22,22 +23,71 @@ const actionConfig: Record<string, { icon: string; label: string }> = {
   REDIRECT_TEACHER: { icon: "school", label: "Ask Teacher" },
 }
 
+function SourceText({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s<>"']+)/g)
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (!part.startsWith("http://") && !part.startsWith("https://")) {
+          return <span key={i}>{part}</span>
+        }
+        const href = part.replace(/[.,;:!?)]+$/, "")
+        try {
+          const url = new URL(href)
+          if (url.protocol !== "http:" && url.protocol !== "https:") {
+            return <span key={i}>{part}</span>
+          }
+          return (
+            <a
+              key={i}
+              href={url.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-primary underline underline-offset-2 break-all hover:text-primary/80"
+            >
+              {href}
+            </a>
+          )
+        } catch {
+          return <span key={i}>{part}</span>
+        }
+      })}
+    </>
+  )
+}
+
 export function HomeworkHelpPage() {
   const { user } = useAuth()
-  const [selectedClassId, setSelectedClassId] = useState("")
-  const [selectedAssignmentId, setSelectedAssignmentId] = useState("")
+  const [searchParams] = useSearchParams()
+  const [selectedCourseId, setSelectedCourseId] = useState(searchParams.get("course") ?? "")
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState(searchParams.get("assignment") ?? "")
   const [input, setInput] = useState("")
   const chatEndRef = useRef<HTMLDivElement>(null)
-  const { messages, sendMessage, clearMessages, isLoading } = useHomeworkHelpChat(
-    selectedClassId || null,
-    selectedAssignmentId || null,
-  )
 
   const studentClasses = useQuery({
-    queryKey: ["student", "classes", user?.id],
-    queryFn: () => api.getStudentClasses(user!.id),
+    queryKey: ["student", "courses", user?.id],
+    queryFn: () => api.getStudentCourses(user!.id),
     enabled: !!user?.id,
   })
+
+  const courses = studentClasses.data
+  const courseValid =
+    !!courses && !!selectedCourseId && courses.some((c) => c.id === selectedCourseId)
+  const effectiveCourseId = courseValid ? selectedCourseId : ""
+  const activeCourse = courseValid
+    ? courses!.find((c) => c.id === selectedCourseId)!
+    : undefined
+  const effectiveAssignmentId =
+    courseValid &&
+    !!selectedAssignmentId &&
+    !!activeCourse?.assignments.some((a) => a.id === selectedAssignmentId)
+      ? selectedAssignmentId
+      : ""
+
+  const { messages, sendMessage, clearMessages, step, lastToolStep, isLoading } = useHomeworkHelpChat(
+    effectiveCourseId || null,
+    effectiveAssignmentId || null,
+  )
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -69,14 +119,14 @@ export function HomeworkHelpPage() {
               Help History →
             </Link>
             <Select
-              value={selectedClassId}
+              value={effectiveCourseId}
               onValueChange={(value) => {
-                setSelectedClassId(value)
+                setSelectedCourseId(value)
                 setSelectedAssignmentId("")
               }}
             >
               <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[170px]">
-                <SelectValue placeholder="Select a class..." />
+                <SelectValue placeholder="Select a course..." />
               </SelectTrigger>
               <SelectContent>
                 {studentClasses.data?.map((c) => (
@@ -85,27 +135,25 @@ export function HomeworkHelpPage() {
               </SelectContent>
             </Select>
             <Select
-              value={selectedAssignmentId}
+              value={effectiveAssignmentId}
               onValueChange={setSelectedAssignmentId}
-              disabled={!selectedClassId}
+              disabled={!effectiveCourseId}
             >
               <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[200px] disabled:opacity-50">
                 <SelectValue
                   placeholder={
-                    selectedClassId
-                      ? (studentClasses.data?.find((c) => c.id === selectedClassId)?.assignments.length ?? 0) > 0
+                    effectiveCourseId
+                      ? (activeCourse?.assignments.length ?? 0) > 0
                         ? "No specific assignment"
-                        : "No assignments in this class"
-                      : "Select a class first..."
+                        : "No assignments in this course"
+                      : "Select a course first..."
                   }
                 />
               </SelectTrigger>
               <SelectContent>
-                {studentClasses.data
-                  ?.find((c) => c.id === selectedClassId)
-                  ?.assignments.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
-                  ))}
+                {activeCourse?.assignments.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </>
@@ -121,7 +169,7 @@ export function HomeworkHelpPage() {
               </div>
               <h2 className="font-headline-md text-headline-md text-primary mb-2">Stuck on homework?</h2>
               <p className="font-body-md text-body-md text-on-surface-variant">
-                Select a class and optionally an assignment, then ask a question — get hints, explanations, or a redirect to your teacher.
+                Select a course and optionally an assignment, then ask a question — get hints, explanations, or a redirect to your teacher.
               </p>
             </div>
           </div>
@@ -151,12 +199,25 @@ export function HomeworkHelpPage() {
                     <span className="material-symbols-outlined text-[14px]">{config.icon}</span>
                     {config.label}
                   </span>
-                  <RichText text={msg.content} />
+                  <TypewriterText key={msg.id} text={msg.content} />
                   {msg.teacherNotified && (
                     <p className="mt-2 flex items-center gap-1.5 font-label-sm text-label-sm text-primary">
                       <span className="material-symbols-outlined text-[14px]">notifications_active</span>
                       Your teacher has been notified.
                     </p>
+                  )}
+                  {msg.sources && msg.sources.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">Sources</p>
+                      <ul className="space-y-1">
+                        {msg.sources.map((s, i) => (
+                          <li key={i} className="font-body-sm text-body-sm text-on-surface-variant">
+                            <span className="material-symbols-outlined text-[13px] text-primary mr-1 align-[-2px]">article</span>
+                            <SourceText text={s} />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                   <div className="mt-3 pt-3 border-t border-border">
                     <FeedbackButtons interactionId={msg.interactionId} currentFeedback={null} />
@@ -171,13 +232,7 @@ export function HomeworkHelpPage() {
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] rounded-lg rounded-bl-[6px] px-4 py-3 bg-surface-container-low border border-border">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
-                </div>
-              </div>
+              <HomeworkAgentGraph step={step} lastToolStep={lastToolStep} />
             </div>
           )}
           <div ref={chatEndRef} />
@@ -189,15 +244,15 @@ export function HomeworkHelpPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={selectedClassId ? "Ask your question..." : "Select a class to start asking..."}
-              disabled={!selectedClassId || isLoading}
+              placeholder={effectiveCourseId ? "Ask your question..." : "Select a course to start asking..."}
+              disabled={!effectiveCourseId || isLoading}
               rows={1}
               className="flex-1 bg-transparent border-none outline-none resize-none px-3 py-2 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50"
             />
             <Button
               type="button"
               onClick={handleSend}
-              disabled={!input.trim() || isLoading || !selectedClassId}
+              disabled={!input.trim() || isLoading || !effectiveCourseId}
               size="icon"
               className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary disabled:opacity-40 transition-opacity hover:opacity-90 hover:bg-primary"
             >

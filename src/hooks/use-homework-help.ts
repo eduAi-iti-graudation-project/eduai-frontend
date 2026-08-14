@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react"
-import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
 
@@ -14,57 +13,75 @@ export interface HomeworkHelpMessage {
   interactionId?: string
 }
 
-export function useHomeworkHelpChat(classId: string | null, assignmentId: string | null = null) {
+export function useHomeworkHelpChat(courseOfferingId: string | null, assignmentId: string | null = null) {
   const [messages, setMessages] = useState<HomeworkHelpMessage[]>([])
-
-  const chatMutation = useMutation({
-    mutationFn: (question: string) =>
-      api.askHomeworkHelp({
-        classId: classId!,
-        question,
-        ...(assignmentId ? { assignmentId } : {}),
-      }),
-    onSuccess: (data) => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: data.interactionId || crypto.randomUUID(),
-          role: "assistant",
-          content: data.reply,
-          timestamp: new Date(),
-          action: data.action,
-          sources: data.sources,
-          teacherNotified: data.teacherNotified,
-          interactionId: data.interactionId || undefined,
-        },
-      ])
-    },
-    onError: (err: Error) => {
-      toast.error(err.message)
-    },
-  })
+  const [step, setStep] = useState<api.HomeworkAgentStep | null>(null)
+  const [lastToolStep, setLastToolStep] = useState<api.HomeworkAgentStep | null>(null)
 
   const sendMessage = useCallback(
     (content: string) => {
-      if (!classId || !content.trim()) return
+      if (!courseOfferingId || !content.trim()) return
+      const question = content.trim()
+
       setMessages((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), role: "user", content, timestamp: new Date() },
+        { id: crypto.randomUUID(), role: "user", content: question, timestamp: new Date() },
       ])
-      chatMutation.mutate(content)
+      setStep("thinking")
+      setLastToolStep(null)
+
+      api
+        .streamHomeworkHelp(
+          {
+            courseOfferingId,
+            question,
+            ...(assignmentId ? { assignmentId } : {}),
+          },
+          {
+            onStep: (s) => {
+              setStep(s)
+              if (s === "search_material" || s === "search_assignment" || s === "search_web") {
+                setLastToolStep(s)
+              }
+            },
+            onDone: (data) => {
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: data.interactionId || crypto.randomUUID(),
+                  role: "assistant",
+                  content: data.reply,
+                  timestamp: new Date(),
+                  action: data.action,
+                  sources: data.sources,
+                  teacherNotified: data.teacherNotified,
+                  interactionId: data.interactionId || undefined,
+                },
+              ])
+              setStep(null)
+            },
+          },
+        )
+        .catch((err: Error) => {
+          setStep(null)
+          toast.error(err.message)
+        })
     },
-    [classId, chatMutation],
+    [courseOfferingId, assignmentId],
   )
 
   const clearMessages = useCallback(() => {
     setMessages([])
+    setStep(null)
+    setLastToolStep(null)
   }, [])
 
   return {
     messages,
     sendMessage,
     clearMessages,
-    isLoading: chatMutation.isPending,
-    error: chatMutation.error,
+    step,
+    lastToolStep,
+    isLoading: step !== null,
   }
 }

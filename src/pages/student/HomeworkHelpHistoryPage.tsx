@@ -18,15 +18,15 @@ import { LoadingState } from "@/components/shared/LoadingState"
 
 export function HomeworkHelpHistoryPage() {
   const { user } = useAuth()
-  const [classFilter, setClassFilter] = useState("")
+  const [courseFilter, setCourseFilter] = useState("")
 
   const studentClasses = useQuery({
-    queryKey: ["student", "classes", user?.id],
-    queryFn: () => api.getStudentClasses(user!.id),
+    queryKey: ["student", "courses", user?.id],
+    queryFn: () => api.getStudentCourses(user!.id),
     enabled: !!user?.id,
   })
 
-  const history = useHomeworkHelpHistory(classFilter || undefined)
+  const history = useHomeworkHelpHistory(courseFilter || undefined)
 
   return (
     <div className="flex-1 p-xl max-w-3xl mx-auto w-full">
@@ -47,9 +47,9 @@ export function HomeworkHelpHistoryPage() {
       </header>
 
       <div className="mb-lg">
-        <Select value={classFilter} onValueChange={setClassFilter}>
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
           <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[180px]">
-            <SelectValue placeholder="All Classes" />
+            <SelectValue placeholder="All Courses" />
           </SelectTrigger>
           <SelectContent>
             {studentClasses.data?.map((c) => (

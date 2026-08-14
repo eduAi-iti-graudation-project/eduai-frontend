@@ -1538,7 +1538,7 @@ export interface HomeworkHelpResponse {
 }
 
 export async function askHomeworkHelp(data: {
-  classId: string
+  courseOfferingId: string
   question: string
   assignmentId?: string
 }): Promise<HomeworkHelpResponse> {
@@ -1546,8 +1546,100 @@ export async function askHomeworkHelp(data: {
   return res.data
 }
 
-export async function getHomeworkHelpHistory(classId?: string): Promise<HomeworkHelpInteraction[]> {
-  const params = classId ? { classId } : undefined
+export type HomeworkAgentStep =
+  | "search_material"
+  | "search_assignment"
+  | "search_web"
+  | "thinking"
+  | "teacher"
+
+export interface HomeworkHelpStreamHandlers {
+  onStep: (step: HomeworkAgentStep) => void
+  onDone: (data: HomeworkHelpResponse) => void
+}
+
+/**
+ * Streams the homework help agent's progress over SSE (POST + ReadableStream).
+ * Emits a `step` event as each agent tool runs, then a `done` event carrying
+ * the final HomeworkHelpResponse payload.
+ */
+export async function streamHomeworkHelp(
+  data: { courseOfferingId: string; question: string; assignmentId?: string },
+  handlers: HomeworkHelpStreamHandlers,
+): Promise<void> {
+  const token = getStoredToken()
+  const res = await fetch(`${API_URL}/assistant/homework-help`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!res.ok) {
+    if (shouldExpireSession(res.status, "/assistant/homework-help", token !== null)) {
+      clearToken()
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT))
+    }
+    let message = "Something went wrong. Please try again."
+    try {
+      const body = await res.json()
+      if (body?.message) message = body.message
+    } catch {
+      // non-JSON error body; keep the default message
+    }
+    throw new Error(message)
+  }
+
+  if (!res.body) {
+    throw new Error("Streaming is not supported by this browser.")
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ""
+  let completed = false
+
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+
+    let idx: number
+    while ((idx = buffer.indexOf("\n\n")) !== -1) {
+      const rawEvent = buffer.slice(0, idx)
+      buffer = buffer.slice(idx + 2)
+      for (const line of rawEvent.split("\n")) {
+        if (!line.startsWith("data:")) continue
+        const payload = line.slice(5).trim()
+        if (!payload) continue
+        let evt: { type: string; step?: HomeworkAgentStep; data?: HomeworkHelpResponse; message?: string }
+        try {
+          evt = JSON.parse(payload)
+        } catch {
+          continue
+        }
+        if (evt.type === "step" && evt.step) {
+          handlers.onStep(evt.step)
+          await new Promise((resolve) => setTimeout(resolve, 60))
+        } else if (evt.type === "done" && evt.data) {
+          completed = true
+          handlers.onDone(evt.data)
+        } else if (evt.type === "error" && evt.message) {
+          throw new Error(evt.message)
+        }
+      }
+    }
+  }
+
+  if (!completed) {
+    throw new Error("The assistant response ended unexpectedly. Please try again.")
+  }
+}
+
+export async function getHomeworkHelpHistory(courseOfferingId?: string): Promise<HomeworkHelpInteraction[]> {
+  const params = courseOfferingId ? { courseOfferingId } : undefined
   const res = await api.get<{ interactions: HomeworkHelpInteraction[] }>("/assistant/homework-help/history", { params })
   return res.data.interactions
 }
