@@ -2220,6 +2220,7 @@ export interface StudyLabOffering {
   courseName: string
   sectionName: string
   teacherName: string | null
+  materialCount: number
 }
 
 export interface PodcastSegment {
@@ -2234,15 +2235,86 @@ export interface PodcastScript {
   audioAvailable: boolean
 }
 
+export interface ChartVisual {
+  kind: "bar" | "line" | "pie" | "area"
+  title?: string
+  categories: string[]
+  series: { label: string; values: number[] }[]
+  xLabel?: string
+  yLabel?: string
+}
+
+export interface FlowVisual {
+  kind: "flow"
+  title?: string
+  steps: { label: string; detail?: string }[]
+}
+
+export interface TimelineVisual {
+  kind: "timeline"
+  title?: string
+  events: { label: string; detail?: string }[]
+}
+
+export interface ComparisonVisual {
+  kind: "comparison"
+  title?: string
+  leftTitle: string
+  rightTitle: string
+  rows: { left: string; right: string }[]
+}
+
+export interface ConceptMapVisual {
+  kind: "concept_map"
+  title?: string
+  nodes: { id: string; label: string }[]
+  edges: { from: string; to: string; label?: string }[]
+}
+
+export type SlideVisual =
+  | ChartVisual
+  | FlowVisual
+  | TimelineVisual
+  | ComparisonVisual
+  | ConceptMapVisual
+
+export type SlideBlock =
+  | { type: "heading"; text: string; level: "h1" | "h2" | "h3" }
+  | { type: "paragraph"; text: string }
+  | { type: "list"; items: string[]; ordered?: boolean }
+  | { type: "quote"; text: string; attribution?: string }
+  | { type: "callout"; text: string; tone: "info" | "tip" | "warn" }
+  | { type: "code"; code: string; language?: string }
+  | { type: "stat"; value: string; label: string }
+  | {
+      type: "columns"
+      cols: { heading: string; items: string[] }[]
+    }
+
+export interface DeckTheme {
+  background: "light" | "dark" | "gradient"
+  accent?: string
+  motion: "fade" | "rise" | "slide" | "scale"
+}
+
 export interface Slide {
-  title: string
-  bullets: string[]
+  layout: "title" | "bullets" | "split" | "statement" | "summary"
+  eyebrow?: string
+  title?: string
+  blocks: SlideBlock[]
+  note?: string
+  visual?: SlideVisual
+  /** legacy aliases — normalized away by normalizeDeck */
+  bullets?: string[]
   code?: string
+  code_snippet?: string
   speakerNote?: string
+  speaker_note?: string
 }
 
 export interface Deck {
   title: string
+  theme?: DeckTheme
   slides: Slide[]
 }
 
