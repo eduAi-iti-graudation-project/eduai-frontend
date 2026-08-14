@@ -828,6 +828,10 @@ export function SignupForm() {
 
       <SocialLogin />
 
+      <p className="text-label-sm text-on-surface-variant text-center mt-3">
+        School administrators can sign in with Google or Microsoft to create or join a school.
+      </p>
+
       <footer className="mt-6 text-center">
         <p className="font-body-md text-body-md text-on-surface-variant">
           Already have an account?{" "}

@@ -75,6 +75,7 @@ export interface User {
   email: string
   name: string
   role: "TEACHER" | "STUDENT" | "GUARDIAN" | "ADMIN"
+  organizationId: string | null
   guardianId: string | null
   gradeId: string | null
   grade?: { id: string; level: number; name: string | null } | null
@@ -377,12 +378,15 @@ export async function resetPassword(token: string, password: string): Promise<Au
 
 export interface VerifyEmailResult {
   email: string
-  password: string
   schoolCode: string | null
+  needsPassword: boolean
 }
 
-export async function verifyEmail(token: string): Promise<VerifyEmailResult> {
-  const res = await api.post<VerifyEmailResult>("/auth/verify-email", { token })
+export async function verifyEmail(token: string, password?: string): Promise<VerifyEmailResult> {
+  const res = await api.post<VerifyEmailResult>("/auth/verify-email", {
+    token,
+    ...(password ? { password } : {}),
+  })
   return res.data
 }
 
@@ -393,6 +397,21 @@ export async function resendCredentials(personalEmail: string): Promise<{ messag
 
 export async function oauthAuthorize(provider: "google" | "microsoft"): Promise<{ url: string }> {
   const res = await api.post<{ url: string }>(`/auth/oauth/${provider}/authorize`)
+  return res.data
+}
+
+export interface OauthOnboardResult {
+  id: string
+  name: string
+  joinCode: string
+  emailDomain: string | null
+}
+
+export async function oauthOnboard(input: {
+  organizationName?: string
+  joinCode?: string
+}): Promise<OauthOnboardResult> {
+  const res = await api.post<OauthOnboardResult>("/auth/oauth/onboard", input)
   return res.data
 }
 
