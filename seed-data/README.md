@@ -10,7 +10,7 @@ Upload in the **admin Migration wizard** (`/admin/migration`): choose "Upload a
 CSV file", pick this file, let the AI map the unconventional headers, confirm
 the mapping, and run the import.
 
-- **14 rows, 11 columns** with non-template headers (e.g. `Student Full Name`,
+- **15 rows, 11 columns** with non-template headers (e.g. `Student Full Name`,
   `E-mail Address`, `Section/Class`, `Guardian Contact (E-mail)`). One column
   (`Date of Birth`) should map to **UNMAPPED** — verify the AI gets it right.
 - **Row 2 (Abdalla Ehab / `abdallahehab3710@gmail.com`)** is fully valid:
@@ -18,6 +18,9 @@ the mapping, and run the import.
   the email is your real mailbox, you can log into that student account with
   Google OAuth (email linking) and real emails (parent invites, notifications)
   will reach you.
+- **Row 16 (Anwar Alaa / `anwaralaa286@gmail.com`)** is fully valid: imports
+  and auto-approves into Grade 10 / Science 301 — Lab Reports, with guardian
+  email `omaralaa7674@gmail.com` in the `Guardian Contact (E-mail)` column.
 - Deliberate faults per row (expected wizard buckets):
 
 | Row | Fault | Result |
