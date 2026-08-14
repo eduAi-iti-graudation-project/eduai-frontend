@@ -33,7 +33,7 @@ export function StudentTimetablePage() {
 
   if (classesQ.isLoading) {
     return (
-      <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+      <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
         <LoadingState label="Loading your schedule…" />
       </div>
     )
@@ -41,7 +41,7 @@ export function StudentTimetablePage() {
 
   if (classesQ.isError || slotsQ.isError) {
     return (
-      <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+      <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
         <ErrorState message="Could not load your schedule." onRetry={() => slotsQ.refetch()} />
       </div>
     )
@@ -50,7 +50,7 @@ export function StudentTimetablePage() {
   const slots = slotsQ.data ?? []
 
   return (
-    <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+    <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
       <h1 className="font-headline-lg text-headline-lg text-primary mb-1">My Timetable</h1>
       <p className="font-body-md text-body-md text-on-surface-variant mb-6">
         Your weekly section schedule.
@@ -60,7 +60,7 @@ export function StudentTimetablePage() {
         <EmptyState
           icon="calendar_month"
           title="You are not enrolled in any classes"
-          description="Join a class to see your weekly schedule here."
+          description="Join a course to see your weekly schedule here."
         />
       ) : slotsQ.isLoading ? (
         <LoadingState label="Loading your schedule…" />
