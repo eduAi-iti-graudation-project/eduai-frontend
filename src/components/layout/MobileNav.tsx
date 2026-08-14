@@ -26,9 +26,8 @@ export function MobileNav() {
 
   const studentItems: NavItem[] = [
     { icon: "home", label: "Home", id: "home", href: "/student", prefixes: ["/student"] },
-    { icon: "school", label: "Sections", id: "classes", href: "/student/classes", prefixes: ["/student/classes"] },
+    { icon: "school", label: "Courses", id: "classes", href: "/student/classes", prefixes: ["/student/classes"] },
     { icon: "chat_bubble", label: "Messages", id: "chat", href: "/student/chat", prefixes: ["/student/chat"] },
-    { icon: "assignment", label: "Assignments", id: "assignments", href: "/student/assignments", prefixes: ["/student/assignments"] },
     { icon: "calendar_today", label: "Attendance", id: "attendance", href: "/student/attendance", prefixes: ["/student/attendance"] },
     { icon: "auto_awesome", label: "Help", id: "homework-help", href: "/student/homework-help", prefixes: ["/student/homework-help"] },
   ]

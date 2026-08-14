@@ -206,7 +206,7 @@ type ClassDto = components["schemas"]["ClassDto"]
 type CreateClassDto = components["schemas"]["CreateSectionDto"]
 type UpdateClassDto = components["schemas"]["UpdateSectionDto"]
 export interface ClassEnriched extends ClassDto {
-  _count?: { enrollments: number; assignments: number }
+  _count?: { enrollments: number; assignments: number; offerings?: number }
   courses?: string[]
 }
 
@@ -514,6 +514,43 @@ export async function deleteClass(id: string): Promise<void> {
   await api.delete(`/classes/${id}`)
 }
 
+// ── Courses ───────────────────────────────────────────────────────
+
+export async function getCourses(): Promise<components["schemas"]["CourseDto"][]> {
+  const res = await api.get<components["schemas"]["CourseDto"][]>("/courses")
+  return res.data
+}
+
+export async function createCourse(data: components["schemas"]["CreateCourseDto"]): Promise<components["schemas"]["CourseDto"]> {
+  const res = await api.post<components["schemas"]["CourseDto"]>("/courses", data)
+  return res.data
+}
+
+export async function updateCourse(id: string, data: components["schemas"]["UpdateCourseDto"]): Promise<components["schemas"]["CourseDto"]> {
+  const res = await api.patch<components["schemas"]["CourseDto"]>(`/courses/${id}`, data)
+  return res.data
+}
+
+export async function deleteCourse(id: string): Promise<void> {
+  await api.delete(`/courses/${id}`)
+}
+
+// ── Offerings (course × section × teacher) ────────────────────────
+
+export async function createOffering(data: components["schemas"]["CreateOfferingDto"]): Promise<CourseOffering> {
+  const res = await api.post<CourseOffering>("/offerings", data)
+  return res.data
+}
+
+export async function updateOffering(id: string, data: components["schemas"]["UpdateOfferingDto"]): Promise<CourseOffering> {
+  const res = await api.patch<CourseOffering>(`/offerings/${id}`, data)
+  return res.data
+}
+
+export async function deleteOffering(id: string): Promise<void> {
+  await api.delete(`/offerings/${id}`)
+}
+
 // ── Enrollments ───────────────────────────────────────────────────
 
 export async function addEnrollment(classId: string, studentId: string): Promise<void> {
@@ -529,6 +566,9 @@ export interface StudentClass {
   name: string
   description: string | null
   teacherName: string
+  materialCount: number
+  materialTitles: string[]
+  quizCount: number
   assignments: {
     id: string
     title: string
@@ -1371,6 +1411,11 @@ export async function getStudentSubmissionGrades(studentId: string, submissionId
 
 export async function getStudentClasses(studentId: string): Promise<StudentClass[]> {
   const res = await api.get<StudentClass[]>(`/students/${studentId}/classes`)
+  return res.data
+}
+
+export async function getStudentCourses(studentId: string): Promise<StudentClass[]> {
+  const res = await api.get<StudentClass[]>(`/students/${studentId}/courses`)
   return res.data
 }
 
