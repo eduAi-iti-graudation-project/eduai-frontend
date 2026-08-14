@@ -10,8 +10,8 @@ export function MyGradesPage() {
   const { user } = useAuth()
 
   const { data: studentClasses, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["student", "classes", user?.id],
-    queryFn: () => api.getStudentClasses(user!.id),
+    queryKey: ["student", "courses", user?.id],
+    queryFn: () => api.getStudentCourses(user!.id),
     enabled: !!user?.id,
   })
 
@@ -28,7 +28,7 @@ export function MyGradesPage() {
   const classes = studentClasses ?? []
 
   return (
-    <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+    <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
       <h1 className="font-headline-lg text-headline-lg text-primary mb-4">My Grades</h1>
       {isLoading ? (
         <LoadingState />
@@ -39,7 +39,7 @@ export function MyGradesPage() {
           description="Your grades will appear here once teachers confirm them."
         />
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
           {classes.map((cls) => (
             <Link
               key={cls.id}

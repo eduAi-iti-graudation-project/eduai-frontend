@@ -113,6 +113,7 @@ export interface CriterionFeedback {
   teacherNotes: string | null
   isConfirmed: boolean
   createdAt: string
+  criteria?: { id: string; description: string; maxPoints: number } | null
   criterion?: { id: string; description: string; maxPoints: number }
 }
 
