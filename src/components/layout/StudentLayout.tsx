@@ -8,13 +8,11 @@ import { SubscriptionBanner } from "@/components/billing/SubscriptionBanner"
 const navItems = [
   { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/student" },
   { icon: "calendar_month", label: "Timetable", id: "timetable", href: "/student/timetable" },
-  { icon: "school", label: "Sections", id: "classes", href: "/student/classes" },
-  { icon: "assignment", label: "Assignments", id: "assignments", href: "/student/assignments" },
+  { icon: "school", label: "Courses", id: "classes", href: "/student/classes" },
   { icon: "auto_awesome", label: "Homework Help", id: "homework-help", href: "/student/homework-help" },
   { icon: "auto_stories", label: "Study Lab", id: "study-lab", href: "/student/study-lab" },
   { icon: "science", label: "Lab Simulations", id: "labs", href: "/student/labs" },
   { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/student/quizzes" },
-  { icon: "grade", label: "My Grades", id: "grades", href: "/student/grades" },
   { icon: "monitoring", label: "Insights", id: "insights", href: "/student/insights" },
   { icon: "chat_bubble", label: "Messages", id: "chat", href: "/student/chat" },
   { icon: "calendar_today", label: "Attendance", id: "attendance", href: "/student/attendance" },
@@ -34,8 +32,7 @@ export function StudentLayout() {
   const activeItem = path === "/student" ? "dashboard"
     : path.startsWith("/student/timetable") ? "timetable"
     : path.startsWith("/student/classes") ? "classes"
-    : path.startsWith("/student/assignments") ? "assignments"
-    : path.startsWith("/student/submissions") ? "assignments"
+    : path.startsWith("/student/submissions") ? "classes"
     : path.startsWith("/student/grades") ? "grades"
     : path.startsWith("/student/attendance") ? "attendance"
     : path.startsWith("/student/meetings") ? "meetings"

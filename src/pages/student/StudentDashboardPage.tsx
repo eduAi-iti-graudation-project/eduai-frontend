@@ -115,9 +115,9 @@ export function StudentDashboardPage() {
         </div>
         <EmptyState
           icon="school"
-          title="Not enrolled in any sections"
-          description="Browse available sections for your grade level and request to join."
-          action={<Link to="/student/classes" className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md inline-block">Browse Sections</Link>}
+          title="Not enrolled in any courses"
+          description="Browse available courses for your grade level and request to join."
+          action={<Link to="/student/classes" className="bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md inline-block">Browse Courses</Link>}
         />
       </div>
     )

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/providers/use-auth"
-import { getClasses, getAssignments, getStudentClasses } from "@/lib/api"
+import { getClasses, getAssignments, getStudentCourses } from "@/lib/api"
 import { cn } from "@/lib/utils"
 
 interface SearchItem {
@@ -59,7 +59,7 @@ export function GlobalSearchBox({ className }: { className?: string }) {
       setSearching(true)
       try {
         if (role === "STUDENT" && user) {
-          const classes = await getStudentClasses(user.id)
+          const classes = await getStudentCourses(user.id)
           if (cancelled) return
           const classResults: SearchItem[] = []
           const assignmentResults: SearchItem[] = []
