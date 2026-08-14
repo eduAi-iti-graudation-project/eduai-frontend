@@ -95,7 +95,7 @@ export function ChildDetailPage() {
   ]
 
   return (
-    <div className="flex-1 p-xl max-w-5xl mx-auto w-full">
+    <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
       <div className="flex items-center gap-3 mb-6">
         <Button asChild variant="ghost" size="icon" className="w-8 h-8 rounded-lg hover:bg-surface-container shrink-0">
           <Link to="/guardian" aria-label="Back to Dashboard">

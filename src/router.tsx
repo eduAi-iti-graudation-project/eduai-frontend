@@ -1,4 +1,4 @@
-import { createBrowserRouter, Link, Outlet } from "react-router-dom"
+import { createBrowserRouter } from "react-router-dom"
 import { TeacherLayout } from "./components/layout/TeacherLayout"
 import { StudentLayout } from "./components/layout/StudentLayout"
 import { MeetingsListPage } from "./pages/meetings/MeetingsListPage"
@@ -57,10 +57,10 @@ import { StudentLabsPage } from "./pages/student/StudentLabsPage"
 import { StudentLabDetailPage } from "./pages/student/StudentLabDetailPage"
 import { LabsPage } from "./pages/teacher/LabsPage"
 import { LabDetailPage } from "./pages/teacher/LabDetailPage"
-import { UserMenu } from "@/components/ui/UserMenu"
-import { NotificationBell } from "@/components/communication/NotificationBell"
 import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
+import { GuardianAlertsPage } from "./pages/guardian/GuardianAlertsPage"
 import { ChildDetailPage } from "./pages/guardian/ChildDetailPage"
+import { GuardianLayout } from "./components/layout/GuardianLayout"
 import { AdminLayout } from "./components/layout/AdminLayout"
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage"
 import { AdminTimetablePage } from "./pages/admin/AdminTimetablePage"
@@ -176,20 +176,11 @@ export function studentRoutes() {
 export function guardianRoutes() {
   return {
     path: "/guardian",
-    element: <GuardianRoute><div className="min-h-screen bg-surface-container-low"><header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-border">
-          <h1 className="font-headline-md text-headline-md text-on-surface">Guardian Portal</h1>
-          <div className="flex items-center gap-3">
-            <Link to="/guardian/insights" className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors">
-              <span className="material-symbols-outlined text-[20px]">monitoring</span>
-              Insights
-            </Link>
-            <NotificationBell />
-            <UserMenu />
-          </div>
-        </header><div className="flex-1 p-xl"><Outlet /></div></div></GuardianRoute>,
+    element: <GuardianRoute><GuardianLayout /></GuardianRoute>,
     children: [
       { index: true, element: <GuardianDashboardPage /> },
       { path: "children/:id", element: <ChildDetailPage /> },
+      { path: "alerts", element: <GuardianAlertsPage /> },
       { path: "alerts/:id", element: <GuardianAlertDetailPage /> },
       { path: "insights", element: <InsightsPage /> },
       { path: "insights/students/:id", element: <StudentInsightsPage /> },

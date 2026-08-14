@@ -41,9 +41,21 @@ export function MobileNav() {
     { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/admin/assistant", prefixes: ["/admin/assistant"] },
   ]
 
-  const navItems = role === "ADMIN" ? adminItems : role === "STUDENT" ? studentItems : items
+  const guardianItems: NavItem[] = [
+    { icon: "home", label: "Home", id: "home", href: "/guardian", prefixes: ["/guardian"] },
+    { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/guardian/alerts", prefixes: ["/guardian/alerts"] },
+    { icon: "monitoring", label: "Insights", id: "insights", href: "/guardian/insights", prefixes: ["/guardian/insights"] },
+    { icon: "description", label: "Reports", id: "reports", href: "/guardian/reports", prefixes: ["/guardian/reports"] },
+    { icon: "notifications", label: "Notifications", id: "notifications", href: "/guardian/notifications", prefixes: ["/guardian/notifications"] },
+  ]
 
-  const homePath = role === "STUDENT" ? "/student" : role === "ADMIN" ? "/admin" : "/dashboard"
+  const navItems =
+    role === "ADMIN" ? adminItems
+    : role === "STUDENT" ? studentItems
+    : role === "GUARDIAN" ? guardianItems
+    : items
+
+  const homePath = role === "STUDENT" ? "/student" : role === "ADMIN" ? "/admin" : role === "GUARDIAN" ? "/guardian" : "/dashboard"
   const activeItem =
     path === homePath
       ? "home"
