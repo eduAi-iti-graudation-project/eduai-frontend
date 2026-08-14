@@ -162,7 +162,7 @@ export function AdminDashboardPage() {
           }
         />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
           <PrecisionStatCard
             icon="groups"
             label="Students"
@@ -201,14 +201,6 @@ export function AdminDashboardPage() {
             delta={{ label: "Auto", direction: "up", tone: "positive" }}
             spark={passSpark}
             iconClass="bg-[#dcfce7] text-[#14532d]"
-          />
-          <PrecisionStatCard
-            icon="description"
-            label="Pending confirmations"
-            value={data.pendingConfirmations ?? 0}
-            delta={{ label: data.pendingConfirmations ? "Needs review" : "Clear", direction: data.pendingConfirmations ? "up" : "flat", tone: data.pendingConfirmations ? "negative" : "positive" }}
-            spark={[2, 5, 3, 6, 8, 7, 10, Math.max(data.pendingConfirmations ?? 0, 1)]}
-            iconClass="bg-[#fee2e2] text-[#7f1d1d]"
           />
         </div>
 

@@ -828,7 +828,7 @@ export async function getAdminStudentProfile(studentId: string): Promise<AdminSt
 
 export interface ResetStudentCredentialsResult {
   email: string
-  password: string
+  invited: boolean
 }
 
 export async function resetStudentCredentials(
@@ -1389,6 +1389,12 @@ export interface TeacherGradeWithCounts extends TeacherGrade {
   students: number
 }
 
+export interface AdminGrade extends TeacherGrade {
+  sections: number
+  courses: number
+  students: number
+}
+
 export async function getTeacherGrades(teacherId: string): Promise<TeacherGradeWithCounts[]> {
   const res = await api.get<
     {
@@ -1483,13 +1489,17 @@ export async function deleteUser(userId: string): Promise<DeletedUser> {
   return res.data
 }
 
-export async function getAllGrades(): Promise<TeacherGrade[]> {
-  const res = await api.get<TeacherGrade[]>("/grades")
+export async function getAllGrades(): Promise<AdminGrade[]> {
+  const res = await api.get<AdminGrade[]>("/grades")
   return res.data
 }
 
 export async function createGrade(data: { level: number; name: string }): Promise<void> {
   await api.post("/grades", data)
+}
+
+export async function deleteGrade(id: string): Promise<void> {
+  await api.delete(`/grade-levels/${id}`)
 }
 
 export async function linkGuardianToStudent(studentId: string, guardianId: string): Promise<void> {
