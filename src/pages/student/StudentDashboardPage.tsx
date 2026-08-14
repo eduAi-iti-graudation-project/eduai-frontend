@@ -104,7 +104,7 @@ export function StudentDashboardPage() {
 
   if (studentClasses.data && studentClasses.data.length === 0) {
     return (
-      <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+      <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-3 mb-4">
           <h1 className="font-headline-lg text-headline-lg text-primary">Dashboard</h1>
           {studentGrade && (
@@ -125,7 +125,7 @@ export function StudentDashboardPage() {
 
   if (dashboard.isLoading) {
     return (
-      <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+      <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
         <LoadingState label="Loading your dashboard..." />
       </div>
     )
@@ -138,7 +138,7 @@ export function StudentDashboardPage() {
   const upcomingMeetings = meetingsQuery.data?.meetings ?? []
 
   return (
-    <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
+    <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
       <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
         <div>
           <h1 className="font-headline-lg text-headline-lg text-on-surface">
@@ -147,7 +147,7 @@ export function StudentDashboardPage() {
           <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">{today}</p>
         </div>
         {studentGrade && (
-          <Badge variant="outline" className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-1 rounded-lg border-0">
+          <Badge variant="outline" className="bg-primary text-primary-foreground font-label-md text-label-md font-semibold px-md py-1.5 rounded-lg border-0 shadow-sm">
             {studentGrade.name}
           </Badge>
         )}

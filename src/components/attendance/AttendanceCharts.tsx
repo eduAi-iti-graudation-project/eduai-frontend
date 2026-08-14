@@ -129,7 +129,7 @@ export function AttendanceDonut({ records }: { records: AttendanceRecordLike[] }
   if (cursor < 100) stops.push(`var(--color-surface-container) ${cursor}% 100%`)
 
   return (
-    <div className="flex flex-col items-center gap-lg sm:flex-row">
+    <div className="flex flex-col items-center gap-lg lg:flex-row">
       <div
         className="relative h-40 w-40 shrink-0 rounded-lg animate-[rise-in_600ms_ease-out_both]"
         style={{ background: `conic-gradient(${stops.join(", ")})` }}
@@ -140,14 +140,14 @@ export function AttendanceDonut({ records }: { records: AttendanceRecordLike[] }
         </div>
       </div>
 
-      <div className="w-full space-y-2">
+      <div className="w-full min-w-0 space-y-2">
         {total === 0 ? (
           <p className="font-body-md text-body-md text-on-surface-variant text-center sm:text-left">No records yet.</p>
         ) : (
           segments.map((s) => {
             const pct = Math.round((s.count / total) * 100)
             return (
-              <div key={s.key} className="flex items-center gap-2">
+              <div key={s.key} className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="h-3 w-3 rounded-[4px]" style={{ background: DONUT_COLORS[s.key] }} />
                 <span className="font-label-md text-label-md text-on-surface">{SEGMENT_LABELS[s.key]}</span>
                 <span className="ml-auto font-label-sm text-label-sm text-on-surface-variant">

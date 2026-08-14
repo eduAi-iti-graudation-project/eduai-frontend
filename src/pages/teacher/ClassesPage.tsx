@@ -9,7 +9,13 @@ export function ClassesPage() {
 
   const { isLoading, isError, error, classCards, taughtSectionCount } = useClasses()
 
-  const filtered = classCards.filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase()))
+  const q = query.trim().toLowerCase()
+  const filtered = classCards.filter(
+    (c) =>
+      c.name.toLowerCase().includes(q) ||
+      c.section.toLowerCase().includes(q) ||
+      c.courses.some((course) => course.toLowerCase().includes(q)),
+  )
 
   if (isError) {
     return (
@@ -40,7 +46,7 @@ export function ClassesPage() {
 
         {/* Search Bar */}
         <div className="flex flex-wrap items-center gap-sm">
-          <div className="relative flex-grow max-w-md">
+          <div className="relative w-full">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">search</span>
             <input
               value={query}

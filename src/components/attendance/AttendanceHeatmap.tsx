@@ -23,13 +23,6 @@ const STATUS_LABELS: Record<string, string> = {
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-function startOfWeek(date: Date): Date {
-  const d = new Date(date)
-  d.setHours(12, 0, 0, 0)
-  d.setDate(d.getDate() - d.getDay())
-  return d
-}
-
 function cellAppearance(day: DayAttendance | undefined): { className: string; summary: string } {
   if (!day || day.total === 0) {
     return { className: STATUS_COLORS.EMPTY, summary: "No record" }
@@ -53,7 +46,8 @@ function cellTooltip(date: Date, day: DayAttendance | undefined): string[] {
 
 export function AttendanceHeatmap({ records }: { records: AttendanceRecordLike[] }) {
   const byDay = computeDayStats(records)
-  const today = startOfWeek(new Date())
+  const today = new Date()
+  today.setHours(12, 0, 0, 0)
   const days = lastNDays(WEEKS * 7, today)
 
   const columns: Date[][] = []
