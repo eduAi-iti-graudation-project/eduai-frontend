@@ -103,7 +103,10 @@ export function StudyLabPage() {
             <SelectContent>
               {offerings.data?.map((o) => (
                 <SelectItem key={o.id} value={o.id}>
-                  {o.courseName} · {o.sectionName}
+                  {o.courseName} · {o.sectionName} ·{" "}
+                  <span className={o.materialCount > 0 ? "text-primary" : "text-error"}>
+                    {o.materialCount > 0 ? `${o.materialCount} material${o.materialCount === 1 ? "" : "s"}` : "no materials"}
+                  </span>
                 </SelectItem>
               ))}
             </SelectContent>

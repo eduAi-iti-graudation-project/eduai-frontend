@@ -305,3 +305,57 @@ input:disabled {
   background: var(--color-outline-variant);
   border-radius: 4px;
 }
+
+/* ── Presentation player slide motion ────────────────────────── */
+@keyframes deck-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes deck-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+@keyframes deck-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+@keyframes deck-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+@keyframes deck-slide-out {
+  to {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+.deck-fade-up {
+  animation: deck-fade-up 0.45s ease both;
+}
+.deck-rise-in {
+  animation: deck-rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.deck-slide-in {
+  animation: deck-slide-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.deck-zoom-in {
+  animation: deck-zoom-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-fade-up,
+  .deck-rise-in,
+  .deck-slide-in,
+  .deck-zoom-in {
+    animation: none;
+  }
+}
