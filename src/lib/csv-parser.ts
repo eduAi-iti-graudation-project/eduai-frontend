@@ -2,13 +2,29 @@
  * Quote-aware CSV / TSV parser shared by the import wizard. Mirrors the
  * backend parser (src/migration/csv-parser.ts) so that what the frontend
  * previews is exactly what the server imports.
+ *
+ * `parseDelimited` / `parseCsv` / `parsePasted` keep the original API. The
+ * `*Detailed` variants additionally surface obvious malformed-input signals
+ * (stray quotes, text after a closing quote, unterminated quoted values) so
+ * the wizard can warn the admin instead of silently presenting corrupted rows
+ * as valid.
  */
 
-export function parseDelimited(text: string, delimiter: "," | "\t"): string[][] {
+export interface CsvParseDiagnostics {
+  /** Human-readable warnings about malformed input. Empty for well-formed CSV. */
+  issues: string[]
+}
+
+function parseDelimitedDetailed(
+  text: string,
+  delimiter: "," | "\t",
+): { rows: string[][]; issues: string[] } {
   const rows: string[][] = []
+  const issues: string[] = []
   let row: string[] = []
   let field = ""
   let inQuotes = false
+  let line = 1
 
   const pushField = () => {
     row.push(field)
@@ -29,13 +45,29 @@ export function parseDelimited(text: string, delimiter: "," | "\t"): string[][] 
           i++
         } else {
           inQuotes = false
+          const next = text[i + 1]
+          if (
+            next &&
+            next !== delimiter &&
+            next !== "\n" &&
+            next !== "\r" &&
+            next.trim()
+          ) {
+            issues.push(`Line ${line}: unexpected text after a closing quote`)
+          }
         }
+      } else if (char === "\n" || char === "\r") {
+        field += char
+        if (!(char === "\r" && text[i + 1] === "\n")) line++
       } else {
         field += char
       }
       continue
     }
     if (char === '"') {
+      if (field.trim().length > 0) {
+        issues.push(`Line ${line}: unexpected quote inside a value`)
+      }
       inQuotes = true
       continue
     }
@@ -45,28 +77,68 @@ export function parseDelimited(text: string, delimiter: "," | "\t"): string[][] 
     }
     if (char === "\n" || char === "\r") {
       if (char === "\r" && text[i + 1] === "\n") i++
+      line++
       pushRow()
       continue
     }
     field += char
   }
+  if (inQuotes) {
+    issues.push("Unterminated quoted value at the end of the file")
+  }
   if (field.length > 0 || row.length > 0) pushRow()
 
-  return rows
+  const cleaned = rows
     .map((r) => r.map((cell) => cell.trim()))
     .filter((r) => r.some((cell) => cell.length > 0))
+  return { rows: cleaned, issues }
+}
+
+export function parseDelimited(text: string, delimiter: "," | "\t"): string[][] {
+  return parseDelimitedDetailed(text, delimiter).rows
 }
 
 export function parseCsv(text: string): string[][] {
   return parseDelimited(text, ",")
 }
 
+export function parseCsvDetailed(
+  text: string,
+): { rows: string[][]; issues: string[] } {
+  return parseDelimitedDetailed(text, ",")
+}
+
 /** Paste from a spreadsheet: tab-separated by default, comma as fallback. */
 export function parsePasted(text: string): string[][] {
+  return parsePastedDetailed(text).rows
+}
+
+export function parsePastedDetailed(
+  text: string,
+): { rows: string[][]; issues: string[] } {
   const firstLine =
     text.split(/\r?\n/).find((l) => l.trim().length > 0) ?? ""
   const delimiter = firstLine.includes("\t") ? "\t" : ","
-  return parseDelimited(text, delimiter)
+  return parseDelimitedDetailed(text, delimiter)
+}
+
+/**
+ * Serialize a parsed grid back to RFC-4180-style comma CSV. Quotes cells
+ * containing commas, quotes or newlines; escapes embedded quotes by doubling.
+ * Used so the wizard sends the import endpoint exactly the text that matches
+ * what was previewed (the backend import always parses comma CSV).
+ */
+export function toCsv(rows: string[][]): string {
+  const needsQuoting = (cell: string) => /["\n\r,]/.test(cell)
+  return rows
+    .map((row) =>
+      row
+        .map((cell) =>
+          needsQuoting(cell) ? `"${cell.replace(/"/g, '""')}"` : cell,
+        )
+        .join(","),
+    )
+    .join("\n")
 }
 
 /**
