@@ -13,6 +13,7 @@ import {
   type TimetableSlotWithOffering,
   updateTimetableSlot,
 } from "@/lib/api"
+import { orderedDays } from "@/lib/timetable-settings"
 import { cn } from "@/lib/utils"
 import {
   colorForTag,
@@ -77,6 +78,7 @@ export interface WeeklyTimetableGridProps {
   editable?: boolean
   showSection?: boolean
   offerings?: CourseOffering[]
+  sectionId?: string
   days?: DayOfWeek[]
   dayStartHour?: number
   dayEndHour?: number
@@ -111,7 +113,8 @@ export function WeeklyTimetableGrid({
   editable = false,
   showSection = false,
   offerings = [],
-  days = DAY_ORDER,
+  sectionId,
+  days = orderedDays(),
   dayStartHour = 7,
   dayEndHour = 18,
   showNowIndicator = !editable,
@@ -133,9 +136,10 @@ export function WeeklyTimetableGrid({
   const [conflictChecking, setConflictChecking] = useState(false)
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
   const [now, setNow] = useState(nowMinutes)
-  const [mobileDay, setMobileDay] = useState<DayOfWeek>(
-    () => DAY_ORDER[(new Date().getDay() + 6) % 7],
-  )
+  const [mobileDay, setMobileDay] = useState<DayOfWeek>(() => {
+    const todayName = DAY_ORDER[(new Date().getDay() + 6) % 7]
+    return orderedDays().find((d) => d === todayName) ?? DAY_ORDER[0]
+  })
 
   const mobile = useMediaQuery("(max-width: 767px)")
 
@@ -707,6 +711,7 @@ export function WeeklyTimetableGrid({
           startMin={popover.startMin}
           endMin={popover.endMin}
           offerings={offerings}
+          sectionId={sectionId}
           submitting={createMutation.isPending}
           onCancel={() => setPopover(null)}
           onConfirm={(offeringId, room) => {
@@ -747,6 +752,7 @@ function CreatePopover({
   startMin,
   endMin,
   offerings,
+  sectionId,
   submitting,
   onCancel,
   onConfirm,
@@ -757,6 +763,7 @@ function CreatePopover({
   startMin: number
   endMin: number
   offerings: CourseOffering[]
+  sectionId?: string
   submitting: boolean
   onCancel: () => void
   onConfirm: (offeringId: string, room: string) => void
@@ -768,12 +775,13 @@ function CreatePopover({
   const q = query.trim().toLowerCase()
   const filtered = offerings.filter(
     (o) =>
-      o.course.name.toLowerCase().includes(q) ||
-      o.section.name.toLowerCase().includes(q) ||
-      (o.teacher?.name ?? "").toLowerCase().includes(q),
+      (!sectionId || o.section.id === sectionId) &&
+      (o.course.name.toLowerCase().includes(q) ||
+        o.section.name.toLowerCase().includes(q) ||
+        (o.teacher?.name ?? "").toLowerCase().includes(q)),
   )
 
-  const effectiveSelected = selected || (offerings.length === 1 ? offerings[0].id : "")
+  const effectiveSelected = selected || (filtered.length === 1 ? filtered[0].id : "")
 
   return (
     <div
@@ -803,7 +811,9 @@ function CreatePopover({
       <div className="max-h-40 overflow-y-auto space-y-1 mb-2">
         {filtered.length === 0 && (
           <p className="text-sm text-on-surface-variant font-body-md py-2 text-center">
-            No course offerings match
+            {sectionId
+              ? "No course offerings for this section — create them in Grade Management."
+              : "No course offerings match"}
           </p>
         )}
         {filtered.map((o) => {
