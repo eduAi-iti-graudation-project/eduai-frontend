@@ -1319,6 +1319,14 @@ export async function getMaterialFileUrl(id: string): Promise<string> {
   return res.data.url
 }
 
+export function materialDownloadUrl(id: string): string {
+  return `${API_URL}/materials/${id}/download`
+}
+
+export async function downloadMaterialFile(id: string): Promise<Blob> {
+  return fetchFileBlob(materialDownloadUrl(id))
+}
+
 export async function uploadMaterial(
   title: string,
   classId: string,

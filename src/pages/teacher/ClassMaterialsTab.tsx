@@ -154,6 +154,7 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
     if (targets.length === 0) return
     let detected = 0
     let failed = 0
+    let ungroupedCount = 0
     for (const target of targets) {
       const title = target.file.name.replace(/\.pdf$/i, "")
       setUploading((prev) => ({ ...prev, [target.file.name]: 0 }))
@@ -169,6 +170,9 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
         )
         if (res.detectedChapterCount && res.detectedChapterCount > 0) {
           detected += res.detectedChapterCount
+        }
+        if (!target.chapterId && !res.chapterId) {
+          ungroupedCount += 1
         }
       } catch (err) {
         failed += 1
@@ -187,7 +191,11 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
     if (detected > 0) {
       toast.info(`Auto-detected ${detected} chapter${detected !== 1 ? "s" : ""} in this document`)
     } else if (okCount > 0) {
-      toast.success(`Uploaded ${okCount} file${okCount !== 1 ? "s" : ""}`)
+      toast.success(
+        ungroupedCount > 0
+          ? `Uploaded ${okCount} file${okCount !== 1 ? "s" : ""} — no chapter headings found, added to Ungrouped`
+          : `Uploaded ${okCount} file${okCount !== 1 ? "s" : ""}`,
+      )
     }
   }
 
@@ -559,7 +567,11 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
           <EmptyState
             icon="menu_book"
             title="No chapters yet"
-            description="Upload a full book and chapters are detected automatically, or create one manually."
+            description={
+              unassigned.length > 0
+                ? `${unassigned.length} file${unassigned.length !== 1 ? "s are" : " is"} ungrouped below — create a chapter, then drop the file${unassigned.length !== 1 ? "s" : ""} onto it.`
+                : "Upload a full book and chapters are detected automatically, or create one manually."
+            }
           />
         )}
       </div>
