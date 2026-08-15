@@ -206,7 +206,7 @@ export function AdminBulkDocumentsPage() {
         ) : pendingQ.isError ? (
           <ErrorState message="Could not load pending documents." onRetry={() => pendingQ.refetch()} />
         ) : (pendingQ.data ?? []).length === 0 ? (
-          <EmptyState
+          <EmptyState flat
             icon="folder_open"
             title="Nothing waiting for review"
             description="Uploaded documents will appear here with their AI suggestions."

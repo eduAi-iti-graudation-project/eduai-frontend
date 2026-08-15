@@ -39,7 +39,7 @@ export function SettingsPage() {
 
   return (
     <div className="p-xl max-w-2xl mx-auto w-full space-y-6">
-      <header className="mb-lg">
+      <header className="mb-lg border-b border-border pb-3">
         <h1 className="font-headline-xl text-headline-xl text-on-surface mb-1">Settings</h1>
         <p className="font-body-md text-body-md text-on-surface-variant">Manage your account, personal info and password.</p>
       </header>

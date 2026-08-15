@@ -107,7 +107,7 @@ export function StudentDashboardPage() {
   if (studentClasses.data && studentClasses.data.length === 0) {
     return (
       <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-4 border-b border-border pb-3">
           <h1 className="font-headline-lg text-headline-lg text-primary">Dashboard</h1>
           {studentGrade && (
             <Badge variant="outline" className="bg-primary-fixed/30 text-primary font-label-sm text-label-sm px-sm py-0.5 rounded-lg border-0">
@@ -141,7 +141,7 @@ export function StudentDashboardPage() {
 
   return (
     <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
-      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap border-b border-border pb-3">
         <div>
           <h1 className="font-headline-lg text-headline-lg text-on-surface">
             {firstName ? `Good ${new Date().getHours() < 12 ? "morning" : "afternoon"}, ${firstName}` : "Dashboard"}
@@ -195,7 +195,7 @@ export function StudentDashboardPage() {
             <Link to="/student/assignments" className="font-label-sm text-label-sm text-primary hover:underline">View all</Link>
           </div>
           {upcoming.length === 0 ? (
-            <EmptyState icon="task_alt" title="Nothing due" description="You're all caught up — enjoy the breather." />
+            <EmptyState flat icon="task_alt" title="Nothing due" description="You're all caught up — enjoy the breather." />
           ) : (
             <ul className="divide-y divide-border">
               {upcoming.slice(0, 5).map((a, i) => {
@@ -230,7 +230,7 @@ export function StudentDashboardPage() {
             <Link to="/student/meetings" className="font-label-sm text-label-sm text-primary hover:underline">View all</Link>
           </div>
           {upcomingMeetings.length === 0 ? (
-            <EmptyState icon="video_call" title="No upcoming meetings" description="When a teacher schedules a live class, it shows up here." />
+            <EmptyState flat icon="video_call" title="No upcoming meetings" description="When a teacher schedules a live class, it shows up here." />
           ) : (
             <ul className="divide-y divide-border">
               {upcomingMeetings.slice(0, 3).map((m) => (
@@ -257,7 +257,7 @@ export function StudentDashboardPage() {
           <Link to="/student/grades" className="font-label-sm text-label-sm text-primary hover:underline">View all</Link>
         </div>
         {recentGrades.length === 0 ? (
-          <EmptyState icon="grade" title="No grades yet" description="Your grades will appear here once assignments are graded." />
+          <EmptyState flat icon="grade" title="No grades yet" description="Your grades will appear here once assignments are graded." />
         ) : (
           <Table>
             <TableHeader>

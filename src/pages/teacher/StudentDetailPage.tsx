@@ -35,7 +35,7 @@ export function StudentDetailPage() {
     <div className="flex-1 p-xl max-w-5xl mx-auto w-full">
       <BackLink to="/classes" label="Back to Classes" className="mb-md" />
 
-      <div className="flex items-center gap-md mb-xl">
+      <div className="flex items-center gap-md mb-xl border-b border-border pb-3">
         <div className="w-16 h-16 bg-primary-container rounded-lg flex items-center justify-center text-white">
           <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
         </div>
@@ -60,7 +60,7 @@ export function StudentDetailPage() {
           {gradesLoading ? (
             <p className="font-body-md text-body-md text-on-surface-variant">Loading...</p>
           ) : !grades || grades.length === 0 ? (
-            <EmptyState icon="grade" title="No grades yet" description="Confirmed grades will appear here." />
+            <EmptyState flat icon="grade" title="No grades yet" description="Confirmed grades will appear here." />
           ) : (
             <div className="space-y-sm">
               {grades.map((g) => (

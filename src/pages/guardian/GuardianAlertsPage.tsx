@@ -29,7 +29,7 @@ export function GuardianAlertsPage() {
 
   return (
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
-      <header className="mb-6">
+      <header className="mb-6 border-b border-border pb-3">
         <h2 className="font-headline-lg text-headline-lg text-primary">Alerts</h2>
         <p className="font-body-md text-body-md text-on-surface-variant">
           Academic updates across your children

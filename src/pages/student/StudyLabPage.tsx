@@ -256,7 +256,7 @@ export function StudyLabPage() {
 
           <div>
             {!activeId && (
-              <EmptyState
+              <EmptyState flat
                 icon="auto_stories"
                 title="Pick a generation to view it"
                 description="Your generated podcast, slides, and study materials will appear here."

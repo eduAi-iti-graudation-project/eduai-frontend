@@ -101,7 +101,7 @@ export function MyAttendancePage() {
 
   return (
     <div className="flex-1 p-margin-desktop max-w-6xl mx-auto w-full space-y-lg">
-      <div className="flex flex-wrap items-end justify-between gap-sm">
+      <div className="flex flex-wrap items-end justify-between gap-sm border-b border-border pb-3">
         <div>
           <h1 className="font-headline-lg text-headline-lg text-primary">My Attendance</h1>
           <p className="font-body-md text-body-md text-on-surface-variant">

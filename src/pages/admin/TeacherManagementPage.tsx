@@ -183,7 +183,7 @@ function TeacherDetail({
         </div>
         {profile.classes.length === 0 ? (
           <div className="py-8">
-            <EmptyState icon="meeting_room" title="No classes assigned" description="This teacher isn't teaching any classes right now." />
+            <EmptyState flat icon="meeting_room" title="No classes assigned" description="This teacher isn't teaching any classes right now." />
           </div>
         ) : (
           <div className="divide-y divide-border">

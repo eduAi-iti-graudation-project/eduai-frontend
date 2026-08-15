@@ -41,7 +41,7 @@ export function AvailableClassesPage() {
   if (enrolled.isLoading) {
     return (
       <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
-        <h1 className="font-headline-lg text-headline-lg text-primary mb-4">My Courses</h1>
+        <h1 className="font-headline-lg text-headline-lg text-primary mb-4 border-b border-border pb-3">My Courses</h1>
         <LoadingState />
       </div>
     )
@@ -60,7 +60,7 @@ export function AvailableClassesPage() {
 
   return (
     <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
-      <h1 className="font-headline-xl text-headline-xl text-on-surface">My Courses</h1>
+      <h1 className="font-headline-xl text-headline-xl text-on-surface border-b border-border pb-3">My Courses</h1>
 
       <p className="font-body-md text-body-md text-on-surface-variant mt-1 mb-6">
         These are the courses available in your section.

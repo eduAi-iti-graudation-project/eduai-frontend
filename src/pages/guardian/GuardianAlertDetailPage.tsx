@@ -55,7 +55,7 @@ export function GuardianAlertDetailPage() {
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
       <BackLink to="/guardian" label="Back to Dashboard" className="mb-4" />
 
-      <div className="mb-6">
+      <div className="mb-6 border-b border-border pb-3">
         <h1 className="font-headline-xl text-headline-xl text-primary">Academic Update</h1>
       </div>
 
@@ -96,7 +96,7 @@ export function GuardianAlertDetailPage() {
             ))}
           </div>
         ) : !grades.data || grades.data.length === 0 ? (
-          <EmptyState icon="grade" title="No grades available yet." />
+          <EmptyState flat icon="grade" title="No grades available yet." />
         ) : (
           <Table>
             <TableHeader>

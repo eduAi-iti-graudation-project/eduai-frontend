@@ -10,7 +10,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, actions, className }: PageHeaderProps) {
   return (
-    <div className={cn("px-6 pt-6 pb-4 flex items-center justify-between gap-4", className)}>
+    <div className={cn("px-6 pt-6 pb-4 border-b border-border flex items-center justify-between gap-4", className)}>
       <div className="min-w-0">
         <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight truncate">
           {title}

@@ -68,7 +68,7 @@ export function SubmissionStatusPage() {
 
   return (
     <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 border-b border-border pb-3">
         <div className="flex items-center gap-3">
           <BackLink to={backTo} label={courseId ? "Back to Class" : "Back to Classes"} />
           <h1 className="font-headline-lg text-headline-lg text-primary">Submission Status</h1>

@@ -150,7 +150,7 @@ export function MeetingDetailPage() {
 
       <Card className="border-border mb-lg">
         <CardContent className="p-lg space-y-4">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-4 border-b border-border pb-3">
             <h1 className="font-headline-lg text-headline-lg text-on-surface">{meeting.title}</h1>
             <MeetingStatusBadge status={meeting.status} />
           </div>
@@ -190,12 +190,14 @@ export function MeetingDetailPage() {
       </Card>
 
       <Tabs value={tab} onValueChange={(value) => setTab(value as typeof tab)}>
-        <TabsList>
-          <TabsTrigger value="recording">Recording</TabsTrigger>
-          <TabsTrigger value="transcript">Transcript</TabsTrigger>
-          <TabsTrigger value="attendance">Attendance</TabsTrigger>
-          {isTeacher && <TabsTrigger value="followup">Follow-up</TabsTrigger>}
-        </TabsList>
+        <div className="border-b border-border pb-2 mb-4">
+          <TabsList>
+            <TabsTrigger value="recording">Recording</TabsTrigger>
+            <TabsTrigger value="transcript">Transcript</TabsTrigger>
+            <TabsTrigger value="attendance">Attendance</TabsTrigger>
+            {isTeacher && <TabsTrigger value="followup">Follow-up</TabsTrigger>}
+          </TabsList>
+        </div>
         <TabsContent value="recording">
           <RecordingTab meeting={meeting} />
         </TabsContent>

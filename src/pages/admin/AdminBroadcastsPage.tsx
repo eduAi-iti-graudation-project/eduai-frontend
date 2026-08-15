@@ -190,7 +190,7 @@ export function AdminBroadcastsPage() {
             <LoadingState label="Loading broadcasts…" className="py-lg" />
           ) : !broadcasts.data || broadcasts.data.length === 0 ? (
             <div className="p-5">
-              <EmptyState icon="campaign" title="Nothing sent yet" description="Your announcements will appear here." />
+              <EmptyState flat icon="campaign" title="Nothing sent yet" description="Your announcements will appear here." />
             </div>
           ) : (
             <div className="divide-y divide-border">

@@ -58,7 +58,7 @@ export function AlertDetailPage() {
     <div className="flex-1 overflow-y-auto p-xl max-w-4xl mx-auto w-full">
       <BackLink to="/alerts" label="Back to Alerts" className="mb-4" />
 
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6 border-b border-border pb-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="material-symbols-outlined text-[20px] text-on-surface-variant">person</span>

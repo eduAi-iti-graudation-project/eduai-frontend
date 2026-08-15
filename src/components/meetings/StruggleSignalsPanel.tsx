@@ -155,7 +155,7 @@ export function StruggleSignalsPanel({
           </div>
 
           {totalPending === 0 && history.length === 0 && (
-            <EmptyState
+            <EmptyState flat
               icon="auto_awesome"
               title="No suggestions yet"
               description="Suggestions appear after a recorded class meeting has been fully processed."

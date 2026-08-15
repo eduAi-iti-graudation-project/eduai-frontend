@@ -72,7 +72,7 @@ export function ScheduleMeetingPage() {
 
   return (
     <div className="p-xl max-w-2xl mx-auto w-full">
-      <header className="mb-lg">
+      <header className="mb-lg border-b border-border pb-3">
         <h1 className="font-headline-xl text-headline-xl text-on-surface mb-1">Schedule a meeting</h1>
         <p className="font-body-md text-body-md text-on-surface-variant">
           Pick a time slot, and we'll spin up a LiveKit room when it's time to join.

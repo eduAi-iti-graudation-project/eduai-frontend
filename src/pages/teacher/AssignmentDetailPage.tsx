@@ -75,7 +75,7 @@ export function AssignmentDetailPage() {
       />
 
       <div className="bg-surface-container-lowest rounded-lg p-xl border border-outline-variant mb-xl">
-        <div className="flex items-start justify-between gap-md mb-md">
+        <div className="flex items-start justify-between gap-md mb-md border-b border-border pb-3">
           <div>
             <h1 className="font-headline-xl text-headline-xl text-on-surface mb-xs">{assignment.title}</h1>
             <p className="font-body-md text-body-md text-on-surface-variant">

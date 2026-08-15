@@ -29,7 +29,7 @@ export function MyGradesPage() {
 
   return (
     <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
-      <h1 className="font-headline-lg text-headline-lg text-primary mb-4">My Grades</h1>
+      <h1 className="font-headline-lg text-headline-lg text-primary mb-4 border-b border-border pb-3">My Grades</h1>
       {isLoading ? (
         <LoadingState />
       ) : classes.length === 0 ? (

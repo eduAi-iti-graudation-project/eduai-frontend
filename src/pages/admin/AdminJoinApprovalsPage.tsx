@@ -158,7 +158,7 @@ export function AdminJoinApprovalsPage() {
 
   return (
     <div className="flex-1 p-xl max-w-6xl mx-auto w-full space-y-md">
-      <h1 className="font-headline-xl text-headline-xl text-primary mb-lg">Join Approvals</h1>
+      <h1 className="font-headline-xl text-headline-xl text-primary mb-lg border-b border-border pb-3">Join Approvals</h1>
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
 <Tabs
@@ -176,6 +176,7 @@ export function AdminJoinApprovalsPage() {
               </TabsTrigger>
             ))}
           </TabsList>
+          <div className="border-b border-border pt-3 mt-3" />
         </Tabs>
 
         <div className="flex items-center gap-3">

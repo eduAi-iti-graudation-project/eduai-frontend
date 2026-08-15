@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/shared/ErrorState"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { SectionHeader } from "@/components/ui/SectionHeader"
 import { PrecisionStatCard } from "@/components/admin/PrecisionStatCard"
 import { FriendlyAlert, SeverityPill } from "@/components/admin/AlertPresentation"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -140,11 +141,11 @@ export function AdminAlertsPage() {
 
         {stats.byClass.length === 0 ? (
           <div className="rounded-lg bg-surface-container-lowest border border-outline-variant">
-            <EmptyState icon="notifications_off" title="All clear" description="No active alerts across any class." />
+            <EmptyState flat icon="notifications_off" title="All clear" description="No active alerts across any class." />
           </div>
         ) : (
           <div className="space-y-4">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface">Class-level alerts</h2>
+            <SectionHeader title="Class-level alerts" />
             {stats.byClass.map(([className, classAlerts]) => (
               <div key={className} className="rounded-lg bg-surface-container-lowest border border-outline-variant overflow-hidden">
                 <div className="px-5 py-3 border-b border-outline-variant bg-surface-container-low/60">

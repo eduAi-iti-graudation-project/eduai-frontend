@@ -408,7 +408,7 @@ function GradesPanel({ grades }: { grades: { data: api.StudentQuizGrade[] | unde
     >
       {data.length === 0 ? (
         <div className="py-10">
-          <EmptyState icon="quiz" title="No quiz results yet" description="This student hasn't completed any quizzes." />
+          <EmptyState flat icon="quiz" title="No quiz results yet" description="This student hasn't completed any quizzes." />
         </div>
       ) : (
         <div className="overflow-x-auto min-w-0">

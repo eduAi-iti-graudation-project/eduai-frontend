@@ -75,7 +75,7 @@ export function TeacherDashboardPage() {
     <div className="min-h-full bg-surface-container-low">
       <div className="mx-auto flex max-w-6xl flex-col gap-md p-gutter pb-24 md:pb-0">
         {/* Page Header */}
-        <div className="flex justify-between items-end">
+        <div className="flex justify-between items-end border-b border-border pb-3">
           <div>
             <h2 className="text-2xl md:text-3xl font-headline-lg font-bold tracking-tight text-on-surface mb-1">Overview</h2>
             <p className="font-body-md text-body-md text-on-surface-variant">Here&apos;s what&apos;s happening in your classes today.</p>
@@ -83,7 +83,7 @@ export function TeacherDashboardPage() {
         </div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 border-b border-border pb-4">
           {stats.map((stat) => (
             <StatCard key={stat.label} {...stat} />
           ))}

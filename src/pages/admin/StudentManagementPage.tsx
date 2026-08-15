@@ -458,7 +458,7 @@ export function StudentManagementPage() {
                   </div>
                   {classSummaries.length === 0 ? (
                     <div className="py-10">
-                      <EmptyState
+                      <EmptyState flat
                         icon="grade"
                         title="No confirmed grades yet"
                         description="Scores appear here once this student submits assignments and their teacher confirms the grades."

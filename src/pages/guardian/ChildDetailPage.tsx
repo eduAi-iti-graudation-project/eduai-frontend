@@ -97,7 +97,7 @@ export function ChildDetailPage() {
 
   return (
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-6 border-b border-border pb-3">
         <BackLink to="/guardian" label="Back to Dashboard" />
         <h1 className="font-headline-xl text-headline-xl text-primary">Student Detail</h1>
       </div>
@@ -126,7 +126,7 @@ export function ChildDetailPage() {
           {grades.isLoading ? (
             <LoadingState className="w-full" />
           ) : !grades.data || grades.data.length === 0 ? (
-            <EmptyState icon="grade" title="No grades yet" description="Confirmed grades will appear here." />
+            <EmptyState flat icon="grade" title="No grades yet" description="Confirmed grades will appear here." />
           ) : (
             grades.data.filter((g) => g.isConfirmed).map((g) => (
               <div key={g.id} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant">

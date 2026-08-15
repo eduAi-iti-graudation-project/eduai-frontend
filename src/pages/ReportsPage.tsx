@@ -15,7 +15,7 @@ export function ReportsPage() {
 
   return (
     <div className="flex-1 p-xl max-w-4xl mx-auto w-full">
-      <h1 className="font-headline-xl text-headline-xl text-primary mb-xl">Reports</h1>
+      <h1 className="font-headline-xl text-headline-xl text-primary mb-xl border-b border-border pb-3">Reports</h1>
 
       <div className="bg-surface-container-lowest rounded-lg p-md border border-outline-variant mb-xl">
         <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Filter by Student ID</label>

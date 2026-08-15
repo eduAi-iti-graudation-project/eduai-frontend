@@ -135,9 +135,9 @@ export function ClassDetailPage() {
             </div>
 
             {students.length === 0 ? (
-              <EmptyState icon="group" title="No students enrolled" description="Students can request to join this class from their portal." />
+              <EmptyState flat icon="group" title="No students enrolled" description="Students can request to join this class from their portal." />
             ) : filteredStudents.length === 0 ? (
-              <EmptyState icon="search" title="No students match" description="Try a different search term" />
+              <EmptyState flat icon="search" title="No students match" description="Try a different search term" />
             ) : (
               <div className="border border-outline-variant rounded-lg overflow-hidden bg-surface-container-lowest">
                 <table className="w-full text-left border-collapse">
@@ -313,7 +313,7 @@ export function ClassDetailPage() {
       <div className="mx-auto w-full max-w-6xl p-gutter pb-24 md:pb-0">
         <BackLink to="/classes" label="Back to Sections" className="mb-4" />
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-md">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-md border-b border-border pb-3">
           <div>
             <h2 className="font-headline-xl text-headline-xl text-on-surface">{cls.name}</h2>
             <p className="font-body-md text-body-md text-on-surface-variant mt-1">

@@ -606,7 +606,7 @@ export function CourseMaterialsTab({ courseId, offeringId, sectionName }: Course
         ))}
 
         {sortedChapters.length === 0 && (
-          <EmptyState
+          <EmptyState flat
             icon="menu_book"
             title="No chapters yet"
             description={

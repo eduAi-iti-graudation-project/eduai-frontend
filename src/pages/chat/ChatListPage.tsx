@@ -89,7 +89,7 @@ export function ChatListPage() {
 
   return (
     <div className="p-xl max-w-3xl mx-auto w-full">
-      <header className="mb-lg">
+      <header className="mb-lg border-b border-border pb-3">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h1 className="font-headline-xl text-headline-xl text-on-surface mb-1">Messages</h1>

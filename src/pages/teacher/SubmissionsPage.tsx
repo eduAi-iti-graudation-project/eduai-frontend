@@ -432,7 +432,7 @@ export function SubmissionsPage() {
 
             {submissions.data?.length === 0 ? (
               <div className="flex items-center justify-center h-64">
-                <EmptyState
+                <EmptyState flat
                   icon="inbox"
                   title="No submissions yet"
                   description={

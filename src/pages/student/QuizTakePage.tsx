@@ -253,7 +253,7 @@ export function QuizTakePage() {
     return (
       <div className="flex-1 p-xl max-w-2xl mx-auto w-full">
         <div className="rounded-lg bg-white border border-border p-xl">
-          <h1 className="font-headline-xl text-headline-xl text-primary mb-xs">{quiz.data?.title ?? "Quiz"}</h1>
+          <h1 className="font-headline-xl text-headline-xl text-primary mb-xs border-b border-border pb-3">{quiz.data?.title ?? "Quiz"}</h1>
           {quiz.data?.description && (
             <p className="font-body-md text-body-md text-on-surface-variant mb-md">{quiz.data.description}</p>
           )}

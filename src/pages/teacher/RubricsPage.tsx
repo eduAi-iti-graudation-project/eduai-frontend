@@ -146,7 +146,7 @@ export function RubricsPage() {
   return (
     <div className="min-h-full bg-surface-container-low">
       <div className="mx-auto w-full max-w-6xl flex flex-col gap-md p-gutter pb-24 md:pb-0">
-        <header ref={builderTopRef} className="flex flex-col lg:flex-row lg:items-center justify-between gap-md">
+        <header ref={builderTopRef} className="flex flex-col lg:flex-row lg:items-center justify-between gap-md border-b border-border pb-3">
           <div>
             <h1 className="font-headline-xl text-headline-xl text-on-surface">Rubrics</h1>
             <p className="font-body-md text-body-md text-on-surface-variant mt-1">
@@ -223,7 +223,7 @@ export function RubricsPage() {
               </div>
 
               {manualCriteria.length === 0 && importedCriteria.length === 0 && (
-                <EmptyState
+                <EmptyState flat
                   icon="checklist"
                   title="No criteria yet"
                   description="Click below to add your first criterion, or import a PDF to let AI propose rows."

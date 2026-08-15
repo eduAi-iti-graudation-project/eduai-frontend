@@ -127,7 +127,7 @@ export function AdminRequestsPage() {
 
   return (
     <div className="flex-1 p-xl max-w-6xl mx-auto w-full space-y-md">
-      <h1 className="font-headline-xl text-headline-xl text-primary mb-lg">Membership Requests</h1>
+      <h1 className="font-headline-xl text-headline-xl text-primary mb-lg border-b border-border pb-3">Membership Requests</h1>
 
       {/* Join code card */}
       <div className="rounded-lg bg-white border border-border p-md flex flex-col md:flex-row md:items-center md:justify-between gap-4">

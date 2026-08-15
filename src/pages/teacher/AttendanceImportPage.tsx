@@ -57,7 +57,7 @@ export function AttendanceImportPage() {
     <div className="flex-1 p-xl max-w-4xl mx-auto w-full">
       <BackLink to={classIdParam ? `/classes/${classIdParam}` : "/classes"} label="Back to Class" className="mb-md" />
 
-      <h1 className="font-headline-xl text-headline-xl text-on-surface mb-xl">Import Attendance</h1>
+      <h1 className="font-headline-xl text-headline-xl text-on-surface mb-xl border-b border-border pb-3">Import Attendance</h1>
 
       <div className="bg-surface-container-lowest rounded-lg p-xl border border-outline-variant mb-xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-md mb-lg">

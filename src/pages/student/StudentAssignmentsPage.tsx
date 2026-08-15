@@ -73,7 +73,7 @@ export function StudentAssignmentsPage() {
   if (studentClasses.isLoading) {
     return (
       <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
-        <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Assignments</h1>
+        <h1 className="font-headline-lg text-headline-lg text-primary mb-4 border-b border-border pb-3">Assignments</h1>
         <LoadingState />
       </div>
     )
@@ -95,7 +95,7 @@ export function StudentAssignmentsPage() {
   if (classes.length === 0) {
     return (
       <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
-        <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Assignments</h1>
+        <h1 className="font-headline-lg text-headline-lg text-primary mb-4 border-b border-border pb-3">Assignments</h1>
         <EmptyState
           icon="assignment"
           title="No assignments"
@@ -109,7 +109,7 @@ export function StudentAssignmentsPage() {
   return (
     <>
       <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
-        <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Assignments</h1>
+        <h1 className="font-headline-lg text-headline-lg text-primary mb-4 border-b border-border pb-3">Assignments</h1>
         <div className="space-y-6">
           {classes.map((cls) => {
             const classAssignments = cls.assignments

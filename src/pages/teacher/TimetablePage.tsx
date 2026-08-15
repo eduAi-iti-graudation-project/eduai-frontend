@@ -17,7 +17,7 @@ export function TimetablePage() {
 
   return (
     <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
-      <h1 className="font-headline-lg text-headline-lg text-primary mb-1">My Timetable</h1>
+      <h1 className="font-headline-lg text-headline-lg text-primary mb-1 border-b border-border pb-3">My Timetable</h1>
       <p className="font-body-md text-body-md text-on-surface-variant mb-6">
         Your weekly schedule across every class you teach.
       </p>

@@ -38,7 +38,7 @@ export function StudentQuizResultPage() {
 
   return (
     <div className="flex-1 p-xl max-w-2xl mx-auto w-full">
-      <header className="mb-lg">
+      <header className="mb-lg border-b border-border pb-3">
         <h1 className="font-headline-xl text-headline-xl text-primary mb-xs">Quiz result</h1>
         <p className="font-body-lg text-body-lg text-on-surface-variant">{quiz.data?.title ?? "Quiz"}</p>
       </header>

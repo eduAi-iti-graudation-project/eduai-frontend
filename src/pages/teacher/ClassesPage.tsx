@@ -17,7 +17,9 @@ type SortKey = "name-az" | "name-za" | "students-desc" | "students-asc" | "cours
 function StatCard({ icon, iconClass, label, value }: { icon: string; iconClass: string; label: string; value: number }) {
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-md flex items-center gap-md shadow-sm">
-      <span className={`material-symbols-outlined ${iconClass}`} style={{ fontSize: 22 }}>{icon}</span>
+      <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconClass}`}>
+        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{icon}</span>
+      </span>
       <div className="min-w-0">
         <p className="font-headline-md text-headline-md text-on-surface tabular-nums leading-none">{value}</p>
         <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5 truncate">{label}</p>
@@ -118,7 +120,7 @@ export function ClassesPage() {
     <div className="min-h-full bg-surface-container-low">
       <div className="mx-auto flex max-w-6xl flex-col gap-md p-gutter pb-24 md:pb-0">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md border-b border-border pb-3">
           <div>
             <h2 className="font-headline-xl text-headline-xl text-on-surface">Your Sections</h2>
             <p className="font-body-md text-body-md text-on-surface-variant mt-1">
@@ -128,11 +130,11 @@ export function ClassesPage() {
         </div>
 
         {/* Stats strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard icon="school" iconClass="text-primary" label="Sections" value={stats.sections} />
-          <StatCard icon="groups" iconClass="text-secondary" label="Students" value={stats.students} />
-          <StatCard icon="menu_book" iconClass="text-tertiary" label="Courses taught" value={stats.courses} />
-          <StatCard icon="account_tree" iconClass="text-[#059669]" label="Grade levels" value={stats.grades} />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-border pb-4">
+          <StatCard icon="school" iconClass="bg-primary-container text-primary" label="Sections" value={stats.sections} />
+          <StatCard icon="groups" iconClass="bg-secondary-container text-on-secondary-container" label="Students" value={stats.students} />
+          <StatCard icon="menu_book" iconClass="bg-tertiary-container text-on-tertiary-container" label="Courses taught" value={stats.courses} />
+          <StatCard icon="account_tree" iconClass="bg-[#ECFDF5] text-[#047857]" label="Grade levels" value={stats.grades} />
         </div>
 
         {/* Filter bar */}

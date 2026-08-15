@@ -129,7 +129,7 @@ export function StudentMaterialsPage() {
 
   return (
     <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-4 border-b border-border pb-3">
         <BackLink to={`/student/classes/${classId}`} label="Back to Class" />
         <h1 className="font-headline-lg text-headline-lg text-primary">{cls.name}</h1>
         <Link

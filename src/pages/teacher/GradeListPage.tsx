@@ -16,7 +16,9 @@ type SortKey = "level-asc" | "level-desc" | "name" | "sections" | "courses" | "s
 function StatCard({ icon, iconClass, label, value }: { icon: string; iconClass: string; label: string; value: number }) {
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-md flex items-center gap-md shadow-sm">
-      <span className={`material-symbols-outlined ${iconClass}`} style={{ fontSize: 22 }}>{icon}</span>
+      <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconClass}`}>
+        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{icon}</span>
+      </span>
       <div className="min-w-0">
         <p className="font-headline-md text-headline-md text-on-surface tabular-nums leading-none">{value}</p>
         <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5 truncate">{label}</p>
@@ -92,7 +94,7 @@ export function GradeListPage() {
   if (list.length === 0 && (grades ?? []).length === 0) {
     return (
       <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
-        <h1 className="font-headline-lg text-headline-lg text-on-surface mb-4">Grades & Levels</h1>
+        <h1 className="font-headline-lg text-headline-lg text-on-surface mb-4 border-b border-border pb-3">Grades & Levels</h1>
         <EmptyState
           icon="account_tree"
           title="No grades assigned"
@@ -104,7 +106,7 @@ export function GradeListPage() {
 
   return (
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
-      <div className="mb-lg">
+      <div className="mb-lg border-b border-border pb-3">
         <h1 className="font-headline-xl text-headline-xl text-on-surface">Grades & Levels</h1>
         <p className="font-body-md text-body-md text-on-surface-variant mt-1">
           {(grades ?? []).length} grade{(grades ?? []).length !== 1 ? "s" : ""} · each grade has sections that share the same courses
@@ -112,11 +114,11 @@ export function GradeListPage() {
       </div>
 
       {/* Stats strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-md mb-lg">
-        <StatCard icon="account_tree" iconClass="text-primary" label="Grade levels" value={(grades ?? []).length} />
-        <StatCard icon="groups" iconClass="text-secondary" label="Sections" value={totals.sections} />
-        <StatCard icon="menu_book" iconClass="text-tertiary" label="Courses" value={totals.courses} />
-        <StatCard icon="person" iconClass="text-[#059669]" label="Students" value={totals.students} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-md mb-lg border-b border-border pb-4">
+        <StatCard icon="account_tree" iconClass="bg-primary-container text-primary" label="Grade levels" value={(grades ?? []).length} />
+        <StatCard icon="groups" iconClass="bg-secondary-container text-on-secondary-container" label="Sections" value={totals.sections} />
+        <StatCard icon="menu_book" iconClass="bg-tertiary-container text-on-tertiary-container" label="Courses" value={totals.courses} />
+        <StatCard icon="person" iconClass="bg-[#ECFDF5] text-[#047857]" label="Students" value={totals.students} />
       </div>
 
       {/* Toolbar */}

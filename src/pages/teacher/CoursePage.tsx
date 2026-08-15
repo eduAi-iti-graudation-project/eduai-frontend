@@ -65,7 +65,7 @@ export function CoursePage() {
         className="mb-md"
       />
 
-      <div className="mb-sm">
+      <div className="mb-sm border-b border-border pb-3">
         <h1 className="font-headline-xl text-headline-xl text-on-surface">{course.name}</h1>
         <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
           {grade ? `Grade ${grade.level}${grade.name ? ` — ${grade.name}` : ""}` : ""}

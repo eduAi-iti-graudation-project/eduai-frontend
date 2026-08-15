@@ -76,7 +76,7 @@ export function MeetingsListPage() {
 
   return (
     <div className="p-xl max-w-3xl mx-auto w-full">
-      <header className="mb-lg flex items-center justify-between">
+      <header className="mb-lg flex items-center justify-between border-b border-border pb-3">
         <div>
           <h1 className="font-headline-xl text-headline-xl text-on-surface mb-1">Meetings</h1>
           <p className="font-body-md text-body-md text-on-surface-variant">
@@ -92,14 +92,16 @@ export function MeetingsListPage() {
       </header>
 
       <Tabs value={scope} onValueChange={(value) => setScope(value as "upcoming" | "past")}>
-        <TabsList>
-          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="past">Past</TabsTrigger>
-        </TabsList>
+        <div className="border-b border-border pb-2 mb-4">
+          <TabsList>
+            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="past">Past</TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value={scope}>
           {scope === "upcoming" && live.length > 0 && (
-            <div className="mt-md mb-lg">
-              <h2 className="font-label-lg text-label-lg text-on-surface mb-2 flex items-center gap-2">
+            <div className="mt-md mb-lg border-b border-border pb-2">
+              <h2 className="font-label-lg text-label-lg text-on-surface flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#15803d] animate-pulse" />
                 Happening now
               </h2>

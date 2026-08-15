@@ -33,7 +33,7 @@ const FAQS = [
 export function SupportPage() {
   return (
     <div className="p-xl max-w-3xl mx-auto w-full">
-      <header className="mb-lg">
+      <header className="mb-lg border-b border-border pb-3">
         <h1 className="font-headline-xl text-headline-xl text-on-surface mb-1">Help Center</h1>
         <p className="font-body-md text-body-md text-on-surface-variant">
           Answers to common questions, and how to reach us.

@@ -106,7 +106,7 @@ export function RubricConfirmPage() {
     return (
       <div className="flex-1 p-margin-desktop max-w-3xl mx-auto w-full">
         <div className="bg-surface-container-lowest rounded-lg p-xl border border-outline-variant space-y-lg">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 border-b border-border pb-3">
             <span className="material-symbols-outlined text-4xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
             <div>
               <h1 className="font-headline-lg text-headline-lg text-on-background">{rubric.title}</h1>
@@ -136,7 +136,7 @@ export function RubricConfirmPage() {
   return (
     <div className="flex-1 p-margin-desktop max-w-3xl mx-auto w-full">
       <div className="bg-surface-container-lowest rounded-lg p-xl border border-outline-variant space-y-lg">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 border-b border-border pb-3">
           <span className="material-symbols-outlined text-4xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>fact_check</span>
           <div>
             <h1 className="font-headline-lg text-headline-lg text-on-background">Review & Confirm Rubric</h1>

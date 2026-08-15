@@ -347,7 +347,7 @@ function ClassesPanel({ classes, isLoading, isError, onRetry }: { classes: api.T
     <PanelCard title="Current classes" subtitle={`${data.length} class${data.length === 1 ? "" : "es"} this teacher is assigned to`}>
       {data.length === 0 ? (
         <div className="py-10">
-          <EmptyState icon="meeting_room" title="No classes assigned" description="This teacher isn't teaching any classes right now." />
+          <EmptyState flat icon="meeting_room" title="No classes assigned" description="This teacher isn't teaching any classes right now." />
         </div>
       ) : (
         <div className="overflow-x-auto min-w-0">

@@ -32,7 +32,7 @@ export function NotificationsListPage() {
 
   return (
     <div className="p-xl max-w-3xl mx-auto">
-      <header className="flex items-center justify-between mb-lg">
+      <header className="flex items-center justify-between mb-lg border-b border-border pb-3">
         <div>
           <h1 className="font-headline-xl text-headline-xl text-on-surface mb-1">Notifications</h1>
           <p className="font-body-md text-body-md text-on-surface-variant">

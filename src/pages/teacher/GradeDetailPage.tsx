@@ -23,7 +23,9 @@ function getInitials(name: string): string {
 function StatCard({ icon, iconClass, label, value }: { icon: string; iconClass: string; label: string; value: number }) {
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-md flex items-center gap-md shadow-sm">
-      <span className={`material-symbols-outlined ${iconClass}`} style={{ fontSize: 22 }}>{icon}</span>
+      <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconClass}`}>
+        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{icon}</span>
+      </span>
       <div className="min-w-0">
         <p className="font-headline-md text-headline-md text-on-surface tabular-nums leading-none">{value}</p>
         <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5 truncate">{label}</p>
@@ -203,7 +205,7 @@ export function GradeDetailPage() {
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
       <BackLink to="/grades" label="Back to Grades" className="mb-md" />
 
-      <div className="mb-lg">
+      <div className="mb-lg border-b border-border pb-3">
         <h1 className="font-headline-xl text-headline-xl text-on-surface">Grade {grade.level}</h1>
         <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
           {grade.name || "—"} · sections in this grade mostly share the same courses
@@ -211,11 +213,11 @@ export function GradeDetailPage() {
       </div>
 
       {/* Stats strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-md mb-lg">
-        <StatCard icon="account_tree" iconClass="text-primary" label="Grade level" value={grade.level} />
-        <StatCard icon="groups" iconClass="text-secondary" label="Sections" value={grade.sections.length} />
-        <StatCard icon="menu_book" iconClass="text-tertiary" label="Courses" value={grade.courses.length} />
-        <StatCard icon="person" iconClass="text-[#059669]" label="Students" value={grade.students} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-md mb-lg border-b border-border pb-4">
+        <StatCard icon="account_tree" iconClass="bg-primary-container text-primary" label="Grade level" value={grade.level} />
+        <StatCard icon="groups" iconClass="bg-secondary-container text-on-secondary-container" label="Sections" value={grade.sections.length} />
+        <StatCard icon="menu_book" iconClass="bg-tertiary-container text-on-tertiary-container" label="Courses" value={grade.courses.length} />
+        <StatCard icon="person" iconClass="bg-[#ECFDF5] text-[#047857]" label="Students" value={grade.students} />
       </div>
 
       {gradeEmpty ? (
@@ -226,7 +228,7 @@ export function GradeDetailPage() {
         />
       ) : (
         <Tabs defaultValue="sections">
-          <div className="flex flex-wrap items-center gap-sm mb-md">
+          <div className="flex flex-wrap items-center gap-sm mb-md border-b border-border pb-2">
             <TabsList>
               <TabsTrigger value="sections">Sections ({grade.sections.length})</TabsTrigger>
               <TabsTrigger value="courses">Courses ({grade.courses.length})</TabsTrigger>
