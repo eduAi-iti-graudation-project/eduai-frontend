@@ -1,13 +1,13 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { toast } from "sonner"
 import { useClassDetail } from "@/hooks/use-classes"
 import { useClassAttendance } from "@/hooks/use-attendance"
 import { useCreateChatThread } from "@/hooks/use-chat-threads"
+import { BackLink } from "@/components/shared/BackLink"
 import { useAuth } from "@/providers/use-auth"
 import { ClassMaterialsTab } from "./ClassMaterialsTab"
 import { EmptyState } from "@/components/ui/EmptyState"
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
 
@@ -40,11 +40,10 @@ export function ClassDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabId>("students")
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [studentQuery, setStudentQuery] = useState("")
 
   const { user } = useAuth()
-  const { detail, assignments, isLoading, isError, error, deleteClass, removeEnrollment } = useClassDetail(id ?? "")
+  const { detail, assignments, isLoading, isError, error, removeEnrollment } = useClassDetail(id ?? "")
   const attendanceQuery = useClassAttendance(id ?? "")
   const createThread = useCreateChatThread()
 
@@ -55,18 +54,38 @@ export function ClassDetailPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const students = cls ? (cls as any).enrollments?.map((e: any) => ({ ...e.student, enrollmentId: e.id })) ?? [] : []
 
+  const sectionCourses = useMemo<import("./ClassMaterialsTab").SectionCourse[]>(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const offerings: any[] = (cls as any)?.offerings ?? []
+    const seen = new Map<
+      string,
+      import("./ClassMaterialsTab").SectionCourse
+    >()
+    for (const o of offerings) {
+      const course = o?.course
+      if (!course?.id) continue
+      const taughtByMe = o.teacher?.id === user?.id
+      const prev = seen.get(course.id)
+      if (!prev) {
+        seen.set(course.id, {
+          offeringId: o.id,
+          courseId: course.id,
+          courseName: course.name ?? "Untitled course",
+          taughtByMe,
+        })
+      } else if (taughtByMe) {
+        seen.set(course.id, { ...prev, offeringId: o.id, taughtByMe: true })
+      }
+    }
+    return Array.from(seen.values())
+  }, [cls, user?.id])
+
   const q = studentQuery.trim().toLowerCase()
   const filteredStudents = students.filter(
     (s: { name: string; email: string }) => s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q),
   )
 
   const dates = [...new Set(attendanceRecords.map((r) => r.date))].sort()
-
-  const handleDelete = async () => {
-    if (!id) return
-    await deleteClass.mutateAsync()
-    navigate("/classes", { replace: true })
-  }
 
   const handleRemoveStudent = async (studentId: string) => {
     if (!id) return
@@ -216,7 +235,7 @@ export function ClassDetailPage() {
         )
 
       case "materials":
-        return <ClassMaterialsTab classId={cls!.id} />
+        return <ClassMaterialsTab classId={cls!.id} courses={sectionCourses} />
 
       case "attendance":
         return (
@@ -292,10 +311,7 @@ export function ClassDetailPage() {
   return (
     <div className="min-h-full bg-surface-container-low">
       <div className="mx-auto w-full max-w-6xl p-gutter pb-24 md:pb-0">
-        <Link to="/classes" className="inline-flex items-center gap-1 text-on-surface-variant hover:text-primary font-body-md text-sm mb-4 transition-colors">
-          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          Back to Sections
-        </Link>
+        <BackLink to="/classes" label="Back to Sections" className="mb-4" />
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-md">
           <div>
@@ -310,14 +326,6 @@ export function ClassDetailPage() {
                 <span className="material-symbols-outlined text-[18px]">smart_toy</span>
                 AI Assistant
               </Link>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="h-auto px-md py-2 border border-error text-error font-label-md text-label-m rounded-md hover:bg-error-container/50 transition-colors"
-            >
-              Delete
             </Button>
           </div>
         </div>
@@ -339,18 +347,6 @@ export function ClassDetailPage() {
           <div className="p-6">{tabContent(activeTab)}</div>
         </div>
       </div>
-
-      <ConfirmDialog
-        open={showDeleteConfirm}
-        title={`Delete ${cls.name}?`}
-        message="This will permanently delete this class and all associated assignments, submissions, and rubrics."
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        variant="danger"
-        isLoading={deleteClass.isPending}
-        onConfirm={handleDelete}
-        onCancel={() => setShowDeleteConfirm(false)}
-      />
     </div>
   )
 }

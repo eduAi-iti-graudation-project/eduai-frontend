@@ -1,117 +1,116 @@
 ---
-name: EduAI Institutional Command Center
+name: EduAI Playground — Crayon Box
 colors:
-  surface: '#faf9ff'
-  surface-dim: '#d5d9ea'
-  surface-bright: '#faf9ff'
+  surface: '#fff8fb'
+  surface-dim: '#f0cfe0'
+  surface-bright: '#fff8fb'
   surface-container-lowest: '#ffffff'
-  surface-container-low: '#f1f3ff'
-  surface-container: '#e9edfe'
-  surface-container-high: '#e4e8f8'
-  surface-container-highest: '#dee2f3'
-  on-surface: '#161b27'
-  on-surface-variant: '#434752'
-  inverse-surface: '#2b303d'
-  inverse-on-surface: '#edf0ff'
-  outline: '#737783'
-  outline-variant: '#c3c6d3'
-  surface-tint: '#285cb0'
-  primary: '#004699'
+  surface-container-low: '#fdf2f8'
+  surface-container: '#fbe7f2'
+  surface-container-high: '#f9dceb'
+  surface-container-highest: '#f6d1e4'
+  on-surface: '#35122b'
+  on-surface-variant: '#7c4a63'
+  inverse-surface: '#4a0d3f'
+  inverse-on-surface: '#fdeef6'
+  outline: '#96707e'
+  outline-variant: '#d8b6c8'
+  surface-tint: '#db2777'
+  primary: '#db2777'
   on-primary: '#ffffff'
-  primary-container: '#2c5fb3'
-  on-primary-container: '#d0ddff'
-  inverse-primary: '#adc6ff'
-  secondary: '#595d75'
+  primary-container: '#fce7f3'
+  on-primary-container: '#9d174d'
+  inverse-primary: '#f9a8d4'
+  secondary: '#0284c7'
   on-secondary: '#ffffff'
-  secondary-container: '#dde1fd'
-  on-secondary-container: '#5f637b'
-  success: '#15803d'
+  secondary-container: '#e0f2fe'
+  on-secondary-container: '#075985'
+  success: '#16a34a'
   on-success: '#ffffff'
   success-container: '#dcfce7'
   on-success-container: '#14532d'
-  warning: '#b45309'
+  warning: '#d97706'
   on-warning: '#ffffff'
   warning-container: '#fef3c7'
   on-warning-container: '#78350f'
-  error: '#ba1a1a'
+  error: '#e11d48'
   on-error: '#ffffff'
-  error-container: '#ffdad6'
-  on-error-container: '#93000a'
-  primary-fixed: '#d8e2ff'
-  primary-fixed-dim: '#adc6ff'
-  on-primary-fixed: '#001a41'
-  on-primary-fixed-variant: '#004494'
-  secondary-fixed: '#dde1fd'
-  secondary-fixed-dim: '#c1c5e0'
-  on-secondary-fixed: '#161a2f'
-  on-secondary-fixed-variant: '#41465c'
-  background: '#faf9ff'
-  on-background: '#161b27'
-  surface-variant: '#dee2f3'
+  error-container: '#ffe4e6'
+  on-error-container: '#9f1239'
+  primary-fixed: '#fce7f3'
+  primary-fixed-dim: '#f9a8d4'
+  on-primary-fixed: '#5b0d35'
+  on-primary-fixed-variant: '#a11057'
+  secondary-fixed: '#e0f2fe'
+  secondary-fixed-dim: '#bae6fd'
+  on-secondary-fixed: '#082f49'
+  on-secondary-fixed-variant: '#075985'
+  background: '#fff8fb'
+  on-background: '#35122b'
+  surface-variant: '#f6d1e4'
 typography:
   headline-xl:
-    fontFamily: Hanken Grotesk
-    fontSize: 32px
+    fontFamily: Quicksand
+    fontSize: 36px
     fontWeight: '700'
-    lineHeight: 40px
-    letterSpacing: -0.02em
+    lineHeight: 44px
+    letterSpacing: -0.01em
   headline-lg:
-    fontFamily: Hanken Grotesk
+    fontFamily: Quicksand
     fontSize: 24px
     fontWeight: '700'
     lineHeight: 32px
     letterSpacing: -0.01em
   headline-md:
-    fontFamily: Hanken Grotesk
-    fontSize: 18px
+    fontFamily: Quicksand
+    fontSize: 20px
+    fontWeight: '600'
+    lineHeight: 28px
+  headline-sm:
+    fontFamily: Quicksand
+    fontSize: 16px
     fontWeight: '600'
     lineHeight: 24px
-    letterSpacing: -0.01em
-  headline-sm:
-    fontFamily: Hanken Grotesk
-    fontSize: 14px
-    fontWeight: '600'
-    lineHeight: 20px
   body-lg:
-    fontFamily: Hanken Grotesk
+    fontFamily: Inter
     fontSize: 16px
     fontWeight: '400'
     lineHeight: 24px
   body-md:
-    fontFamily: Hanken Grotesk
+    fontFamily: Inter
     fontSize: 14px
     fontWeight: '400'
     lineHeight: 20px
   body-sm:
-    fontFamily: Hanken Grotesk
+    fontFamily: Inter
     fontSize: 13px
     fontWeight: '400'
     lineHeight: 18px
   body-xs:
-    fontFamily: Hanken Grotesk
+    fontFamily: Inter
     fontSize: 12px
     fontWeight: '400'
     lineHeight: 16px
   number-md:
-    fontFamily: Hanken Grotesk
+    fontFamily: Inter
     fontSize: 22px
     fontWeight: '700'
     lineHeight: 28px
     letterSpacing: -0.01em
   number-lg:
-    fontFamily: Hanken Grotesk
+    fontFamily: Inter
     fontSize: 32px
     fontWeight: '700'
     lineHeight: 36px
     letterSpacing: -0.02em
   label-md:
-    fontFamily: Hanken Grotesk
+    fontFamily: Inter
     fontSize: 12px
     fontWeight: '600'
     lineHeight: 16px
     letterSpacing: 0.02em
   label-sm:
-    fontFamily: Hanken Grotesk
+    fontFamily: Inter
     fontSize: 11px
     fontWeight: '500'
     lineHeight: 14px
@@ -123,7 +122,7 @@ typography:
     lineHeight: 18px
 fixed-layout:
   sidebar-width: 256px
-  sidebar-bg: '#151a2e'
+  sidebar-bg: '#4a0d3f'
   topbar-height: 64px
   content-max-width: 1600px
   page-margin: 24px
@@ -140,138 +139,141 @@ spacing:
   stack-xl: 24px
   stack-2xl: 32px
 rounded:
-  sm: 0.1875rem
-  DEFAULT: 0.375rem
-  md: 0.5rem
-  lg: 0.625rem
-  xl: 0.75rem
+  sm: 0.375rem
+  DEFAULT: 0.5rem
+  md: 0.625rem
+  lg: 0.75rem
+  xl: 1rem
   full: 9999px
 elevation:
-  card: '0 1px 2px rgba(22,27,39,0.04)'
-  hover: '0 2px 6px rgba(22,27,39,0.06)'
-  floating: '0 4px 16px rgba(22,27,39,0.10)'
+  card: '0 1px 2px rgba(53,18,43,0.04), 0 6px 18px rgba(219,39,119,0.08)'
+  hover: '0 2px 4px rgba(53,18,43,0.06), 0 10px 28px rgba(219,39,119,0.13)'
+  floating: '0 4px 12px rgba(53,18,43,0.08), 0 16px 40px rgba(219,39,119,0.18)'
 ---
 
-# EduAI Institutional Command Center — Design System (Admin)
+# EduAI Playground — Crayon Box Design System
 
-A **high-density institutional command center** for administrators. The aesthetic is
-"modern institutional intelligence": calm enterprise-grade surfaces, near-grayscale
-neutral foundation, restrained navy accent, and extremely high information density
-without clutter. A senior admin must be able to scan 40+ data rows per screen, read
-a metric trend at a glance, and trust every number.
+A **warm, friendly, colorful** school app for every role — students, teachers,
+guardians, and admins. The aesthetic is "Crayon Box": a fresh page of
+school supplies. A bold magenta-pink primary (`#db2777`) partners with a
+sky-blue secondary (`#0284c7`) for a cheerful two-tone base, while the status
+colors, chips, and charts borrow from a full crayon box (sky, sunshine,
+mint, coral, violet). Surfaces stay clean and warm-white so dense data stays
+legible — color lives in the stickers: chips, icon tiles, buttons, and charts.
+Body copy and tabular numbers remain in Inter.
 
 ## 1. Brand & Mood
-- **Scale & Sentiment**: precise, calm, authoritative. Zero decorative flourish.
-  Data is the hero; chrome is invisible.
-- **Reference energy**: modern school-ops dashboards, Bloomberg-terminal density
-  with Figma-level polish. Think "PowerSchool 2026" not "consumer fintech".
-- **Persona**: the person behind the screen is a principal or academic operations
-  lead who reviews the school daily. They are decision-makers, not end-users.
+- **Scale & Sentiment**: approachable, encouraging, alive — like a favorite
+  classroom: colorful but organized. Rounded shapes, soft colored shadows,
+  sticker-like chips, warm pastel tints. Playful, never childish.
+- **Reference energy**: modern edtech (Duolingo polish, ClassDojo warmth) with
+  the density of a real school-ops tool. Think "fresh notebooks + full crayon
+  box on a clean desk".
+- **Persona**: a student who checks grades without dread, a teacher who scans
+  their day in one glance, a guardian who feels reassured.
 
 ## 2. Color Strategy
-- **Foundation**: near-white `#faf9ff` app background with pure-white card panels
-  separated by `1px` outlines (`#dee2f3`), rarely shadow.
-- **Sidebar**: deep navy `#151a2e` (fixed 256px). Active nav item = `#2c5fb3` pill
-  with white text OR left 3px indicator + `rgba(255,255,255,0.06)` tint.
-- **Accent**: `#2c5fb3` navy reserved ONLY for interactive affordances: primary
-  buttons, active nav, links, focus rings, selected rows, small trend sparklines.
-- **Semantic sets** (use alone, never tone-on-tone unless container-filled):
-  - Success `#15803d` on `#dcfce7` (or plain text w/ delta ▲)
-  - Warning `#b45309` on `#fef3c7`
-  - Danger `#ba1a1a` on `#ffdad6`
-  - Info/Neutral `#595d75` on `#dde1fd`
-- **Data-viz palette** (charts): `#2c5fb3, #7c4dff, #0ea5e9, #f59e0b, #ef4444, #22c55e, #64748b` — 8 grades, always label directly.
-- **Never** use color alone to convey meaning when it is the only signal (add
-  labels, icons, or value text).
+- **Foundation**: clean warm-white `#fff8fb` pages, pure-white cards separated by
+  visible `1px` blush-pink outlines (`#d8b6c8`) and gentle magenta-tinted shadows.
+  The page stays calm — the crayons do the talking.
+- **Two-tone brand base**: magenta-pink primary `#db2777` + sky-blue secondary
+  `#0284c7`. Primary drives buttons, active nav, links, focus rings, selected
+  rows. Secondary appears in secondary actions, information, and curriculum
+  surfaces — so the app never reads as all-pink.
+- **Sidebar / dark chrome**: deep plum `#4a0d3f`. Active nav = magenta
+  `#db2777` pill with white text OR left 3px rail + `rgba(255,255,255,0.08)` tint.
+- **Crayon status containers** (fill + ink pairs — use together, never tone-on-tone):
+  - Pink `#fce7f3` / `#9d174d` — the "AI / insight" family
+  - Sky `#e0f2fe` / `#075985` — information & curriculum (secondary)
+  - Mint `#dcfce7` / `#14532d` — success, positive trends
+  - Amber `#fef3c7` / `#78350f` — warnings, in-progress
+  - Rose `#ffe4e6` / `#9f1239` — errors, at-risk
+- **Crayon box** (charts & data-viz, always label directly):
+  `#db2777, #0ea5e9, #f59e0b, #10b981, #8b5cf6, #f43f5e, #38bdf8, #f97316` —
+  magenta, sky, sunshine, mint, violet, coral, light-sky, orange.
+- **Never** use color alone when it is the only signal — add labels, icons, or
+  value text.
 
 ## 3. Typography
-- **Hanken Grotesk** everywhere. Mono variant `JetBrains Mono` for IDs, join codes.
-- Hierarchy for dense dashboards:
-  - Page title: `32px/700` (never dupe a redundant "page header" label).
-  - Card title: `14px/600` with a small gray kicker when needed.
+- **Quicksand** for all headlines — the playful, rounded display face already
+  loaded in the app (weights 400–700). Use 600/700, tight tracking.
+- **Inter** for everything else: body copy, tables, inputs, labels, tabular
+  numbers. Dense screens stay scannable.
+- Hierarchy:
+  - Page title: `36px/700` Quicksand.
+  - Card title: `14px/600` Inter with a small gray kicker when needed.
   - Stat number: `22px/700` tabular; large hero numbers `32px/700`.
-  - Body: `14px` default; `13px` for secondary metadata; `12px` for
-    table subtitles, chips, footer meta.
-- **Tabular-numeric**: metric numbers should be `font-variant-numeric: tabular-nums`
-  to avoid jitter in live data.
-- Line height tight: `1.43` body, `1.3` headings. Keep the "dense but legible".
+  - Body: `14px` default; `13px` secondary metadata; `12px` table subtitles.
+- Metric numbers use `font-variant-numeric: tabular-nums` to avoid jitter.
 
 ## 4. Density & Layout System
-- **Base grid**: 8px. Everything is a multiple of 4px, ideally 8px. Page gutter 24px,
-  inter-card 16px. Card internal padding 20px.
-- **Content width**: max `1600px` centered; the admin shell stretches further than
-  other roles deliberately for tables & charts.
-- **Scannable cards**: every data card gets a compact header row (title + one
-  right-aligned action) with a `1px` bottom divider when content is long.
-- **Tables** (the workhorse of admin):
-  - Row height 44px (dense 40px); header 36px, `11px` uppercase gray labels.
-  - No zebra stripes; horizontal 1px dividers `#eceef5`.
-  - Hover row: `#f6f8ff` wash, no border jump.
-  - Numeric columns right-aligned with tabular nums.
-- **Avatar**: `32px` circle w/ initial (navy on `#e9edfe`), `20px` when inline in
-  tight lists, `44px` on profile heads. Provide colored "math-of-name" initials.
+- **Base grid**: 8px. Page gutter 24px, inter-card 16px, card padding 20px.
+- **Content width**: max `1600px` centered.
+- **Tables**: row height 44px (dense 40px), header 36px with `11px` uppercase
+  gray labels, horizontal 1px dividers, hover wash `#f6f2ff`, numeric columns
+  right-aligned with tabular nums.
+- **Avatar**: `32px` circle with initial (magenta on `#fce7f3`), `44px` on profile
+  heads.
+- **Structure: lines & separators (anchor, don't float)**: structure comes from
+  lines, not extra shadow. Every card carries a visible `1px` outline (`#d8b6c8`).
+  Stacked lists use hairline `divide-y` dividers between rows; section headers get
+  a `1px` bottom rule (header bar separated from body); connected stat rows use
+  `divide-x` vertical separators instead of separate floating cards; tables always
+  show clear row lines and a header rule. Borders and dividers share the same
+  `#d8b6c8` line token so panels read as anchored, never floating.
 
 ## 5. Components
-- **StatCard (precision variant)**: icon chip (square, 28px, tinted bg) + label
-  (12px gray) + value (28px 700) + **delta pill** (▲/▼ + % text) + optional
-  **mini sparkline** (40x24 inline SVG) in card footer. Never stack value + delta
-  in the same color as primary.
-- **Delta chip**: 10.5px uppercase, colored pair (green up, red down, gray flat),
-  borderless, `font-weight 500`, padding 2px 6px, radius 6px.
-- **Search / Command**: global search at topbar right (280px), `Search` glyph,
-  shortcut hint chip `⌘K`. Entity search filters typed results inline.
-- **Entity/profile row**: avatar + two-line (name 600 / sub meta 12px gray),
-  right-side trailing value, chevron only when navigable.
-- **Insight/AI card**: top header (AI icon, "AI", title), body 2-3 lines of
-  analysis narrative with soft gradient border-left `2px gold/indigo`, footer
-  "Ask AI" affordance. Never pretend deterministic certainty—use "Likely",
-  "Trend suggests", "Review".
-- **Callout / alert banner**: left 3px accent rail, tinted container bg, title +
-  message + action button right-aligned. Tint = severity semantics above.
-- **StatusChip**: 4px radius, no border, 11px label uppercase. Use the
-  semantic tint pairs in §2.
-- **Tag filter row**: segmented chips (All | Students | Teachers | Classes) 32px
-  height, active = `#2c5fb3` text + `#eef3fc` bg underline, inactive gray.
-- **Empty/Error**: centered 120px glyph + 16px title + 13px description +
-  primary ghost action button.
+- **Card**: white, `rounded-2xl`, visible `1px` blush-pink outline (`#d8b6c8`) plus
+  soft magenta-tinted elevation (`0 6px 18px rgba(219,39,119,0.08)`). Panels are
+  anchored by their outline, not floating. Hover lifts 1px with a warmer shadow.
+- **Button**: `rounded-xl`, height 40px, `700` weight. Primary = magenta-pink
+  `#db2777`; secondary = sky blue `#0284c7`; outline = 1px blush-pink border;
+  ghost for quiet actions.
+- **Input / Select / Textarea**: `rounded-xl`, 1px blush-pink border, magenta focus
+  ring (`#ec4899`, 2px + offset).
+- **Sticker chip / StatusBadge**: pill-shaped (`rounded-full`), 11px uppercase
+  label, crayon fill + ink pairs from §2. Never bordered — they read as
+  stickers stuck on the page, not bordered tags.
+- **Icon tile**: rounded-squircle (28px, `rounded-xl`), crayon-tinted bg + ink
+  icon — the playful avatar of each stat card. Magenta for primary stats, sky
+  for info, mint for positive, amber for in-progress, rose for at-risk.
+- **Insight/AI card**: header (AI icon, "AI", title), 2–3 lines of analysis,
+  soft gradient border-left `2px` magenta/amber, footer "Ask AI" affordance.
+  Use hedged language: "Likely", "Trend suggests", "Review".
+- **Callout / alert banner**: left 3px accent rail, crayon container bg, title +
+  message + action.
+- **Empty/Error**: centered 120px doodle-style glyph + 16px Quicksand title +
+  13px Inter description + primary ghost action. Doodles are simple line
+  drawings (book, pencil, magnifier) — hand-drawn warmth without animation.
+- **Highlighter accent**: key headlines get a 2px warm underline
+  (`rgba(245,158,11,0.35)`) — like a yellow highlighter stroke, sparingly.
 
-## 6. Admin-specific personas (screen patterns)
-- **Command Center (Dashboard)** is the *decision* surface: 6 StatCards w/ delta +
-  sparkline, 2-3 trend charts, an at-risk/flagged ranked list (max 6 rows),
-  and a 1-column "What to watch" AI narrative. It must answer "what changed
-  today/week" in one glance.
-- **People/Roster**: always a two-pane master/detail. List pane `320–360px`
-  (search + compact rows), detail pane rich-profile with stacked sections:
-  identity card → key stats → grades by class → attendance drill → alerts →
-  AI brief. Never a bare name+email.
-- **Directory of roles (Teachers/Faculty)**: card grid with avatar init 8-bit,
-  name, dept/grade scope, class count, avg class grade honor, flagged indicator.
-- **AI Assistant**: full-height three-column (entity picker list / conversation /
-  sticky composer). Replies render as Markdown-ish cards; square encloses
-  structured payloads (analytics) inside an indented bordered block.
-- Every entity surface ends with an **"Ask AI" affordance** (auto-fill that
-  entity into the assistant context).
+## 6. Role surfaces
+- **Dashboard**: playful stat cards with crayon icon tiles (squircle 28px,
+  tinted bg), delta pill (▲/▼), mini sparkline; the "What to watch" AI
+  narrative card in pink. Alternate icon-tile hues across the stat row so the
+  board reads like a row of crayons.
+- **People/roster**: two-pane master/detail. Identity card → key stats → grades
+  by class → attendance drill → alerts → AI brief.
+- **AI Assistant**: three-column (entity picker / conversation / composer),
+  replies as rounded cards, structured payloads in bordered blocks.
+- Every entity surface ends with an **"Ask AI" affordance**.
 
 ## 7. Charts & Data-viz
-- Prefer SVG built-ins; consistent 8px stroke; 12px labels; grey-grid (no
-  vertical grid lines).
-- Line/area for trends; bar for comparisons; donut only when parts-of-whole
-  matter (attendance status breakdown); radar for skill-gap profiles.
-- Include explicit `min/max` value labels on any line endpoint to kill guesswork.
-- Interactive tooltips (hover) with name + value + delta.
+- Prefer SVG built-ins; 8px stroke; 12px labels; grey grid (no vertical lines).
+- Crayon box colors from §2, drawn in series order. Line/area for trends, bar
+  for comparisons, donut for parts-of-whole, radar for skill gaps. Include
+  min/max value labels on line endpoints.
+- Interactive tooltips with name + value + delta.
 
 ## 8. Navigation & Shell
-- Sidebar section groups: **Overview** (Dashboard, Insights), **People** (Students,
-  Teachers), **Academic** (Grades, Attendance, Alerts), **Operations** (Requests,
-  Billing).
-- Active item: `#2c5fb3` tinted `#eff3fc` bg + primary text + 3px navy rail.
-- Topbar: breadcrumb/title left, search center (⌘K), notification bell + avatar
-  right. System status = subtle `[· Live data]` chip.
-- No clutter: hide secondary nav items behind "More".
+- Sidebar groups: **Overview** (Dashboard, Insights), **People**, **Academic**,
+  **Operations**. Active = magenta tint + primary text + 3px magenta rail.
+- Topbar: breadcrumb/title left, search center, notification bell + avatar right.
+- No clutter: hide secondary items behind "More".
 
 ## 9. Motion & Interactions
-- 120–180ms ease transitions on hover/focus only. No entrance animations for
-  full-screen chrome; micro-only.
-- Sparklines draw on mount (200ms). Chart hover shows crosshair + tooltip.
-- Row hover: 120ms bg wash; card hover: `1px darken` + slight translate-y 1px +
-  0.2s. Respect `prefers-reduced-motion`.
+- 120–200ms ease transitions on hover/focus; playful micro-bounces for badges
+  and confirmation states (scale 1.04 → 1 on success).
+- Sparklines draw on mount (200ms). Card hover: lift 1px + shadow warm-up 0.2s.
+- Respect `prefers-reduced-motion`.

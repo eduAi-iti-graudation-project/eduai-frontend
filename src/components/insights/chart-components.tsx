@@ -21,7 +21,33 @@ import {
 import type { InsightSection } from "@/lib/api"
 import { CHART_COLORS } from "@/components/insights/chart-theme"
 
-export function TrendLineChart({ section }: { section: InsightSection }) {
+export type OnPointClick = (label: string, value: number) => void
+
+interface ChartProps {
+  section: InsightSection
+  onPointClick?: OnPointClick
+}
+
+function pointClickHandler(onPointClick?: OnPointClick) {
+  if (!onPointClick) return undefined
+  return (data: unknown) => {
+    const d = (data ?? {}) as {
+      payload?: { label?: string | number; value?: string | number }
+      label?: string | number
+      value?: string | number
+    }
+    const entry = d.payload ?? d
+    const { label, value } = entry
+    if (typeof label === "string" && typeof value === "number") {
+      onPointClick(label, value)
+    }
+  }
+}
+
+const click = (onPointClick?: OnPointClick) =>
+  pointClickHandler(onPointClick) as never
+
+export function TrendLineChart({ section, onPointClick }: ChartProps) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <LineChart data={section.series} margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
@@ -29,13 +55,21 @@ export function TrendLineChart({ section }: { section: InsightSection }) {
         <XAxis dataKey="label" tick={{ fill: "#625f70", fontSize: 12 }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fill: "#625f70", fontSize: 12 }} axisLine={false} tickLine={false} />
         <Tooltip />
-        <Line type="monotone" dataKey="value" name={section.title} stroke="#4f46e5" strokeWidth={2.5} dot={{ r: 3, fill: "#4f46e5" }} />
+        <Line
+          type="monotone"
+          dataKey="value"
+          name={section.title}
+          stroke="#4f46e5"
+          strokeWidth={2.5}
+          dot={{ r: 3, fill: "#4f46e5" }}
+          onClick={click(onPointClick)}
+        />
       </LineChart>
     </ResponsiveContainer>
   )
 }
 
-export function TrendAreaChart({ section }: { section: InsightSection }) {
+export function TrendAreaChart({ section, onPointClick }: ChartProps) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <AreaChart data={section.series} margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
@@ -49,13 +83,21 @@ export function TrendAreaChart({ section }: { section: InsightSection }) {
         <XAxis dataKey="label" tick={{ fill: "#625f70", fontSize: 12 }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fill: "#625f70", fontSize: 12 }} axisLine={false} tickLine={false} />
         <Tooltip />
-        <Area type="monotone" dataKey="value" name={section.title} stroke="#4f46e5" strokeWidth={2.5} fill={`url(#grad-${section.key})`} />
+        <Area
+          type="monotone"
+          dataKey="value"
+          name={section.title}
+          stroke="#4f46e5"
+          strokeWidth={2.5}
+          fill={`url(#grad-${section.key})`}
+          onClick={click(onPointClick)}
+        />
       </AreaChart>
     </ResponsiveContainer>
   )
 }
 
-export function ComparisonBarChart({ section }: { section: InsightSection }) {
+export function ComparisonBarChart({ section, onPointClick }: ChartProps) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <BarChart data={section.series} margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
@@ -63,7 +105,7 @@ export function ComparisonBarChart({ section }: { section: InsightSection }) {
         <XAxis dataKey="label" tick={{ fill: "#625f70", fontSize: 12 }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fill: "#625f70", fontSize: 12 }} axisLine={false} tickLine={false} />
         <Tooltip />
-        <Bar dataKey="value" name={section.title} radius={[8, 8, 0, 0]}>
+        <Bar dataKey="value" name={section.title} radius={[8, 8, 0, 0]} onClick={click(onPointClick)}>
           {section.series.map((entry, index) => (
             <Cell key={entry.label} fill={CHART_COLORS[index % CHART_COLORS.length]} />
           ))}
@@ -73,20 +115,27 @@ export function ComparisonBarChart({ section }: { section: InsightSection }) {
   )
 }
 
-export function StrengthRadarChart({ section }: { section: InsightSection }) {
+export function StrengthRadarChart({ section, onPointClick }: ChartProps) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart data={section.series} margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
         <PolarGrid stroke="#e8e8ed" />
         <PolarAngleAxis dataKey="label" tick={{ fill: "#625f70", fontSize: 12 }} />
-        <Radar dataKey="value" name={section.title} stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.25} />
+        <Radar
+          dataKey="value"
+          name={section.title}
+          stroke="#4f46e5"
+          fill="#4f46e5"
+          fillOpacity={0.25}
+          onClick={click(onPointClick)}
+        />
         <Tooltip />
       </RadarChart>
     </ResponsiveContainer>
   )
 }
 
-export function DonutChart({ section }: { section: InsightSection }) {
+export function DonutChart({ section, onPointClick }: ChartProps) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <PieChart>
@@ -97,6 +146,7 @@ export function DonutChart({ section }: { section: InsightSection }) {
           innerRadius={60}
           outerRadius={85}
           paddingAngle={3}
+          onClick={click(onPointClick)}
         >
           {section.series.map((entry, index) => (
             <Cell key={entry.label} fill={CHART_COLORS[index % CHART_COLORS.length]} />

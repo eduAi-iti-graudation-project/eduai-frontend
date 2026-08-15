@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { FileDropzone } from "@/components/ui/FileDropzone"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { BackLink } from "@/components/shared/BackLink"
 import {
   Dialog,
   DialogContent,
@@ -148,12 +149,7 @@ export function StudentAssignmentGradePage() {
   return (
     <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
       <div className="flex items-center gap-3 mb-4">
-        <Link
-          to={`/student/classes/${classId}`}
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors"
-        >
-          <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
-        </Link>
+        <BackLink to={`/student/classes/${classId}`} label="Back to Class" />
         <h1 className="font-headline-lg text-headline-lg text-primary">{assignment.title}</h1>
         <Link
           to={`/student/homework-help?course=${classId}&assignment=${assignmentId}`}

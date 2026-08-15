@@ -165,86 +165,95 @@ function CourseAssistantTab({ initialOfferingId }: { initialOfferingId?: string 
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 px-md pt-sm pb-sm shrink-0">
-        <Select
-          value={derivedGradeId}
-          onValueChange={(v) => {
-            setTouched(true)
-            setGradeId(v)
-            setCourseId("")
-            setOfferingId("")
-          }}
-        >
-          <SelectTrigger className="w-auto min-w-[150px] rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
-            <SelectValue placeholder="Grade…" />
-          </SelectTrigger>
-          <SelectContent>
-            {grades.length === 0 && (
-              <p className="px-3 py-2 text-sm text-on-surface-variant">
-                No grades assigned yet
-              </p>
-            )}
-            {grades.map((g) => (
-              <SelectItem key={g.id} value={g.id}>
-                Grade {g.level}
-                {g.name ? ` — ${g.name}` : ""}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex flex-wrap items-end gap-3 px-md pt-sm pb-sm shrink-0">
+        <div className="flex flex-col gap-1">
+          <label className="font-label-sm text-label-sm text-on-surface-variant">Grade</label>
+          <Select
+            value={derivedGradeId}
+            onValueChange={(v) => {
+              setTouched(true)
+              setGradeId(v)
+              setCourseId("")
+              setOfferingId("")
+            }}
+          >
+            <SelectTrigger aria-label="Grade" className="w-auto min-w-[150px] rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
+              <SelectValue placeholder="Grade…" />
+            </SelectTrigger>
+            <SelectContent>
+              {grades.length === 0 && (
+                <p className="px-3 py-2 text-sm text-on-surface-variant">
+                  No grades assigned yet
+                </p>
+              )}
+              {grades.map((g) => (
+                <SelectItem key={g.id} value={g.id}>
+                  Grade {g.level}
+                  {g.name ? ` — ${g.name}` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select
-          value={derivedCourseId}
-          onValueChange={(v) => {
-            setTouched(true)
-            setCourseId(v)
-            setOfferingId("")
-          }}
-          disabled={!derivedGradeId}
-        >
-          <SelectTrigger className="w-auto min-w-[180px] rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-50">
-            <SelectValue placeholder="Course…" />
-          </SelectTrigger>
-          <SelectContent>
-            {courses.length === 0 && (
-              <p className="px-3 py-2 text-sm text-on-surface-variant">
-                {gradeId ? "No courses in this grade" : "Pick a grade first"}
-              </p>
-            )}
-            {courses.map((c) => (
-              <SelectItem key={c.id} value={c.id}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-1">
+          <label className="font-label-sm text-label-sm text-on-surface-variant">Course</label>
+          <Select
+            value={derivedCourseId}
+            onValueChange={(v) => {
+              setTouched(true)
+              setCourseId(v)
+              setOfferingId("")
+            }}
+            disabled={!derivedGradeId}
+          >
+            <SelectTrigger aria-label="Course" className="w-auto min-w-[180px] rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-50">
+              <SelectValue placeholder="Course…" />
+            </SelectTrigger>
+            <SelectContent>
+              {courses.length === 0 && (
+                <p className="px-3 py-2 text-sm text-on-surface-variant">
+                  {gradeId ? "No courses in this grade" : "Pick a grade first"}
+                </p>
+              )}
+              {courses.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select
-          value={derivedOfferingId}
-          onValueChange={(v) => {
-            setTouched(true)
-            setOfferingId(v)
-          }}
-          disabled={!derivedCourseId}
-        >
-          <SelectTrigger className="w-auto min-w-[150px] rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-50">
-            <SelectValue placeholder="Section…" />
-          </SelectTrigger>
-          <SelectContent>
-            {sectionOptions.length === 0 && (
-              <p className="px-3 py-2 text-sm text-on-surface-variant">
-                {derivedCourseId
-                  ? "You don't teach this in any section"
-                  : "Pick a course first"}
-              </p>
-            )}
-            {sectionOptions.map((o) => (
-              <SelectItem key={o.id} value={o.id}>
-                {o.section.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-1">
+          <label className="font-label-sm text-label-sm text-on-surface-variant">Section</label>
+          <Select
+            value={derivedOfferingId}
+            onValueChange={(v) => {
+              setTouched(true)
+              setOfferingId(v)
+            }}
+            disabled={!derivedCourseId}
+          >
+            <SelectTrigger aria-label="Section" className="w-auto min-w-[150px] rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-50">
+              <SelectValue placeholder="Section…" />
+            </SelectTrigger>
+            <SelectContent>
+              {sectionOptions.length === 0 && (
+                <p className="px-3 py-2 text-sm text-on-surface-variant">
+                  {derivedCourseId
+                    ? "You don't teach this in any section"
+                    : "Pick a course first"}
+                </p>
+              )}
+              {sectionOptions.map((o) => (
+                <SelectItem key={o.id} value={o.id}>
+                  {o.section.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {messages.length > 0 && (
           <Button

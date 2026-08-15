@@ -4,6 +4,7 @@ import { useCourseMaterialChapters } from "@/hooks/use-materials"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { ChapterCreateDialog } from "@/components/materials/ChapterCreateDialog"
 import * as api from "@/lib/api"
 import type { Material } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -23,8 +24,7 @@ export function CourseMaterialsTab({ courseId, offeringId, sectionName }: Course
   const { chapters, unassigned, create, update, remove, move, refetch } =
     useCourseMaterialChapters(courseId)
 
-  const [isCreating, setIsCreating] = useState(false)
-  const [newTitle, setNewTitle] = useState("")
+  const [chapterDialogOpen, setChapterDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingValue, setEditingValue] = useState("")
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
@@ -41,6 +41,8 @@ export function CourseMaterialsTab({ courseId, offeringId, sectionName }: Course
     title: string
   } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const chapterInputRef = useRef<HTMLInputElement>(null)
+  const [addPdfChapterId, setAddPdfChapterId] = useState<string | null>(null)
 
   const sortedChapters = [...chapters].sort((a, b) => a.order - b.order)
 
@@ -67,16 +69,68 @@ export function CourseMaterialsTab({ courseId, offeringId, sectionName }: Course
     }
   }, [])
 
-  const handleCreate = async () => {
-    const title = newTitle.trim()
-    if (!title) return
+  const handleCreate = async (title: string, files: File[]) => {
     try {
-      await create.mutateAsync(title)
-      toast.success(`Chapter "${title}" created`)
-      setNewTitle("")
-      setIsCreating(false)
+      const chapter = await create.mutateAsync(title)
+      if (files.length > 0) {
+        for (const file of files) {
+          await api.uploadMaterial(
+            file.name.replace(/\.pdf$/i, ""),
+            file,
+            { courseOfferingId: offeringId, chapterId: chapter.id },
+          )
+        }
+        await refetch()
+        toast.success(
+          `Chapter "${title}" created with ${files.length} file${files.length !== 1 ? "s" : ""}`,
+        )
+      } else {
+        toast.success(`Chapter "${title}" created`)
+      }
+      setChapterDialogOpen(false)
     } catch (err) {
       toast.error(api.getErrorMessage(err))
+    }
+  }
+
+  const handleAddPdf = (chapterId: string) => {
+    setAddPdfChapterId(chapterId)
+    chapterInputRef.current?.click()
+  }
+
+  const handleChapterFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const target = addPdfChapterId
+    const files = e.target.files ? Array.from(e.target.files) : []
+    e.target.value = ""
+    if (!target || files.length === 0) return
+    const valid = files.filter((f) => f.type.includes("pdf"))
+    for (const file of valid) {
+      const title = file.name.replace(/\.pdf$/i, "")
+      setUploading((prev) => ({ ...prev, [file.name]: 0 }))
+      try {
+        await api.uploadMaterial(
+          title,
+          file,
+          { courseOfferingId: offeringId, chapterId: target },
+          (p) =>
+            setUploading((prev) => ({ ...prev, [file.name]: p })),
+        )
+      } catch (err) {
+        toast.error(`${title}: ${api.getErrorMessage(err)}`)
+      } finally {
+        setUploading((prev) => {
+          const next = { ...prev }
+          delete next[file.name]
+          return next
+        })
+      }
+    }
+    setAddPdfChapterId(null)
+    await refetch()
+    if (valid.length > 0) {
+      toast.success(`Added ${valid.length} file${valid.length !== 1 ? "s" : ""} to chapter`)
     }
   }
 
@@ -163,12 +217,10 @@ export function CourseMaterialsTab({ courseId, offeringId, sectionName }: Course
       try {
         const res = await api.uploadMaterial(
           title,
-          offeringId,
           target.file,
+          { courseOfferingId: offeringId, chapterId: target.chapterId },
           (p) =>
             setUploading((prev) => ({ ...prev, [target.file.name]: p })),
-          undefined,
-          target.chapterId,
         )
         if (res.detectedChapterCount && res.detectedChapterCount > 0) {
           detected += res.detectedChapterCount
@@ -275,36 +327,13 @@ export function CourseMaterialsTab({ courseId, offeringId, sectionName }: Course
         </h3>
         <Button
           type="button"
-          onClick={() => setIsCreating((v) => !v)}
+          onClick={() => setChapterDialogOpen(true)}
           className="flex items-center gap-2 px-4 py-2 h-auto rounded-md bg-primary text-on-primary font-body-medium text-sm hover:bg-primary/90 transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           New Chapter
         </Button>
       </div>
-
-      {isCreating && (
-        <div className="flex items-center gap-sm bg-surface-container-lowest rounded-lg p-md border border-outline-variant">
-          <span className="material-symbols-outlined text-primary">menu_book</span>
-          <input
-            type="text"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-            placeholder="Chapter title, e.g. Chapter 1 — Intro to Cells"
-            className="flex-1 px-md py-sm rounded-lg border border-outline-variant bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:outline-none"
-            autoFocus
-          />
-          <Button
-            type="button"
-            onClick={handleCreate}
-            disabled={!newTitle.trim() || create.isPending}
-            className="h-auto px-md py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 transition-colors disabled:opacity-50"
-          >
-            Create
-          </Button>
-        </div>
-      )}
 
       <div
         onDragOver={(e) => {
@@ -487,6 +516,15 @@ export function CourseMaterialsTab({ courseId, offeringId, sectionName }: Course
               <div className="flex items-center gap-0.5">
                 <button
                   type="button"
+                  title="Add PDF"
+                  onClick={() => handleAddPdf(chapter.id)}
+                  className="inline-flex items-center gap-1 px-1.5 py-1 rounded text-on-surface-variant hover:text-primary transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                  <span className="font-label-sm text-label-sm">Add PDF</span>
+                </button>
+                <button
+                  type="button"
                   title="Move up"
                   onClick={() => {
                     const idx = sortedChapters.findIndex((c) => c.id === chapter.id)
@@ -560,7 +598,7 @@ export function CourseMaterialsTab({ courseId, offeringId, sectionName }: Course
             {expanded.has(chapter.id) && chapter.materials.length === 0 && (
               <div className="px-md pb-md">
                 <p className="font-label-sm text-label-sm text-on-surface-variant">
-                  No files yet — drop a PDF onto this chapter to add one.
+                  No files yet — use “Add PDF” above to upload one.
                 </p>
               </div>
             )}
@@ -573,12 +611,21 @@ export function CourseMaterialsTab({ courseId, offeringId, sectionName }: Course
             title="No chapters yet"
             description={
               unassigned.length > 0
-                ? `${unassigned.length} file${unassigned.length !== 1 ? "s are" : " is"} ungrouped below — create a chapter, then drop the file${unassigned.length !== 1 ? "s" : ""} onto it.`
-                : "Upload a full book and chapters are detected automatically, or create one manually."
+                ? `${unassigned.length} file${unassigned.length !== 1 ? "s are" : " is"} ungrouped below — click “New Chapter”, then upload the file${unassigned.length !== 1 ? "s" : ""} into it.`
+                : "Upload a full book and chapters are detected automatically, or click “New Chapter” to create one."
             }
           />
         )}
       </div>
+
+      <input
+        ref={chapterInputRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        multiple
+        className="hidden"
+        onChange={handleChapterFileChange}
+      />
 
       <div className="space-y-sm">
         <div className="flex items-center gap-2">
@@ -617,6 +664,13 @@ export function CourseMaterialsTab({ courseId, offeringId, sectionName }: Course
           </p>
         )}
       </div>
+
+      <ChapterCreateDialog
+        open={chapterDialogOpen}
+        onOpenChange={setChapterDialogOpen}
+        onCreate={handleCreate}
+        isSubmitting={create.isPending}
+      />
 
       <ConfirmDialog
         open={confirmDelete?.kind === "chapter"}

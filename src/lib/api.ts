@@ -118,6 +118,20 @@ export interface CriterionFeedback {
   criterion?: { id: string; description: string; maxPoints: number }
 }
 
+export interface SubmissionAssignment {
+  id: string
+  title: string
+  description: string | null
+  dueDate: string
+  totalPoints: number
+  courseOfferingId: string
+  offering?: {
+    id: string
+    course: { id: string; name: string }
+    section: { id: string; name: string }
+  }
+}
+
 export interface SubmissionDetail {
   id: string
   assignmentId: string
@@ -126,7 +140,7 @@ export interface SubmissionDetail {
   createdAt: string
   updatedAt: string
   student?: User
-  assignment?: components["schemas"]["AssignmentDto"]
+  assignment?: SubmissionAssignment
   scores?: CriterionFeedback[]
   chunks?: { id: string; content: string }[]
 }
@@ -146,12 +160,16 @@ export interface Material {
   title: string
   classId: string
   fileUrl?: string
+  courseOfferingId?: string | null
+  courseId?: string | null
   assignmentId?: string | null
   chapterId?: string | null
   createdAt: string
   chunkCount?: number
   detectedChapterCount?: number
   _count?: { chunks: number }
+  course?: { name: string } | null
+  offering?: { course?: { name: string } } | null
 }
 
 export interface MaterialChapter {
@@ -160,6 +178,10 @@ export interface MaterialChapter {
   order: number
   materials: Material[]
   createdAt?: string
+  courseOfferingId?: string | null
+  courseId?: string | null
+  course?: { name: string } | null
+  offering?: { course?: { name: string } } | null
 }
 
 export interface MaterialGrouped {
@@ -617,8 +639,8 @@ export interface StudentClass {
 
 // ── Assignments ───────────────────────────────────────────────────
 
-export async function getAssignments(classId?: string): Promise<components["schemas"]["AssignmentDto"][]> {
-  const params = classId ? { classId } : undefined
+export async function getAssignments(courseOfferingId?: string): Promise<components["schemas"]["AssignmentDto"][]> {
+  const params = courseOfferingId ? { courseOfferingId } : undefined
   const res = await api.get<components["schemas"]["AssignmentDto"][]>("/assignments", { params })
   return res.data
 }
@@ -695,10 +717,21 @@ export async function createRubricFromPdfDirect(formData: FormData): Promise<Rub
 
 // ── Submissions ───────────────────────────────────────────────────
 
-export async function getSubmissions(status?: string, assignmentId?: string): Promise<SubmissionDetail[]> {
+export interface SubmissionFilters {
+  status?: string
+  assignmentId?: string
+  courseId?: string
+  offeringId?: string
+  q?: string
+}
+
+export async function getSubmissions(filters?: SubmissionFilters): Promise<SubmissionDetail[]> {
   const params: Record<string, string> = {}
-  if (status) params.status = status
-  if (assignmentId) params.assignmentId = assignmentId
+  if (filters?.status) params.status = filters.status
+  if (filters?.assignmentId) params.assignmentId = filters.assignmentId
+  if (filters?.courseId) params.courseId = filters.courseId
+  if (filters?.offeringId) params.offeringId = filters.offeringId
+  if (filters?.q) params.q = filters.q
   const res = await api.get<SubmissionDetail[]>("/submissions", { params })
   return res.data
 }
@@ -1385,18 +1418,27 @@ export async function downloadMaterialFile(id: string): Promise<Blob> {
 
 export async function uploadMaterial(
   title: string,
-  classId: string,
   file: File,
+  opts: {
+    courseOfferingId?: string
+    sectionId?: string
+    courseId?: string
+    assignmentId?: string
+    chapterId?: string
+  } = {},
   onProgress?: (percent: number) => void,
-  assignmentId?: string,
-  chapterId?: string,
 ): Promise<Material> {
   const fd = new FormData()
   fd.append("file", file)
   fd.append("title", title)
-  fd.append("courseOfferingId", classId)
-  if (assignmentId) fd.append("assignmentId", assignmentId)
-  if (chapterId) fd.append("chapterId", chapterId)
+  if (opts.courseOfferingId) {
+    fd.append("courseOfferingId", opts.courseOfferingId)
+  } else if (opts.sectionId) {
+    fd.append("sectionId", opts.sectionId)
+  }
+  if (opts.courseId) fd.append("courseId", opts.courseId)
+  if (opts.assignmentId) fd.append("assignmentId", opts.assignmentId)
+  if (opts.chapterId) fd.append("chapterId", opts.chapterId)
   const res = await api.post<Material>("/materials/upload", fd, {
     headers: { "Content-Type": "multipart/form-data" },
     onUploadProgress: (e) => {
@@ -1750,6 +1792,7 @@ export async function submitHomeworkHelpFeedback(interactionId: string, feedback
 // ── Quizzes ───────────────────────────────────────────────────────
 
 export type QuizStatus = "DRAFT" | "PUBLISHED" | "CLOSED"
+export type QuizDifficulty = "EASY" | "MEDIUM" | "HARD"
 export type QuizQuestionType = "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY"
 export type StudentAttemptStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED"
 
@@ -1767,16 +1810,33 @@ export interface QuizQuestion {
   order: number
 }
 
+export interface QuizAssignmentDto {
+  id: string
+  courseOfferingId: string
+  sectionId: string
+  sectionName: string
+  courseId: string
+  courseName: string
+  gradeLevelId: string
+  gradeLevelName: string
+  teacherId: string | null
+  targetStudentIds: string[]
+}
+
 export interface QuizDto {
   id: string
   title: string
   description: string | null
-  classId: string
+  teacherId: string
   timeLimit: number | null
   passingScore: number | null
+  difficulty: QuizDifficulty
   status: QuizStatus
   endsAt: string | null
   createdAt: string
+  updatedAt: string
+  assignments: QuizAssignmentDto[]
+  questionCount: number
   questions?: QuizQuestion[]
 }
 
@@ -1800,21 +1860,30 @@ export interface CreateQuizQuestion {
   order: number
 }
 
+export interface QuizAssignmentInput {
+  courseOfferingId: string
+  targetStudentIds?: string[]
+}
+
 export interface CreateQuizDto {
   title: string
   description?: string
-  classId: string
+  assignments: QuizAssignmentInput[]
   timeLimit?: number
   passingScore?: number
-  endsAt: string
+  difficulty?: QuizDifficulty
+  endsAt?: string
   questions: CreateQuizQuestion[]
 }
 
 export interface GenerateQuizDto {
-  classId: string
+  courseId: string
+  assignments: QuizAssignmentInput[]
   topic: string
   questionCount: number
   types: QuizQuestionType[]
+  difficulty?: QuizDifficulty
+  endsAt?: string
 }
 
 export interface GenerateQuizResult {
@@ -1864,8 +1933,8 @@ export interface SubmitQuizAnswers {
   answer: string
 }
 
-export async function getQuizzes(classId?: string): Promise<QuizDto[]> {
-  const params = classId ? { classId } : undefined
+export async function getQuizzes(courseOfferingId?: string): Promise<QuizDto[]> {
+  const params = courseOfferingId ? { courseOfferingId } : undefined
   const res = await api.get<QuizDto[]>("/quizzes", { params })
   return res.data
 }
@@ -1902,6 +1971,16 @@ export async function publishQuiz(id: string): Promise<QuizDto> {
 
 export async function deleteQuiz(id: string): Promise<void> {
   await api.delete(`/quizzes/${id}`)
+}
+
+export async function assignQuiz(id: string, assignments: QuizAssignmentInput[]): Promise<QuizDto> {
+  const res = await api.post<QuizDto>(`/quizzes/${id}/assignments`, { assignments })
+  return res.data
+}
+
+export async function removeQuizAssignment(assignmentId: string): Promise<QuizDto> {
+  const res = await api.delete<QuizDto>(`/quizzes/assignments/${assignmentId}`)
+  return res.data
 }
 
 export async function startQuizAttempt(quizId: string): Promise<QuizAttemptDto> {
@@ -1999,6 +2078,55 @@ export async function getStudentInsights(
   return res.data
 }
 
+export interface SectionDetailRecord {
+  /** primary label of the underlying record (student name, assignment, question, ...) */
+  label: string
+  /** secondary context (course, status, date, ...) */
+  meta?: string | null
+  /** numeric value when the record is graded (percent 0-100), absent for pure counts */
+  value?: number | null
+  /** link target when the record maps to a real entity */
+  ref?: { kind: "student" | "alert" | "submission"; id: string } | null
+}
+
+export interface SectionDetail {
+  sectionKey: string
+  title: string
+  /** what the chart value means: 'count' or 'percent' */
+  unit: "count" | "percent"
+  /** the clicked point label (bucket date or category name) */
+  bucket: string
+  /** total records behind the point (count for counts, average percent for percents) */
+  value: number
+  totalRecords: number
+  records: SectionDetailRecord[]
+}
+
+export async function getDashboardSectionDetail(
+  interval: "week" | "month",
+  sectionKey: string,
+  bucket: string,
+): Promise<SectionDetail> {
+  const res = await api.get<SectionDetail>(
+    `/dashboard/insights/sections/${encodeURIComponent(sectionKey)}/detail`,
+    { params: { interval, bucket } },
+  )
+  return res.data
+}
+
+export async function getStudentSectionDetail(
+  studentId: string,
+  interval: "week" | "month",
+  sectionKey: string,
+  bucket: string,
+): Promise<SectionDetail> {
+  const res = await api.get<SectionDetail>(
+    `/dashboard/insights/students/${studentId}/sections/${encodeURIComponent(sectionKey)}/detail`,
+    { params: { interval, bucket } },
+  )
+  return res.data
+}
+
 // ── Chat ─────────────────────────────────────────────────────
 
 export interface ChatMessage {
@@ -2010,24 +2138,40 @@ export interface ChatMessage {
   createdAt: string
 }
 
+export type ChatThreadType = "CLASS" | "ADMIN"
+
 export interface ChatThreadListItem {
   id: string
-  classId: string
-  teacherId: string
-  studentId: string
+  type: ChatThreadType
+  courseOfferingId: string | null
+  teacherId: string | null
+  studentId: string | null
   createdAt: string
   updatedAt: string
   className: string | null
   peerId: string
   peerName: string
   lastMessage: string | null
+  lastMessageAuthorId: string | null
+  unreadCount: number
 }
 
 export interface ChatThread {
   id: string
-  classId: string
+  type: "CLASS"
+  courseOfferingId: string
   teacherId: string
   studentId: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdminChatThread {
+  id: string
+  type: "ADMIN"
+  adminId: string
+  peerId: string
+  peerRole: "TEACHER" | "GUARDIAN"
   createdAt: string
   updatedAt: string
 }
@@ -2047,9 +2191,17 @@ export async function createOrGetChatThread(courseOfferingId: string, studentId?
   return res.data
 }
 
-export async function getChatMessages(threadId: string, after?: string): Promise<MessagesPage> {
+export async function createOrGetAdminChatThread(
+  peerId: string,
+  peerRole: "TEACHER" | "GUARDIAN",
+): Promise<AdminChatThread> {
+  const res = await api.post<AdminChatThread>("/chat/threads/admin", { peerId, peerRole })
+  return res.data
+}
+
+export async function getChatMessages(threadId: string, before?: string): Promise<MessagesPage> {
   const res = await api.get<MessagesPage>(`/chat/threads/${threadId}/messages`, {
-    params: after ? { after } : undefined,
+    params: before ? { before } : undefined,
   })
   return res.data
 }
@@ -2061,6 +2213,42 @@ export async function sendThreadMessage(threadId: string, text: string): Promise
 
 export async function markThreadRead(threadId: string): Promise<void> {
   await api.post(`/chat/threads/${threadId}/read`)
+}
+
+// ── Broadcasts (admin news) ─────────────────────────────────
+
+export type BroadcastTargetRole = "STUDENT" | "TEACHER" | "GUARDIAN" | "ADMIN"
+
+export interface Broadcast {
+  id: string
+  title: string
+  body: string | null
+  targetRoles: BroadcastTargetRole[]
+  targetGradeId: string | null
+  createdById: string
+  organizationId: string
+  deliveredCount: number
+  createdAt: string
+  createdByName: string | null
+  targetGradeName: string | null
+  targetGradeLevel: number | null
+}
+
+export interface CreateBroadcastPayload {
+  title: string
+  body?: string
+  targetRoles: BroadcastTargetRole[]
+  targetGradeId?: string
+}
+
+export async function createBroadcast(payload: CreateBroadcastPayload): Promise<Broadcast> {
+  const res = await api.post<Broadcast>("/broadcasts", payload)
+  return res.data
+}
+
+export async function getBroadcasts(): Promise<Broadcast[]> {
+  const res = await api.get<Broadcast[]>("/broadcasts")
+  return res.data
 }
 
 // ── Organizations & Billing ───────────────────────────────────────
@@ -2407,10 +2595,9 @@ export type StudyLabPreset =
 export type StudyLabStatus = "PROCESSING" | "READY" | "FAILED"
 
 export interface StudyLabOffering {
-  id: string
+  offeringId: string
+  courseId: string
   courseName: string
-  sectionName: string
-  teacherName: string | null
   materialCount: number
 }
 
@@ -2648,6 +2835,7 @@ export interface LabReviewFlags {
 export interface Lab {
   id: string
   courseOfferingId: string
+  courseOfferingIds: string[]
   topic: string
   status: LabStatus
   generatedCode: string | null
@@ -2659,7 +2847,7 @@ export interface Lab {
 }
 
 export interface GenerateLabInput {
-  courseOfferingId: string
+  courseOfferingIds: string[]
   topic: string
 }
 

@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom"
 import { useStudentGrades } from "@/hooks/use-students"
 import { useStudentAttendance } from "@/hooks/use-attendance"
 import { useReports } from "@/hooks/use-reports"
+import { BackLink } from "@/components/shared/BackLink"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -32,10 +33,7 @@ export function StudentDetailPage() {
 
   return (
     <div className="flex-1 p-xl max-w-5xl mx-auto w-full">
-      <Link to="/classes" className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors mb-md">
-        <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-        Back to Classes
-      </Link>
+      <BackLink to="/classes" label="Back to Classes" className="mb-md" />
 
       <div className="flex items-center gap-md mb-xl">
         <div className="w-16 h-16 bg-primary-container rounded-lg flex items-center justify-center text-white">

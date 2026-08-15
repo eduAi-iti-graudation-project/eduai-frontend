@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import * as api from "@/lib/api"
+import { BackLink } from "@/components/shared/BackLink"
 import { useSubmissions } from "@/hooks/use-submissions"
 import { useRubrics } from "@/hooks/use-rubrics"
 import { StatusBadge } from "@/components/ui/StatusBadge"
@@ -21,7 +22,7 @@ export function AssignmentDetailPage() {
   })
 
   const assignment = assignmentQuery.data
-  const { submissions: submissionsQuery, isLoading: subsLoading } = useSubmissions(undefined, id)
+  const { submissions: submissionsQuery, isLoading: subsLoading } = useSubmissions({ assignmentId: id })
   const { rubrics: rubricsQuery } = useRubrics(id)
 
   const subs = submissionsQuery.data ?? []
@@ -67,10 +68,11 @@ export function AssignmentDetailPage() {
 
   return (
     <div className="flex-1 p-xl max-w-5xl mx-auto w-full">
-      <Link to={classId ? `/classes/${classId}` : "/assignments/new"} className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors mb-md">
-        <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-        {classId ? "Back to Class" : "Back"}
-      </Link>
+      <BackLink
+        to={classId ? `/classes/${classId}` : "/assignments/new"}
+        label={classId ? "Back to Class" : "Back"}
+        className="mb-md"
+      />
 
       <div className="bg-surface-container-lowest rounded-lg p-xl border border-outline-variant mb-xl">
         <div className="flex items-start justify-between gap-md mb-md">

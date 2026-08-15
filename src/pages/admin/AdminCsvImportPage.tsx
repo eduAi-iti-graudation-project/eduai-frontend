@@ -234,7 +234,7 @@ export function AdminCsvImportPage() {
                               value={current}
                               onValueChange={(v) => setMapping((prev) => ({ ...prev, [col.sourceColumn]: v as Field }))}
                             >
-                              <SelectTrigger className="h-auto rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-sm text-label-sm">
+                              <SelectTrigger aria-label={`Map "${col.sourceColumn}" to a field`} className="h-auto rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-sm text-label-sm">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>

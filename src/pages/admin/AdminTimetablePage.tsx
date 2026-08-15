@@ -102,42 +102,48 @@ export function AdminTimetablePage() {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <Select
-              value={effectiveGradeId ?? undefined}
-              onValueChange={(v) => {
-                setSelectedGradeId(v)
-                setSelectedSectionId(null)
-              }}
-            >
-              <SelectTrigger className="w-auto min-w-[180px] h-9 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 font-label-md text-label-md">
-                <SelectValue placeholder="Select grade" />
-              </SelectTrigger>
-              <SelectContent>
-                {grades.map((g) => (
-                  <SelectItem key={g.id} value={g.id}>
-                    {g.name ?? `Grade ${g.level}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap items-end gap-3 mb-4">
+            <div className="flex flex-col gap-1">
+              <label className="font-label-sm text-label-sm text-on-surface-variant">Grade</label>
+              <Select
+                value={effectiveGradeId ?? undefined}
+                onValueChange={(v) => {
+                  setSelectedGradeId(v)
+                  setSelectedSectionId(null)
+                }}
+              >
+                <SelectTrigger aria-label="Grade" className="w-auto min-w-[180px] h-9 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 font-label-md text-label-md">
+                  <SelectValue placeholder="Select grade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {grades.map((g) => (
+                    <SelectItem key={g.id} value={g.id}>
+                      {g.name ?? `Grade ${g.level}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Select
-              value={effectiveSectionId ?? undefined}
-              onValueChange={setSelectedSectionId}
-              disabled={!effectiveGradeId || gradeSections.length === 0}
-            >
-              <SelectTrigger className="w-auto min-w-[220px] h-9 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 font-label-md text-label-md">
-                <SelectValue placeholder="Select section" />
-              </SelectTrigger>
-              <SelectContent>
-                {gradeSections.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col gap-1">
+              <label className="font-label-sm text-label-sm text-on-surface-variant">Section</label>
+              <Select
+                value={effectiveSectionId ?? undefined}
+                onValueChange={setSelectedSectionId}
+                disabled={!effectiveGradeId || gradeSections.length === 0}
+              >
+                <SelectTrigger aria-label="Section" className="w-auto min-w-[220px] h-9 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 font-label-md text-label-md">
+                  <SelectValue placeholder="Select section" />
+                </SelectTrigger>
+                <SelectContent>
+                  {gradeSections.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="flex-1" />
 

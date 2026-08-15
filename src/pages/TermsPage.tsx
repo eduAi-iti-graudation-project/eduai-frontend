@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { BackLink } from "@/components/shared/BackLink"
 
 const SECTIONS = [
   {
@@ -35,10 +35,7 @@ const SECTIONS = [
 export function TermsPage() {
   return (
     <div className="p-xl max-w-3xl mx-auto w-full">
-      <Link to="/" className="font-label-md text-label-md text-primary hover:underline mb-md inline-flex items-center gap-1">
-        <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-        Back to home
-      </Link>
+      <BackLink to="/" label="Back to home" className="mb-md" />
       <header className="mb-lg">
         <h1 className="font-headline-xl text-headline-xl text-on-surface mb-1">Terms of Service</h1>
         <p className="font-body-md text-body-md text-on-surface-variant">Last updated: August 2026</p>

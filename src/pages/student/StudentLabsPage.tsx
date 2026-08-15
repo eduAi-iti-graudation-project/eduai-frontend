@@ -12,7 +12,7 @@ export function StudentLabsPage() {
   const offeringNameMap = useMemo(
     () =>
       new Map(
-        (offerings.data ?? []).map((o) => [o.id, `${o.courseName} · ${o.sectionName}`]),
+        (offerings.data ?? []).map((o) => [o.offeringId, o.courseName]),
       ),
     [offerings.data],
   )

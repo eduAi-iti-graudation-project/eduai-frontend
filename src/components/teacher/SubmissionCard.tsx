@@ -46,6 +46,8 @@ export function SubmissionCard({
   const config = statusConfigs[submission.status] ?? statusConfigs.SUBMITTED
   const iconKey = assignmentIcons[iconIndex % assignmentIcons.length]
   const totalPoints = submission.scores?.reduce((sum, s) => sum + s.pointsAwarded, 0) ?? 0
+  const courseName = submission.assignment?.offering?.course?.name
+  const sectionName = submission.assignment?.offering?.section?.name
 
   return (
     <div className="bg-white rounded-lg p-md border border-border flex items-center gap-md group hover:shadow-md transition-all nudge-hover relative overflow-hidden">
@@ -63,11 +65,21 @@ export function SubmissionCard({
               {config.label}
             </span>
           </div>
-          <p className="font-body-md text-body-md text-on-surface-variant truncate">
-            {submission.student?.email ?? ""}
+          <p className="font-body-md text-body-md text-on-surface truncate">
+            {submission.assignment?.title ?? "Untitled assignment"}
           </p>
-          <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
-            Submitted {new Date(submission.createdAt).toLocaleDateString()}
+          <p className="font-label-sm text-label-sm text-on-surface-variant mt-1 flex items-center gap-1 flex-wrap">
+            {submission.student?.email ? (
+              <>
+                <span>{submission.student.email}</span>
+                <span className="text-outline-variant">·</span>
+              </>
+            ) : null}
+            {courseName ? <span>{courseName}</span> : null}
+            {courseName && sectionName ? <span className="text-outline-variant">·</span> : null}
+            {sectionName ? <span>{sectionName}</span> : null}
+            <span className="text-outline-variant">·</span>
+            <span>Submitted {new Date(submission.createdAt).toLocaleDateString()}</span>
           </p>
         </div>
 

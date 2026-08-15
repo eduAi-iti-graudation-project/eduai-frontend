@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { BackLink } from "@/components/shared/BackLink"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const TIERS = [
@@ -57,10 +58,7 @@ function PlanLink({ to, children, featured }: { to: string; children: React.Reac
 export function PricingPage() {
   return (
     <div className="mx-auto w-full max-w-5xl p-xl">
-      <Link to="/" className="font-label-md text-label-md text-primary hover:underline mb-md inline-flex items-center gap-1">
-        <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-        Back to home
-      </Link>
+      <BackLink to="/" label="Back to home" className="mb-md" />
       <header className="mb-lg text-center">
         <h1 className="font-headline-xl text-headline-xl text-on-surface mb-2">Pricing that grows with your school</h1>
         <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl mx-auto">

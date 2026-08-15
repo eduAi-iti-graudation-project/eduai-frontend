@@ -63,7 +63,11 @@ export function InsightsPage() {
         <div className="flex-1 p-md space-y-lg">
           <div className="grid gap-4 md:grid-cols-2">
             {data.sections.map((section) => (
-              <InsightSectionCard key={section.key} section={section} />
+              <InsightSectionCard
+                key={section.key}
+                section={section}
+                interval={interval}
+              />
             ))}
           </div>
 

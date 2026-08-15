@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom"
 import { useQuiz, useAttemptsByQuiz } from "@/hooks/use-quizzes"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { BackLink } from "@/components/shared/BackLink"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -28,10 +29,7 @@ export function QuizAttemptsListPage() {
     <>
       <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant">
         <div className="flex items-center gap-3">
-          <Link to="/quizzes" className="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline">
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-            Quizzes
-          </Link>
+          <BackLink to="/quizzes" label="Quizzes" />
           <div>
             <h1 className="font-headline-lg text-headline-lg text-on-surface">Attempts</h1>
             {quiz.data && (

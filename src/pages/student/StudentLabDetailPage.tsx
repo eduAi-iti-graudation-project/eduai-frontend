@@ -76,7 +76,9 @@ function useStudyLabOfferingNames(): Map<string, string> {
   const offerings = useStudyLabOfferings()
   return useMemo(
     () =>
-      new Map((offerings.data ?? []).map((o) => [o.id, `${o.courseName} · ${o.sectionName}`])),
+      new Map(
+        (offerings.data ?? []).map((o) => [o.offeringId, o.courseName]),
+      ),
     [offerings.data],
   )
 }

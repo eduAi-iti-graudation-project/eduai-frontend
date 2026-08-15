@@ -5,6 +5,7 @@ import { useAuth } from "@/providers/use-auth"
 import * as api from "@/lib/api"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { BackLink } from "@/components/shared/BackLink"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -113,12 +114,7 @@ export function StudentClassGradesPage() {
   return (
     <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
       <div className="flex items-center gap-3 mb-4">
-        <Link
-          to="/student/classes"
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors"
-        >
-          <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
-        </Link>
+        <BackLink to="/student/classes" label="Back to Classes" />
         <h1 className="font-headline-lg text-headline-lg text-primary">{cls.name}</h1>
         <Link
           to={`/student/homework-help?course=${classId}`}

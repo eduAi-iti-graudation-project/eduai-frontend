@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { useClasses } from "@/hooks/use-classes"
 import { useQuiz, useCreateQuiz, useUpdateQuiz, usePublishQuiz } from "@/hooks/use-quizzes"
 import { QuizStatusBadge } from "@/components/quiz/QuizStatusBadge"
+import { QuizTargetPicker, type TargetOffering } from "@/components/quiz/QuizTargetPicker"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { BackLink } from "@/components/shared/BackLink"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -41,8 +42,6 @@ const TYPE_LABELS: Record<QuizQuestionType, string> = {
 }
 
 const QUESTION_TYPES: QuizQuestionType[] = ["MCQ", "TRUE_FALSE", "SHORT_ANSWER", "ESSAY"]
-
-const NO_CLASS = "__none__"
 
 let localSeq = 0
 const newLocalId = () => `local-${Date.now()}-${localSeq++}`
@@ -87,13 +86,12 @@ export function QuizEditorPage() {
   const { id } = useParams<{ id: string }>()
   const isNew = !id
   const navigate = useNavigate()
-  const { classes } = useClasses()
 
   const quiz = useQuiz(id ?? "")
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [classId, setClassId] = useState("")
+  const [targets, setTargets] = useState<TargetOffering[]>([])
   const [timeLimit, setTimeLimit] = useState("")
   const [passingScore, setPassingScore] = useState("")
   const [closesAt, setClosesAt] = useState("")
@@ -113,7 +111,18 @@ export function QuizEditorPage() {
     setLoadedQuizId(id)
     setTitle(q.title)
     setDescription(q.description ?? "")
-    setClassId(q.classId)
+    setTargets(
+      q.assignments.map((a) => ({
+        courseOfferingId: a.courseOfferingId,
+        targetStudentIds: a.targetStudentIds,
+        gradeLevelId: a.gradeLevelId,
+        gradeLevelName: a.gradeLevelName,
+        courseId: a.courseId,
+        courseName: a.courseName,
+        sectionId: a.sectionId,
+        sectionName: a.sectionName,
+      })),
+    )
     setTimeLimit(q.timeLimit != null ? String(q.timeLimit) : "")
     setPassingScore(q.passingScore != null ? String(q.passingScore) : "")
     setClosesAt(q.endsAt ? toLocalInputValue(q.endsAt) : "")
@@ -211,10 +220,13 @@ export function QuizEditorPage() {
   const buildPayload = () => ({
     title: title.trim(),
     description: description.trim() || undefined,
-    classId,
+    assignments: targets.map((t) => ({
+      courseOfferingId: t.courseOfferingId,
+      targetStudentIds: t.targetStudentIds.length > 0 ? t.targetStudentIds : undefined,
+    })),
     timeLimit: timeLimit ? Math.max(1, Number(timeLimit)) : undefined,
     passingScore: passingScore ? Math.max(0, Number(passingScore)) : undefined,
-    endsAt: new Date(closesAt).toISOString(),
+    endsAt: closesAt ? new Date(closesAt).toISOString() : undefined,
     questions: questions.map((q, index) => ({
       id: q.id,
       type: q.type,
@@ -226,14 +238,14 @@ export function QuizEditorPage() {
   })
 
   const closesAtError = !closesAt
-    ? "A closing time is required — the quiz closes automatically at this time."
+    ? null
     : isNew && new Date(closesAt).getTime() <= new Date().getTime()
       ? "The closing time must be in the future."
       : null
 
   const canSave =
     title.trim().length > 0 &&
-    (!isNew || classId) &&
+    targets.length > 0 &&
     closesAtError === null &&
     questions.length > 0 &&
     questions.every((q) => q.question.trim().length > 0)
@@ -274,10 +286,7 @@ export function QuizEditorPage() {
     <>
       <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant">
         <div className="flex items-center gap-3">
-          <Link to="/quizzes" className="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline">
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-            Quizzes
-          </Link>
+          <BackLink to="/quizzes" label="Quizzes" />
           <h1 className="font-headline-lg text-headline-lg text-on-surface">
             {isNew ? "New quiz" : "Edit quiz"}
           </h1>
@@ -347,30 +356,15 @@ export function QuizEditorPage() {
                 />
               </div>
               <div>
-                <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Class</label>
-                <Select
-                  value={classId}
-                  onValueChange={(v) => setClassId(v === NO_CLASS ? "" : v)}
-                  disabled={!isNew || readOnly}
-                >
-                  <SelectTrigger className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60">
-                    <SelectValue placeholder="Select a class" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {isNew ? (
-                      <>
-                        <SelectItem value={NO_CLASS}>Select a class</SelectItem>
-                        {(classes.data ?? []).map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
-                      </>
-                    ) : (
-                      <SelectItem value={classId || NO_CLASS}>
-                        {(classes.data ?? []).find((c) => c.id === classId)?.name ?? "Class"}
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
+                <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
+                  Assign to sections
+                </label>
+                <QuizTargetPicker value={targets} onChange={setTargets} disabled={readOnly} />
+                {!isNew && readOnly && targets.length > 0 && (
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
+                    This quiz is assigned to {targets.length} section{targets.length > 1 ? "s" : ""}.
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-md">
                 <div>
@@ -400,7 +394,7 @@ export function QuizEditorPage() {
               </div>
               <div>
                 <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
-                  Closes at <span className="text-error">*</span>
+                  Closes at <span className="text-on-surface-variant">(optional)</span>
                 </label>
                 <Input
                   type="datetime-local"
@@ -414,7 +408,7 @@ export function QuizEditorPage() {
                   <p className="font-label-sm text-label-sm text-error mt-1">{closesAtError}</p>
                 ) : (
                   <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
-                    Students can&apos;t start or continue the quiz after this time — it closes automatically.
+                    Optional — leave empty and the quiz stays open until you close it manually.
                   </p>
                 )}
               </div>

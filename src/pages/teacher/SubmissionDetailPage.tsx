@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { useQueryClient, useMutation } from "@tanstack/react-query"
 import * as api from "@/lib/api"
 import { useSubmissionDetail } from "@/hooks/use-submissions"
+import { BackLink } from "@/components/shared/BackLink"
 import { StatusBadge } from "@/components/ui/StatusBadge"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
@@ -76,10 +77,7 @@ export function SubmissionDetailPage() {
 
   return (
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
-      <Link to={sub.assignmentId ? `/assignments/${sub.assignmentId}` : "/submissions"} className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors mb-md">
-        <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-        Back to Assignment
-      </Link>
+      <BackLink to={sub.assignmentId ? `/assignments/${sub.assignmentId}` : "/submissions"} label="Back to Assignment" className="mb-md" />
 
       {/* Status-specific banner */}
       {(sub.status === "SUBMITTED" || sub.status === "GRADING_IN_PROGRESS") && (

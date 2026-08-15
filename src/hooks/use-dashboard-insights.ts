@@ -30,3 +30,31 @@ export function useStudentInsights(
     enabled: !!studentId,
   })
 }
+
+export function sectionDetailQueryKey(
+  sectionKey: string,
+  interval: InsightsInterval,
+  bucket: string,
+  studentId?: string,
+) {
+  return studentId
+    ? (["dashboard-insights", { studentId, sectionKey, interval, bucket }] as const)
+    : (["dashboard-insights", { sectionKey, interval, bucket }] as const)
+}
+
+export function useSectionDetail(
+  sectionKey: string,
+  interval: InsightsInterval,
+  bucket: string,
+  studentId: string | undefined,
+  enabled: boolean,
+): UseQueryResult<api.SectionDetail> {
+  return useQuery({
+    queryKey: sectionDetailQueryKey(sectionKey, interval, bucket, studentId),
+    queryFn: () =>
+      studentId
+        ? api.getStudentSectionDetail(studentId, interval, sectionKey, bucket)
+        : api.getDashboardSectionDetail(interval, sectionKey, bucket),
+    enabled: enabled && !!sectionKey && !!bucket,
+  })
+}

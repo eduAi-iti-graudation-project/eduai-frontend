@@ -6,6 +6,7 @@ import { useAuth } from "@/providers/use-auth"
 import { StatusBadge } from "@/components/ui/StatusBadge"
 import { Badge } from "@/components/ui/badge"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { BackLink } from "@/components/shared/BackLink"
 
 type ScoreLike = { criterion?: { description?: string; maxPoints?: number } }
 
@@ -69,9 +70,7 @@ export function SubmissionStatusPage() {
     <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <Link to={backTo} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors">
-            <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
-          </Link>
+          <BackLink to={backTo} label={courseId ? "Back to Class" : "Back to Classes"} />
           <h1 className="font-headline-lg text-headline-lg text-primary">Submission Status</h1>
         </div>
         <StatusBadge status={status} />

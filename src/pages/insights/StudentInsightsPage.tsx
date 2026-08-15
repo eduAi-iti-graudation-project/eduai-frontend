@@ -1,10 +1,11 @@
 import { useState } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import axios from "axios"
 import { useStudentInsights, type InsightsInterval } from "@/hooks/use-dashboard-insights"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
+import { BackLink } from "@/components/shared/BackLink"
 import { InsightSectionCard } from "@/components/insights/InsightSectionCard"
 import { AgentInsightCard } from "@/components/insights/AgentInsightCard"
 import { Button } from "@/components/ui/button"
@@ -66,20 +67,19 @@ export function StudentInsightsPage() {
             onRetry={() => refetch()}
           />
           <div className="text-center pb-lg">
-            <Link
-              to="/insights"
-              className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              Back to Insights
-            </Link>
+            <BackLink to="/insights" label="Back to Insights" />
           </div>
         </div>
       ) : data ? (
         <div className="flex-1 p-md space-y-lg">
           <div className="grid gap-4 md:grid-cols-2">
             {data.sections.map((section) => (
-              <InsightSectionCard key={section.key} section={section} />
+              <InsightSectionCard
+                key={section.key}
+                section={section}
+                interval={interval}
+                studentId={id}
+              />
             ))}
           </div>
 

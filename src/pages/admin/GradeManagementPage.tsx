@@ -623,6 +623,7 @@ export function GradeManagementPage() {
                                         }
                                         disabled={teacherList.length === 0 || assignCell.isPending}
                                         title={teacherList.length === 0 ? "No teachers in your school yet" : undefined}
+                                        aria-label={`Assign teacher for ${s.name} — ${c.name}`}
                                         className="px-2 py-1.5 rounded-md border border-outline-variant font-body-sm text-body-sm bg-surface-container-lowest outline-none focus:border-primary w-full min-w-32"
                                       >
                                         <option value="">{offering ? "Reassign…" : "Assign…"}</option>

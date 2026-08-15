@@ -3,12 +3,15 @@ import { toast } from "sonner"
 import * as api from "@/lib/api"
 import type { SubmissionEnriched } from "@/lib/api"
 
-export function useSubmissions(status?: string, assignmentId?: string) {
+export function useSubmissions(filters?: api.SubmissionFilters) {
   const queryClient = useQueryClient()
+  const key = filters
+    ? ["submissions", filters.status, filters.assignmentId, filters.courseId, filters.offeringId, filters.q]
+    : ["submissions"]
 
   const submissions = useQuery({
-    queryKey: ["submissions", status, assignmentId],
-    queryFn: () => api.getSubmissions(status, assignmentId),
+    queryKey: key,
+    queryFn: () => api.getSubmissions(filters),
     staleTime: 0,
   })
 

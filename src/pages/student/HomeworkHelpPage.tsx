@@ -118,44 +118,50 @@ export function HomeworkHelpPage() {
             >
               Help History →
             </Link>
-            <Select
-              value={effectiveCourseId}
-              onValueChange={(value) => {
-                setSelectedCourseId(value)
-                setSelectedAssignmentId("")
-              }}
-            >
-              <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[170px]">
-                <SelectValue placeholder="Select a course..." />
-              </SelectTrigger>
-              <SelectContent>
-                {studentClasses.data?.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={effectiveAssignmentId}
-              onValueChange={setSelectedAssignmentId}
-              disabled={!effectiveCourseId}
-            >
-              <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[200px] disabled:opacity-50">
-                <SelectValue
-                  placeholder={
-                    effectiveCourseId
-                      ? (activeCourse?.assignments.length ?? 0) > 0
-                        ? "No specific assignment"
-                        : "No assignments in this course"
-                      : "Select a course first..."
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {activeCourse?.assignments.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col gap-1">
+              <label className="font-label-sm text-label-sm text-on-surface-variant">Course</label>
+              <Select
+                value={effectiveCourseId}
+                onValueChange={(value) => {
+                  setSelectedCourseId(value)
+                  setSelectedAssignmentId("")
+                }}
+              >
+                <SelectTrigger aria-label="Course" className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[170px]">
+                  <SelectValue placeholder="Select a course..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {studentClasses.data?.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="font-label-sm text-label-sm text-on-surface-variant">Assignment</label>
+              <Select
+                value={effectiveAssignmentId}
+                onValueChange={setSelectedAssignmentId}
+                disabled={!effectiveCourseId}
+              >
+                <SelectTrigger aria-label="Assignment" className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[200px] disabled:opacity-50">
+                  <SelectValue
+                    placeholder={
+                      effectiveCourseId
+                        ? (activeCourse?.assignments.length ?? 0) > 0
+                          ? "No specific assignment"
+                          : "No assignments in this course"
+                        : "Select a course first..."
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeCourse?.assignments.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </>
         }
       />

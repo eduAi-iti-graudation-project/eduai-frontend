@@ -4,6 +4,7 @@ import { HomeStrategiesList } from "@/components/communication/HomeStrategiesLis
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { BackLink } from "@/components/shared/BackLink"
 import {
   Table,
   TableBody,
@@ -52,13 +53,7 @@ export function GuardianAlertDetailPage() {
 
   return (
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
-      <Link
-        to="/guardian"
-        className="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant hover:text-primary mb-4"
-      >
-        <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-        Back to Dashboard
-      </Link>
+      <BackLink to="/guardian" label="Back to Dashboard" className="mb-4" />
 
       <div className="mb-6">
         <h1 className="font-headline-xl text-headline-xl text-primary">Academic Update</h1>

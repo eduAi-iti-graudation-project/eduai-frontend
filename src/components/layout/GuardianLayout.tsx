@@ -9,6 +9,7 @@ const navItems = [
   { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/guardian/alerts" },
   { icon: "monitoring", label: "Insights", id: "insights", href: "/guardian/insights" },
   { icon: "description", label: "Reports", id: "reports", href: "/guardian/reports" },
+  { icon: "chat_bubble", label: "Messages", id: "chat", href: "/guardian/chat" },
   { icon: "notifications", label: "Notifications", id: "notifications", href: "/guardian/notifications" },
 ]
 
@@ -20,6 +21,7 @@ export function GuardianLayout() {
     : path.startsWith("/guardian/alerts") ? "alerts"
     : path.startsWith("/guardian/insights") ? "insights"
     : path.startsWith("/guardian/reports") ? "reports"
+    : path.startsWith("/guardian/chat") ? "chat"
     : path.startsWith("/guardian/notifications") ? "notifications"
     : "dashboard"
 

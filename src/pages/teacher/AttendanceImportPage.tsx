@@ -1,7 +1,8 @@
 import { useState } from "react"
-import { useSearchParams, Link } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 import { useClassDetail } from "@/hooks/use-classes"
 import { useImportAttendance } from "@/hooks/use-attendance"
+import { BackLink } from "@/components/shared/BackLink"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
@@ -54,10 +55,7 @@ export function AttendanceImportPage() {
 
   return (
     <div className="flex-1 p-xl max-w-4xl mx-auto w-full">
-      <Link to={classIdParam ? `/classes/${classIdParam}` : "/classes"} className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors mb-md">
-        <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-        Back to Class
-      </Link>
+      <BackLink to={classIdParam ? `/classes/${classIdParam}` : "/classes"} label="Back to Class" className="mb-md" />
 
       <h1 className="font-headline-xl text-headline-xl text-on-surface mb-xl">Import Attendance</h1>
 

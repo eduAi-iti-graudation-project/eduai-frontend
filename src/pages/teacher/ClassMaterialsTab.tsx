@@ -1,9 +1,10 @@
 import { useState, useCallback, useRef } from "react"
 import { toast } from "sonner"
-import { useMaterialChapters } from "@/hooks/use-materials"
+import { useSectionMaterialChapters } from "@/hooks/use-materials"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { ChapterCreateDialog } from "@/components/materials/ChapterCreateDialog"
 import * as api from "@/lib/api"
 import type { Material } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -13,16 +14,38 @@ interface QueuedFile {
   chapterId?: string
 }
 
-interface ClassMaterialsTabProps {
-  classId: string
+export interface SectionCourse {
+  offeringId: string
+  courseId: string
+  courseName: string
+  taughtByMe: boolean
 }
 
-export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
-  const { chapters, unassigned, create, update, remove, move, refetch } =
-    useMaterialChapters(classId)
+type UploadScope = "section" | "course"
 
-  const [isCreating, setIsCreating] = useState(false)
-  const [newTitle, setNewTitle] = useState("")
+interface ClassMaterialsTabProps {
+  classId: string
+  courses: SectionCourse[]
+}
+
+export function ClassMaterialsTab({ classId, courses }: ClassMaterialsTabProps) {
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null)
+  const [scope, setScope] = useState<UploadScope>("section")
+
+  const effectiveCourseId =
+    selectedCourseId ??
+    courses.find((c) => c.taughtByMe)?.courseId ??
+    courses[0]?.courseId ??
+    null
+  const selectedCourse =
+    courses.find((c) => c.courseId === effectiveCourseId) ?? null
+  const offeringId = selectedCourse?.offeringId ?? null
+  const canManage = !!selectedCourse && selectedCourse.taughtByMe
+
+  const { chapters, unassigned, create, update, remove, move, refetch } =
+    useSectionMaterialChapters(classId, effectiveCourseId, offeringId)
+
+  const [chapterDialogOpen, setChapterDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingValue, setEditingValue] = useState("")
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
@@ -39,6 +62,8 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
     title: string
   } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const chapterInputRef = useRef<HTMLInputElement>(null)
+  const [addPdfChapterId, setAddPdfChapterId] = useState<string | null>(null)
 
   const sortedChapters = [...chapters].sort((a, b) => a.order - b.order)
 
@@ -51,6 +76,18 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
       else next.add(id)
       return next
     })
+
+  const buildUploadOpts = (chapterId?: string) => {
+    if (!effectiveCourseId || !selectedCourse) {
+      throw new Error("Select a course first")
+    }
+    if (!selectedCourse.taughtByMe) {
+      throw new Error("You can only upload materials for courses you teach in this section")
+    }
+    return scope === "section"
+      ? { sectionId: classId, courseId: effectiveCourseId, chapterId }
+      : { courseId: effectiveCourseId, chapterId }
+  }
 
   const handleFiles = useCallback((files: File[]) => {
     const valid = files.filter((f) => f.type.includes("pdf"))
@@ -65,16 +102,73 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
     }
   }, [])
 
-  const handleCreate = async () => {
-    const title = newTitle.trim()
-    if (!title) return
+  const handleCreate = async (title: string, files: File[]) => {
+    if (!canManage) {
+      toast.error("Select a course you teach in this section first")
+      return
+    }
     try {
-      await create.mutateAsync(title)
-      toast.success(`Chapter "${title}" created`)
-      setNewTitle("")
-      setIsCreating(false)
+      const chapter = await create.mutateAsync(title)
+      if (files.length > 0) {
+        for (const file of files) {
+          await api.uploadMaterial(
+            file.name.replace(/\.pdf$/i, ""),
+            file,
+            buildUploadOpts(chapter.id),
+          )
+        }
+        await refetch()
+        toast.success(
+          `Chapter "${title}" created with ${files.length} file${files.length !== 1 ? "s" : ""}`,
+        )
+      } else {
+        toast.success(`Chapter "${title}" created`)
+      }
+      setChapterDialogOpen(false)
     } catch (err) {
       toast.error(api.getErrorMessage(err))
+    }
+  }
+
+  const handleAddPdf = (chapterId: string) => {
+    if (!canManage) return
+    setAddPdfChapterId(chapterId)
+    chapterInputRef.current?.click()
+  }
+
+  const handleChapterFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const target = addPdfChapterId
+    const files = e.target.files ? Array.from(e.target.files) : []
+    e.target.value = ""
+    if (!target || files.length === 0) return
+    const valid = files.filter((f) => f.type.includes("pdf"))
+    for (const file of valid) {
+      const title = file.name.replace(/\.pdf$/i, "")
+      setUploading((prev) => ({ ...prev, [file.name]: 0 }))
+      try {
+        await api.uploadMaterial(
+          title,
+          file,
+          buildUploadOpts(target),
+          (p) =>
+            setUploading((prev) => ({ ...prev, [file.name]: p })),
+        )
+      } catch (err) {
+        toast.error(`${title}: ${api.getErrorMessage(err)}`)
+      } finally {
+        setUploading((prev) => {
+          const next = { ...prev }
+          delete next[file.name]
+          return next
+        })
+      }
+    }
+    setAddPdfChapterId(null)
+    await refetch()
+    if (valid.length > 0) {
+      toast.success(`Added ${valid.length} file${valid.length !== 1 ? "s" : ""} to chapter`)
     }
   }
 
@@ -152,6 +246,10 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
   const uploadQueued = async () => {
     const targets = [...queued]
     if (targets.length === 0) return
+    if (!canManage) {
+      toast.error("Select a course you teach in this section first")
+      return
+    }
     let detected = 0
     let failed = 0
     let ungroupedCount = 0
@@ -161,12 +259,10 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
       try {
         const res = await api.uploadMaterial(
           title,
-          classId,
           target.file,
+          buildUploadOpts(target.chapterId),
           (p) =>
             setUploading((prev) => ({ ...prev, [target.file.name]: p })),
-          undefined,
-          target.chapterId,
         )
         if (res.detectedChapterCount && res.detectedChapterCount > 0) {
           detected += res.detectedChapterCount
@@ -237,6 +333,10 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
           <p className="font-label-sm text-label-sm text-on-surface-variant">
             {new Date(m.createdAt).toLocaleDateString()}
             {m.assignmentId ? " · attached to assignment" : ""}
+            {" · "}
+            <span className={cn("font-medium", m.courseOfferingId == null ? "text-primary" : "text-on-surface-variant")}>
+              {m.courseOfferingId == null ? "Shared · all sections" : "This section"}
+            </span>
           </p>
         </div>
       </div>
@@ -265,43 +365,98 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
     </div>
   )
 
+  if (courses.length === 0) {
+    return (
+      <EmptyState
+        icon="menu_book"
+        title="No courses assigned"
+        description="This section has no course assigned yet. Add a course to start uploading materials."
+      />
+    )
+  }
+
   return (
     <div className="space-y-md">
-      <div className="flex items-center justify-between">
-        <h3 className="font-headline-sub text-headline-sub text-on-surface">
-          Materials
-        </h3>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-md">
+        <div className="space-y-sm">
+          <h3 className="font-headline-sub text-headline-sub text-on-surface">
+            Materials
+            {selectedCourse && (
+              <span className="text-on-surface-variant"> · {selectedCourse.courseName}</span>
+            )}
+          </h3>
+          <label className="flex items-center gap-2">
+            <span className="font-label-sm text-label-sm text-on-surface-variant">
+              Course
+            </span>
+            <select
+              value={effectiveCourseId ?? ""}
+              onChange={(e) => setSelectedCourseId(e.target.value || null)}
+              className="px-2 py-1.5 rounded-md border border-outline-variant bg-surface-container-low text-on-surface font-body-md text-sm focus:outline-none focus:border-primary"
+            >
+              {courses.map((c) => (
+                <option key={c.courseId} value={c.courseId}>
+                  {c.courseName}
+                  {!c.taughtByMe ? " (not taught by you)" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
         <Button
           type="button"
-          onClick={() => setIsCreating((v) => !v)}
-          className="flex items-center gap-2 px-4 py-2 h-auto rounded-md bg-primary text-on-primary font-body-medium text-sm hover:bg-primary/90 transition-colors"
+          onClick={() => setChapterDialogOpen(true)}
+          disabled={!canManage}
+          className="flex items-center gap-2 px-4 py-2 h-auto rounded-md bg-primary text-on-primary font-body-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           New Chapter
         </Button>
       </div>
 
-      {isCreating && (
-        <div className="flex items-center gap-sm bg-surface-container-lowest rounded-lg p-md border border-outline-variant">
-          <span className="material-symbols-outlined text-primary">menu_book</span>
-          <input
-            type="text"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-            placeholder="Chapter title, e.g. Chapter 1 — Intro to Cells"
-            className="flex-1 px-md py-sm rounded-lg border border-outline-variant bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:border-primary focus:outline-none"
-            autoFocus
-          />
-          <Button
-            type="button"
-            onClick={handleCreate}
-            disabled={!newTitle.trim() || create.isPending}
-            className="h-auto px-md py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 transition-colors disabled:opacity-50"
-          >
-            Create
-          </Button>
+      {selectedCourse && (
+        <div className="flex items-center gap-sm">
+          <div className="flex rounded-lg border border-outline-variant overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setScope("section")}
+              disabled={!canManage}
+              className={cn(
+                "px-3 py-1.5 font-label-sm text-label-sm transition-colors disabled:opacity-50",
+                scope === "section"
+                  ? "bg-primary text-on-primary"
+                  : "bg-surface-container-lowest text-on-surface-variant hover:text-on-surface",
+              )}
+            >
+              This section only
+            </button>
+            <button
+              type="button"
+              onClick={() => setScope("course")}
+              disabled={!canManage}
+              className={cn(
+                "px-3 py-1.5 font-label-sm text-label-sm transition-colors disabled:opacity-50",
+                scope === "course"
+                  ? "bg-primary text-on-primary"
+                  : "bg-surface-container-lowest text-on-surface-variant hover:text-on-surface",
+              )}
+            >
+              All sections of this course
+            </button>
+          </div>
+          <p className="font-label-sm text-label-sm text-on-surface-variant">
+            {scope === "section"
+              ? "Uploads are visible in this section only."
+              : "Uploads are shared with every section of this course."}
+          </p>
         </div>
+      )}
+
+      {!canManage && (
+        <p className="font-label-sm text-label-sm text-error">
+          You can view materials here, but only the teacher of this course in
+          this section can upload or create chapters.
+        </p>
       )}
 
       <div
@@ -312,6 +467,10 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
         onDrop={(e) => {
           e.preventDefault()
           setDragChapter(null)
+          if (!canManage) {
+            toast.error("Select a course you teach in this section first")
+            return
+          }
           handleFiles(Array.from(e.dataTransfer.files))
         }}
         className="bg-surface-container-lowest rounded-lg p-md border-2 border-dashed border-outline-variant hover:border-primary/50 transition-colors"
@@ -331,7 +490,8 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
               type="button"
               variant="outline"
               onClick={() => inputRef.current?.click()}
-              className="h-auto px-md py-2 rounded-lg border border-outline-variant text-on-surface font-label-md text-label-md hover:border-primary hover:text-primary transition-colors"
+              disabled={!canManage}
+              className="h-auto px-md py-2 rounded-lg border border-outline-variant text-on-surface font-label-md text-label-md hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[18px] mr-1">folder_open</span>
               Browse files
@@ -424,6 +584,10 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
                 return
               }
               if (e.dataTransfer.types.includes("Files")) {
+                if (!canManage) {
+                  toast.error("Select a course you teach in this section first")
+                  return
+                }
                 const files = Array.from(e.dataTransfer.files)
                 setQueued((prev) => [
                   ...prev,
@@ -481,6 +645,16 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
                 )}
               </button>
               <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  title="Add PDF"
+                  onClick={() => handleAddPdf(chapter.id)}
+                  disabled={!canManage}
+                  className="inline-flex items-center gap-1 px-1.5 py-1 rounded text-on-surface-variant hover:text-primary transition-colors disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                  <span className="font-label-sm text-label-sm">Add PDF</span>
+                </button>
                 <button
                   type="button"
                   title="Move up"
@@ -556,7 +730,7 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
             {expanded.has(chapter.id) && chapter.materials.length === 0 && (
               <div className="px-md pb-md">
                 <p className="font-label-sm text-label-sm text-on-surface-variant">
-                  No files yet — drop a PDF onto this chapter to add one.
+                  No files yet — use “Add PDF” above to upload one.
                 </p>
               </div>
             )}
@@ -569,12 +743,21 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
             title="No chapters yet"
             description={
               unassigned.length > 0
-                ? `${unassigned.length} file${unassigned.length !== 1 ? "s are" : " is"} ungrouped below — create a chapter, then drop the file${unassigned.length !== 1 ? "s" : ""} onto it.`
-                : "Upload a full book and chapters are detected automatically, or create one manually."
+                ? `${unassigned.length} file${unassigned.length !== 1 ? "s are" : " is"} ungrouped below — click “New Chapter”, then upload the file${unassigned.length !== 1 ? "s" : ""} into it.`
+                : "Upload a full book and chapters are detected automatically, or click “New Chapter” to create one."
             }
           />
         )}
       </div>
+
+      <input
+        ref={chapterInputRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        multiple
+        className="hidden"
+        onChange={handleChapterFileChange}
+      />
 
       <div className="space-y-sm">
         <div className="flex items-center gap-2">
@@ -613,6 +796,13 @@ export function ClassMaterialsTab({ classId }: ClassMaterialsTabProps) {
           </p>
         )}
       </div>
+
+      <ChapterCreateDialog
+        open={chapterDialogOpen}
+        onOpenChange={setChapterDialogOpen}
+        onCreate={handleCreate}
+        isSubmitting={create.isPending}
+      />
 
       <ConfirmDialog
         open={confirmDelete?.kind === "chapter"}

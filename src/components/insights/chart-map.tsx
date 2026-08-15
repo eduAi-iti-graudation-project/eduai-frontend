@@ -5,6 +5,7 @@ import {
   StrengthRadarChart,
   TrendAreaChart,
   TrendLineChart,
+  type OnPointClick,
 } from "@/components/insights/chart-components"
 
 export function getChartComponent(chartType: InsightChartType) {
@@ -22,17 +23,17 @@ export function getChartComponent(chartType: InsightChartType) {
   }
 }
 
-export function renderChart(section: InsightSection) {
+export function renderChart(section: InsightSection, onPointClick?: OnPointClick) {
   switch (section.chartType) {
     case "line":
-      return <TrendLineChart section={section} />
+      return <TrendLineChart section={section} onPointClick={onPointClick} />
     case "area":
-      return <TrendAreaChart section={section} />
+      return <TrendAreaChart section={section} onPointClick={onPointClick} />
     case "bar":
-      return <ComparisonBarChart section={section} />
+      return <ComparisonBarChart section={section} onPointClick={onPointClick} />
     case "radar":
-      return <StrengthRadarChart section={section} />
+      return <StrengthRadarChart section={section} onPointClick={onPointClick} />
     case "donut":
-      return <DonutChart section={section} />
+      return <DonutChart section={section} onPointClick={onPointClick} />
   }
 }

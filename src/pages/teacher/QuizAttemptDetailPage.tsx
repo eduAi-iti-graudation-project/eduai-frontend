@@ -1,8 +1,9 @@
 import { useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { useAttempt, useConfirmAttempt, useUpdateAnswer } from "@/hooks/use-quizzes"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { BackLink } from "@/components/shared/BackLink"
 import { RichText } from "@/components/shared/RichText"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -70,10 +71,7 @@ export function QuizAttemptDetailPage() {
     <>
       <header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-outline-variant">
         <div className="flex items-center gap-3">
-          <Link to={`/quizzes/${quiz?.id}/attempts`} className="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline">
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-            Attempts
-          </Link>
+          <BackLink to={`/quizzes/${quiz?.id}/attempts`} label="Attempts" />
           <div>
             <h1 className="font-headline-lg text-headline-lg text-on-surface">{detail.student?.name ?? "Student"}</h1>
             <p className="font-label-sm text-label-sm text-on-surface-variant">{quiz?.title}</p>

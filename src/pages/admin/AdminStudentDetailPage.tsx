@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
@@ -120,6 +120,7 @@ function PercentChip({ value }: { value: number }) {
 
 export function AdminStudentDetailPage() {
   const { id = "" } = useParams()
+  const navigate = useNavigate()
   const qc = useQueryClient()
 
   const profileQ = useQuery({
@@ -182,6 +183,15 @@ export function AdminStudentDetailPage() {
 
   const profile = profileQ.data!
 
+  const openConversation = async (guardianId: string) => {
+    try {
+      const thread = await api.createOrGetAdminChatThread(guardianId, "GUARDIAN")
+      navigate(`/admin/chat/${thread.id}`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start a conversation")
+    }
+  }
+
   return (
     <div className="flex-1 px-4 py-4 min-w-0">
       <div className="max-w-[1100px] mx-auto space-y-4 min-w-0">
@@ -214,6 +224,17 @@ export function AdminStudentDetailPage() {
                   <span className="material-symbols-outlined text-[14px]">family_restroom</span>
                   {profile.guardian.name}
                 </span>
+              )}
+              {profile.guardian && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-md font-label-md text-label-md"
+                  onClick={() => openConversation(profile.guardian!.id)}
+                >
+                  <span className="material-symbols-outlined text-[16px] mr-1">chat_bubble</span>
+                  Message guardian
+                </Button>
               )}
               <Button
                 variant="outline"

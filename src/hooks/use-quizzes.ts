@@ -2,10 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
 
-export function useQuizList(classId?: string) {
+export function useQuizList(courseOfferingId?: string) {
   return useQuery({
-    queryKey: ["quizzes", classId ?? "all"],
-    queryFn: () => api.getQuizzes(classId),
+    queryKey: ["quizzes", courseOfferingId ?? "all"],
+    queryFn: () => api.getQuizzes(courseOfferingId),
   })
 }
 
@@ -98,6 +98,33 @@ export function useDeleteQuiz() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quizzes"] })
       toast.success("Quiz deleted")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useAssignQuiz() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, assignments }: { id: string; assignments: api.QuizAssignmentInput[] }) =>
+      api.assignQuiz(id, assignments),
+    onSuccess: (quiz) => {
+      queryClient.invalidateQueries({ queryKey: ["quiz", quiz.id] })
+      queryClient.invalidateQueries({ queryKey: ["quizzes"] })
+      toast.success("Quiz assigned")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useRemoveQuizAssignment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (assignmentId: string) => api.removeQuizAssignment(assignmentId),
+    onSuccess: (quiz) => {
+      queryClient.invalidateQueries({ queryKey: ["quiz", quiz.id] })
+      queryClient.invalidateQueries({ queryKey: ["quizzes"] })
+      toast.success("Assignment removed")
     },
     onError: (err: Error) => toast.error(err.message),
   })

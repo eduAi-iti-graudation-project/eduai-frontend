@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAlertDetail } from "@/hooks/use-alert-detail"
+import { BackLink } from "@/components/shared/BackLink"
 import { AlertDetailDiagnosis } from "@/components/communication/AlertDetailDiagnosis"
 import { TeacherAnalysisSection } from "@/components/communication/TeacherAnalysisSection"
 import { TeacherFeedbackSection } from "@/components/communication/TeacherFeedbackSection"
@@ -55,13 +56,7 @@ export function AlertDetailPage() {
 
   return (
     <div className="flex-1 overflow-y-auto p-xl max-w-4xl mx-auto w-full">
-      <Link
-        to="/alerts"
-        className="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant hover:text-primary mb-4"
-      >
-        <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-        Back to Alerts
-      </Link>
+      <BackLink to="/alerts" label="Back to Alerts" className="mb-4" />
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
         <div>

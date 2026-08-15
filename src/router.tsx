@@ -80,6 +80,7 @@ import { InsightsPage } from "./pages/insights/InsightsPage"
 import { StudentInsightsPage } from "./pages/insights/StudentInsightsPage"
 import { ChatListPage } from "./pages/chat/ChatListPage"
 import { ChatThreadPage } from "./pages/chat/ChatThreadPage"
+import { AdminBroadcastsPage } from "./pages/admin/AdminBroadcastsPage"
 import { NotFoundPage } from "./pages/NotFoundPage"
 import { AuthCallbackPage } from "./pages/AuthCallbackPage"
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage"
@@ -87,6 +88,8 @@ import { VerifyPage } from "./pages/VerifyPage"
 import { PrivacyPage } from "./pages/PrivacyPage"
 import { TermsPage } from "./pages/TermsPage"
 import { PricingPage } from "./pages/PricingPage"
+// PREVIEW THEME ROUTE — remove this import to roll back the design preview
+import { DesignPreviewPage } from "./pages/DesignPreviewPage"
 
 export const TEACHER_ROUTES = [
   { path: "/dashboard", element: <TeacherDashboardPage /> },
@@ -182,6 +185,8 @@ export function guardianRoutes() {
       { path: "children/:id", element: <ChildDetailPage /> },
       { path: "alerts", element: <GuardianAlertsPage /> },
       { path: "alerts/:id", element: <GuardianAlertDetailPage /> },
+      { path: "chat", element: <ChatListPage /> },
+      { path: "chat/:threadId", element: <ChatThreadPage /> },
       { path: "insights", element: <InsightsPage /> },
       { path: "insights/students/:id", element: <StudentInsightsPage /> },
       { path: "reports", element: <ReportsPage /> },
@@ -199,6 +204,9 @@ export function adminRoutes() {
       { path: "timetable", element: <AdminTimetablePage /> },
       { path: "assistant", element: <AdminAssistantPage /> },
       { path: "alerts", element: <AdminAlertsPage /> },
+      { path: "broadcasts", element: <AdminBroadcastsPage /> },
+      { path: "chat", element: <ChatListPage /> },
+      { path: "chat/:threadId", element: <ChatThreadPage /> },
       { path: "grades", element: <GradeManagementPage /> },
       { path: "migration", element: <MigrationWizardPage /> },
       { path: "students", element: <StudentManagementPage /> },
@@ -264,6 +272,11 @@ export const router = createBrowserRouter([
   {
     path: "/pricing",
     element: <PricingPage />,
+  },
+  // PREVIEW THEME ROUTE — remove this block to roll back the design preview
+  {
+    path: "/design-preview",
+    element: <DesignPreviewPage />,
   },
   teacherRoutes(),
   studentRoutes(),

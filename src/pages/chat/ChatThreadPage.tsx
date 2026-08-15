@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { useAuth } from "@/providers/use-auth"
 import { useChatMessages } from "@/hooks/use-chat-messages"
 import { useChatThreads } from "@/hooks/use-chat-threads"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { BackLink } from "@/components/shared/BackLink"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { ChatMessage } from "@/lib/api"
@@ -64,7 +65,11 @@ export function ChatThreadPage() {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const thread = threads?.find((t) => t.id === threadId)
-  const basePath = user?.role === "TEACHER" ? "/chat" : "/student/chat"
+  const basePath =
+    user?.role === "ADMIN" ? "/admin/chat"
+    : user?.role === "GUARDIAN" ? "/guardian/chat"
+    : user?.role === "TEACHER" ? "/chat"
+    : "/student/chat"
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -100,12 +105,7 @@ export function ChatThreadPage() {
   return (
     <div className="flex flex-col h-full">
       <header className="flex items-center gap-3 px-md py-4 bg-surface-container-lowest border-b border-outline-variant">
-        <Link
-          to={basePath}
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors"
-        >
-          <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
-        </Link>
+        <BackLink to={basePath} label="Back to Chats" className="shrink-0" />
         <div className="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant font-label-md font-bold shrink-0">
           {getInitials(peerName)}
         </div>

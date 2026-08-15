@@ -37,13 +37,15 @@ export function MobileNav() {
     { icon: "person", label: "Students", id: "students", href: "/admin/students", prefixes: ["/admin/students"] },
     { icon: "school", label: "Teachers", id: "teachers", href: "/admin/teachers", prefixes: ["/admin/teachers"] },
     { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/admin/alerts", prefixes: ["/admin/alerts"] },
+    { icon: "chat_bubble", label: "Messages", id: "chat", href: "/admin/chat", prefixes: ["/admin/chat"] },
+    { icon: "campaign", label: "Broadcast", id: "broadcasts", href: "/admin/broadcasts", prefixes: ["/admin/broadcasts"] },
     { icon: "monitoring", label: "Insights", id: "insights", href: "/admin/insights", prefixes: ["/admin/insights"] },
-    { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/admin/assistant", prefixes: ["/admin/assistant"] },
   ]
 
   const guardianItems: NavItem[] = [
     { icon: "home", label: "Home", id: "home", href: "/guardian", prefixes: ["/guardian"] },
     { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/guardian/alerts", prefixes: ["/guardian/alerts"] },
+    { icon: "chat_bubble", label: "Messages", id: "chat", href: "/guardian/chat", prefixes: ["/guardian/chat"] },
     { icon: "monitoring", label: "Insights", id: "insights", href: "/guardian/insights", prefixes: ["/guardian/insights"] },
     { icon: "description", label: "Reports", id: "reports", href: "/guardian/reports", prefixes: ["/guardian/reports"] },
     { icon: "notifications", label: "Notifications", id: "notifications", href: "/guardian/notifications", prefixes: ["/guardian/notifications"] },

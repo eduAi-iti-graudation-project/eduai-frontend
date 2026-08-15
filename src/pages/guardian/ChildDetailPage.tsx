@@ -3,9 +3,10 @@ import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import * as api from "@/lib/api"
 import { EmptyState } from "@/components/ui/EmptyState"
-import { ErrorState } from "@/components/shared/ErrorState"
-import { RichText } from "@/components/shared/RichText"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { ErrorState } from "@/components/shared/ErrorState"
+import { BackLink } from "@/components/shared/BackLink"
+import { RichText } from "@/components/shared/RichText"
 import { Button } from "@/components/ui/button"
 import { renderReportSection } from "@/lib/report-sections"
 import { Badge } from "@/components/ui/badge"
@@ -97,11 +98,7 @@ export function ChildDetailPage() {
   return (
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
       <div className="flex items-center gap-3 mb-6">
-        <Button asChild variant="ghost" size="icon" className="w-8 h-8 rounded-lg hover:bg-surface-container shrink-0">
-          <Link to="/guardian" aria-label="Back to Dashboard">
-            <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
-          </Link>
-        </Button>
+        <BackLink to="/guardian" label="Back to Dashboard" />
         <h1 className="font-headline-xl text-headline-xl text-primary">Student Detail</h1>
       </div>
 

@@ -93,10 +93,23 @@ export function useClasses() {
       id: c.id,
       name: c.name,
       section: c.description ?? "No description",
+      gradeLevelId: c.gradeLevelId,
       courses: c.courses ?? [],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       students: c._count?.enrollments ?? (c as any).enrollments?.length ?? 0,
     }))
+
+  // Per-section courses with their color tags, derived from the teacher's
+  // offerings so section cards can render colored course chips.
+  const sectionCourseColors = useMemo(() => {
+    const map = new Map<string, { name: string; colorTag: string | null }[]>()
+    for (const o of offerings.data ?? []) {
+      const existing = map.get(o.section.id) ?? []
+      existing.push({ name: o.course.name, colorTag: o.course.colorTag })
+      map.set(o.section.id, existing)
+    }
+    return map
+  }, [offerings.data])
 
   return {
     classes,
@@ -104,6 +117,7 @@ export function useClasses() {
     isError: classes.isError || offerings.isError,
     error: classes.error ?? offerings.error,
     classCards,
+    sectionCourseColors,
     taughtSectionCount: taughtSectionIds.size,
     createClass,
     updateClass,

@@ -1288,7 +1288,7 @@ export function MigrationWizardPage() {
                       }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger aria-label={`Map "${col.sourceColumn}" to a field`}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

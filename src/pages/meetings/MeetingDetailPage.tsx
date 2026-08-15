@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
+import { BackLink } from "@/components/shared/BackLink"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/EmptyState"
@@ -145,10 +146,7 @@ export function MeetingDetailPage() {
 
   return (
     <div className="p-xl max-w-3xl mx-auto w-full">
-      <Link to={basePath} className="font-label-md text-label-md text-primary hover:underline inline-flex items-center gap-1 mb-lg">
-        <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-        Back to meetings
-      </Link>
+      <BackLink to={basePath} label="Back to meetings" className="mb-lg" />
 
       <Card className="border-border mb-lg">
         <CardContent className="p-lg space-y-4">

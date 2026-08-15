@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/providers/use-auth"
 import * as api from "@/lib/api"
+import { BackLink } from "@/components/shared/BackLink"
 import { useHomeworkHelpHistory } from "@/hooks/use-homework-history"
 import { HomeworkHelpCard } from "@/components/student/HomeworkHelpCard"
 import { EmptyState } from "@/components/ui/EmptyState"
@@ -37,26 +38,23 @@ export function HomeworkHelpHistoryPage() {
             Past questions you asked the homework assistant
           </p>
         </div>
-        <Link
-          to="/student/homework-help"
-          className="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline"
-        >
-          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          Back
-        </Link>
+        <BackLink to="/student/homework-help" label="Back" />
       </header>
 
       <div className="mb-lg">
-        <Select value={courseFilter} onValueChange={setCourseFilter}>
-          <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[180px]">
-            <SelectValue placeholder="All Courses" />
-          </SelectTrigger>
-          <SelectContent>
-            {studentClasses.data?.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-1">
+          <label className="font-label-sm text-label-sm text-on-surface-variant">Course</label>
+          <Select value={courseFilter} onValueChange={setCourseFilter}>
+            <SelectTrigger aria-label="Course" className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[180px]">
+              <SelectValue placeholder="All Courses" />
+            </SelectTrigger>
+            <SelectContent>
+              {studentClasses.data?.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {history.isLoading ? (

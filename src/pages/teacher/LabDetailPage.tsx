@@ -71,7 +71,10 @@ export function LabDetailPage() {
 
   const publishable = lab.status === "PENDING_TEACHER_REVIEW"
   const rejectable = ["GENERATING", "AI_REVIEW_FAILED", "PENDING_TEACHER_REVIEW"].includes(lab.status)
-  const offeringLabel = offeringNames.get(lab.courseOfferingId) ?? "—"
+  const offeringLabels = (lab.courseOfferingIds ?? [lab.courseOfferingId])
+    .map((id) => offeringNames.get(id))
+    .filter((name): name is string => Boolean(name))
+  const offeringLabel = offeringLabels.length > 0 ? offeringLabels.join(" · ") : "—"
 
   return (
     <div className="flex-1 flex flex-col">
@@ -113,7 +116,7 @@ export function LabDetailPage() {
             <p className="font-label-lg text-label-lg text-blue-700">Passed AI review — now verify it yourself</p>
             <p className="font-body-sm text-body-sm text-blue-600 mt-1">
               Play the simulation above, confirm the objective is achievable and the physics behaves, then publish so
-              students in this section can run it.
+              students in the selected sections can run it.
             </p>
           </div>
         )}
@@ -153,7 +156,7 @@ export function LabDetailPage() {
       <ConfirmDialog
         open={confirmPublish}
         title="Publish this lab?"
-        message="Students enrolled in this section will immediately be able to run this simulation. You can't unpublish it after the fact — you can only reject new labs going forward."
+        message="Students enrolled in the selected sections will immediately be able to run this simulation. You can't unpublish it after the fact — you can only reject new labs going forward."
         confirmLabel="Publish"
         isLoading={publish.isPending}
         onConfirm={() =>

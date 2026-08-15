@@ -1,9 +1,10 @@
-import { useParams, useSearchParams, Link } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import * as api from "@/lib/api"
 import { useAuth } from "@/providers/use-auth"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
+import { BackLink } from "@/components/shared/BackLink"
 import { CourseMaterialsTab } from "./CourseMaterialsTab"
 
 export function CoursePage() {
@@ -58,20 +59,18 @@ export function CoursePage() {
 
   return (
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
-      <div className="flex items-center gap-3 mb-2">
-        <Link
-          to={backTo}
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors"
-        >
-          <span className="material-symbols-outlined text-on-surface-variant">arrow_back</span>
-        </Link>
-        <div>
-          <h1 className="font-headline-xl text-headline-xl text-on-surface">{course.name}</h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
-            {grade ? `Grade ${grade.level}${grade.name ? ` — ${grade.name}` : ""}` : ""}
-            {course.description ? ` · ${course.description}` : ""}
-          </p>
-        </div>
+      <BackLink
+        to={backTo}
+        label={searchParams.get("gradeId") ? "Back to Grade" : "Back to Grades"}
+        className="mb-md"
+      />
+
+      <div className="mb-sm">
+        <h1 className="font-headline-xl text-headline-xl text-on-surface">{course.name}</h1>
+        <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
+          {grade ? `Grade ${grade.level}${grade.name ? ` — ${grade.name}` : ""}` : ""}
+          {course.description ? ` · ${course.description}` : ""}
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-sm mb-xl">

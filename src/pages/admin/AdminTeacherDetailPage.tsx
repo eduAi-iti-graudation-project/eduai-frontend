@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
@@ -97,6 +97,7 @@ const genderLabels: Record<string, string> = {
 
 export function AdminTeacherDetailPage() {
   const { id = "" } = useParams()
+  const navigate = useNavigate()
   const qc = useQueryClient()
 
   const profileQ = useQuery({
@@ -151,6 +152,15 @@ export function AdminTeacherDetailPage() {
 
   const profile = profileQ.data!
 
+  const openConversation = async () => {
+    try {
+      const thread = await api.createOrGetAdminChatThread(profile.id, "TEACHER")
+      navigate(`/admin/chat/${thread.id}`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start a conversation")
+    }
+  }
+
   return (
     <div className="flex-1 px-4 py-4 min-w-0">
       <div className="max-w-[1100px] mx-auto space-y-4 min-w-0">
@@ -193,6 +203,10 @@ export function AdminTeacherDetailPage() {
                   +{profile.grades.length - 3} more
                 </span>
               )}
+              <Button variant="outline" size="sm" className="rounded-md font-label-md text-label-md" onClick={openConversation}>
+                <span className="material-symbols-outlined text-[16px] mr-1">chat_bubble</span>
+                Message
+              </Button>
             </div>
           </div>
 

@@ -96,21 +96,24 @@ export function StudyLabPage() {
         title="Study Lab"
         subtitle="Generate a podcast, slide deck, or study material from your course content."
         actions={
-          <Select value={offeringId} onValueChange={setOfferingId}>
-            <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[200px]">
-              <SelectValue placeholder="Select a course..." />
-            </SelectTrigger>
-            <SelectContent>
-              {offerings.data?.map((o) => (
-                <SelectItem key={o.id} value={o.id}>
-                  {o.courseName} · {o.sectionName} ·{" "}
-                  <span className={o.materialCount > 0 ? "text-primary" : "text-error"}>
-                    {o.materialCount > 0 ? `${o.materialCount} material${o.materialCount === 1 ? "" : "s"}` : "no materials"}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col gap-1">
+            <label className="font-label-sm text-label-sm text-on-surface-variant">Course</label>
+            <Select value={offeringId} onValueChange={setOfferingId}>
+              <SelectTrigger aria-label="Course" className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[200px]">
+                <SelectValue placeholder="Select a course..." />
+              </SelectTrigger>
+              <SelectContent>
+                {offerings.data?.map((o) => (
+                  <SelectItem key={o.offeringId} value={o.offeringId}>
+                    {o.courseName}{" "}
+                    <span className={o.materialCount > 0 ? "text-primary" : "text-error"}>
+                      · {o.materialCount > 0 ? `${o.materialCount} material${o.materialCount === 1 ? "" : "s"}` : "no materials"}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         }
       />
 
