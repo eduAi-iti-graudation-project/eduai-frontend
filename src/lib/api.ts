@@ -2483,7 +2483,14 @@ export type SlideBlock =
     }
 
 export interface DeckTheme {
+  preset?: "modern" | "classic" | "dark" | "colorful" | "minimal"
   background: "light" | "dark" | "gradient"
+  colors?: {
+    primary?: string
+    secondary?: string
+    accent?: string
+    text?: string
+  }
   accent?: string
   motion: "fade" | "rise" | "slide" | "scale"
 }

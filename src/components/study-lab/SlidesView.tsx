@@ -5,19 +5,75 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { SlideVisualView } from "@/components/study-lab/SlideVisualView"
 
-const ACCENT_FALLBACK = "#4F46E5"
-
-type Palette = {
-  bg: string
-  panel: string
-  border: string
-  text: string
-  muted: string
-  accent: string
+const THEME_PRESETS: Record<string, Palette> = {
+  modern: {
+    bg: "#ffffff",
+    panel: "#ffffff",
+    border: "#E5E7EB",
+    text: "#1F2937",
+    muted: "#6B7280",
+    accent: "#10B981",
+  },
+  classic: {
+    bg: "#ffffff",
+    panel: "#ffffff",
+    border: "#E5E7EB",
+    text: "#1F2937",
+    muted: "#6B7280",
+    accent: "#DC2626",
+  },
+  dark: {
+    bg: "#0F172A",
+    panel: "#1E293B",
+    border: "#334155",
+    text: "#F1F5F9",
+    muted: "#94A3B8",
+    accent: "#6EE7B7",
+  },
+  colorful: {
+    bg: "#ffffff",
+    panel: "#ffffff",
+    border: "#E5E7EB",
+    text: "#1F2937",
+    muted: "#6B7280",
+    accent: "#F59E0B",
+  },
+  minimal: {
+    bg: "#ffffff",
+    panel: "#ffffff",
+    border: "#E5E7EB",
+    text: "#1F2937",
+    muted: "#6B7280",
+    accent: "#6B7280",
+  },
 }
 
 function paletteFor(deck: api.Deck): Palette {
-  const accent = deck.theme?.accent ?? ACCENT_FALLBACK
+  const preset = deck.theme?.preset
+  const accent = deck.theme?.accent ?? deck.theme?.colors?.accent ?? "#4F46E5"
+  const presetPalette = preset ? THEME_PRESETS[preset] : null
+
+  if (presetPalette) {
+    const base = { ...presetPalette, accent }
+    if (deck.theme?.background === "dark" || preset === "dark") {
+      return {
+        bg: "#0F172A",
+        panel: "#1E293B",
+        border: "#334155",
+        text: "#F1F5F9",
+        muted: "#94A3B8",
+        accent,
+      }
+    }
+    if (deck.theme?.background === "gradient" || preset === "colorful") {
+      return {
+        ...base,
+        bg: `linear-gradient(180deg, ${accent}1A 0%, #ffffff 55%)`,
+      }
+    }
+    return base
+  }
+
   const base: Palette = {
     bg: "#ffffff",
     panel: "#ffffff",
@@ -37,7 +93,10 @@ function paletteFor(deck: api.Deck): Palette {
     }
   }
   if (deck.theme?.background === "gradient") {
-    base.bg = `linear-gradient(180deg, ${accent}1A 0%, #ffffff 55%)`
+    return {
+      ...base,
+      bg: `linear-gradient(180deg, ${accent}1A 0%, #ffffff 55%)`,
+    }
   }
   return base
 }
@@ -459,7 +518,22 @@ export function SlidesView({ generation }: { generation: api.StudyGeneration }) 
         <Button
           type="button"
           size="sm"
-          onClick={() => window.open(api.studyLabFileUrl(generation.id), "_blank")}
+          onClick={async () => {
+            try {
+              const blob = await api.fetchFileBlob(api.studyLabFileUrl(generation.id))
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = generation.fileUrl?.split('/').pop() ?? 'study-file'
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+            } catch {
+              // fallback: open in new tab
+              window.open(api.studyLabFileUrl(generation.id), '_blank')
+            }
+          }}
         >
           <span className="material-symbols-outlined text-[18px] mr-1.5">
             download

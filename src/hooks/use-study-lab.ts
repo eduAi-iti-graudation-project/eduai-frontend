@@ -39,14 +39,17 @@ export function useStudyLabGeneration(generationId: string | null) {
   )
   const [isLoading, setIsLoading] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const pollIdRef = useRef(0)
 
   useEffect(() => {
     if (!generationId) return
 
     const poll = async () => {
+      const currentPollId = ++pollIdRef.current
       setIsLoading(true)
       try {
         const next = await api.getStudyLabGeneration(generationId)
+        if (currentPollId !== pollIdRef.current) return
         setGeneration(next)
         if (next.status === "READY" || next.status === "FAILED") {
           if (timerRef.current) clearInterval(timerRef.current)
@@ -54,7 +57,9 @@ export function useStudyLabGeneration(generationId: string | null) {
       } catch {
         // transient — keep polling
       } finally {
-        setIsLoading(false)
+        if (currentPollId === pollIdRef.current) {
+          setIsLoading(false)
+        }
       }
     }
 
@@ -63,6 +68,7 @@ export function useStudyLabGeneration(generationId: string | null) {
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
+      pollIdRef.current++
     }
   }, [generationId])
 
