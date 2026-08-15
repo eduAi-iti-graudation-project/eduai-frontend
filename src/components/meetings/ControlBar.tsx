@@ -47,7 +47,7 @@ function ControlButton({ label, icon, active, destructive, onClick }: ControlBut
               ? "bg-red-500 text-white hover:bg-red-600"
               : active
                 ? "bg-primary text-white hover:bg-primary/90"
-                : "bg-[#232f4e] text-white hover:bg-[#2c3a63]",
+                : "bg-inverse-surface text-white hover:bg-white/15",
           )}
         >
           <span className="material-symbols-outlined text-[22px]">{icon}</span>
@@ -89,12 +89,12 @@ export function ControlBar({
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="w-12 h-12 rounded-full bg-[#232f4e] text-white hover:bg-[#2c3a63] flex items-center justify-center"
+            className="w-12 h-12 rounded-full bg-inverse-surface text-white hover:bg-white/15 flex items-center justify-center"
           >
             <span className="material-symbols-outlined text-[22px]">sentiment_satisfied</span>
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto bg-[#1a2038] border-[#232f4e] p-2">
+        <PopoverContent className="w-auto bg-inverse-surface border-white/15 p-2">
           <div className="flex gap-1.5">
             {EMOJIS.map((emoji) => (
               <button
@@ -113,7 +113,7 @@ export function ControlBar({
         </PopoverContent>
       </Popover>
 
-      <div className="w-px h-8 bg-[#232f4e]" />
+      <div className="w-px h-8 bg-white/15" />
 
       {isHost && (
         <ControlButton
@@ -126,7 +126,7 @@ export function ControlBar({
       <ControlButton label="In-meeting chat" icon="chat_bubble" active={chatOpen} onClick={onToggleChat} />
       <ControlButton label="Transcript" icon="article" active={transcriptOpen} onClick={onToggleTranscript} />
 
-      <div className="w-px h-8 bg-[#232f4e]" />
+      <div className="w-px h-8 bg-white/15" />
 
       {isHost ? (
         <Button variant="destructive" className="rounded-full h-12" onClick={onEnd}>

@@ -168,7 +168,7 @@ export function AdminAlertsPage() {
                     </span>
                   </div>
                 </div>
-                <div className="divide-y divide-[#eceef5]">
+                <div className="divide-y divide-border">
                   {classAlerts.map((a) => (
                     <Link
                       key={a.id}

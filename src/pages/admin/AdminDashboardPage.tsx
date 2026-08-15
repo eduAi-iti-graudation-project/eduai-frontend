@@ -240,36 +240,36 @@ function TrendChartCard({ title, series }: { title: string; series: Point[] }) {
           <AreaChart data={series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2c5fb3" stopOpacity={0.18} />
-                <stop offset="100%" stopColor="#2c5fb3" stopOpacity={0} />
+                <stop offset="0%" stopColor="#db2777" stopOpacity={0.18} />
+                <stop offset="100%" stopColor="#db2777" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid stroke="#e4e8f8" strokeDasharray="3 3" vertical={false} />
+            <CartesianGrid stroke="#ecd5e2" strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fill: "#737783", fontSize: 12, fontFamily: "Hanken Grotesk" }}
+              tick={{ fill: "#7d5470", fontSize: 12, fontFamily: "Hanken Grotesk" }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               domain={["dataMin - 5", "dataMax + 5"]}
-              tick={{ fill: "#737783", fontSize: 12, fontFamily: "Hanken Grotesk" }}
+              tick={{ fill: "#7d5470", fontSize: 12, fontFamily: "Hanken Grotesk" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v: number) => `${v}%`}
             />
             <Tooltip
               formatter={(value: number | string) => [`${value}%`, "Pass rate"]}
-              contentStyle={{ backgroundColor: "#161b27", border: "none", borderRadius: 8 }}
-              labelStyle={{ color: "#adc6ff", fontWeight: 600 }}
+              contentStyle={{ backgroundColor: "#35122b", border: "none", borderRadius: 12 }}
+              labelStyle={{ color: "#f9a8d4", fontWeight: 600 }}
             />
             <Area
               type="monotone"
               dataKey="value"
-              stroke="#2c5fb3"
+              stroke="#db2777"
               strokeWidth={2.5}
               fill="url(#trendFill)"
-              dot={{ r: 3, fill: "#ffffff", stroke: "#2c5fb3", strokeWidth: 2 }}
+              dot={{ r: 3, fill: "#ffffff", stroke: "#db2777", strokeWidth: 2 }}
               activeDot={{ r: 5 }}
             />
           </AreaChart>
@@ -302,7 +302,7 @@ function WatchListCard({ alerts }: { alerts: api.AlertListItem[] }) {
   return (
     <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-5 flex flex-col">
       <div className="flex items-center gap-2.5 mb-4">
-        <span className="w-8 h-8 rounded-md bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
+        <span className="w-8 h-8 rounded-xl bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
           <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
         </span>
         <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-md bg-primary text-primary-foreground">AI</span>
@@ -310,7 +310,7 @@ function WatchListCard({ alerts }: { alerts: api.AlertListItem[] }) {
       </div>
       <div className="flex-1 space-y-4">
         {items.map((item, i) => (
-          <div key={item.title} className="border-l-2 pl-3 border-[#2c5fb3]">
+          <div key={item.title} className="border-l-2 pl-3 border-primary">
             <div className="flex items-center justify-between gap-2 mb-0.5">
               <h4 className="font-body-md text-body-md text-on-surface font-semibold">{item.title}</h4>
               <span className="font-label-sm text-label-sm text-on-surface-variant">#{i + 1}</span>
@@ -342,7 +342,7 @@ function FlaggedStudentsCard({ students }: { students: api.AlertListItem[] }) {
           <p className="font-body-md text-body-md text-on-surface-variant">No active flags. Everything looks healthy.</p>
         </div>
       ) : (
-        <div className="divide-y divide-[#eceef5]">
+        <div className="divide-y divide-border">
           {students.map((s) => (
             <Link
               key={s.id}
@@ -475,7 +475,7 @@ function JoinRequestsCard() {
           </p>
         </div>
       ) : (
-        <div className="divide-y divide-[#eceef5]">
+        <div className="divide-y divide-border">
           {requests.map((r) => (
             <div key={r.id} className="px-5 py-3">
               <div className="flex items-center gap-3">

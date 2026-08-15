@@ -567,7 +567,7 @@ function DocumentsPanel({
           <EmptyState icon="folder_open" title="No documents" description="Upload certificates, transcripts or other student records here." />
         </div>
       ) : (
-        <div className="divide-y divide-[#eceef5]">
+        <div className="divide-y divide-border">
           {data.map((d) => (
             <div key={d.id} className="flex items-start gap-3 px-5 py-3">
               <span className="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center shrink-0">

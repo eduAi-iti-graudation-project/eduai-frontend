@@ -9,7 +9,7 @@ interface SparklineProps {
   className?: string
 }
 
-export function Sparkline({ values, width = 96, height = 28, stroke = "#2c5fb3", fill = "#e9edfe", className }: SparklineProps) {
+export function Sparkline({ values, width = 96, height = 28, stroke = "#db2777", fill = "#fce7f3", className }: SparklineProps) {
   const gradientId = useId()
 
   if (values.length < 2) {

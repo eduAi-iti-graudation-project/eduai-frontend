@@ -329,7 +329,7 @@ export function GradeManagementPage() {
             value={offeringCount}
             delta={{ label: "Assigned", direction: "flat", tone: "neutral" }}
             spark={[1, 2, 3, 4, 6, 7, 8, Math.max(offeringCount, 1)]}
-            iconClass="bg-[#e9edfe] text-[#2c5fb3]"
+            iconClass="bg-secondary-container text-on-secondary-container"
           />
           <PrecisionStatCard
             icon="groups"

@@ -33,7 +33,7 @@ const ATTENDANCE_STYLES: Record<string, string> = {
   PRESENT: "bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]",
   ABSENT: "bg-error-container text-on-error-container border border-error-container",
   LATE: "bg-surface-container-high text-on-surface border border-surface-container-high",
-  EXCUSED: "bg-[#F3F4F6] text-[#374151] border border-[#E5E7EB]",
+  EXCUSED: "bg-surface-container-high text-on-surface border border-surface-container-high",
 }
 
 export function ClassDetailPage() {

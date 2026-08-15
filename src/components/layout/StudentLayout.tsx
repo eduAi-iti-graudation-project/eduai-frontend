@@ -74,15 +74,15 @@ export function StudentLayout() {
       </header>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col h-screen w-64 bg-[#151A2E] pb-md px-sm gap-base sticky top-0 shrink-0 border-r border-[#232f4e]">
+      <aside className="hidden md:flex flex-col h-screen w-64 bg-inverse-surface pb-md px-sm gap-base sticky top-0 shrink-0 border-r border-white/10">
         <div className="flex flex-col gap-xs px-3 pt-md pb-lg">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-[#2C5FB3] rounded-lg flex items-center justify-center text-white shrink-0">
+            <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center text-white shrink-0">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>school</span>
             </div>
             <div>
               <h1 className="font-headline-md text-headline-md font-bold text-white leading-none">EduAI</h1>
-              <p className="text-label-sm font-label-sm text-[#8a95b3] mt-0.5">Student Portal</p>
+              <p className="text-label-sm font-label-sm text-inverse-on-surface/60 mt-0.5">Student Portal</p>
             </div>
           </div>
         </div>
@@ -94,12 +94,12 @@ export function StudentLayout() {
               to={item.href}
               className={`relative flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
                 activeItem === item.id
-                  ? "bg-[#1E2A4A] text-white font-semibold"
-                  : "text-[#a9b2c8] hover:bg-white/5 hover:text-white"
+                  ? "bg-primary text-white font-semibold"
+                  : "text-inverse-on-surface/70 hover:bg-white/10 hover:text-white"
               }`}
             >
               {activeItem === item.id && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-[#2C5FB3]" />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-white/30" />
               )}
               <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
               <span className="font-label-md text-label-md">{item.label}</span>
@@ -107,12 +107,12 @@ export function StudentLayout() {
           ))}
         </nav>
 
-        <div className="space-y-0.5 px-2 pt-base border-t border-[#232f4e]">
+        <div className="space-y-0.5 px-2 pt-base border-t border-white/10">
           {bottomItems.map((item) => (
             <Link
               key={item.id}
               to={item.href}
-              className="flex items-center gap-3 px-4 py-2.5 text-[#a9b2c8] hover:bg-white/5 hover:text-white rounded-lg transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 text-inverse-on-surface/70 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
             >
               <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
               <span className="font-label-md text-label-md">{item.label}</span>

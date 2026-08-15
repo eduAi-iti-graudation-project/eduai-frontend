@@ -102,7 +102,7 @@ export function TeacherManagementPage() {
                 />
               </div>
             </div>
-            <div className="divide-y divide-[#eceef5] max-h-[680px] overflow-y-auto">
+            <div className="divide-y divide-border max-h-[680px] overflow-y-auto">
               {filtered.map((t) => (
                 <button
                   key={t.id}
@@ -186,7 +186,7 @@ function TeacherDetail({
             <EmptyState icon="meeting_room" title="No classes assigned" description="This teacher isn't teaching any classes right now." />
           </div>
         ) : (
-          <div className="divide-y divide-[#eceef5]">
+          <div className="divide-y divide-border">
             {profile.classes.map((c) => (
               <div key={c.id} className="flex items-start gap-3 px-5 py-3">
                 <span className="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center shrink-0">
@@ -216,7 +216,7 @@ function TeacherDetail({
             <EmptyState icon="history" title="No history yet" description="Past class assignments will appear here." />
           </div>
         ) : (
-          <div className="divide-y divide-[#eceef5] max-h-[360px] overflow-y-auto">
+          <div className="divide-y divide-border max-h-[360px] overflow-y-auto">
             {history.map((h) => (
               <div key={h.id} className="flex items-center gap-3 px-5 py-3">
                 <span className="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center shrink-0">

@@ -46,14 +46,14 @@ export function AdminLayout() {
 
   return (
     <div className="flex h-dvh overflow-hidden bg-surface-container-low">
-      <aside className="hidden md:flex flex-col h-screen w-64 bg-[#151A2E] py-4 px-3 border-r border-[#232f4e] sticky top-0 shrink-0">
+      <aside className="hidden md:flex flex-col h-screen w-64 bg-inverse-surface py-4 px-3 border-r border-white/10 sticky top-0 shrink-0">
         <div className="flex items-center gap-2.5 px-2 mb-6">
-          <div className="w-9 h-9 rounded-lg bg-[#2C5FB3] flex items-center justify-center text-white shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-white shrink-0">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1, 'wght' 500" }}>school</span>
           </div>
           <div>
             <h1 className="font-headline-md text-headline-md font-bold text-white leading-none">EduAI Admin</h1>
-            <p className="font-label-sm text-label-sm text-[#8a95b3] mt-0.5">Admin Portal</p>
+            <p className="font-label-sm text-label-sm text-inverse-on-surface/60 mt-0.5">Admin Portal</p>
           </div>
         </div>
 
@@ -64,12 +64,12 @@ export function AdminLayout() {
               to={item.href}
               className={`relative flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors ${
                 activeItem === item.id
-                  ? "bg-[#1E2A4A] text-white font-semibold"
-                  : "text-[#a9b2c8] hover:bg-white/5 hover:text-white"
+                  ? "bg-primary text-white font-semibold"
+                  : "text-inverse-on-surface/70 hover:bg-white/10 hover:text-white"
               }`}
             >
               {activeItem === item.id && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-[#2C5FB3]" />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-white/30" />
               )}
               <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
               <span className="font-label-md text-label-md">{item.label}</span>

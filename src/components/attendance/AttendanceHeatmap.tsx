@@ -9,7 +9,7 @@ const WEEKS = 26
 const STATUS_COLORS: Record<string, string> = {
   PRESENT: "bg-[#22c55e]",
   LATE: "bg-[#86efac]",
-  EXCUSED: "bg-[#6366f1]",
+  EXCUSED: "bg-[#8b5cf6]",
   ABSENT: "bg-[#ef4444]",
   EMPTY: "bg-surface-container",
 }

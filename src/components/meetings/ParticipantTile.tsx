@@ -66,7 +66,7 @@ export function ParticipantTile({ participant, isLocal, handRaised, reactions, c
   return (
     <div
       className={cn(
-        "relative rounded-2xl overflow-hidden bg-[#1a2038] aspect-video flex items-center justify-center",
+        "relative rounded-2xl overflow-hidden bg-inverse-surface aspect-video flex items-center justify-center",
         className,
       )}
     >
@@ -74,10 +74,10 @@ export function ParticipantTile({ participant, isLocal, handRaised, reactions, c
         <div ref={containerRef} className="w-full h-full" />
       ) : (
         <div className="flex flex-col items-center gap-2">
-          <div className="w-16 h-16 rounded-full bg-[#2C5FB3] flex items-center justify-center text-white font-headline-md">
+          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white font-headline-md">
             {getInitials(participant.name || "Guest")}
           </div>
-          <span className="font-label-md text-label-md text-[#a9b2c8]">Camera off</span>
+          <span className="font-label-md text-label-md text-inverse-on-surface/70">Camera off</span>
         </div>
       )}
 

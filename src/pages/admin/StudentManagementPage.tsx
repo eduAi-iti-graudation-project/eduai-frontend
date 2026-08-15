@@ -323,7 +323,7 @@ export function StudentManagementPage() {
                 />
               </div>
             </div>
-            <div className="divide-y divide-[#eceef5] max-h-[640px] overflow-y-auto">
+            <div className="divide-y divide-border max-h-[640px] overflow-y-auto">
               {filteredStudents.map((s) => {
                 const sg = (s as unknown as { guardianId: string | undefined }).guardianId
                 const guardian = sg ? guardiansById.get(sg) : undefined
@@ -413,7 +413,7 @@ export function StudentManagementPage() {
                         {studentInsightsQ.data.interval}
                       </span>
                     </div>
-                    <div className="divide-y divide-[#eceef5]">
+                    <div className="divide-y divide-border">
                       {studentInsightsQ.data.agentInsights.slice(0, 3).map((insight, i) => (
                         <div key={`${insight.title}-${i}`} className="px-5 py-3.5">
                           <AgentInsightCard insight={insight} bare />
@@ -428,7 +428,7 @@ export function StudentManagementPage() {
                     <div className="px-4 py-2.5 border-b border-outline-variant">
                       <h3 className="font-headline-sm text-headline-sm text-on-surface">Active alerts</h3>
                     </div>
-                    <div className="divide-y divide-[#eceef5]">
+                    <div className="divide-y divide-border">
                       {studentFlags.map((a) => (
                         <div key={a.id} className="flex items-center gap-3 px-5 py-3">
                           <div className="flex-1 min-w-0">

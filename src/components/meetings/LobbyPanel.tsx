@@ -72,23 +72,23 @@ export function LobbyPanel({ title, subtitle, joining, onJoin, onBack }: LobbyPa
   )
 
   return (
-    <div className="flex flex-col items-center min-h-dvh bg-[#0f1322] text-white p-xl overflow-y-auto">
+    <div className="flex flex-col items-center min-h-dvh bg-foreground text-white p-xl overflow-y-auto">
       <div className="w-full max-w-2xl my-auto min-w-0">
         <div className="text-center mb-lg">
           <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
             <span className="material-symbols-outlined text-[28px]">video_call</span>
           </div>
           <h1 className="font-headline-lg text-headline-lg font-bold">{title}</h1>
-          <p className="font-body-md text-body-md text-[#a9b2c8] mt-1">{subtitle}</p>
+          <p className="font-body-md text-body-md text-inverse-on-surface/70 mt-1">{subtitle}</p>
         </div>
 
         <div className="rounded-2xl overflow-hidden bg-black relative max-h-[42vh] aspect-video mb-lg">
           <video ref={videoRef} muted playsInline className="w-full h-full object-contain" />
           {(previewError || devicesError) && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#1a2038]">
+            <div className="absolute inset-0 flex items-center justify-center bg-inverse-surface">
               <div className="text-center px-lg">
-                <span className="material-symbols-outlined text-[40px] text-[#8a95b3] block mb-2">videocam_off</span>
-                <p className="font-label-md text-label-md text-[#a9b2c8]">{previewError ?? devicesError}</p>
+                <span className="material-symbols-outlined text-[40px] text-inverse-on-surface/60 block mb-2">videocam_off</span>
+                <p className="font-label-md text-label-md text-inverse-on-surface/70">{previewError ?? devicesError}</p>
               </div>
             </div>
           )}
@@ -96,9 +96,9 @@ export function LobbyPanel({ title, subtitle, joining, onJoin, onBack }: LobbyPa
 
         <div className="space-y-md min-w-0">
           <div className="space-y-1">
-            <Label className="font-label-md text-label-md text-[#a9b2c8]">Camera</Label>
+            <Label className="font-label-md text-label-md text-inverse-on-surface/70">Camera</Label>
             <Select value={cameraId} onValueChange={setCameraId}>
-              <SelectTrigger className="bg-[#1a2038] border-[#232f4e] text-white">
+              <SelectTrigger className="bg-inverse-surface border-white/15 text-white">
                 <SelectValue placeholder="Choose camera" />
               </SelectTrigger>
               <SelectContent>{deviceOptions(cameras)}</SelectContent>
@@ -106,9 +106,9 @@ export function LobbyPanel({ title, subtitle, joining, onJoin, onBack }: LobbyPa
           </div>
 
           <div className="space-y-1">
-            <Label className="font-label-md text-label-md text-[#a9b2c8]">Microphone</Label>
+            <Label className="font-label-md text-label-md text-inverse-on-surface/70">Microphone</Label>
             <Select value={micId} onValueChange={setMicId}>
-              <SelectTrigger className="bg-[#1a2038] border-[#232f4e] text-white">
+              <SelectTrigger className="bg-inverse-surface border-white/15 text-white">
                 <SelectValue placeholder="Choose microphone" />
               </SelectTrigger>
               <SelectContent>{deviceOptions(mics)}</SelectContent>
@@ -116,7 +116,7 @@ export function LobbyPanel({ title, subtitle, joining, onJoin, onBack }: LobbyPa
           </div>
 
           <div className="flex gap-md pt-sm">
-            <Button variant="outline" className="flex-1 bg-transparent border-[#232f4e] text-[#a9b2c8] hover:bg-white/5" onClick={onBack} disabled={joining}>
+            <Button variant="outline" className="flex-1 bg-transparent border-white/20 text-inverse-on-surface/70 hover:bg-white/10" onClick={onBack} disabled={joining}>
               Back
             </Button>
             <Button className="flex-1" onClick={() => onJoin({ cameraId, micId })} disabled={joining}>

@@ -41,12 +41,14 @@ function formatMeetingDate(iso: string): string {
 }
 
 function Metric({ label, icon, value, caption, to, tone }: { label: string; icon: string; value: string | number; caption: string; to?: string; tone?: string }) {
-  const iconClass = tone ?? "text-primary"
+  const iconClass = tone ?? "bg-primary-container text-primary"
   const card = (
-    <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 shadow-md flex flex-col gap-2 hover:border-primary-container/40 transition-colors h-full">
+    <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-md flex flex-col gap-2 hover:border-primary-container/40 transition-colors h-full">
       <div className="flex justify-between items-start">
         <span className="font-body-md text-body-md text-on-surface-variant">{label}</span>
-        <span className={`material-symbols-outlined ${iconClass}`} style={{ fontSize: 20 }}>{icon}</span>
+        <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconClass}`}>
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{icon}</span>
+        </span>
       </div>
       <div className="text-2xl md:text-3xl font-headline-lg font-bold tracking-tight text-on-surface">{value}</div>
       <div className="text-xs text-on-surface-variant font-medium mt-1">{caption}</div>
@@ -167,7 +169,7 @@ export function StudentDashboardPage() {
           value={`${attendanceRate}%`}
           caption="of scheduled sessions"
           to="/student/attendance"
-          tone={attendanceRate >= 75 ? "text-primary" : "text-error"}
+          tone={attendanceRate >= 75 ? undefined : "bg-error-container text-error"}
         />
         <Metric
           label="Active alerts"
@@ -175,7 +177,7 @@ export function StudentDashboardPage() {
           value={activeAlerts.length}
           caption={activeAlerts.length === 0 ? "all clear" : "need your attention"}
           to="/student/attendance"
-          tone={activeAlerts.length > 0 ? "text-error" : "text-primary"}
+          tone={activeAlerts.length > 0 ? "bg-error-container text-error" : undefined}
         />
         <Metric
           label="Unread notifications"
@@ -188,7 +190,7 @@ export function StudentDashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-md shadow-md">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
             <h2 className="font-headline-md text-headline-md text-on-surface">Upcoming deadlines</h2>
             <Link to="/student/assignments" className="font-label-sm text-label-sm text-primary hover:underline">View all</Link>
           </div>
@@ -223,7 +225,7 @@ export function StudentDashboardPage() {
         </div>
 
         <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-md shadow-md">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
             <h2 className="font-headline-md text-headline-md text-on-surface">Upcoming meetings</h2>
             <Link to="/student/meetings" className="font-label-sm text-label-sm text-primary hover:underline">View all</Link>
           </div>
@@ -250,7 +252,7 @@ export function StudentDashboardPage() {
       </div>
 
       <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-md shadow-md mb-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between border-b border-border pb-2 mb-4">
           <h2 className="font-headline-md text-headline-md text-on-surface">Recent grades</h2>
           <Link to="/student/grades" className="font-label-sm text-label-sm text-primary hover:underline">View all</Link>
         </div>
@@ -309,7 +311,7 @@ export function StudentDashboardPage() {
       )}
 
       <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-md shadow-md">
-        <h2 className="font-headline-md text-headline-md text-on-surface mb-4">Quick links</h2>
+        <h2 className="font-headline-md text-headline-md text-on-surface border-b border-border pb-2 mb-4">Quick links</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {QUICK_LINKS.map((q) => (
             <Link

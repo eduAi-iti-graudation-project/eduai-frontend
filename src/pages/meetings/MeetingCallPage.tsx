@@ -130,7 +130,7 @@ export function MeetingCallPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#0d1226] text-white">
+    <div className="h-full flex flex-col bg-foreground text-white">
       <header className="px-lg py-sm flex items-center justify-between border-b border-white/10">
         <div className="flex items-center gap-3 min-w-0">
           <span className="material-symbols-outlined text-white/60">video_camera_front</span>
@@ -190,7 +190,7 @@ export function MeetingCallPage() {
             onToggleRecording={handleRecord}
             onLeave={handleLeave}
             onEnd={handleEnd}
-            className="border-t border-white/5 bg-[#0d1227]"
+            className="border-t border-white/10 bg-inverse-surface"
           />
         </main>
 

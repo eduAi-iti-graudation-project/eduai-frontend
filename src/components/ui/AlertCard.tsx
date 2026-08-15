@@ -46,7 +46,7 @@ export function AlertCard({
     >
       <div
         className={cn(
-          "w-10 h-10 rounded-md flex items-center justify-center shrink-0",
+          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
           status === "NEW" ? "bg-primary text-primary-foreground" : "bg-surface-container-low text-on-surface-variant",
         )}
       >
@@ -60,7 +60,7 @@ export function AlertCard({
           <Badge
             variant="outline"
             className={cn(
-              "font-label-sm text-label-sm px-2 py-0.5 rounded-md",
+              "font-label-sm text-label-sm px-2 py-0.5 rounded-full",
               statusStyles[status] ?? "bg-gray-100 text-gray-800 border-0",
             )}
           >
@@ -84,7 +84,7 @@ export function AlertCard({
               <button
                 type="button"
                 onClick={onResolve}
-                className="px-3 py-1.5 bg-primary text-primary-foreground font-label-sm text-label-sm rounded-md hover:opacity-90 active:scale-95 transition-all"
+                className="px-3 py-1.5 bg-primary text-primary-foreground font-label-sm text-label-sm rounded-lg hover:opacity-90 active:scale-95 transition-all"
               >
                 Resolve
               </button>
@@ -93,7 +93,7 @@ export function AlertCard({
               <button
                 type="button"
                 onClick={onDismiss}
-                className="px-3 py-1.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-md hover:bg-surface-container-high transition-all"
+                className="px-3 py-1.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-lg hover:bg-surface-container-high transition-all"
               >
                 Dismiss
               </button>

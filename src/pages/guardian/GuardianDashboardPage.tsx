@@ -65,7 +65,7 @@ export function GuardianDashboardPage() {
               type="button"
               variant="ghost"
               onClick={() => navigate(`/guardian/children/${child.id}`)}
-              className="w-full h-auto flex flex-col items-start justify-start gap-0 rounded-lg bg-white p-xl border border-border hover:border-primary-container/30 hover:shadow-md hover:scale-[1.02] transition-all hover:bg-white"
+              className="w-full h-auto flex flex-col items-start justify-start gap-0 rounded-xl bg-white p-xl border border-border hover:border-primary-container/30 hover:shadow-md hover:scale-[1.02] transition-all hover:bg-white"
             >
               <div className="flex items-start justify-between mb-4 w-full">
                 <div>
@@ -86,11 +86,11 @@ export function GuardianDashboardPage() {
                 )}
               </div>
               <div className="grid grid-cols-2 gap-4 w-full">
-                <div className="bg-surface-container-low rounded-lg p-md text-center">
+                <div className="bg-surface-container-low rounded-xl p-md text-center">
                   <p className="font-label-sm text-label-sm text-on-surface-variant">Average</p>
                   <p className="font-headline-md text-headline-md text-primary">{child.overallAverage}%</p>
                 </div>
-                <div className="bg-surface-container-low rounded-lg p-md text-center">
+                <div className="bg-surface-container-low rounded-xl p-md text-center">
                   <p className="font-label-sm text-label-sm text-on-surface-variant">Attendance</p>
                   <p className="font-headline-md text-headline-md text-primary">{child.attendanceRate}%</p>
                 </div>

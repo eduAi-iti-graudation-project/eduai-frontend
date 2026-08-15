@@ -31,10 +31,12 @@ function AlertAvatar({ alert }: { alert: Alert }) {
 
 function StatCard({ label, icon, iconClass, value, caption }: { label: string; icon: string; iconClass: string; value: string | number; caption: string }) {
   return (
-    <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 shadow-md flex flex-col gap-2">
+    <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-md flex flex-col gap-2">
       <div className="flex justify-between items-start">
         <span className="font-body-md text-body-md text-on-surface-variant">{label}</span>
-        <span className={`material-symbols-outlined ${iconClass}`} style={{ fontSize: 20 }}>{icon}</span>
+        <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconClass}`}>
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{icon}</span>
+        </span>
       </div>
       <div className="text-2xl md:text-3xl font-headline-lg font-bold tracking-tight text-on-surface">{value}</div>
       <div className="text-xs text-on-surface-variant font-medium mt-1">{caption}</div>
@@ -63,10 +65,10 @@ export function TeacherDashboardPage() {
       : "—"
 
   const stats = [
-    { label: "Active Alerts", icon: "warning", iconClass: "text-primary", value: activeAlertCount, caption: "Needs your attention" },
-    { label: "Resolved", icon: "check_circle", iconClass: "text-[#059669]", value: resolvedAlertCount, caption: "All good" },
-    { label: "Pending Review", icon: "pending_actions", iconClass: "text-primary", value: pendingCount, caption: "Awaiting your review" },
-    { label: "Avg Section Score", icon: "analytics", iconClass: "text-primary", value: totalSubmissions > 0 ? `${submissionRate}%` : avgGradeDisplay, caption: "Submission rate" },
+    { label: "Active Alerts", icon: "warning", iconClass: "bg-primary-container text-primary", value: activeAlertCount, caption: "Needs your attention" },
+    { label: "Resolved", icon: "check_circle", iconClass: "bg-[#ECFDF5] text-[#047857]", value: resolvedAlertCount, caption: "All good" },
+    { label: "Pending Review", icon: "pending_actions", iconClass: "bg-secondary-container text-on-secondary-container", value: pendingCount, caption: "Awaiting your review" },
+    { label: "Avg Section Score", icon: "analytics", iconClass: "bg-[#FEF3C7] text-[#b45309]", value: totalSubmissions > 0 ? `${submissionRate}%` : avgGradeDisplay, caption: "Submission rate" },
   ]
 
   return (
@@ -91,7 +93,7 @@ export function TeacherDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Main: Active Sections */}
           <div className="lg:col-span-2 flex flex-col gap-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center border-b border-border pb-2 mb-4">
               <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">Active Sections</h3>
               {classCards.length > 0 && (
                 <Link to="/classes" className="text-sm font-medium text-primary hover:underline cursor-pointer">View All</Link>
@@ -123,7 +125,7 @@ export function TeacherDashboardPage() {
                         {c.pending} Pending
                       </span>
                     ) : (
-                      <span className="bg-[#F3F4F6] text-[#374151] px-2 py-0.5 rounded text-xs font-medium border border-[#E5E7EB]">
+                      <span className="bg-surface-container-high text-on-surface px-2 py-0.5 rounded text-xs font-medium border border-surface-container-high">
                         All Clear
                       </span>
                     )}
@@ -157,7 +159,7 @@ export function TeacherDashboardPage() {
 
           {/* Sidebar: Needs Attention */}
           <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center border-b border-border pb-2 mb-4">
               <h3 className="text-headline-md font-headline-md font-semibold text-on-surface flex items-center gap-2">
                 Needs Attention
                 <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-medium">{activeAlertCount}</span>

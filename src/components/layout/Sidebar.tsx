@@ -51,15 +51,15 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden md:flex fixed left-0 top-0 h-full w-[280px] flex-col bg-[#151A2E] border-r border-[#232f4e] z-40">
+    <aside className="hidden md:flex fixed left-0 top-0 h-full w-[280px] flex-col bg-inverse-surface border-r border-white/10 z-40">
       {/* Brand */}
       <div className="flex items-center gap-sm px-md py-md">
-        <div className="w-10 h-10 rounded-lg bg-[#2C5FB3] flex items-center justify-center shrink-0 shadow-sm">
+        <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0 shadow-sm">
           <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>psychology</span>
         </div>
         <div>
           <h1 className="font-headline-md text-headline-md font-bold text-white leading-none">EduAI</h1>
-          <p className="font-label-sm text-label-sm text-[#8a95b3] mt-1">School Management</p>
+          <p className="font-label-sm text-label-sm text-inverse-on-surface/60 mt-1">School Management</p>
         </div>
       </div>
 
@@ -72,12 +72,12 @@ export function Sidebar() {
             className={cn(
               "relative flex items-center gap-3 px-3 py-1.5 rounded-lg transition-colors",
               activeItem === item.id
-                ? "bg-[#1E2A4A] text-white font-semibold"
-                : "text-[#a9b2c8] hover:bg-white/5 hover:text-white"
+                ? "bg-primary text-white font-semibold"
+                : "text-inverse-on-surface/70 hover:bg-white/10 hover:text-white"
             )}
           >
             {activeItem === item.id && (
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-[#2C5FB3]" />
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-white/30" />
             )}
             <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
             <span className="font-label-md text-label-md font-medium">{item.label}</span>
@@ -86,12 +86,12 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom Nav */}
-      <div className="px-3 py-md border-t border-[#232f4e] space-y-1">
+      <div className="px-3 py-md border-t border-white/10 space-y-1">
         {bottomItems.map((item) => (
           <Link
             key={item.id}
             to={item.href}
-            className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-[#a9b2c8] hover:bg-white/5 hover:text-white transition-colors"
+            className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-inverse-on-surface/70 hover:bg-white/10 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
             <span className="font-label-md text-label-md font-medium">{item.label}</span>
@@ -99,7 +99,7 @@ export function Sidebar() {
         ))}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-1.5 w-full rounded-lg text-[#a9b2c8] hover:bg-white/5 hover:text-error transition-colors"
+          className="flex items-center gap-3 px-3 py-1.5 w-full rounded-lg text-inverse-on-surface/70 hover:bg-white/10 hover:text-error transition-colors"
         >
           <span className="material-symbols-outlined text-[20px]">logout</span>
           <span className="font-label-md text-label-md font-medium">Log Out</span>

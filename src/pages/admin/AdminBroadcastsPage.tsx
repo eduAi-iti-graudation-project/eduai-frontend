@@ -193,7 +193,7 @@ export function AdminBroadcastsPage() {
               <EmptyState icon="campaign" title="Nothing sent yet" description="Your announcements will appear here." />
             </div>
           ) : (
-            <div className="divide-y divide-[#eceef5]">
+            <div className="divide-y divide-border">
               {broadcasts.data.map((broadcast) => {
                 const audience = broadcast.targetRoles.map((role) => ROLE_LABEL[role]).join(", ")
                 const gradeLabel = broadcast.targetGradeName

@@ -5,7 +5,7 @@ const BAR_MAX = 132
 const SEGMENT_CLASSES: Record<string, string> = {
   present: "bg-[#16a34a]",
   late: "bg-[#86efac]",
-  excused: "bg-[#6366f1]",
+  excused: "bg-[#8b5cf6]",
   absent: "bg-[#ef4444]",
 }
 
@@ -104,7 +104,7 @@ export function MonthlyAttendanceBars({ records }: { records: AttendanceRecordLi
 const DONUT_COLORS: Record<string, string> = {
   present: "#16a34a",
   late: "#86efac",
-  excused: "#6366f1",
+  excused: "#8b5cf6",
   absent: "#ef4444",
 }
 
