@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
+import { useOperations, useOperationId, useOperation } from "@/providers/use-operations"
 import * as api from "@/lib/api"
 
 export interface HomeworkHelpMessage {
@@ -15,8 +16,12 @@ export interface HomeworkHelpMessage {
 
 export function useHomeworkHelpChat(courseOfferingId: string | null, assignmentId: string | null = null) {
   const [messages, setMessages] = useState<HomeworkHelpMessage[]>([])
-  const [step, setStep] = useState<api.HomeworkAgentStep | null>(null)
-  const [lastToolStep, setLastToolStep] = useState<api.HomeworkAgentStep | null>(null)
+  const { register, update, remove } = useOperations()
+  const operationId = useOperationId("homework-help")
+  const active = useOperation("homework-help")
+  const step = (active?.step ?? null) as api.HomeworkAgentStep | null
+  const lastToolStep = (active?.lastToolStep ?? null) as api.HomeworkAgentStep | null
+  const isLoading = active?.status === "running"
 
   const sendMessage = useCallback(
     (content: string) => {
@@ -27,8 +32,13 @@ export function useHomeworkHelpChat(courseOfferingId: string | null, assignmentI
         ...prev,
         { id: crypto.randomUUID(), role: "user", content: question, timestamp: new Date() },
       ])
-      setStep("thinking")
-      setLastToolStep(null)
+      register({
+        id: operationId,
+        kind: "homework-help",
+        label: "Asking the homework helper…",
+        step: "thinking",
+        lastToolStep: null,
+      })
 
       api
         .streamHomeworkHelp(
@@ -39,10 +49,11 @@ export function useHomeworkHelpChat(courseOfferingId: string | null, assignmentI
           },
           {
             onStep: (s) => {
-              setStep(s)
-              if (s === "search_material" || s === "search_assignment" || s === "search_web") {
-                setLastToolStep(s)
-              }
+              update(operationId, {
+                step: s,
+                lastToolStep:
+                  s === "search_material" || s === "search_assignment" || s === "search_web" ? s : null,
+              })
             },
             onDone: (data) => {
               setMessages((prev) => [
@@ -58,23 +69,22 @@ export function useHomeworkHelpChat(courseOfferingId: string | null, assignmentI
                   interactionId: data.interactionId || undefined,
                 },
               ])
-              setStep(null)
+              remove(operationId)
             },
           },
         )
         .catch((err: Error) => {
-          setStep(null)
+          remove(operationId)
           toast.error(err.message)
         })
     },
-    [courseOfferingId, assignmentId],
+    [courseOfferingId, assignmentId, operationId, register, update, remove],
   )
 
   const clearMessages = useCallback(() => {
     setMessages([])
-    setStep(null)
-    setLastToolStep(null)
-  }, [])
+    remove(operationId)
+  }, [operationId, remove])
 
   return {
     messages,
@@ -82,6 +92,6 @@ export function useHomeworkHelpChat(courseOfferingId: string | null, assignmentI
     clearMessages,
     step,
     lastToolStep,
-    isLoading: step !== null,
+    isLoading,
   }
 }

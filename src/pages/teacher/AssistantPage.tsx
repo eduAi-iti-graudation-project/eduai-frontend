@@ -25,12 +25,20 @@ import {
 import {
   ScopeSearch,
 } from "@/components/assistant/ScopeSearch"
+import { AssistantAgentGraph } from "@/components/assistant/AssistantAgentGraph"
 import type { AssistantScope } from "@/components/assistant/scope"
 import type { components } from "@/types/api-schema"
 import * as api from "@/lib/api"
 import { cn } from "@/lib/utils"
 
 type TabId = "course" | "students"
+
+const COURSE_SUGGESTIONS = [
+  "Create a quiz for this class",
+  "Summarize the course material",
+  "Suggest teaching strategies for this class",
+  "Draft a homework assignment",
+]
 
 export function AssistantPage() {
   const [tab, setTab] = useState<TabId>("course")
@@ -295,13 +303,7 @@ function CourseAssistantTab({ initialOfferingId }: { initialOfferingId?: string 
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] rounded-lg rounded-bl-[6px] px-4 py-3 bg-surface-container-low border border-outline-variant">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
-                </div>
-              </div>
+              <AssistantAgentGraph />
             </div>
           )}
           <div ref={chatEndRef} />
@@ -309,6 +311,20 @@ function CourseAssistantTab({ initialOfferingId }: { initialOfferingId?: string 
       </div>
 
       <div className="max-w-3xl mx-auto w-full px-md pb-md md:pb-6 mb-24 md:mb-0">
+        {derivedOfferingId && (
+          <div className="flex flex-wrap justify-center gap-2 pb-sm">
+            {COURSE_SUGGESTIONS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => { sendMessage(s); setInput("") }}
+                className="font-label-md text-label-md px-3 py-1.5 rounded-md border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container-high transition-colors"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="flex items-end gap-2 bg-surface-container-low rounded-lg border border-outline-variant p-2">
           <Textarea
             ref={inputRef}
