@@ -7,11 +7,11 @@ function Tree({ position, scale = 1 }: { position: [number, number, number]; sca
       </mesh>
       <mesh position={[0, 3, 0]}>
         <icosahedronGeometry args={[1.15, 0]} />
-        <meshStandardMaterial color="#5f9e6b" flatShading />
+        <meshStandardMaterial color="#f9a8d4" flatShading />
       </mesh>
       <mesh position={[0.8, 2.6, 0.3]}>
         <icosahedronGeometry args={[0.7, 0]} />
-        <meshStandardMaterial color="#71ad77" flatShading />
+        <meshStandardMaterial color="#f472b6" flatShading />
       </mesh>
     </group>
   )
@@ -73,10 +73,10 @@ export function SchoolGatePocket() {
         <boxGeometry args={[4.75, 0.55, 0.75]} />
         <meshStandardMaterial color="#e8e0cf" flatShading />
       </mesh>
-      {/* violet cap on the arch — dream tie-in */}
+      {/* pink cap on the arch — dream tie-in */}
       <mesh position={[0, 4, 5]}>
         <boxGeometry args={[4.4, 0.22, 0.5]} />
-        <meshStandardMaterial color="#a78bfa" flatShading />
+        <meshStandardMaterial color="#db2777" flatShading />
       </mesh>
 
       <Fence side={1} />

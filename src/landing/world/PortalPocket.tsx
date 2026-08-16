@@ -5,7 +5,7 @@ import { localProgress, scrollState, windowed } from "../progress"
 
 const RING_RADIUS = 2.2
 const SPARK_COUNT = 420
-const SPARK_COLORS = ["#a7f3d0", "#6ee7b7", "#4ade80", "#22c55e", "#d1fae5"]
+const SPARK_COLORS = ["#fda4c6", "#f472b6", "#ec4899", "#db2777", "#ffe4f1"]
 
 /** Deterministic pseudo-random 0..1 from an index — no runtime state needed. */
 const rand = (n: number) => {
@@ -87,8 +87,8 @@ sparkleMesh.count = SPARK_COUNT
 }
 
 /**
- * The dream portal — all green, seamless with the emerald scene (scene 3):
- * a solid disc mouth, two flat green rims, and a continuous SPARKLE EMISSION
+ * The dream portal — all pink/magenta, seamless with the rose scene (scene 3):
+ * a solid disc mouth, two flat magenta rims, and a continuous SPARKLE EMISSION
  * — 4-point star crosses born at the mouth, spiraling outward, shrinking to
  * nothing, forever re-emitting. Opaque primitives only: no textures, no
  * shaders, no transparency.
@@ -97,7 +97,7 @@ export function PortalPocket() {
   const groupRef = useRef<THREE.Group>(null)
   const lightRef = useRef<THREE.PointLight>(null)
   const rimMaterials = useMemo(
-    () => [new THREE.Color("#22c55e"), new THREE.Color("#4ade80")].map((c) => new THREE.MeshBasicMaterial({ color: c, toneMapped: false })),
+    () => [new THREE.Color("#ec4899"), new THREE.Color("#f472b6")].map((c) => new THREE.MeshBasicMaterial({ color: c, toneMapped: false })),
     []
   )
 
@@ -133,12 +133,12 @@ export function PortalPocket() {
 
   return (
     <group ref={groupRef} position={[0, 0.9, -8.5]}>
-      {/* solid portal mouth — blends into the emerald scene */}
+      {/* solid portal mouth — blends into the magenta scene */}
       <mesh position={[0, 0, -0.1]}>
         <circleGeometry args={[RING_RADIUS - 0.25, 64]} />
-        <meshBasicMaterial color="#0f6b36" toneMapped={false} />
+        <meshBasicMaterial color="#7f1350" toneMapped={false} />
       </mesh>
-      {/* outer green rim */}
+      {/* outer magenta rim */}
       <mesh material={rimMaterials[0]}>
         <ringGeometry args={[RING_RADIUS - 0.25, RING_RADIUS + 0.25, 96]} />
       </mesh>
@@ -148,7 +148,7 @@ export function PortalPocket() {
       </mesh>
       {/* emitted sparkles — born at the mouth, spiraling outward, forever */}
       <primitive object={sparkleMesh} />
-      <pointLight ref={lightRef} color="#22c55e" intensity={7} distance={22} decay={2} position={[0, 0, 0.4]} />
+      <pointLight ref={lightRef} color="#ec4899" intensity={7} distance={22} decay={2} position={[0, 0, 0.4]} />
     </group>
   )
 }

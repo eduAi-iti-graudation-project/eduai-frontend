@@ -10,6 +10,7 @@ import { robotState } from "../view-state"
 const STATION: readonly [number, number, number] = [1.0, 0, -0.9] // beside-right of the student, fully in frame
 const BASE_Y = 0.68
 const SLIDE_START: readonly [number, number, number] = [4.4, 0, -0.9]
+const HEAD_ANCHOR = new THREE.Vector3(0, 1.15, 0)
 
 const ease = (t: number) => t * t * (3 - 2 * t)
 
@@ -44,7 +45,7 @@ export function Robot() {
       if (mesh.isMesh && /eye|core|light|visor|screen|emiss/i.test(mesh.name)) {
         const mat = mesh.material as THREE.MeshStandardMaterial
         if (mat && "emissive" in mat) {
-          mat.emissive = new THREE.Color("#7c4dff")
+          mat.emissive = new THREE.Color("#db2777")
           mat.emissiveIntensity = 0.5
           coreMaterial.current = mat
         }
@@ -92,6 +93,9 @@ export function Robot() {
       rootRef.current.rotation.y = facing.current + Math.sin(t * 0.8) * 0.08
       rootRef.current.rotation.z = 0.05
       rootRef.current.getWorldPosition(robotState.pos)
+      // head anchor: the model is normalized to ~0.55m tall and sits at BASE_Y,
+      // so +1.15 lands on the face/screen where the dialogue should originate.
+      robotState.head.copy(robotState.pos).add(HEAD_ANCHOR)
     }
 
     s.position.y = BASE_Y + Math.sin(t * 2.2) * (0.03 + talking * 0.03)

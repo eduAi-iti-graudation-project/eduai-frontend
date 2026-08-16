@@ -51,6 +51,15 @@ export function CameraRig() {
       pos.current.y -= 0.5 * Math.sin(Math.PI * t) * (1 - 0.35 * t)
     }
 
+    // fall into the pricing finale: start high above the sky and swoop down
+    // through the first third of band 9 — the tiers fade in only after the drop
+    if (band === 9) {
+      const s9 = localProgress(global, 9)
+      const drop = ease(Math.min(1, Math.max(0, s9 / 0.35)))
+      pos.current.y += (1 - drop) * 1.7
+      look.current.y += (1 - drop) * 1.15
+    }
+
     camera.position.copy(pos.current)
     camera.lookAt(look.current)
     viewState.camera = camera

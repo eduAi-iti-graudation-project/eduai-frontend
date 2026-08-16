@@ -32,7 +32,7 @@ function Board() {
       </mesh>
       <mesh position={[0, 0, 0.08]}>
         <planeGeometry args={[5.5, 2.1]} />
-        <meshStandardMaterial color="#22704f" />
+        <meshStandardMaterial color="#c2346b" />
       </mesh>
       {[
         [-1.8, 0.4],
@@ -105,15 +105,15 @@ export function ClassroomPocket() {
           <group key={z} position={[-0.12, 2.3, z]}>
             <mesh>
               <boxGeometry args={[0.16, 1.5, 2]} />
-              <meshStandardMaterial color="#bfe3ff" emissive="#9fc8ec" emissiveIntensity={0.5} />
+              <meshStandardMaterial color="#ffd0e2" emissive="#f9a8d4" emissiveIntensity={0.5} />
             </mesh>
             <mesh position={[0, 0, 0.02]}>
               <boxGeometry args={[0.06, 1.5, 0.09]} />
-              <meshStandardMaterial color="#5b6b85" />
+              <meshStandardMaterial color="#a86a80" />
             </mesh>
             <mesh position={[0, 0, 0.02]}>
               <boxGeometry args={[0.06, 0.09, 2]} />
-              <meshStandardMaterial color="#5b6b85" />
+              <meshStandardMaterial color="#a86a80" />
             </mesh>
           </group>
         ))}

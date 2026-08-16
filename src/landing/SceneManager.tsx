@@ -10,6 +10,7 @@ import { TunnelPocket } from "./world/TunnelPocket"
 import { ClassroomPocket } from "./world/ClassroomPocket"
 import { TestPaper } from "./world/TestPaper"
 import { Confetti } from "./effects/Confetti"
+import { Sakura } from "./effects/Sakura"
 import { Parents } from "./characters/Parents"
 import { Robot } from "./characters/Robot"
 
@@ -81,6 +82,8 @@ export function SceneManager() {
       </group>
       {/* Floating test paper — at root so it can show in both the school scenes and the celebration */}
       <TestPaper />
+      {/* Falling cherry-blossom petals — drift through the outdoor scenes */}
+      <Sakura />
     </>
   )
 }

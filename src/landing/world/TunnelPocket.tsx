@@ -61,16 +61,16 @@ export function TunnelPocket() {
       {/* tunnel mouth glow */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0.4, Z_MAX]}>
         <circleGeometry args={[4.6, 48]} />
-        <meshBasicMaterial color="#146b36" transparent opacity={0.65} toneMapped={false} />
+        <meshBasicMaterial color="#7f1350" transparent opacity={0.65} toneMapped={false} />
       </mesh>
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0.4, Z_MAX - 0.05]}>
         <circleGeometry args={[1.5, 48]} />
-        <meshBasicMaterial color="#7ff0ae" transparent opacity={0.85} toneMapped={false} />
+        <meshBasicMaterial color="#ff9ecb" transparent opacity={0.85} toneMapped={false} />
       </mesh>
       {/* rushing light streaks */}
       <points geometry={geometry}>
         <pointsMaterial
-          color="#6ee7b7"
+          color="#f472b6"
           size={0.085}
           sizeAttenuation
           transparent
