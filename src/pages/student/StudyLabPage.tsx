@@ -361,10 +361,10 @@ export function StudyLabPage() {
                   </p>
                 </div>
 
-                {/* Background */}
+                {/* Background & Motion Row */}
                 <div>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">Background</p>
-                  <div className="flex flex-col gap-1.5">
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mb-1.5">Background Style</p>
+                  <div className="grid grid-cols-3 gap-1.5">
                     {BACKGROUND_OPTIONS.map((bg) => (
                       <button
                         key={bg.value}
@@ -372,10 +372,10 @@ export function StudyLabPage() {
                         type="button"
                         onClick={() => setThemeBackground(bg.value)}
                         className={cn(
-                          "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 font-label-sm text-label-sm transition-colors text-left",
+                          "flex items-center justify-center gap-1.5 rounded-lg border py-2 px-2 font-label-sm text-label-sm transition-all",
                           themeBackground === bg.value
-                            ? "bg-primary/5 border-primary/40 text-primary"
-                            : "border-border text-on-surface-variant hover:border-primary/30",
+                            ? "bg-primary/10 border-primary text-primary font-semibold shadow-sm"
+                            : "border-border text-on-surface-variant hover:bg-surface-container-low hover:border-outline-variant",
                         )}
                       >
                         <span className="material-symbols-outlined text-[16px]">{bg.icon}</span>
@@ -387,8 +387,8 @@ export function StudyLabPage() {
 
                 {/* Motion / transition */}
                 <div>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">Slide Transition</p>
-                  <div className="flex flex-col gap-1.5">
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mb-1.5">Slide Transition</p>
+                  <div className="grid grid-cols-2 gap-1.5">
                     {MOTION_OPTIONS.map((m) => (
                       <button
                         key={m.value}
@@ -396,10 +396,10 @@ export function StudyLabPage() {
                         type="button"
                         onClick={() => setThemeMotion(m.value)}
                         className={cn(
-                          "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 font-label-sm text-label-sm transition-colors text-left",
+                          "flex items-center justify-center gap-1.5 rounded-lg border py-1.5 px-2 font-label-sm text-label-sm transition-all",
                           themeMotion === m.value
-                            ? "bg-primary/5 border-primary/40 text-primary"
-                            : "border-border text-on-surface-variant hover:border-primary/30",
+                            ? "bg-primary/10 border-primary text-primary font-semibold shadow-sm"
+                            : "border-border text-on-surface-variant hover:bg-surface-container-low hover:border-outline-variant",
                         )}
                       >
                         <span className="material-symbols-outlined text-[16px]">{m.icon}</span>
