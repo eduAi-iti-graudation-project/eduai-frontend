@@ -1,3 +1,9 @@
+/**
+ * The Matter.js UMD bundle as raw text, inlined into the harness <script> so
+ * generated code can use the global \`Matter\` exactly as the generator prompt
+ * promises. Inlining (not a CDN <script src>) is required because the sandbox
+ * CSP blocks all external requests. Bundled at build time via Vite's ?raw.
+ */
 import matterSource from "matter-js/build/matter.min.js?raw"
 
 /**
@@ -16,7 +22,6 @@ export function escapeClosingScript(text: string): string {
  * outside is postMessage for the objective/error events.
  */
 export function buildLabHarnessHtml(code: string): string {
-  const matter = escapeClosingScript(matterSource)
   const escapedCode = escapeClosingScript(code)
   return `<!DOCTYPE html>
 <html>
@@ -25,14 +30,12 @@ export function buildLabHarnessHtml(code: string): string {
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
 <style>
   html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #ffffff; }
-  #sim { width: 100%; height: 100%; }
+  #sim { width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }
+  #sim canvas { touch-action: none; }
 </style>
 </head>
 <body>
 <div id="sim"></div>
-<script>
-${matter}
-</script>
 <script>
 var __labObjectiveReported = false;
 function reportLabObjectiveComplete() {
@@ -47,6 +50,9 @@ window.addEventListener("error", function (event) {
     message: String(event.message || "Unknown simulation error"),
   }, "*");
 });
+</script>
+<script>
+${matterSource}
 </script>
 <script>
 ${escapedCode}

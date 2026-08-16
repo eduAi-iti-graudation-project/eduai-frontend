@@ -34,7 +34,7 @@ export function StudentLabDetailPage() {
     )
   }
 
-  if (!lab || !lab.generatedCode) {
+  if (!lab || (!lab.gameSpec && !lab.generatedCode)) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center py-20 gap-2">
         <p className="font-body-lg text-body-lg text-on-surface">This simulation is not available.</p>
@@ -60,7 +60,12 @@ export function StudentLabDetailPage() {
 
       <div className="px-6 pb-6 flex-1 min-h-0">
         <div className="aspect-[16/10] max-h-[70vh]">
-          <LabSimulationFrame code={lab.generatedCode} onObjectiveComplete={onObjectiveComplete} className="h-full" />
+          <LabSimulationFrame
+            spec={lab.gameSpec}
+            code={lab.generatedCode}
+            onObjectiveComplete={onObjectiveComplete}
+            className="h-full"
+          />
         </div>
         {objectiveCount > 0 && (
           <p className="font-body-md text-body-md text-on-surface-variant mt-3">

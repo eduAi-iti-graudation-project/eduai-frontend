@@ -8,8 +8,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { useTeacherOfferings } from "@/hooks/use-labs"
-import { useGenerateLab, useLabs } from "@/hooks/use-labs"
+import { useGenerateLab, useLabs, useDeleteLab } from "@/hooks/use-labs"
+import { useCourseMaterialChapters } from "@/hooks/use-materials"
+import { LabAgentGraph } from "@/components/labs/LabAgentGraph"
 import { LabStatusChip } from "@/components/labs/LabStatusChip"
 import * as api from "@/lib/api"
 
@@ -25,8 +28,11 @@ export function LabsPage() {
   const [courseId, setCourseId] = useState("")
   const [offeringId, setOfferingId] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [topic, setTopic] = useState("")
+  const [prompt, setPrompt] = useState("")
+  const [genUnit, setGenUnit] = useState("")
   const [selectedOfferingIds, setSelectedOfferingIds] = useState<string[]>([])
+  const [advancedMode, setAdvancedMode] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<api.Lab | null>(null)
 
   const offerings = useTeacherOfferings()
   const gradesQ = useQuery({
@@ -80,6 +86,9 @@ export function LabsPage() {
 
   const { labs, isLoading } = useLabs(derivedOfferingId || undefined)
   const generate = useGenerateLab()
+  const removeLab = useDeleteLab()
+  const { chapters: genUnits, isLoading: genUnitsLoading } =
+    useCourseMaterialChapters(derivedCourseId)
 
   const offeringNameMap = useMemo(
     () => new Map((offerings.data ?? []).map((o) => [o.id, `${o.course.name} · ${o.section.name}`])),
@@ -111,31 +120,36 @@ export function LabsPage() {
     )
   }
 
-  const canGenerate = selectedOfferingIds.length > 0 && topic.trim().length >= 3 && !generate.isPending
+  const canGenerate = selectedOfferingIds.length > 0 && !!genUnit && prompt.trim().length >= 3 && !generate.isPending
 
   const submit = () => {
     if (!canGenerate) return
+    // Fire-and-forget: close the dialog immediately and stream in the page.
+    setDialogOpen(false)
     generate.mutate(
-      { courseOfferingIds: selectedOfferingIds, topic: topic.trim() },
       {
-        onSuccess: (result) => {
-          if (!result.grounded) {
-            toast.error(result.message ?? "No curriculum material was found for this topic.")
-            setDialogOpen(false)
+        courseOfferingIds: selectedOfferingIds,
+        chapterId: genUnit,
+        prompt: prompt.trim(),
+        mode: advancedMode ? "advanced" : "template",
+      },
+      {
+        onDone: (result) => {
+          if (!result.grounded || !result.labId) {
+            toast.warning(
+              result.message ?? "The selected unit has no curriculum material, so a lab can't be generated for it.",
+            )
             return
           }
-          setDialogOpen(false)
-          setTopic("")
+          setPrompt("")
+          setGenUnit("")
+          setSelectedOfferingIds([])
           if (result.status === "AI_REVIEW_FAILED") {
-            toast.error("The AI security review rejected the generated code. See the review flags.")
+            toast.error("The AI couldn't build the lab. See the review flags.")
           } else {
-            toast.success(
-              result.status === "PENDING_TEACHER_REVIEW"
-                ? "Lab generated and AI-reviewed. Play it, then publish."
-                : "Lab generated.",
-            )
+            toast.success("Lab generated — play it, then publish.")
           }
-          if (result.labId) navigate(`/labs/${result.labId}`)
+          navigate(`/labs/${result.labId}`)
         },
       },
     )
@@ -145,7 +159,7 @@ export function LabsPage() {
     <div className="flex-1 flex flex-col">
       <PageHeader
         title="Lab Simulations"
-        subtitle="Generate, review, and publish AI-built physics simulations grounded in your class material."
+        subtitle="Generate, review, and publish AI-built interactive labs grounded in your class material."
         actions={
           <Button onClick={openDialog} disabled={!offerings.data?.length}>
             New lab
@@ -245,6 +259,18 @@ export function LabsPage() {
           </div>
         </div>
 
+        {generate.isLoading && (
+          <div className="mb-4">
+            <div className="rounded-lg border border-border bg-surface p-4">
+              <LabAgentGraph
+                variant="inline"
+                step={generate.step}
+                lastToolStep={generate.lastToolStep}
+              />
+            </div>
+          </div>
+        )}
+
         {isLoading ? (
           <p className="font-body-md text-body-md text-on-surface-variant">Loading labs…</p>
         ) : labs.length === 0 ? (
@@ -253,17 +279,20 @@ export function LabsPage() {
             <p className="font-headline-sm text-headline-sm text-on-surface mt-3">No labs yet</p>
             <p className="font-body-md text-body-md text-on-surface-variant mt-1">
               {offerings.data?.length
-                ? "Create one from a topic in your uploaded class material."
+                ? "Create one from a unit in your uploaded class material."
                 : "You have no course offerings to create labs for."}
             </p>
           </div>
         ) : (
           <ul className="space-y-3">
             {labs.map((lab) => (
-              <li key={lab.id}>
+              <li
+                key={lab.id}
+                className="flex items-stretch rounded-lg border border-border bg-surface transition-colors hover:border-primary/40"
+              >
                 <Link
                   to={`/labs/${lab.id}`}
-                  className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-4 transition-colors hover:border-primary/40"
+                  className="flex flex-1 min-w-0 flex-wrap items-center gap-3 p-4"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-label-lg text-label-lg text-on-surface truncate">{lab.topic}</p>
@@ -283,6 +312,14 @@ export function LabsPage() {
                   <LabStatusChip status={lab.status} />
                   <span className="material-symbols-outlined text-on-surface-variant text-[18px]">chevron_right</span>
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(lab)}
+                  aria-label={`Delete lab ${lab.topic}`}
+                  className="flex items-center px-3 text-on-surface-variant hover:text-red-600 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                </button>
               </li>
             ))}
           </ul>
@@ -292,11 +329,12 @@ export function LabsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Generate a lab simulation</DialogTitle>
+            <DialogTitle>Generate a lab</DialogTitle>
             <DialogDescription>
-              The AI writes a Matter.js physics simulation grounded in your uploaded material, then a separate agent
-              security-reviews the code before you see it. Usually takes 30–90 seconds. Pick the sections it should be
-              published to once it passes review.
+              The AI builds an interactive game grounded in the selected unit's material — fast and reliable. Pick the
+              sections it should be published to once you approve it. You can refine or regenerate the result afterward.
+              Advanced mode (optional) writes a free-form interactive game/simulation that a separate agent security-reviews
+              before you see it.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -333,6 +371,7 @@ export function LabsPage() {
                   setTouched(true)
                   setCourseId(v)
                   setOfferingId("")
+                  setGenUnit("")
                   setSelectedOfferingIds(sectionIdsFor(derivedGradeId, v))
                 }}
                 disabled={!derivedGradeId}
@@ -348,6 +387,34 @@ export function LabsPage() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <label className="block font-label-md text-label-md text-on-surface mb-1.5">Unit</label>
+              <Select
+                value={genUnit}
+                onValueChange={setGenUnit}
+                disabled={generate.isPending || !derivedCourseId || genUnitsLoading}
+              >
+                <SelectTrigger className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-50">
+                  <SelectValue placeholder={derivedCourseId ? "Pick a unit…" : "Pick a course first…"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {derivedCourseId && !genUnitsLoading && genUnits.length === 0 && (
+                    <p className="px-3 py-2 text-sm text-on-surface-variant">
+                      No material units in this course yet. Organize material into units first.
+                    </p>
+                  )}
+                  {genUnits.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.title}
+                      {u.materials.length > 0 && ` (${u.materials.length} material${u.materials.length === 1 ? "" : "s"})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="font-label-sm text-label-sm text-on-surface-variant mt-1.5">
+                The lab is generated from the selected unit's material.
+              </p>
             </div>
             <div>
               <label className="block font-label-md text-label-md text-on-surface mb-1.5">Sections</label>
@@ -391,19 +458,35 @@ export function LabsPage() {
               </p>
             </div>
             <div>
-              <label className="block font-label-md text-label-md text-on-surface mb-1.5">Topic</label>
-              <input
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
+              <label className="block font-label-md text-label-md text-on-surface mb-1.5">Prompt</label>
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") submit()
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit()
                 }}
-                placeholder="e.g. Projectile motion on an inclined plane"
+                rows={3}
+                placeholder="e.g. Build a game where students construct a plant cell by dragging organelles into the right regions."
                 className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface"
               />
               <p className="font-label-sm text-label-sm text-on-surface-variant mt-1.5">
-                The topic must appear in your uploaded class material, or generation is refused.
+                Describe the lab you want for this unit. The AI grounds it in the unit's material.
               </p>
+            </div>
+            <div className="flex items-start gap-3 rounded-lg border border-outline-variant bg-surface p-3">
+              <Checkbox
+                id="lab-advanced-mode"
+                checked={advancedMode}
+                onCheckedChange={(checked) => setAdvancedMode(checked === true)}
+              />
+              <label htmlFor="lab-advanced-mode" className="flex-1 cursor-pointer select-none">
+                <span className="block font-label-md text-label-md text-on-surface">Advanced mode — free-form game</span>
+                <span className="block font-label-sm text-label-sm text-on-surface-variant mt-0.5">
+                  Writes a free-form interactive game/simulation from scratch, checked by the sandbox before it runs. Slower and less
+                  reliable; use only
+                  when a template game can't cover what you need.
+                </span>
+              </label>
             </div>
           </div>
           <DialogFooter>
@@ -423,6 +506,26 @@ export function LabsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Delete this lab?"
+        message={
+          deleteTarget?.status === "PUBLISHED"
+            ? "This lab is currently published — deleting it removes student access immediately. This can't be undone."
+            : "This lab and all its section links will be permanently removed. This can't be undone."
+        }
+        confirmLabel="Delete lab"
+        isLoading={removeLab.isPending}
+        onConfirm={() => {
+          if (!deleteTarget) return
+          removeLab.mutate(deleteTarget.id, {
+            onSuccess: () => setDeleteTarget(null),
+            onError: () => setDeleteTarget(null),
+          })
+        }}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   )
 }

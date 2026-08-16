@@ -2903,7 +2903,7 @@ export async function fetchFileBlob(url: string): Promise<Blob> {
   return res.data
 }
 
-// ─── Lab Simulations (AI-generated Matter.js sandbox labs) ──
+// ─── Lab Simulations (AI-generated labs: template games or free-form code sandbox) ──
 export type LabStatus =
   | "GENERATING"
   | "AI_REVIEW_FAILED"
@@ -2916,13 +2916,67 @@ export interface LabReviewFlags {
   reasoning: string
 }
 
+export interface DragToRegionsSpec {
+  template: "drag-to-regions"
+  title: string
+  instructions: string
+  objective: string
+  tabs: {
+    id: string
+    label: string
+    regions: { id: string; label: string; hint?: string }[]
+  }[]
+  items: {
+    id: string
+    label: string
+    emoji?: string
+    tabId: string
+    regionId: string
+    fact?: string
+  }[]
+}
+
+export interface SortCategoriesSpec {
+  template: "sort-categories"
+  title: string
+  instructions: string
+  objective: string
+  categories: { id: string; label: string }[]
+  items: { id: string; label: string; categoryId: string }[]
+}
+
+export interface MatchPairsSpec {
+  template: "match-pairs"
+  title: string
+  instructions: string
+  objective: string
+  pairs: { id: string; term: string; definition: string }[]
+}
+
+export interface FlashcardsSpec {
+  template: "flashcards"
+  title: string
+  instructions: string
+  objective: string
+  cards: { id: string; front: string; back: string }[]
+}
+
+export type LabGameSpec =
+  | DragToRegionsSpec
+  | SortCategoriesSpec
+  | MatchPairsSpec
+  | FlashcardsSpec
+
 export interface Lab {
   id: string
   courseOfferingId: string
   courseOfferingIds: string[]
   topic: string
+  chapterId: string | null
   status: LabStatus
   generatedCode: string | null
+  template: string | null
+  gameSpec: LabGameSpec | null
   reviewApproved: boolean | null
   reviewFlags: LabReviewFlags | null
   teacherNotes: string | null
@@ -2930,9 +2984,13 @@ export interface Lab {
   createdAt: string
 }
 
+export type LabGenerationMode = "template" | "advanced"
+
 export interface GenerateLabInput {
   courseOfferingIds: string[]
-  topic: string
+  chapterId: string
+  prompt: string
+  mode?: LabGenerationMode
 }
 
 export interface GenerateLabResponse {
@@ -2944,8 +3002,162 @@ export interface GenerateLabResponse {
   reviewFlags: LabReviewFlags | null
 }
 
-export async function generateLab(input: GenerateLabInput): Promise<GenerateLabResponse> {
-  const res = await api.post<GenerateLabResponse>("/labs/generate", input)
+export type LabAgentStep =
+  | "thinking"
+  | "search_curriculum"
+  | "design_game"
+  | "generate_code"
+  | "load_lab"
+  | "modify_lab"
+
+export interface LabStreamHandlers {
+  onStep: (step: LabAgentStep) => void
+  onDone: (data: GenerateLabResponse) => void
+}
+
+/** Safety cap for a lab SSE stream before it is force-cleared (10 minutes). */
+const LAB_STREAM_TIMEOUT_MS = 10 * 60 * 1000
+
+async function consumeLabStream(
+  res: Response,
+  path: string,
+  handlers: LabStreamHandlers,
+): Promise<void> {
+  if (!res.ok) {
+    if (shouldExpireSession(res.status, path, getStoredToken() !== null)) {
+      clearToken()
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT))
+    }
+    let message = "Something went wrong. Please try again."
+    try {
+      const body = await res.json()
+      if (body?.message) message = body.message
+    } catch {
+      // non-JSON error body; keep the default message
+    }
+    throw new Error(message)
+  }
+
+  if (!res.body) {
+    throw new Error("Streaming is not supported by this browser.")
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ""
+  let completed = false
+  // Safety net: a generation that silently hangs (dropped proxy connection,
+  // provider wedged past its own timeout) must not leave the loading widget
+  // spinning forever. The backend normally finishes well inside this bound.
+  let timedOut = false
+  const watchdog = setTimeout(() => {
+    timedOut = true
+    void reader.cancel()
+  }, LAB_STREAM_TIMEOUT_MS)
+
+  try {
+    for (;;) {
+      let read: { done: boolean; value?: Uint8Array }
+      try {
+        read = await reader.read()
+      } catch {
+        // reader.cancel() (watchdog) rejects the in-flight read; treat it as
+        // the timeout it is. Any other read failure is an unexpected drop.
+        throw timedOut
+          ? new Error("Lab generation timed out. Please try again.")
+          : new Error("Lab generation ended unexpectedly. Please try again.")
+      }
+      if (read.done) break
+      buffer += decoder.decode(read.value, { stream: true })
+
+      let idx: number
+      while ((idx = buffer.indexOf("\n\n")) !== -1) {
+        const rawEvent = buffer.slice(0, idx)
+        buffer = buffer.slice(idx + 2)
+        for (const line of rawEvent.split("\n")) {
+          if (!line.startsWith("data:")) continue
+          const payload = line.slice(5).trim()
+          if (!payload) continue
+          let evt: { type: string; step?: LabAgentStep; data?: GenerateLabResponse; message?: string }
+          try {
+            evt = JSON.parse(payload)
+          } catch {
+            continue
+          }
+          if (evt.type === "step" && evt.step) {
+            handlers.onStep(evt.step)
+            await new Promise((resolve) => setTimeout(resolve, 60))
+          } else if (evt.type === "done" && evt.data) {
+            completed = true
+            handlers.onDone(evt.data)
+          } else if (evt.type === "error" && evt.message) {
+            throw new Error(evt.message)
+          }
+        }
+      }
+    }
+  } finally {
+    clearTimeout(watchdog)
+  }
+
+  if (timedOut) {
+    throw new Error("Lab generation timed out. Please try again.")
+  }
+  if (!completed) {
+    throw new Error("Lab generation ended unexpectedly. Please try again.")
+  }
+}
+
+export async function streamGenerateLab(
+  input: GenerateLabInput,
+  handlers: LabStreamHandlers,
+): Promise<void> {
+  const token = getStoredToken()
+  const res = await fetch(`${API_URL}/labs/generate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(input),
+  })
+  await consumeLabStream(res, "/labs/generate", handlers)
+}
+
+export async function streamRefineLab(
+  id: string,
+  instruction: string,
+  handlers: LabStreamHandlers,
+): Promise<void> {
+  const token = getStoredToken()
+  const res = await fetch(`${API_URL}/labs/${id}/refine`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ instruction }),
+  })
+  await consumeLabStream(res, `/labs/${id}/refine`, handlers)
+}
+
+export async function streamRegenerateLab(
+  id: string,
+  handlers: LabStreamHandlers,
+): Promise<void> {
+  const token = getStoredToken()
+  const res = await fetch(`${API_URL}/labs/${id}/regenerate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  })
+  await consumeLabStream(res, `/labs/${id}/regenerate`, handlers)
+}
+
+export async function deleteLab(id: string): Promise<Lab> {
+  const res = await api.delete<Lab>(`/labs/${id}`)
   return res.data
 }
 

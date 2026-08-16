@@ -1,18 +1,27 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { render, screen, cleanup, within, fireEvent } from "@testing-library/react"
+import { render, screen, cleanup, within, fireEvent, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { LabsPage } from "@/pages/teacher/LabsPage"
 
-const { useTeacherOfferings, useLabs, useGenerateLab, getTeacherGrades } =
-  vi.hoisted(() => ({
-    useTeacherOfferings: vi.fn(),
-    useLabs: vi.fn(),
-    useGenerateLab: vi.fn(),
-    getTeacherGrades: vi.fn(),
-  }))
+const {
+  useTeacherOfferings,
+  useLabs,
+  useGenerateLab,
+  useDeleteLab,
+  getTeacherGrades,
+  useCourseMaterialChapters,
+} = vi.hoisted(() => ({
+  useTeacherOfferings: vi.fn(),
+  useLabs: vi.fn(),
+  useGenerateLab: vi.fn(),
+  useDeleteLab: vi.fn(),
+  getTeacherGrades: vi.fn(),
+  useCourseMaterialChapters: vi.fn(),
+}))
 
 const mutateLab = vi.fn()
+const deleteLab = vi.fn()
 
 vi.mock("@/providers/use-auth", () => ({
   useAuth: () => ({ user: { id: "teacher-1" } }),
@@ -26,7 +35,17 @@ vi.mock("@/hooks/use-labs", () => ({
   useTeacherOfferings: () => useTeacherOfferings(),
   useLabs: () => useLabs(),
   useGenerateLab: () => useGenerateLab(),
+  useDeleteLab: () => useDeleteLab(),
 }))
+
+vi.mock("@/hooks/use-materials", () => ({
+  useCourseMaterialChapters: () => useCourseMaterialChapters(),
+}))
+
+const UNITS = [
+  { id: "unit-1", title: "Unit 1 — Kinematics", order: 1, materials: [{ id: "m1" }] },
+  { id: "unit-2", title: "Unit 2 — Forces", order: 2, materials: [{ id: "m2" }] },
+]
 
 function renderPage() {
   const queryClient = new QueryClient({
@@ -51,6 +70,7 @@ describe("LabsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mutateLab.mockReset()
+    deleteLab.mockReset()
     getTeacherGrades.mockResolvedValue([
       { id: "grade-a", level: 9, name: "", createdAt: "2026-01-01T00:00:00Z" },
       { id: "grade-b", level: 10, name: "", createdAt: "2026-01-01T00:00:00Z" },
@@ -78,7 +98,15 @@ describe("LabsPage", () => {
       ],
     })
     useLabs.mockReturnValue({ labs: [], isLoading: false })
-    useGenerateLab.mockReturnValue({ isPending: false, mutate: mutateLab })
+    useGenerateLab.mockReturnValue({
+      isPending: false,
+      isLoading: false,
+      step: null,
+      lastToolStep: null,
+      mutate: mutateLab,
+    })
+    useDeleteLab.mockReturnValue({ isPending: false, mutate: deleteLab })
+    useCourseMaterialChapters.mockReturnValue({ chapters: UNITS, isLoading: false })
   })
 
   afterEach(() => {
@@ -140,7 +168,7 @@ describe("LabsPage", () => {
     expect(within(sectionListbox).queryByText("10-A")).not.toBeInTheDocument()
   })
 
-  it("defaults the dialog to the top-bar section and submits every selected section", async () => {
+  it("defaults the dialog to the top-bar section and submits every selected section with a unit and prompt", async () => {
     renderPage()
     await screen.findByText("Grade 9")
 
@@ -152,19 +180,27 @@ describe("LabsPage", () => {
     expect(within(dialog).getByText("9-A")).toBeInTheDocument()
     expect(within(dialog).getByText("9-B")).toBeInTheDocument()
 
-    // Add a second section, type a topic, and generate.
+    // Add a second section, pick a unit, type a prompt, and generate.
     fireEvent.click(within(dialog).getByRole("checkbox", { name: "9-B" }))
     expect(screen.getByText(/2 sections selected/)).toBeInTheDocument()
 
-    const topicInput = screen.getByPlaceholderText(
-      "e.g. Projectile motion on an inclined plane",
-    )
-    fireEvent.change(topicInput, { target: { value: "pendulum period" } })
+    const dialogCombos = within(dialog).getAllByRole("combobox")
+    dialogCombos[2].click()
+    const unitListbox = await screen.findByRole("listbox")
+    within(unitListbox).getByText(/Unit 1 — Kinematics/).click()
+
+    const promptInput = screen.getByPlaceholderText(/Build a game where students construct a plant cell/)
+    fireEvent.change(promptInput, { target: { value: "pendulum period" } })
 
     screen.getByRole("button", { name: "Generate lab" }).click()
 
     expect(mutateLab).toHaveBeenCalledWith(
-      { courseOfferingIds: ["off-a", "off-b"], topic: "pendulum period" },
+      {
+        courseOfferingIds: ["off-a", "off-b"],
+        chapterId: "unit-1",
+        prompt: "pendulum period",
+        mode: "template",
+      },
       expect.any(Object),
     )
   })
@@ -195,7 +231,7 @@ describe("LabsPage", () => {
     expect(screen.queryByText("9-B")).not.toBeInTheDocument()
   })
 
-  it("keeps Generate disabled until a topic is typed", async () => {
+  it("keeps Generate disabled until a unit and prompt are chosen", async () => {
     renderPage()
     await screen.findByText("Grade 9")
 
@@ -203,5 +239,68 @@ describe("LabsPage", () => {
     await screen.findByText(/1 section selected/)
 
     expect(screen.getByRole("button", { name: "Generate lab" })).toBeDisabled()
+  })
+
+  it("deletes a lab from the list after confirmation", async () => {
+    useLabs.mockReturnValue({
+      labs: [
+        {
+          id: "lab-1",
+          courseOfferingId: "off-a",
+          courseOfferingIds: ["off-a"],
+          topic: "Pendulum period",
+          chapterId: "unit-1",
+          status: "PENDING_TEACHER_REVIEW",
+          generatedCode: "// x",
+          template: null,
+          gameSpec: null,
+          reviewApproved: true,
+          reviewFlags: null,
+          teacherNotes: null,
+          publishedAt: null,
+          createdAt: "2026-01-01T00:00:00Z",
+        },
+      ],
+      isLoading: false,
+    })
+    renderPage()
+
+    screen.getByRole("button", { name: "Delete lab Pendulum period" }).click()
+    const dialog = await screen.findByRole("dialog")
+    within(dialog).getByRole("button", { name: "Delete lab" }).click()
+
+    expect(deleteLab).toHaveBeenCalledWith("lab-1", expect.any(Object))
+  })
+
+  it("closes the dialog immediately and shows the inline agent card while generating", async () => {
+    renderPage()
+    await screen.findByText("Grade 9")
+
+    screen.getByRole("button", { name: "New lab" }).click()
+    await screen.findByText(/1 section selected/)
+
+    const dialog = await screen.findByRole("dialog")
+    const dialogCombos = within(dialog).getAllByRole("combobox")
+    dialogCombos[2].click()
+    const unitListbox = await screen.findByRole("listbox")
+    within(unitListbox).getByText(/Unit 1 — Kinematics/).click()
+
+    const promptInput = screen.getByPlaceholderText(/Build a game where students construct a plant cell/)
+    fireEvent.change(promptInput, { target: { value: "pendulum period" } })
+
+    // Generation is pending from the moment the dialog is submitted.
+    useGenerateLab.mockReturnValue({
+      isPending: true,
+      isLoading: true,
+      step: "search_curriculum",
+      lastToolStep: "search_curriculum",
+      mutate: mutateLab,
+    })
+
+    screen.getByRole("button", { name: "Generate lab" }).click()
+
+    // Dialog closes immediately; the inline agent card appears instead.
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+    expect(screen.getByText("Searching the unit material…")).toBeTruthy()
   })
 })

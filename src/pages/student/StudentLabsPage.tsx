@@ -21,7 +21,7 @@ export function StudentLabsPage() {
     <div className="flex-1 flex flex-col">
       <PageHeader
         title="Lab Simulations"
-        subtitle="Interactive physics simulations your teacher built from class material. Can you hit the objective?"
+        subtitle="Interactive labs your teacher built from class material. Can you hit the objective?"
       />
 
       <div className="px-6 pb-6 flex-1">
@@ -32,7 +32,7 @@ export function StudentLabsPage() {
             <span className="material-symbols-outlined text-[40px] text-on-surface-variant">science</span>
             <p className="font-headline-sm text-headline-sm text-on-surface mt-3">No labs yet</p>
             <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-              Your teachers haven't published any simulations for your classes yet.
+              Your teachers haven't published any labs for your classes yet.
             </p>
           </div>
         ) : (

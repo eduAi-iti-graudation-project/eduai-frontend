@@ -14,10 +14,9 @@ describe("escapeClosingScript", () => {
 })
 
 describe("buildLabHarnessHtml", () => {
-  it("inlines the Matter.js engine and the generated code", () => {
-    const html = buildLabHarnessHtml("Matter.Engine.create();")
-    expect(html).toContain("matter-js 0.20.0")
-    expect(html).toContain("Matter.Engine.create();")
+  it("inlines the generated code into a #sim container", () => {
+    const html = buildLabHarnessHtml("const game = new Game();")
+    expect(html).toContain("const game = new Game();")
     expect(html).toContain('id="sim"')
   })
 
@@ -44,5 +43,20 @@ describe("buildLabHarnessHtml", () => {
     // The iframe element itself is not part of the srcdoc, but the harness
     // contract is documented here for regression purposes.
     expect(html).toBeDefined()
+  })
+
+  it("inlines the Matter.js bundle before the generated code so the global Matter exists", () => {
+    const html = buildLabHarnessHtml("Matter.Engine.create()")
+    // The UMD bundle boots the global \`Matter\` (e.g. its version banner).
+    expect(html).toContain("matter-js")
+    expect(html).toContain("Matter.Engine")
+    // Matter is a separate <script> block emitted BEFORE the generated code.
+    expect(html.indexOf("matter-js")).toBeLessThan(html.indexOf("Matter.Engine.create()"))
+  })
+
+  it("disables touch scrolling and text selection so drags are never swallowed", () => {
+    const html = buildLabHarnessHtml("")
+    expect(html).toContain("#sim { width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }")
+    expect(html).toContain("#sim canvas { touch-action: none; }")
   })
 })
