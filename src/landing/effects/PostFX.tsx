@@ -7,9 +7,9 @@ import { EffectComposer, Vignette } from "@react-three/postprocessing"
  * surfaces instead, so no post-processing step can ever poison a frame.
  */
 export function PostFX() {
-  return (
-    <EffectComposer multisampling={0}>
-      <Vignette eskil={false} offset={0.28} darkness={0.42} />
-    </EffectComposer>
-  )
+ return (
+  <EffectComposer multisampling={0}>
+   <Vignette eskil={false} offset={0.28} darkness={0.42} />
+  </EffectComposer>
+ )
 }

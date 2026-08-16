@@ -17,36 +17,36 @@ preloadLandingModels()
  * invisible DOM wrapper owns the wheel; one scroll value drives everything.
  */
 export function LandingExperience() {
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  useLandingScroll(wrapperRef)
+ const wrapperRef = useRef<HTMLDivElement>(null)
+ useLandingScroll(wrapperRef)
 
-  return (
-    <>
-      <div ref={wrapperRef} className="relative" style={{ height: `${PAGE_HEIGHT_VH}vh` }}>
-        {/* sky backdrop behind the canvas so overscroll never flashes */}
-        <div className="fixed inset-0 z-0 bg-[#d9e6f6]" />
-        <LoadingGate>
-          <LandingErrorBoundary>
-            <div className="fixed inset-0 z-[1]">
-              <Canvas
-                dpr={[1, 1.75]}
-                camera={{ fov: 45, near: 0.1, far: 200, position: [0, 1.15, 2.75] }}
-                gl={{ antialias: true, powerPreference: "high-performance" }}
-              >
-                <Suspense fallback={null}>
-                  <SceneRoot />
-                </Suspense>
-              </Canvas>
-            </div>
-          </LandingErrorBoundary>
-          {/* section text / UI overlays */}
-          <div className="pointer-events-none absolute inset-0 z-10">
-            <SectionOverlays />
-          </div>
-          <WarpFlash />
-        </LoadingGate>
+ return (
+  <>
+   <div ref={wrapperRef} className="relative" style={{ height: `${PAGE_HEIGHT_VH}vh` }}>
+    {/* sky backdrop behind the canvas so overscroll never flashes */}
+    <div className="fixed inset-0 z-0 bg-[#fceef5]" />
+    <LoadingGate>
+     <LandingErrorBoundary>
+      <div className="fixed inset-0 z-[1]">
+       <Canvas
+        dpr={[1, 1.75]}
+        camera={{ fov: 45, near: 0.1, far: 200, position: [0, 1.15, 2.75] }}
+        gl={{ antialias: true, powerPreference: "high-performance" }}
+       >
+        <Suspense fallback={null}>
+         <SceneRoot />
+        </Suspense>
+       </Canvas>
       </div>
-      <NavBar />
-    </>
-  )
+     </LandingErrorBoundary>
+     {/* section text / UI overlays */}
+     <div className="pointer-events-none absolute inset-0 z-10">
+      <SectionOverlays />
+     </div>
+     <WarpFlash />
+    </LoadingGate>
+   </div>
+   <NavBar />
+  </>
+ )
 }

@@ -5,58 +5,58 @@ const TEACHER_ROLES = new Set(["TEACHER"])
 const STUDENT_ROLES = new Set(["STUDENT", "GUARDIAN"])
 
 function LoadingScreen() {
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-surface">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
-        </div>
-        <p className="font-body-md text-body-md text-on-surface-variant">Loading...</p>
-      </div>
+ return (
+  <div className="flex items-center justify-center min-h-screen bg-surface">
+   <div className="flex flex-col items-center gap-4">
+    <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
+     <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
     </div>
-  )
+    <p className="font-body-md text-body-md text-on-surface-variant">Loading...</p>
+   </div>
+  </div>
+ )
 }
 
 export function TeacherRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, user } = useAuth()
-  if (isLoading) return <LoadingScreen />
-  if (!isAuthenticated) return <Navigate to="/login" replace />
-  if (user?.role && TEACHER_ROLES.has(user.role)) return <>{children}</>
-  return <Navigate to="/" replace />
+ const { isAuthenticated, isLoading, user } = useAuth()
+ if (isLoading) return <LoadingScreen />
+ if (!isAuthenticated) return <Navigate to="/login" replace />
+ if (user?.role && TEACHER_ROLES.has(user.role)) return <>{children}</>
+ return <Navigate to="/" replace />
 }
 
 export function StudentRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, user } = useAuth()
-  if (isLoading) return <LoadingScreen />
-  if (!isAuthenticated) return <Navigate to="/login" replace />
-  if (user?.role && STUDENT_ROLES.has(user.role)) return <>{children}</>
-  return <Navigate to="/" replace />
+ const { isAuthenticated, isLoading, user } = useAuth()
+ if (isLoading) return <LoadingScreen />
+ if (!isAuthenticated) return <Navigate to="/login" replace />
+ if (user?.role && STUDENT_ROLES.has(user.role)) return <>{children}</>
+ return <Navigate to="/" replace />
 }
 
 export function GuardianRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, user } = useAuth()
-  if (isLoading) return <LoadingScreen />
-  if (!isAuthenticated) return <Navigate to="/login" replace />
-  if (user?.role === "GUARDIAN") return <>{children}</>
-  return <Navigate to="/" replace />
+ const { isAuthenticated, isLoading, user } = useAuth()
+ if (isLoading) return <LoadingScreen />
+ if (!isAuthenticated) return <Navigate to="/login" replace />
+ if (user?.role === "GUARDIAN") return <>{children}</>
+ return <Navigate to="/" replace />
 }
 
 export function GuestRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, user } = useAuth()
-  if (isLoading) return <LoadingScreen />
-  if (isAuthenticated && user?.role) {
-    if (user.role === "ADMIN") return <Navigate to="/admin" replace />
-    if (user.role === "TEACHER") return <Navigate to="/dashboard" replace />
-    if (user.role === "GUARDIAN") return <Navigate to="/guardian" replace />
-    if (user.role === "STUDENT") return <Navigate to="/student" replace />
-  }
-  return <>{children}</>
+ const { isAuthenticated, isLoading, user } = useAuth()
+ if (isLoading) return <LoadingScreen />
+ if (isAuthenticated && user?.role) {
+  if (user.role === "ADMIN") return <Navigate to="/admin" replace />
+  if (user.role === "TEACHER") return <Navigate to="/dashboard" replace />
+  if (user.role === "GUARDIAN") return <Navigate to="/guardian" replace />
+  if (user.role === "STUDENT") return <Navigate to="/student" replace />
+ }
+ return <>{children}</>
 }
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, user } = useAuth()
-  if (isLoading) return <LoadingScreen />
-  if (!isAuthenticated) return <Navigate to="/login" replace />
-  if (user?.role === "ADMIN") return <>{children}</>
-  return <Navigate to="/" replace />
+ const { isAuthenticated, isLoading, user } = useAuth()
+ if (isLoading) return <LoadingScreen />
+ if (!isAuthenticated) return <Navigate to="/login" replace />
+ if (user?.role === "ADMIN") return <>{children}</>
+ return <Navigate to="/" replace />
 }
