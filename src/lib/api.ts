@@ -2583,11 +2583,23 @@ export interface StudyGeneration {
   fileUrl: string | null
 }
 
+export type StudyLabThemePreset = "modern" | "classic" | "dark" | "colorful" | "minimal"
+export type StudyLabThemeBackground = "light" | "dark" | "gradient"
+export type StudyLabThemeMotion = "fade" | "rise" | "slide" | "scale"
+
+export interface DeckThemeInput {
+  preset?: StudyLabThemePreset
+  accent?: string
+  background?: StudyLabThemeBackground
+  motion?: StudyLabThemeMotion
+}
+
 export interface GenerateStudyLabInput {
   courseOfferingId: string
   kind: StudyLabKind
   materialKind?: StudyLabMaterialKind
   preset?: StudyLabPreset
+  theme?: DeckThemeInput
   topic: string
 }
 
