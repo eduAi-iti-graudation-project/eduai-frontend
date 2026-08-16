@@ -158,6 +158,7 @@ export function StudyLabPage() {
   const [materialKind, setMaterialKind] = useState<api.StudyLabMaterialKind>("STUDY_GUIDE")
   const [preset, setPreset] = useState<api.StudyLabPreset>("OVERVIEW")
   const [topic, setTopic] = useState("")
+  const [activeId, setActiveId] = useState<string | null>(null)
   // History Filter state
   const [historyFilter, setHistoryFilter] = useState<string>("ALL")
   const [historySearch, setHistorySearch] = useState("")
