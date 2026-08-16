@@ -158,7 +158,31 @@ export function StudyLabPage() {
   const [materialKind, setMaterialKind] = useState<api.StudyLabMaterialKind>("STUDY_GUIDE")
   const [preset, setPreset] = useState<api.StudyLabPreset>("OVERVIEW")
   const [topic, setTopic] = useState("")
-  const [activeId, setActiveId] = useState<string | null>(null)
+  // History Filter state
+  const [historyFilter, setHistoryFilter] = useState<string>("ALL")
+  const [historySearch, setHistorySearch] = useState("")
+
+  // Filter history data
+  const filteredHistory = (history.data ?? []).filter((g) => {
+    // Kind / Status filter
+    if (historyFilter === "PODCAST" && g.kind !== "PODCAST") return false
+    if (historyFilter === "SLIDES" && g.kind !== "SLIDES") return false
+    if (historyFilter === "STUDY_MATERIAL" && g.kind !== "STUDY_MATERIAL") return false
+    if (historyFilter === "READY" && g.status !== "READY") return false
+    if (historyFilter === "PROCESSING" && g.status !== "PROCESSING") return false
+    if (historyFilter === "FAILED" && g.status !== "FAILED") return false
+
+    // Search query filter
+    if (historySearch.trim()) {
+      const q = historySearch.toLowerCase().trim()
+      const matchTopic = g.topic.toLowerCase().includes(q)
+      const matchKind = g.kind.toLowerCase().includes(q)
+      const matchMaterial = g.materialKind?.toLowerCase().includes(q)
+      if (!matchTopic && !matchKind && !matchMaterial) return false
+    }
+
+    return true
+  })
 
   // Slide theme state
   const [themePreset, setThemePreset] = useState<api.StudyLabThemePreset>("modern")
@@ -483,31 +507,92 @@ export function StudyLabPage() {
         </div>
 
         {/* ── History + Detail ── */}
-        <div className="mt-6 grid gap-6 lg:grid-cols-[340px_1fr]">
-          <div>
-            <h2 className="font-headline-md text-headline-md text-on-surface mb-3">
-              History
-            </h2>
-            <div className="space-y-2">
-              {history.data?.length === 0 && (
-                <p className="font-body-md text-body-md text-on-surface-variant">
-                  Nothing generated yet — pick a course and hit Generate.
+        <div className="mt-6 grid gap-6 lg:grid-cols-[360px_1fr] items-start">
+          {/* History Sidebar */}
+          <div className="rounded-lg border border-border bg-surface p-4 flex flex-col max-h-[650px]">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-[20px] text-primary">history</span>
+                History
+              </h2>
+              <span className="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded-full border border-border">
+                {filteredHistory.length}
+              </span>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative mb-3">
+              <span className="material-symbols-outlined absolute left-2.5 top-2.5 text-[16px] text-on-surface-variant">
+                search
+              </span>
+              <input
+                type="text"
+                value={historySearch}
+                onChange={(e) => setHistorySearch(e.target.value)}
+                placeholder="Search history..."
+                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-border bg-surface-container-lowest text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary"
+              />
+              {historySearch && (
+                <button
+                  type="button"
+                  onClick={() => setHistorySearch("")}
+                  className="absolute right-2 top-2 text-on-surface-variant hover:text-on-surface"
+                >
+                  <span className="material-symbols-outlined text-[14px]">close</span>
+                </button>
+              )}
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex flex-wrap gap-1 mb-3 pb-2 border-b border-border">
+              {[
+                { id: "ALL", label: "All" },
+                { id: "PODCAST", label: "Podcasts" },
+                { id: "SLIDES", label: "Slides" },
+                { id: "STUDY_MATERIAL", label: "Materials" },
+                { id: "PROCESSING", label: "Active" },
+                { id: "FAILED", label: "Failed" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setHistoryFilter(tab.id)}
+                  className={cn(
+                    "rounded-md px-2 py-1 font-label-sm text-[11px] transition-colors",
+                    historyFilter === tab.id
+                      ? "bg-primary text-on-primary font-medium"
+                      : "bg-surface-container-low text-on-surface-variant hover:bg-border",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* History List with Isolated Scrollbar */}
+            <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[460px] custom-scrollbar">
+              {filteredHistory.length === 0 && (
+                <p className="font-body-md text-sm text-on-surface-variant p-3 text-center">
+                  {historySearch || historyFilter !== "ALL"
+                    ? "No matching generations found."
+                    : "Nothing generated yet — pick a course and hit Generate."}
                 </p>
               )}
-              {history.data?.map((g) => {
-                const resolvedKind = g.kind === "STUDY_MATERIAL" ? g.materialKind ?? "STUDY_MATERIAL" : g.kind
+              {filteredHistory.map((g) => {
+                const resolvedKind =
+                  g.kind === "STUDY_MATERIAL" ? g.materialKind ?? "STUDY_MATERIAL" : g.kind
                 return (
                   <button
                     key={g.id}
                     type="button"
                     onClick={() => setActiveId(g.id === activeId ? null : g.id)}
                     className={cn(
-                      "w-full text-left rounded-lg border p-3 transition-colors",
+                      "w-full text-left rounded-lg border p-3 transition-all hover:shadow-sm",
                       g.recommendedForAnalysisId
                         ? "border-primary/60 bg-primary/10"
                         : activeId === g.id
-                          ? "border-primary/50 bg-primary/5"
-                          : "border-border hover:border-primary/30",
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                          : "border-border hover:border-primary/40 bg-surface-container-lowest",
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -518,21 +603,31 @@ export function StudyLabPage() {
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 font-label-md text-label-md text-on-surface truncate">
-                          <span className="material-symbols-outlined text-[16px] text-on-surface-variant shrink-0">
+                          <span className="material-symbols-outlined text-[16px] text-primary shrink-0">
                             {kindIcons[resolvedKind] ?? "description"}
                           </span>
                           {kindLabels[resolvedKind]}
                         </span>
                       )}
-                      <span className={cn("font-label-sm text-label-sm rounded-full px-2 py-0.5 shrink-0", statusStyles[g.status])}>
+                      <span
+                        className={cn(
+                          "font-label-sm text-[10px] rounded-full px-2 py-0.5 shrink-0 font-medium",
+                          statusStyles[g.status],
+                        )}
+                      >
                         {g.status === "PROCESSING" ? g.stage : g.status.toLowerCase()}
                       </span>
                     </div>
-                    <p className="font-label-sm text-label-sm text-on-surface-variant mt-1 truncate">
+                    <p className="font-body-md text-xs text-on-surface-variant mt-1.5 line-clamp-2">
                       {g.topic}
                     </p>
-                    <p className="font-label-sm text-label-sm text-on-surface-variant/70 mt-0.5">
-                      {new Date(g.createdAt).toLocaleString()}
+                    <p className="font-label-sm text-[10px] text-on-surface-variant/70 mt-1">
+                      {new Date(g.createdAt).toLocaleString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </p>
                   </button>
                 )
