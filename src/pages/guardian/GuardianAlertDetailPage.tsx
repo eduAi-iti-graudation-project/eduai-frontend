@@ -49,7 +49,7 @@ export function GuardianAlertDetailPage() {
     )
   }
 
-  const { guardianContent, diagnosis } = detail.data
+  const { guardianContent, diagnosis, studentId, studentName } = detail.data
 
   return (
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
@@ -57,66 +57,126 @@ export function GuardianAlertDetailPage() {
 
       <div className="mb-6 border-b border-border pb-3">
         <h1 className="font-headline-xl text-headline-xl text-primary">Academic Update</h1>
+        {studentName && (
+          <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
+            For <span className="font-semibold text-on-surface">{studentName}</span>
+          </p>
+        )}
       </div>
 
-      {guardianContent && (
-        <div className="space-y-6">
-          <div className="rounded-lg bg-white border border-border p-md">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-                <span className="material-symbols-outlined text-[18px] text-accent-foreground">family_history</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+        <div className="lg:col-span-2 space-y-6">
+          {guardianContent && (
+            <div className="rounded-lg bg-white border border-border p-md">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[18px] text-accent-foreground">family_history</span>
+                </div>
+                <h2 className="font-headline-md text-headline-md text-primary">Message</h2>
               </div>
-              <h2 className="font-headline-md text-headline-md text-primary">Message</h2>
+              <div className="bg-accent rounded-lg p-4 border border-outline-variant">
+                <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap">
+                  {guardianContent.message}
+                </p>
+              </div>
             </div>
-            <div className="bg-accent rounded-lg p-4 border border-outline-variant">
-              <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap">
-                {guardianContent.message}
+          )}
+
+          {diagnosis.summary && (
+            <div className="rounded-lg bg-white border border-border p-md">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[18px] text-on-primary-fixed-variant">psychology</span>
+                </div>
+                <h2 className="font-headline-md text-headline-md text-primary">Why this happened</h2>
+              </div>
+              <p className="font-body-md text-body-md text-on-surface">{diagnosis.summary}</p>
+            </div>
+          )}
+
+          {!guardianContent && !diagnosis.summary && (
+            <div className="rounded-lg bg-white border border-border p-md">
+              <p className="font-body-md text-body-md text-on-surface">
+                No further context is available for this update yet.
               </p>
             </div>
+          )}
+
+          {guardianContent && <HomeStrategiesList strategies={guardianContent.homeSupport} />}
+        </div>
+
+        <aside className="space-y-4">
+          {studentId && (
+            <div className="rounded-lg bg-white border border-border p-md">
+              <h3 className="font-headline-md text-headline-md text-primary border-b border-border pb-2 mb-3">
+                About {studentName ?? "this student"}
+              </h3>
+              <ul className="space-y-1">
+                <li>
+                  <Link
+                    to={`/guardian/children/${studentId}`}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 font-label-md text-label-md text-on-surface hover:bg-surface-container transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px] text-on-surface-variant">person</span>
+                    View student detail
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to={`/guardian/insights/students/${studentId}`}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 font-label-md text-label-md text-on-surface hover:bg-surface-container transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px] text-on-surface-variant">monitoring</span>
+                    View insights
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to={`/guardian/assistant?student=${studentId}`}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 font-label-md text-label-md text-on-surface hover:bg-surface-container transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px] text-on-surface-variant">smart_toy</span>
+                    Ask the Assistant
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          )}
+
+          <div className="rounded-lg bg-white border border-border overflow-hidden">
+            <div className="px-md py-3 border-b border-border">
+              <h3 className="font-headline-md text-headline-md text-primary">Recent Grades</h3>
+            </div>
+            {grades.isLoading ? (
+              <div className="p-4 space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 bg-surface-container-high rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : !grades.data || grades.data.length === 0 ? (
+              <EmptyState flat icon="grade" title="No grades available yet." />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-border bg-surface-container-low hover:bg-transparent">
+                    <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Assignment</TableHead>
+                    <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Score</TableHead>
+                    <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Max</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {grades.data.filter((g) => g.isConfirmed).map((g) => (
+                    <TableRow key={g.id} className="border-b border-border hover:bg-surface-container">
+                      <TableCell className="px-md py-3 font-body-md text-body-md text-on-surface">{g.criterionDescription}</TableCell>
+                      <TableCell className="px-md py-3 text-right font-body-md text-body-md text-on-surface">{g.pointsAwarded}</TableCell>
+                      <TableCell className="px-md py-3 text-right font-body-md text-body-md text-on-surface-variant">{g.criterionMaxPoints}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </div>
-
-          <HomeStrategiesList strategies={guardianContent.homeSupport} />
-        </div>
-      )}
-
-      {!guardianContent && diagnosis.summary && (
-        <div className="rounded-lg bg-white border border-border p-md">
-          <p className="font-body-md text-body-md text-on-surface">{diagnosis.summary}</p>
-        </div>
-      )}
-
-      <div className="rounded-lg bg-white border border-border overflow-hidden mt-4">
-        <div className="px-md py-3 border-b border-border">
-          <h3 className="font-headline-md text-headline-md text-primary">Recent Grades</h3>
-        </div>
-        {grades.isLoading ? (
-          <div className="p-4 space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-surface-container-high rounded-lg animate-pulse" />
-            ))}
-          </div>
-        ) : !grades.data || grades.data.length === 0 ? (
-          <EmptyState flat icon="grade" title="No grades available yet." />
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-border bg-surface-container-low hover:bg-transparent">
-                <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Assignment</TableHead>
-                <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Score</TableHead>
-                <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-md py-3 h-auto">Max</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {grades.data.filter((g) => g.isConfirmed).map((g) => (
-                <TableRow key={g.id} className="border-b border-border hover:bg-surface-container">
-                  <TableCell className="px-md py-3 font-body-md text-body-md text-on-surface">{g.criterionDescription}</TableCell>
-                  <TableCell className="px-md py-3 text-right font-body-md text-body-md text-on-surface">{g.pointsAwarded}</TableCell>
-                  <TableCell className="px-md py-3 text-right font-body-md text-body-md text-on-surface-variant">{g.criterionMaxPoints}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+        </aside>
       </div>
     </div>
   )

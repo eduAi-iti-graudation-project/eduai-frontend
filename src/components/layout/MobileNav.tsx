@@ -45,6 +45,7 @@ export function MobileNav() {
   const guardianItems: NavItem[] = [
     { icon: "home", label: "Home", id: "home", href: "/guardian", prefixes: ["/guardian"] },
     { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/guardian/alerts", prefixes: ["/guardian/alerts"] },
+    { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/guardian/assistant", prefixes: ["/guardian/assistant"] },
     { icon: "chat_bubble", label: "Messages", id: "chat", href: "/guardian/chat", prefixes: ["/guardian/chat"] },
     { icon: "monitoring", label: "Insights", id: "insights", href: "/guardian/insights", prefixes: ["/guardian/insights"] },
     { icon: "description", label: "Reports", id: "reports", href: "/guardian/reports", prefixes: ["/guardian/reports"] },

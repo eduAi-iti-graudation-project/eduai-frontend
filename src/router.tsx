@@ -61,6 +61,7 @@ import { LabsPage } from "./pages/teacher/LabsPage"
 import { LabDetailPage } from "./pages/teacher/LabDetailPage"
 import { GuardianDashboardPage } from "./pages/guardian/GuardianDashboardPage"
 import { GuardianAlertsPage } from "./pages/guardian/GuardianAlertsPage"
+import { GuardianAssistantPage } from "./pages/guardian/GuardianAssistantPage"
 import { ChildDetailPage } from "./pages/guardian/ChildDetailPage"
 import { GuardianLayout } from "./components/layout/GuardianLayout"
 import { AdminLayout } from "./components/layout/AdminLayout"
@@ -187,6 +188,7 @@ export function guardianRoutes() {
     element: <GuardianRoute><GuardianLayout /></GuardianRoute>,
     children: [
       { index: true, element: <GuardianDashboardPage /> },
+      { path: "assistant", element: <GuardianAssistantPage /> },
       { path: "children/:id", element: <ChildDetailPage /> },
       { path: "alerts", element: <GuardianAlertsPage /> },
       { path: "alerts/:id", element: <GuardianAlertDetailPage /> },

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { renderReportSection } from "@/lib/report-sections"
 import { Badge } from "@/components/ui/badge"
 import { WeeklyTimetableGrid } from "@/components/timetable/WeeklyTimetableGrid"
+import { computeChildSummary } from "@/lib/child-stats"
 import {
   Table,
   TableBody,
@@ -101,6 +102,50 @@ export function ChildDetailPage() {
         <BackLink to="/guardian" label="Back to Dashboard" />
         <h1 className="font-headline-xl text-headline-xl text-primary">Student Detail</h1>
       </div>
+
+      {!grades.isLoading && !attendance.isLoading && (
+        <div className="mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+            {(() => {
+              const summary = computeChildSummary(grades.data ?? [], attendance.data ?? [])
+              return [
+                { label: "Overall average", icon: "grade", value: `${summary.overallAverage}%`, caption: `${summary.confirmedCount} confirmed grade${summary.confirmedCount === 1 ? "" : "s"}` },
+                { label: "Attendance rate", icon: "event_available", value: `${summary.attendanceRate}%`, caption: "of recorded sessions" },
+                { label: "Present days", icon: "check_circle", value: summary.present, caption: summary.present === 1 ? "day on record" : "days on record" },
+                { label: "Absent days", icon: "event_busy", value: summary.absent, caption: summary.absent === 1 ? "day on record" : "days on record" },
+              ].map((stat) => (
+                <div key={stat.label} className="rounded-xl bg-surface-container-lowest border border-outline-variant p-md flex flex-col gap-1">
+                  <div className="flex justify-between items-start">
+                    <span className="font-label-sm text-label-sm text-on-surface-variant">{stat.label}</span>
+                    <span className="w-8 h-8 rounded-lg bg-primary-container text-primary flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[18px]">{stat.icon}</span>
+                    </span>
+                  </div>
+                  <p className="text-2xl font-headline-lg font-bold tracking-tight text-on-surface">{stat.value}</p>
+                  <p className="text-xs text-on-surface-variant font-medium">{stat.caption}</p>
+                </div>
+              ))
+            })()}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to={`/guardian/assistant?student=${id}`}
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-md py-sm rounded-lg font-label-md"
+            >
+              <span className="material-symbols-outlined text-[18px]">smart_toy</span>
+              Ask the Assistant
+            </Link>
+            <Link
+              to={`/guardian/insights/students/${id}`}
+              className="inline-flex items-center gap-2 bg-surface-container text-on-surface-variant px-md py-sm rounded-lg font-label-md hover:bg-surface-container-high transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">monitoring</span>
+              View insights
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-2 mb-6">
         {tabs.map((tab) => (

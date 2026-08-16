@@ -7,6 +7,7 @@ import { SubscriptionBanner } from "@/components/billing/SubscriptionBanner"
 const navItems = [
   { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/guardian" },
   { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/guardian/alerts" },
+  { icon: "smart_toy", label: "Assistant", id: "assistant", href: "/guardian/assistant" },
   { icon: "monitoring", label: "Insights", id: "insights", href: "/guardian/insights" },
   { icon: "description", label: "Reports", id: "reports", href: "/guardian/reports" },
   { icon: "chat_bubble", label: "Messages", id: "chat", href: "/guardian/chat" },
@@ -19,6 +20,7 @@ export function GuardianLayout() {
 
   const activeItem = path === "/guardian" ? "dashboard"
     : path.startsWith("/guardian/alerts") ? "alerts"
+    : path.startsWith("/guardian/assistant") ? "assistant"
     : path.startsWith("/guardian/insights") ? "insights"
     : path.startsWith("/guardian/reports") ? "reports"
     : path.startsWith("/guardian/chat") ? "chat"
