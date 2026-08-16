@@ -13,13 +13,10 @@ function shuffleArray<T>(array: T[]): T[] {
 
 function shuffleOptions(
   question: api.PracticeQuestion,
-): { question: api.PracticeQuestion; originalToShuffled: number[] } {
+): { question: api.PracticeQuestion } {
   const indices = question.options.map((_, i) => i)
   const shuffledIndices = shuffleArray(indices)
   const shuffledOptions = shuffledIndices.map((i) => question.options[i])
-  const originalToShuffled = shuffledIndices.map((originalIdx) =>
-    question.options.indexOf(question.options[originalIdx]),
-  )
   const newAnswerIndex = shuffledIndices.indexOf(question.answerIndex)
 
   return {
@@ -28,20 +25,17 @@ function shuffleOptions(
       options: shuffledOptions,
       answerIndex: newAnswerIndex,
     },
-    originalToShuffled: shuffledIndices,
   }
 }
 
 export function PracticeView({ generation }: { generation: api.StudyGeneration }) {
   const practice = generation.payload as api.PracticeSet
 
-  const { shuffledQuestions, originalToShuffledMap } = useMemo(() => {
+  const { shuffledQuestions } = useMemo(() => {
     const shuffled = shuffleArray(practice.questions)
     const result = shuffled.map((q) => shuffleOptions(q))
-    const originalToShuffledMap = result.map((r) => r.originalToShuffled)
     return {
       shuffledQuestions: result.map((r) => r.question),
-      originalToShuffledMap,
     }
   }, [practice.questions])
 
@@ -71,7 +65,6 @@ export function PracticeView({ generation }: { generation: api.StudyGeneration }
   }
 
   const retryWrong = () => {
-    const wrongQuestions = wrongAnswers.map((i) => shuffledQuestions[i])
     setIndex(0)
     setScore(0)
     setWrongAnswers([])
@@ -117,7 +110,6 @@ export function PracticeView({ generation }: { generation: api.StudyGeneration }
           <div className="space-y-3">
             {practice.questions.map((q, i) => {
               const shuffledQ = shuffledQuestions[i]
-              const originalIdx = originalToShuffledMap[i]?.[0] ?? i
               return (
                 <div
                   key={i}

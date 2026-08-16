@@ -5,6 +5,15 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { SlideVisualView } from "@/components/study-lab/SlideVisualView"
 
+type Palette = {
+  bg: string
+  panel: string
+  border: string
+  text: string
+  muted: string
+  accent: string
+}
+
 const THEME_PRESETS: Record<string, Palette> = {
   modern: {
     bg: "#ffffff",
