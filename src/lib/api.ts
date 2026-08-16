@@ -969,7 +969,9 @@ export interface BulkUploadResult {
 export async function bulkUploadStudentDocuments(files: File[]): Promise<BulkUploadResult> {
   const form = new FormData()
   for (const file of files) form.append("files", file)
-  const res = await api.post<BulkUploadResult>("/documents/bulk-upload", form)
+  const res = await api.post<BulkUploadResult>("/documents/bulk-upload", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  })
   return res.data
 }
 

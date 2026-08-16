@@ -12,11 +12,11 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { Button } from "@/components/ui/button"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+ Select,
+ SelectContent,
+ SelectItem,
+ SelectTrigger,
+ SelectValue,
 } from "@/components/ui/select"
 import { PodcastView } from "@/components/study-lab/PodcastView"
 import { SlidesView } from "@/components/study-lab/SlidesView"
@@ -27,24 +27,24 @@ import { CheatSheetView } from "@/components/study-lab/CheatSheetView"
 import { cn } from "@/lib/utils"
 
 const kindOptions: { value: api.StudyLabKind; label: string; icon: string; description: string }[] = [
-  { value: "PODCAST", label: "Podcast", icon: "podcasts", description: "Two-voice audio episode with transcript" },
-  { value: "SLIDES", label: "Slides", icon: "co_present", description: "Slide deck with .pptx download" },
-  { value: "STUDY_MATERIAL", label: "Study Material", icon: "menu_book", description: "Guide, flashcards, practice, or cheat sheet" },
+ { value: "PODCAST", label: "Podcast", icon: "podcasts", description: "Two-voice audio episode with transcript" },
+ { value: "SLIDES", label: "Slides", icon: "co_present", description: "Slide deck with .pptx download" },
+ { value: "STUDY_MATERIAL", label: "Study Material", icon: "menu_book", description: "Guide, flashcards, practice, or cheat sheet" },
 ]
 
 const materialKindOptions: { value: api.StudyLabMaterialKind; label: string; icon: string }[] = [
-  { value: "STUDY_GUIDE", label: "Study Guide", icon: "article" },
-  { value: "FLASHCARDS", label: "Flashcards", icon: "style" },
-  { value: "PRACTICE_QUESTIONS", label: "Practice Questions", icon: "fact_check" },
-  { value: "CHEAT_SHEET", label: "Cheat Sheet", icon: "bolt" },
+ { value: "STUDY_GUIDE", label: "Study Guide", icon: "article" },
+ { value: "FLASHCARDS", label: "Flashcards", icon: "style" },
+ { value: "PRACTICE_QUESTIONS", label: "Practice Questions", icon: "fact_check" },
+ { value: "CHEAT_SHEET", label: "Cheat Sheet", icon: "bolt" },
 ]
 
 const presetOptions: { value: api.StudyLabPreset; label: string }[] = [
-  { value: "OVERVIEW", label: "Overview" },
-  { value: "DEEP_DIVE", label: "Deep Dive" },
-  { value: "EXAM_CRAM", label: "Exam Cram" },
-  { value: "CASUAL", label: "Casual" },
-  { value: "BREAKDOWN", label: "Breakdown" },
+ { value: "OVERVIEW", label: "Overview" },
+ { value: "DEEP_DIVE", label: "Deep Dive" },
+ { value: "EXAM_CRAM", label: "Exam Cram" },
+ { value: "CASUAL", label: "Casual" },
+ { value: "BREAKDOWN", label: "Breakdown" },
 ]
 
 // ── Slide Theme Configuration ──────────────────────────────────────────────
@@ -122,18 +122,18 @@ const QUICK_ACCENTS = [
 // ── Status / label helpers ─────────────────────────────────────────────────
 
 const statusStyles: Record<string, string> = {
-  PROCESSING: "bg-amber-100 text-amber-700",
-  READY: "bg-emerald-100 text-emerald-700",
-  FAILED: "bg-red-100 text-red-700",
+ PROCESSING: "bg-highlight/20 text-highlight",
+ READY: "bg-success/15 text-success",
+ FAILED: "bg-danger/15 text-danger",
 }
 
 const kindLabels: Record<string, string> = {
-  PODCAST: "Podcast",
-  SLIDES: "Slides",
-  STUDY_GUIDE: "Study Guide",
-  FLASHCARDS: "Flashcards",
-  PRACTICE_QUESTIONS: "Practice Questions",
-  CHEAT_SHEET: "Cheat Sheet",
+ PODCAST: "Podcast",
+ SLIDES: "Slides",
+ STUDY_GUIDE: "Study Guide",
+ FLASHCARDS: "Flashcards",
+ PRACTICE_QUESTIONS: "Practice Questions",
+ CHEAT_SHEET: "Cheat Sheet",
 }
 
 const kindIcons: Record<string, string> = {
@@ -148,9 +148,9 @@ const kindIcons: Record<string, string> = {
 // ── Component ──────────────────────────────────────────────────────────────
 
 export function StudyLabPage() {
-  const offerings = useStudyLabOfferings()
-  const generate = useGenerateStudyLab()
-  const history = useStudyLabHistory()
+ const offerings = useStudyLabOfferings()
+ const generate = useGenerateStudyLab()
+ const history = useStudyLabHistory()
 
   // Form state
   const [offeringId, setOfferingId] = useState("")
@@ -226,31 +226,31 @@ export function StudyLabPage() {
     setTopic("")
   }
 
-  const selectedKind = kindOptions.find((k) => k.value === kind)
+ const selectedKind = kindOptions.find((k) => k.value === kind)
 
-  return (
-    <div className="flex-1 flex flex-col">
-      <PageHeader
-        title="Study Lab"
-        subtitle="Generate a podcast, slide deck, or study material from your course content."
-        actions={
-          <Select value={offeringId} onValueChange={setOfferingId}>
-            <SelectTrigger className="form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface w-auto min-w-[200px]">
-              <SelectValue placeholder="Select a course..." />
-            </SelectTrigger>
-            <SelectContent>
-              {offerings.data?.map((o) => (
-                <SelectItem key={o.id} value={o.id}>
-                  {o.courseName} · {o.sectionName} ·{" "}
-                  <span className={o.materialCount > 0 ? "text-primary" : "text-error"}>
-                    {o.materialCount > 0 ? `${o.materialCount} material${o.materialCount === 1 ? "" : "s"}` : "no materials"}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        }
-      />
+ return (
+  <div className="flex-1 flex flex-col">
+   <PageHeader
+    title="Study Lab"
+    subtitle="Generate a podcast, slide deck, or study material from your course content."
+    actions={
+     <Select value={offeringId} onValueChange={setOfferingId}>
+      <SelectTrigger className="form-input-focus rounded-full bg-surface px-3 py-2 text-label-md text-on-surface w-auto min-w-[200px]">
+       <SelectValue placeholder="Select a course..." />
+      </SelectTrigger>
+      <SelectContent>
+       {offerings.data?.map((o) => (
+        <SelectItem key={o.id} value={o.id}>
+         {o.courseName} · {o.sectionName} ·{" "}
+         <span className={o.materialCount > 0 ? "text-primary" : "text-error"}>
+          {o.materialCount > 0 ? `${o.materialCount} material${o.materialCount === 1 ? "" : "s"}` : "no materials"}
+         </span>
+        </SelectItem>
+       ))}
+      </SelectContent>
+     </Select>
+    }
+   />
 
       <div className="px-6 pb-6 flex-1">
         {/* ── Generation form ── */}
@@ -633,53 +633,104 @@ export function StudyLabPage() {
             </div>
           </div>
 
-          <div>
-            {!activeId && (
-              <EmptyState
-                icon="auto_stories"
-                title="Pick a generation to view it"
-                description="Your generated podcast, slides, and study materials will appear here."
-              />
-            )}
-            {activeId && (
-              <GenerationDetailView
-                key={activeId}
-                generationId={activeId}
-                onDelete={() => setActiveId(null)}
-              />
-            )}
-          </div>
-        </div>
+    <div className="mt-6 grid gap-6 lg:grid-cols-[340px_1fr]">
+     <div>
+      <h2 className="font-headline-md text-headline-md text-primary mb-3">
+       History
+      </h2>
+      <div className="space-y-2">
+       {history.data?.length === 0 && (
+        <p className="font-body-md text-body-md text-on-surface-variant">
+         Nothing generated yet — pick a course and hit Generate.
+        </p>
+       )}
+       {history.data?.map((g) => (
+        <button
+         key={g.id}
+         type="button"
+         onClick={() => setActiveId(g.id === activeId ? null : g.id)}
+         className={cn(
+          "w-full text-left rounded-lg border p-3 transition-colors",
+          g.recommendedForAnalysisId
+           ? "border-primary/60 bg-primary/10"
+           : activeId === g.id
+            ? "border-primary/50 bg-primary/5"
+            : "border-border hover:border-primary/30",
+         )}
+        >
+         <div className="flex items-center justify-between gap-2">
+          {g.recommendedForAnalysisId ? (
+           <span className="inline-flex items-center gap-1 font-label-md text-label-md text-primary">
+            <span className="material-symbols-outlined text-[18px]">spark</span>
+            Recommended practice
+           </span>
+          ) : (
+           <span className="font-label-md text-label-md text-on-surface truncate">
+            {kindLabels[g.kind === "STUDY_MATERIAL" ? g.materialKind ?? "STUDY_MATERIAL" : g.kind]}
+           </span>
+          )}
+          <span className={cn("font-label-sm text-label-sm rounded-full px-2 py-0.5 shrink-0", statusStyles[g.status])}>
+           {g.status === "PROCESSING" ? g.stage : g.status.toLowerCase()}
+          </span>
+         </div>
+         <p className="font-label-sm text-label-sm text-on-surface-variant mt-1 truncate">
+          {g.topic}
+         </p>
+         <p className="font-label-sm text-label-sm text-on-surface-variant/70 mt-0.5">
+          {new Date(g.createdAt).toLocaleString()}
+         </p>
+        </button>
+       ))}
       </div>
+     </div>
+
+     <div>
+      {!activeId && (
+       <EmptyState
+        icon="auto_stories"
+        title="Pick a generation to view it"
+        description="Your generated podcast, slides, and study materials will appear here."
+       />
+      )}
+      {activeId && (
+       <GenerationDetailView
+        key={activeId}
+        generationId={activeId}
+        onDelete={() => setActiveId(null)}
+       />
+      )}
+     </div>
     </div>
-  )
+   </div>
+  </div>
+ )
 }
 
 function GenerationDetailView({
-  generationId,
-  onDelete,
+ generationId,
+ onDelete,
 }: {
-  generationId: string
-  onDelete: () => void
+ generationId: string
+ onDelete: () => void
 }) {
   const { generation, isLoading, refetch } = useStudyLabGeneration(generationId)
   const remove = useDeleteStudyLabGeneration()
   const retry = useRetryStudyLab()
 
-  if (isLoading && !generation) {
-    return (
-      <div className="rounded-lg border border-border bg-surface p-6 flex items-center gap-3">
-        <span className="material-symbols-outlined animate-spin text-primary">
-          progress_activity
-        </span>
-        <span className="font-body-md text-body-md text-on-surface-variant">
-          Loading generation...
-        </span>
-      </div>
-    )
-  }
+ if (isLoading && !generation) {
+  return (
+   <div className="rounded-lg border border-border bg-surface-container-lowest p-6 flex items-center gap-3">
+    <span className="material-symbols-outlined animate-spin text-primary">
+     progress_activity
+    </span>
+    <span className="font-body-md text-body-md text-on-surface-variant">
+     Loading generation...
+    </span>
+   </div>
+  )
+ }
 
-  if (!generation) return null
+ if (!generation) return null
 
   return (
     <div className="space-y-4">
@@ -743,42 +794,30 @@ function GenerationDetailView({
           </Button>
         </div>
       )}
-      {generation.status === "READY" && generation.payload && (
-        <div className="rounded-lg border border-border bg-surface p-5">
-          {generation.kind === "PODCAST" && <PodcastView generation={generation} />}
-          {generation.kind === "SLIDES" && <SlidesView generation={generation} />}
-          {generation.kind === "STUDY_MATERIAL" &&
-            generation.materialKind === "STUDY_GUIDE" && (
-              <StudyGuideView generation={generation} />
-            )}
-          {generation.kind === "STUDY_MATERIAL" &&
-            generation.materialKind === "FLASHCARDS" && (
-              <FlashcardsView generation={generation} />
-            )}
-          {generation.kind === "STUDY_MATERIAL" &&
-            generation.materialKind === "PRACTICE_QUESTIONS" && (
-              <PracticeView generation={generation} />
-            )}
-          {generation.kind === "STUDY_MATERIAL" &&
-            generation.materialKind === "CHEAT_SHEET" && (
-              <CheatSheetView generation={generation} />
-            )}
-        </div>
+     {generation.kind === "STUDY_MATERIAL" &&
+      generation.materialKind === "PRACTICE_QUESTIONS" && (
+       <PracticeView generation={generation} />
       )}
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="text-destructive"
-        onClick={() => {
-          remove.mutate(generation.id)
-          onDelete()
-        }}
-      >
-        <span className="material-symbols-outlined text-[18px] mr-1">delete</span>
-        Delete
-      </Button>
+     {generation.kind === "STUDY_MATERIAL" &&
+      generation.materialKind === "CHEAT_SHEET" && (
+       <CheatSheetView generation={generation} />
+      )}
     </div>
-  )
+   )}
+   <Button
+    type="button"
+    variant="ghost"
+    size="sm"
+    className="text-destructive"
+    onClick={() => {
+     remove.mutate(generation.id)
+     onDelete()
+    }}
+   >
+    <span className="material-symbols-outlined text-[18px] mr-1">delete</span>
+    Delete
+   </Button>
+  </div>
+ )
 }
 

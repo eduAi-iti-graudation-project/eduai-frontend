@@ -135,7 +135,7 @@ export function StudentSelectCombobox({
 
   return (
     <div ref={wrapperRef} className={cn("relative", className)}>
-      <div className="flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(79,70,229,0.15)] transition-all">
+      <div className="flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 focus-within:border-primary focus-within:shadow-[0_0_0_3px_rgba(244,114,182,0.3)] transition-all">
         <span className="material-symbols-outlined text-outline text-[16px]">search</span>
         <input
           ref={inputRef}
@@ -144,7 +144,7 @@ export function StudentSelectCombobox({
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="flex-1 bg-transparent border-none outline-none font-label-sm text-label-sm text-on-surface placeholder:text-outline-variant"
+          className="flex-1 bg-transparent border-none outline-none font-label-sm text-label-sm text-on-surface placeholder:text-muted-foreground"
         />
         {isSearching && (
           <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-lg animate-spin shrink-0" />
@@ -152,7 +152,7 @@ export function StudentSelectCombobox({
       </div>
 
       {showResults && (
-        <div className="absolute z-50 mt-1 w-full bg-white rounded-lg shadow-xl border border-border py-2 max-h-60 overflow-y-auto">
+        <div className="absolute z-50 mt-1 w-full bg-popover rounded-lg shadow-md border border-border py-2 max-h-60 overflow-y-auto">
           {results.map((student) => (
             <button
               key={student.id}

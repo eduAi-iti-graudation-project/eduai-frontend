@@ -47,7 +47,7 @@ export function PracticeView({ generation }: { generation: api.StudyGeneration }
   const [wrongAnswers, setWrongAnswers] = useState<number[]>([])
   const question = shuffledQuestions[index]
 
-  const isCorrect = selected === question.answerIndex
+ const isCorrect = selected === question.answerIndex
 
   const choose = (i: number) => {
     if (revealed) return
@@ -150,6 +150,9 @@ export function PracticeView({ generation }: { generation: api.StudyGeneration }
       </div>
     )
   }
+  setSelected(null)
+  setRevealed(false)
+ }
 
   return (
     <div className="space-y-4">
@@ -179,59 +182,59 @@ export function PracticeView({ generation }: { generation: api.StudyGeneration }
         </p>
       </div>
 
-      <div className="space-y-2">
-        {question.options.map((option, i) => {
-          const showCorrect = revealed && i === question.answerIndex
-          const showWrong = revealed && selected === i && !showCorrect
-          return (
-            <button
-              key={i}
-              type="button"
-              onClick={() => choose(i)}
-              disabled={revealed}
-              className={cn(
-                "w-full text-left rounded-lg border px-4 py-3 font-body-md text-body-md transition-colors",
-                showCorrect
-                  ? "bg-emerald-50 border-emerald-400 text-emerald-800"
-                  : showWrong
-                    ? "bg-destructive/10 border-destructive/40 text-destructive"
-                    : revealed
-                      ? "bg-surface-container-low border-border text-on-surface-variant"
-                      : "bg-surface border-border text-on-surface hover:border-primary/40",
-              )}
-            >
-              <span className="inline-flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full border border-outline-variant inline-flex items-center justify-center font-label-sm text-label-sm shrink-0">
-                  {String.fromCharCode(65 + i)}
-                </span>
-                {option}
-                {showCorrect && (
-                  <span className="material-symbols-outlined text-[18px]">
-                    check_circle
-                  </span>
-                )}
-                {showWrong && (
-                  <span className="material-symbols-outlined text-[18px]">
-                    cancel
-                  </span>
-                )}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+   <div className="space-y-2">
+    {question.options.map((option, i) => {
+     const showCorrect = revealed && i === question.answerIndex
+     const showWrong = revealed && selected === i && !showCorrect
+     return (
+      <button
+       key={i}
+       type="button"
+       onClick={() => choose(i)}
+       disabled={revealed}
+       className={cn(
+        "w-full text-left rounded-lg border px-4 py-3 font-body-md text-body-md transition-colors",
+        showCorrect
+         ? "bg-success/10 border-success/40 text-success"
+         : showWrong
+          ? "bg-destructive/10 border-destructive/40 text-destructive"
+          : revealed
+           ? "bg-surface-container-low border-border text-on-surface-variant"
+           : "bg-surface border-border text-on-surface hover:border-primary/40",
+       )}
+      >
+       <span className="inline-flex items-center gap-2">
+        <span className="w-6 h-6 rounded-full inline-flex items-center justify-center font-label-sm text-label-sm shrink-0">
+         {String.fromCharCode(65 + i)}
+        </span>
+        {option}
+        {showCorrect && (
+         <span className="material-symbols-outlined text-[18px]">
+          check_circle
+         </span>
+        )}
+        {showWrong && (
+         <span className="material-symbols-outlined text-[18px]">
+          cancel
+         </span>
+        )}
+       </span>
+      </button>
+     )
+    })}
+   </div>
 
-      {revealed && (
-        <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
-          <p className="font-label-sm text-label-sm text-primary mb-1 flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[16px]">info</span>
-            {isCorrect ? "Correct!" : "Not quite — here's the explanation:"}
-          </p>
-          <p className="font-body-md text-body-md text-on-surface">
-            {question.explanation}
-          </p>
-        </div>
-      )}
+   {revealed && (
+    <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
+     <p className="font-label-sm text-label-sm text-primary mb-1 flex items-center gap-1.5">
+      <span className="material-symbols-outlined text-[16px]">info</span>
+      {isCorrect ? "Correct!" : "Not quite — here's the explanation:"}
+     </p>
+     <p className="font-body-md text-body-md text-on-surface">
+      {question.explanation}
+     </p>
+    </div>
+   )}
 
       {revealed && (
         <div className="flex justify-between">
@@ -276,5 +279,7 @@ export function PracticeView({ generation }: { generation: api.StudyGeneration }
         </div>
       )}
     </div>
-  )
+   )}
+  </div>
+ )
 }
