@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
@@ -11,6 +11,11 @@ import {
  isTemplateHeader,
  isEmptyTemplatedFile,
 } from "@/lib/csv-parser"
+import {
+  buildRecords,
+  type StudentRecord,
+  type StudentStatus,
+} from "@/lib/import-validation"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -30,10 +35,13 @@ import {
  TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { EmptyState } from "@/components/ui/EmptyState"
 import { cn } from "@/lib/utils"
 
 type SourceKind = "file" | "paste" | "template"
-type Step = "source" | "review" | "result"
+type Step = "upload" | "review" | "match" | "validate" | "result"
+
+const PAGE_SIZE = 20
 
 const FIELD_LABELS: Record<string, string> = {
  STUDENT_NAME: "Student full name",
@@ -50,12 +58,108 @@ const FIELD_LABELS: Record<string, string> = {
  UNMAPPED: "Skip (not imported)",
 }
 
+const REQUIRED_FIELDS = new Set<api.MigrateField>([
+  "STUDENT_NAME",
+  "FIRST_NAME",
+  "LAST_NAME",
+  "EMAIL",
+])
+
+const STATUS_META: Record<
+  StudentStatus,
+  { label: string; icon: string; className: string }
+> = {
+  ready: {
+    label: "Ready",
+    icon: "✓",
+    className: "border-emerald-300 bg-emerald-50 text-emerald-700",
+  },
+  attention: {
+    label: "Needs attention",
+    icon: "⚠",
+    className: "border-amber-300 bg-amber-50 text-amber-700",
+  },
+  invalid: {
+    label: "Invalid",
+    icon: "✕",
+    className: "border-red-300 bg-red-50 text-red-700",
+  },
+}
+
+const STEP_LABELS = ["Upload", "Review", "Match Fields", "Import"] as const
+
 function apiErrorMessage(err: unknown): string {
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const message = (err as any)?.response?.data?.message
  if (typeof message === "string") return message
  if (Array.isArray(message)) return message.join(" · ")
  return "Import went wrong — check the file and try again."
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function StepIndicator({ step }: { step: Step }) {
+  const index =
+    step === "result"
+      ? STEP_LABELS.length - 1
+      : step === "upload"
+        ? 0
+        : step === "review"
+          ? 1
+          : step === "match"
+            ? 2
+            : 3
+  return (
+    <ol className="flex items-center justify-center gap-2 sm:gap-3">
+      {STEP_LABELS.map((label, i) => {
+        const done = i < index
+        const active = i === index
+        return (
+          <li key={label} className="flex items-center gap-2 sm:gap-3">
+            {i > 0 && (
+              <div
+                className={cn(
+                  "h-px w-6 sm:w-8",
+                  done || active ? "bg-primary" : "bg-border",
+                )}
+                aria-hidden
+              />
+            )}
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+                  done
+                    ? "bg-primary text-primary-foreground"
+                    : active
+                      ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                      : "bg-muted text-muted-foreground",
+                )}
+              >
+                {done ? (
+                  <span className="material-symbols-outlined text-[14px]">check</span>
+                ) : (
+                  i + 1
+                )}
+              </span>
+              <span
+                className={cn(
+                  "hidden text-sm font-medium sm:inline",
+                  active ? "text-on-surface" : "text-on-surface-variant",
+                )}
+              >
+                {label}
+              </span>
+            </div>
+          </li>
+        )
+      })}
+    </ol>
+  )
 }
 
 function MaskedBadge() {
