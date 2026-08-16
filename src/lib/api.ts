@@ -673,6 +673,70 @@ export async function generateAssignmentDraft(data: components["schemas"]["Gener
   return res.data
 }
 
+export type AssignmentType = "essay" | "short_answer" | "project"
+
+export interface AssignmentTarget {
+  courseOfferingId: string
+}
+
+export interface GenerateCourseAssignmentDto {
+  courseId: string
+  assignments: AssignmentTarget[]
+  chapterId?: string | null
+  dueDate: string
+  assignmentType?: AssignmentType
+}
+
+export interface GeneratedCriterion {
+  description: string
+  maxPoints: number
+}
+
+export interface GeneratedAssignmentWithRubric {
+  assignment: {
+    title: string
+    description: string
+  }
+  rubric: {
+    title: string
+    criteria: GeneratedCriterion[]
+  }
+}
+
+export type GenerateCourseAssignmentDraftResult =
+  | { status: "grounded"; draft: GeneratedAssignmentWithRubric }
+  | { status: "not_grounded"; message: string }
+
+export interface SaveGeneratedAssignmentsDto {
+  assignments: AssignmentTarget[]
+  title: string
+  description?: string
+  dueDate: string
+  rubricTitle: string
+  criteria: GeneratedCriterion[]
+}
+
+export interface SavedGeneratedAssignment {
+  assignmentId: string
+  rubricId: string
+  courseOfferingId: string
+  sectionName: string
+}
+
+export async function generateCourseAssignmentDraft(
+  data: GenerateCourseAssignmentDto,
+): Promise<GenerateCourseAssignmentDraftResult> {
+  const res = await api.post<GenerateCourseAssignmentDraftResult>("/assignments/generate-course", data)
+  return res.data
+}
+
+export async function saveGeneratedAssignments(
+  data: SaveGeneratedAssignmentsDto,
+): Promise<SavedGeneratedAssignment[]> {
+  const res = await api.post<SavedGeneratedAssignment[]>("/assignments/save-generated", data)
+  return res.data
+}
+
 // ── Rubrics ───────────────────────────────────────────────────────
 
 export async function getRubrics(assignmentId?: string): Promise<Rubric[]> {

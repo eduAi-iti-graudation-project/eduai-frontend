@@ -30,7 +30,7 @@ export function Sidebar() {
     { icon: "calendar_month", label: "Timetable", id: "timetable", href: "/timetable" },
     { icon: "account_tree", label: "Grades & Levels", id: "grades", href: "/grades" },
     { icon: "school", label: "Sections", id: "classes", href: "/classes" },
-    { icon: "assignment", label: "Assignments", id: "assignments", href: "/assignments/new" },
+    { icon: "assignment", label: "Assignments", id: "assignments", href: "/assignments" },
     { icon: "assignment_turned_in", label: "Rubrics", id: "rubrics", href: "/rubrics" },
     { icon: "list_alt", label: "Submissions", id: "submissions", href: "/submissions" },
     { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/quizzes" },
