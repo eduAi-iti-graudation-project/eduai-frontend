@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
+import { PLANS as SHARED_PLANS } from "@/lib/plans"
 import { useOrganization } from "@/hooks/use-organization"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { LoadingState } from "@/components/shared/LoadingState"
@@ -16,35 +17,15 @@ const PLANS: {
   tagline: string
   features: string[]
   tier: api.SubscriptionTier
-}[] = [
-  {
-    id: "basic",
-    name: "Basic",
-    price: "Free",
-    period: "included with trial",
-    tagline: "For individual teachers getting started.",
-    features: ["Up to 50 seats", "Rubric builder", "AI grading assistant", "Teacher–student chat"],
-    tier: "BASIC",
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "Popular",
-    period: "for growing schools",
-    tagline: "Unlocks the full AI-powered classroom.",
-    features: ["Everything in Basic", "Auto-generated quizzes", "Homework help", "Reports & analysis"],
-    tier: "PRO",
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "Custom",
-    period: "for institutions",
-    tagline: "Deep insights and institutional controls.",
-    features: ["Everything in Pro", "Advanced insights", "Priority support", "Dedicated onboarding"],
-    tier: "ENTERPRISE",
-  },
-]
+}[] = SHARED_PLANS.map((plan) => ({
+  id: plan.id,
+  name: plan.name,
+  price: plan.price,
+  period: plan.period,
+  tagline: plan.tagline,
+  features: plan.features,
+  tier: plan.id === "basic" ? "BASIC" : plan.id === "pro" ? "PRO" : "ENTERPRISE",
+}))
 
 function tierLabel(tier: api.SubscriptionTier): string {
   return tier === "TRIAL" ? "Trial" : tier.charAt(0) + tier.slice(1).toLowerCase()
@@ -115,9 +96,37 @@ export function AdminBillingPage() {
   }
 
   const isPaidActive = org.subscriptionStatus === "ACTIVE"
+  const isGrouped = Boolean(org.groupId)
+  const visiblePlans = isGrouped ? PLANS.filter((plan) => plan.id === "enterprise") : PLANS
 
   return (
     <div className="flex-1 p-xl max-w-6xl mx-auto w-full space-y-md">
+      {/* WP5 group banner */}
+      {isGrouped && (
+        <div className="rounded-lg bg-primary-container border border-primary/30 p-md flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-[24px] text-primary">domain</span>
+            <div>
+              <p className="font-headline-md text-headline-md text-on-primary-container">
+                Your school is part of {org.groupName}
+              </p>
+              <p className="font-body-sm text-body-sm text-on-primary-container/80">
+                School groups are billed together on the Enterprise plan with unlimited seats. Group billing is managed in the group dashboard.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            className="rounded-lg font-label-md text-label-md border border-primary bg-white text-primary hover:bg-primary-container h-auto px-5 py-2.5"
+            onClick={() => {
+              window.location.assign("/admin/groups")
+            }}
+          >
+            Manage group
+          </Button>
+        </div>
+      )}
+
       {/* Current plan / status card */}
       <div className="rounded-lg bg-white border border-border p-md">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -153,8 +162,8 @@ export function AdminBillingPage() {
       </div>
 
       {/* Plan cards */}
-      <div className="grid md:grid-cols-3 gap-md items-stretch">
-        {PLANS.map((plan) => {
+      <div className={`grid ${visiblePlans.length === 1 ? "md:grid-cols-1 max-w-md" : "md:grid-cols-3"} gap-md items-stretch`}>
+        {visiblePlans.map((plan) => {
           const isCurrent = org.subscriptionTier === plan.tier
           const canUpgrade = plan.tier === "ENTERPRISE" || plan.tier !== org.subscriptionTier
           const busy = busyAction === plan.id
@@ -207,9 +216,7 @@ export function AdminBillingPage() {
                     ? "Current plan"
                     : isPaidActive
                       ? `Switch to ${plan.name}`
-                      : plan.name === "Enterprise"
-                        ? "Contact sales"
-                        : `Choose ${plan.name}`}
+                      : `Choose ${plan.name}`}
               </Button>
             </div>
           )

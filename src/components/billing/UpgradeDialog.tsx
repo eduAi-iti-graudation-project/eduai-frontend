@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
+import { PLANS } from "@/lib/plans"
 import { useAuth } from "@/providers/use-auth"
 import { useOrganization } from "@/hooks/use-organization"
 import { Button } from "@/components/ui/button"
@@ -18,11 +19,13 @@ interface UpgradeDialogProps {
   requiredTier: string | null
 }
 
-const PLAN_TIERS: { id: api.PlanId; name: string; price: string; description: string; icon: string }[] = [
-  { id: "basic", name: "Basic", price: "$29/mo", description: "Core grading + alerts for a single class", icon: "school" },
-  { id: "pro", name: "Pro", price: "$79/mo", description: "AI assistant, reports & homework help", icon: "auto_awesome" },
-  { id: "enterprise", name: "Enterprise", price: "Custom", description: "Advanced insights for large districts", icon: "domain" },
-]
+const PLAN_TIERS: { id: api.PlanId; name: string; price: string; description: string; icon: string }[] = PLANS.map((plan) => ({
+  id: plan.id,
+  name: plan.name,
+  price: `${plan.price}/mo`,
+  description: plan.tagline,
+  icon: plan.id === "enterprise" ? "domain" : plan.id === "pro" ? "auto_awesome" : "school",
+}))
 
 export function UpgradeDialog({ open, onOpenChange, requiredTier }: UpgradeDialogProps) {
   const { user } = useAuth()
@@ -31,13 +34,27 @@ export function UpgradeDialog({ open, onOpenChange, requiredTier }: UpgradeDialo
 
   const isAdmin = user?.role === "ADMIN"
   const orgStatus = org?.subscriptionStatus ?? "TRIALING"
+  const isGrouped = Boolean(org?.groupId)
   const needsNewSubscription = orgStatus === "CANCELED" || orgStatus === "PAST_DUE" || requiredTier === null
+  const isPaidActive = orgStatus === "ACTIVE"
+  // WP5: a school in a group is billed by the group on Enterprise only.
+  const tiers = isGrouped ? PLAN_TIERS.filter((plan) => plan.id === "enterprise") : PLAN_TIERS
+  const currentTierIndex = org?.subscriptionTier
+    ? PLAN_TIERS.findIndex((p) => p.id === org.subscriptionTier.toLowerCase())
+    : -1
 
   const handleUpgrade = async (planId: api.PlanId) => {
     setLoadingId(planId)
     try {
-      const { url } = await api.createCheckoutSession(planId)
-      window.location.assign(url)
+      if (isPaidActive) {
+        await api.changePlan(planId)
+        const name = PLAN_TIERS.find((p) => p.id === planId)?.name
+        toast.success(`Plan update scheduled — your organization is now on ${name}.`)
+        onOpenChange(false)
+      } else {
+        const { url } = await api.createCheckoutSession(planId)
+        window.location.assign(url)
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not start checkout. Please try again.")
     } finally {
@@ -55,16 +72,21 @@ export function UpgradeDialog({ open, onOpenChange, requiredTier }: UpgradeDialo
           <DialogDescription className="text-on-surface-variant font-body-sm text-body-sm">
             {needsNewSubscription
               ? "Your organization needs an active subscription to continue using EduAI."
-              : `This feature requires the ${requiredTier} plan or higher. Choose a plan below to upgrade instantly.`}
+              : isGrouped
+                ? `Your school is part of a group billed on the Enterprise plan${requiredTier ? ` (required for ${requiredTier})` : ""}.`
+                : isPaidActive
+                  ? `This feature requires the ${requiredTier} plan or higher. Switch your plan below — changes take effect immediately.`
+                  : `This feature requires the ${requiredTier} plan or higher. Choose a plan below to upgrade instantly.`}
           </DialogDescription>
         </DialogHeader>
 
         {isAdmin ? (
           <div className="space-y-3">
-            {PLAN_TIERS.map((plan) => {
+            {tiers.map((plan) => {
               const requiredIndex = requiredTier ? PLAN_TIERS.findIndex((p) => p.id === requiredTier) : -1
               const planIndex = PLAN_TIERS.findIndex((p) => p.id === plan.id)
-              const disabled = requiredTier !== null && planIndex < requiredIndex
+              const disabled =
+                (requiredTier !== null && planIndex < requiredIndex) || (isPaidActive && planIndex <= currentTierIndex)
               return (
                 <button
                   key={plan.id}
