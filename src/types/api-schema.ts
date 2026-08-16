@@ -216,7 +216,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Verify an invite link token and reveal the school login credentials once */
+        /** Verify an invite link token — set a password or confirm the school email */
         post: operations["AuthController_verifyEmail"];
         delete?: never;
         options?: never;
@@ -495,6 +495,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assignments/generate-course": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Draft an assignment and rubric from a course unit (or the entire course) for one or more sections */
+        post: operations["AssignmentsController_generateCourse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assignments/save-generated": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Persist an approved AI-generated assignment + confirmed rubric to one or more sections */
+        post: operations["AssignmentsController_saveGenerated"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assignments/{id}": {
         parameters: {
             query?: never;
@@ -755,6 +789,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/materials/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download a material file (PDF or text) */
+        get: operations["MaterialsController_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/rubrics": {
         parameters: {
             query?: never;
@@ -848,7 +899,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List submissions, optionally filtered by status and assignment */
+        /** List submissions for the teacher, optionally filtered by status, assignment, course, section, or student */
         get: operations["SubmissionsController_findAll"];
         put?: never;
         /** Submit an assignment (student) */
@@ -1166,6 +1217,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/alerts/guardian": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List ACTIVE alerts for the guardian's children */
+        get: operations["AlertsController_findByGuardian"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/alerts/{id}/teacher-detail": {
         parameters: {
             query?: never;
@@ -1319,6 +1387,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/students/{id}/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the courses (offerings) of a student */
+        get: operations["StudentsController_getCourses"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/students/{id}/credentials/reset": {
         parameters: {
             query?: never;
@@ -1328,7 +1413,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Regenerate a school-provisioned student login password (returned once) */
+        /** Email a set-password invite to the student */
         post: operations["StudentsController_resetCredentials"];
         delete?: never;
         options?: never;
@@ -1781,6 +1866,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/dashboard/insights/sections/{sectionKey}/detail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Underlying records for one insight chart point */
+        get: operations["DashboardController_getSectionDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/insights/students/{id}/sections/{sectionKey}/detail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Underlying records for one student insight chart point */
+        get: operations["DashboardController_getStudentSectionDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/teachers/me/profile": {
         parameters: {
             query?: never;
@@ -2119,7 +2238,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** AI-generate a quiz from class materials */
+        /** AI-generate a quiz from class materials (SSE: step events then a done event) */
         post: operations["QuizzesController_generate"];
         delete?: never;
         options?: never;
@@ -2179,6 +2298,40 @@ export interface paths {
         head?: never;
         /** Publish a draft quiz */
         patch: operations["QuizzesController_publish"];
+        trace?: never;
+    };
+    "/quizzes/{id}/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign an existing quiz to more grade/section/course combos */
+        post: operations["QuizzesController_addAssignments"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/quizzes/assignments/{assignmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a quiz assignment (unassign from a class) */
+        delete: operations["QuizzesController_removeAssignment"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/quizzes/{id}/start": {
@@ -2309,7 +2462,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ask the homework helper agent for help */
+        /** Ask the homework helper agent for help (SSE: step events then a done event) */
         post: operations["HomeworkHelperController_help"];
         delete?: never;
         options?: never;
@@ -2369,6 +2522,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/chat/threads/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create or get an admin chat thread with a teacher or guardian (admin only) */
+        post: operations["ChatController_createAdminThread"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/chat/threads/{threadId}/messages": {
         parameters: {
             query?: never;
@@ -2398,6 +2568,58 @@ export interface paths {
         put?: never;
         /** Mark counterparty messages in the thread as read */
         post: operations["ChatController_markRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/broadcasts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List broadcasts for the admin organization */
+        get: operations["BroadcastsController_findAll"];
+        put?: never;
+        /** Create a broadcast and fan it out to its audience */
+        post: operations["BroadcastsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public plan catalog (tiers, prices, features) */
+        get: operations["BillingController_getPlans"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The organization's subscription status and plan */
+        get: operations["BillingController_getBillingStatus"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2517,6 +2739,23 @@ export interface paths {
         put?: never;
         /** Create a school group and move billing of the current school into it */
         post: operations["GroupsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/groups/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Join a school group by its join code */
+        post: operations["GroupsController_join"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2902,6 +3141,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/meetings/{id}/struggle-signals/extract": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Manually trigger struggle-signal extraction for a meeting (idempotent; useful for testing without LiveKit webhooks). */
+        post: operations["StruggleSignalsController_triggerExtraction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/struggle-signals/{id}/send": {
         parameters: {
             query?: never;
@@ -3223,8 +3479,42 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Generate a lab simulation: grounds the topic in curriculum material, generates Matter.js code, and runs an AI security review before returning. */
+        /** Generate a lab (SSE: step events then a done event). Default mode builds a template game spec via the lab architect agent; mode "advanced" runs free-form generation of any self-contained interactive game code, checked by deterministic plain-code guards. */
         post: operations["LabsController_generate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/labs/{id}/refine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Iteratively refine a lab (SSE: step events then a done event). Template labs get their game spec modified in place; legacy labs get their code modified and re-reviewed. Never regenerates from scratch. */
+        post: operations["LabsController_refine"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/labs/{id}/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restart a lab from scratch (SSE: step events then a done event). Replaces the current content with a fresh generation grounded in the same unit — use this instead of refine when the lab is beyond repair. */
+        post: operations["LabsController_regenerate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3265,23 +3555,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/labs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List labs. Teachers see their own labs (optionally filtered by course offering); students only ever see PUBLISHED labs in their enrolled offerings. */
-        get: operations["LabsController_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/labs/{id}": {
         parameters: {
             query?: never;
@@ -3291,6 +3564,24 @@ export interface paths {
         };
         /** Get one lab. Students can only retrieve PUBLISHED labs — a direct URL to a pending or rejected lab returns 404. */
         get: operations["LabsController_get"];
+        put?: never;
+        post?: never;
+        /** Hard-delete a lab the teacher owns. Any status — deleting a published lab removes student access. Removes the lab and its offering links. */
+        delete: operations["LabsController_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/labs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List labs. Teachers see their own labs (optionally filtered by course offering); students only ever see PUBLISHED labs in their enrolled offerings. */
+        get: operations["LabsController_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3366,6 +3657,7 @@ export interface components {
         };
         VerifyEmailDto: {
             token: string;
+            password?: string;
         };
         ResendCredentialsDto: {
             /** Format: email */
@@ -3513,6 +3805,66 @@ export interface components {
             assignmentType: "essay" | "short_answer" | "project";
             targetPoints?: number;
         };
+        GenerateCourseGroundedResultDto: {
+            /** @enum {string} */
+            status: "grounded";
+            draft: {
+                assignment: {
+                    title: string;
+                    description: string;
+                };
+                rubric: {
+                    title: string;
+                    criteria: {
+                        description: string;
+                        maxPoints: number;
+                    }[];
+                };
+            };
+        };
+        GenerateCourseNotGroundedResultDto: {
+            /** @enum {string} */
+            status: "not_grounded";
+            message: string;
+        };
+        GenerateCourseAssignmentDto: {
+            /** Format: uuid */
+            courseId: string;
+            assignments: {
+                /** Format: uuid */
+                courseOfferingId: string;
+            }[];
+            /** Format: uuid */
+            chapterId?: string | null;
+            /** Format: date-time */
+            dueDate: string;
+            /** @enum {string} */
+            assignmentType?: "essay" | "short_answer" | "project";
+        };
+        SaveGeneratedAssignmentsDto: {
+            assignments: {
+                /** Format: uuid */
+                courseOfferingId: string;
+            }[];
+            title: string;
+            description?: string;
+            /** Format: date-time */
+            dueDate: string;
+            rubricTitle: string;
+            criteria: {
+                description: string;
+                maxPoints: number;
+            }[];
+        };
+        SavedGeneratedAssignmentDto: {
+            /** Format: uuid */
+            assignmentId: string;
+            /** Format: uuid */
+            rubricId: string;
+            /** Format: uuid */
+            courseOfferingId: string;
+            sectionName: string;
+        };
         UpdateAssignmentDto: {
             title?: string;
             description?: string;
@@ -3522,7 +3874,11 @@ export interface components {
         };
         CreateMaterialChapterDto: {
             /** Format: uuid */
-            courseOfferingId: string;
+            courseOfferingId?: string;
+            /** Format: uuid */
+            sectionId?: string;
+            /** Format: uuid */
+            courseId?: string;
             title: string;
         };
         UpdateMaterialChapterDto: {
@@ -3539,6 +3895,7 @@ export interface components {
             courseOfferingId: string | null;
             /** Format: uuid */
             courseId: string | null;
+            courseName?: string | null;
             title: string;
             order: number;
             createdAt: string;
@@ -3560,6 +3917,11 @@ export interface components {
             chapters: {
                 /** Format: uuid */
                 id: string;
+                /** Format: uuid */
+                courseOfferingId?: string | null;
+                /** Format: uuid */
+                courseId?: string | null;
+                courseName?: string | null;
                 title: string;
                 order: number;
                 materials: {
@@ -3568,9 +3930,10 @@ export interface components {
                     title: string;
                     fileUrl: string | null;
                     /** Format: uuid */
-                    courseOfferingId: string;
+                    courseOfferingId: string | null;
                     /** Format: uuid */
                     courseId: string | null;
+                    courseName?: string | null;
                     createdAt: string;
                     updatedAt: string;
                 }[];
@@ -3581,9 +3944,10 @@ export interface components {
                 title: string;
                 fileUrl: string | null;
                 /** Format: uuid */
-                courseOfferingId: string;
+                courseOfferingId: string | null;
                 /** Format: uuid */
                 courseId: string | null;
+                courseName?: string | null;
                 createdAt: string;
                 updatedAt: string;
             }[];
@@ -3594,9 +3958,10 @@ export interface components {
             title: string;
             fileUrl: string | null;
             /** Format: uuid */
-            courseOfferingId: string;
+            courseOfferingId: string | null;
             /** Format: uuid */
             courseId: string | null;
+            courseName?: string | null;
             createdAt: string;
             updatedAt: string;
         };
@@ -3636,6 +4001,10 @@ export interface components {
                 id: string;
                 title: string;
                 description: string | null;
+                dueDate: string;
+                totalPoints: number;
+                /** Format: uuid */
+                courseOfferingId: string;
             };
         };
         NotificationDto: {
@@ -3956,6 +4325,25 @@ export interface components {
             }[];
             unreadNotifications: number;
         };
+        SectionDetailDto: {
+            sectionKey: string;
+            title: string;
+            /** @enum {string} */
+            unit: "count" | "percent";
+            bucket: string;
+            value: number;
+            totalRecords: number;
+            records: {
+                label: string;
+                meta?: string;
+                value?: number;
+                ref?: {
+                    /** @enum {string} */
+                    kind: "student" | "alert" | "submission";
+                    id: string;
+                };
+            }[];
+        };
         UpdateTeacherMeDto: {
             phone?: string | null;
             street?: string | null;
@@ -4002,8 +4390,14 @@ export interface components {
         };
         GenerateQuizDto: {
             /** Format: uuid */
-            courseOfferingId: string;
-            topic?: string;
+            courseId: string;
+            assignments: {
+                /** Format: uuid */
+                courseOfferingId: string;
+                targetStudentIds?: string[];
+            }[];
+            /** Format: uuid */
+            chapterId?: string | null;
             /** @default 5 */
             questionCount: number;
             types?: ("MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY")[];
@@ -4012,14 +4406,27 @@ export interface components {
              * @enum {string}
              */
             difficulty: "EASY" | "MEDIUM" | "HARD";
+            timeLimit: number;
+            /** Format: date-time */
+            endsAt: string;
         };
         CreateQuizDto: {
             title: string;
             description?: string;
-            /** Format: uuid */
-            courseOfferingId: string;
-            timeLimit?: number;
+            assignments: {
+                /** Format: uuid */
+                courseOfferingId: string;
+                targetStudentIds?: string[];
+            }[];
+            timeLimit: number;
             passingScore?: number;
+            /**
+             * @default MEDIUM
+             * @enum {string}
+             */
+            difficulty: "EASY" | "MEDIUM" | "HARD";
+            /** Format: date-time */
+            endsAt: string;
             questions: {
                 /** @enum {string} */
                 type: "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER" | "ESSAY";
@@ -4040,6 +4447,10 @@ export interface components {
             timeLimit?: number | null;
             passingScore?: number | null;
             /** @enum {string} */
+            difficulty?: "EASY" | "MEDIUM" | "HARD";
+            /** Format: date-time */
+            endsAt?: string | null;
+            /** @enum {string} */
             status?: "DRAFT" | "PUBLISHED" | "CLOSED";
             questions?: {
                 /** @enum {string} */
@@ -4053,6 +4464,13 @@ export interface components {
                 /** @default 1 */
                 points: number;
                 order: number;
+            }[];
+        };
+        AssignQuizDto: {
+            assignments: {
+                /** Format: uuid */
+                courseOfferingId: string;
+                targetStudentIds?: string[];
             }[];
         };
         SubmitAttemptDto: {
@@ -4075,18 +4493,6 @@ export interface components {
             question: string;
             /** Format: uuid */
             assignmentId?: string;
-        };
-        HomeworkHelpResponseDto: {
-            answer: string;
-            reply: string;
-            /** @enum {string} */
-            action: "HINT" | "EXPLANATION" | "REDIRECT_TEACHER";
-            sources: string[];
-            /** Format: uuid */
-            interactionId: string;
-            teacherNotified: boolean;
-            /** Format: uuid */
-            threadId?: string;
         };
         HomeworkHelpHistoryResponseDto: {
             interactions: {
@@ -4111,8 +4517,40 @@ export interface components {
             /** Format: uuid */
             studentId?: string;
         };
+        CreateAdminThreadDto: {
+            /** Format: uuid */
+            peerId: string;
+            /** @enum {string} */
+            peerRole: "TEACHER" | "GUARDIAN";
+        };
         SendMessageDto: {
             text: string;
+        };
+        CreateBroadcastDto: {
+            title: string;
+            body?: string;
+            targetRoles: ("STUDENT" | "TEACHER" | "GUARDIAN" | "ADMIN")[];
+            /** Format: uuid */
+            targetGradeId?: string;
+        };
+        BroadcastDto: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            body: string | null;
+            targetRoles: ("STUDENT" | "TEACHER" | "GUARDIAN" | "ADMIN")[];
+            /** Format: uuid */
+            targetGradeId: string | null;
+            /** Format: uuid */
+            createdById: string;
+            /** Format: uuid */
+            organizationId: string;
+            deliveredCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            createdByName: string | null;
+            targetGradeName: string | null;
+            targetGradeLevel: number | null;
         };
         CreateCheckoutSessionDto: {
             /** @enum {string} */
@@ -4134,6 +4572,9 @@ export interface components {
         };
         CreateGroupDto: {
             name: string;
+        };
+        JoinGroupDto: {
+            joinCode: string;
         };
         EmailDomainDto: {
             emailDomain: string;
@@ -4384,35 +4825,38 @@ export interface components {
             classId: string;
         };
         GenerateLabDto: {
+            /** @description The course offerings (sections) the lab should apply to. All must belong to the same course; the first is the primary used to ground the prompt in curriculum material. */
+            courseOfferingIds: string[];
             /**
              * Format: uuid
-             * @description The course offering the lab belongs to.
+             * @description The material unit (chapter) of the selected course the lab is grounded in and generated from.
              */
-            courseOfferingId: string;
-            /** @description The topic the simulation should be grounded in. */
-            topic: string;
+            chapterId: string;
+            /** @description The teacher’s prompt describing the lab to generate for the selected unit. Also stored as the lab topic. */
+            prompt: string;
+            /**
+             * @description 'template' (default) generates a reliable interactive game from a fixed template via the lab architect agent. 'advanced' runs free-form generation of any self-contained interactive game code, checked by deterministic plain-code guards, then runs in the sandbox.
+             * @enum {string}
+             */
+            mode?: "template" | "advanced";
         };
-        GenerateLabResponseDto: {
-            grounded: boolean;
-            /** Format: uuid */
-            labId: string | null;
-            /** @enum {string|null} */
-            status: "GENERATING" | "AI_REVIEW_FAILED" | "PENDING_TEACHER_REVIEW" | "PUBLISHED" | "REJECTED" | null;
-            message: string | null;
-            reviewApproved: boolean | null;
-            reviewFlags: {
-                flags: string[];
-                reasoning: string;
-            } | null;
+        RefineLabDto: {
+            /** @description The teacher’s requested modification. The AI modifies the existing generated code in place — it never regenerates from scratch. */
+            instruction: string;
         };
         LabDto: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             courseOfferingId: string;
+            courseOfferingIds: string[];
             topic: string;
+            /** Format: uuid */
+            chapterId: string | null;
             /** @enum {string} */
             status: "GENERATING" | "AI_REVIEW_FAILED" | "PENDING_TEACHER_REVIEW" | "PUBLISHED" | "REJECTED";
+            template: string | null;
+            gameSpec: unknown;
             generatedCode: string | null;
             reviewApproved: boolean | null;
             reviewFlags: {
@@ -5324,6 +5768,52 @@ export interface operations {
             };
         };
     };
+    AssignmentsController_generateCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateCourseAssignmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateCourseGroundedResultDto"] | components["schemas"]["GenerateCourseNotGroundedResultDto"];
+                };
+            };
+        };
+    };
+    AssignmentsController_saveGenerated: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveGeneratedAssignmentsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedGeneratedAssignmentDto"][];
+                };
+            };
+        };
+    };
     AssignmentsController_findOne: {
         parameters: {
             query?: never;
@@ -5404,6 +5894,10 @@ export interface operations {
                     title?: string;
                     /** Format: uuid */
                     courseOfferingId?: string;
+                    /** Format: uuid */
+                    sectionId?: string;
+                    /** Format: uuid */
+                    courseId?: string;
                 };
             };
         };
@@ -5752,6 +6246,25 @@ export interface operations {
             };
         };
     };
+    MaterialsController_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     RubricsController_findAll: {
         parameters: {
             query?: never;
@@ -5883,6 +6396,10 @@ export interface operations {
             query?: {
                 status?: string;
                 assignmentId?: string;
+                courseId?: string;
+                offeringId?: string;
+                /** @description Search by student name or email */
+                q?: string;
             };
             header?: never;
             path?: never;
@@ -6303,6 +6820,25 @@ export interface operations {
             };
         };
     };
+    AlertsController_findByGuardian: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertDto"][];
+                };
+            };
+        };
+    };
     AlertsController_getTeacherDetail: {
         parameters: {
             query?: never;
@@ -6470,6 +7006,25 @@ export interface operations {
         };
     };
     StudentsController_getClasses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StudentsController_getCourses: {
         parameters: {
             query?: never;
             header?: never;
@@ -7113,6 +7668,61 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InsightsResponseDto"];
+                };
+            };
+        };
+    };
+    DashboardController_getSectionDetail: {
+        parameters: {
+            query: {
+                /** @description Bucket interval — defaults to week */
+                interval?: "week" | "month";
+                /** @description The clicked chart point label (bucket date or category) */
+                bucket: string;
+            };
+            header?: never;
+            path: {
+                sectionKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Records behind a single chart point (or category) for the caller role */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SectionDetailDto"];
+                };
+            };
+        };
+    };
+    DashboardController_getStudentSectionDetail: {
+        parameters: {
+            query: {
+                /** @description Bucket interval — defaults to week */
+                interval?: "week" | "month";
+                /** @description The clicked chart point label (bucket date or category) */
+                bucket: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+                sectionKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Records behind a single student insight chart point; 403 when the caller has no access */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SectionDetailDto"];
                 };
             };
         };
@@ -7857,6 +8467,48 @@ export interface operations {
             };
         };
     };
+    QuizzesController_addAssignments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignQuizDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuizzesController_removeAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     QuizzesController_startAttempt: {
         parameters: {
             query?: never;
@@ -8015,13 +8667,11 @@ export interface operations {
             };
         };
         responses: {
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HomeworkHelpResponseDto"];
-                };
+                content?: never;
             };
         };
     };
@@ -8107,6 +8757,27 @@ export interface operations {
             };
         };
     };
+    ChatController_createAdminThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAdminThreadDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ChatController_getMessages: {
         parameters: {
             query?: {
@@ -8164,6 +8835,82 @@ export interface operations {
         requestBody?: never;
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BroadcastsController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BroadcastDto"][];
+                };
+            };
+        };
+    };
+    BroadcastsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBroadcastDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BroadcastDto"];
+                };
+            };
+        };
+    };
+    BillingController_getPlans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BillingController_getBillingStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8295,6 +9042,27 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["CreateGroupDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupsController_join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinGroupDto"];
             };
         };
         responses: {
@@ -8856,6 +9624,40 @@ export interface operations {
                     "application/json": components["schemas"]["StruggleSignalsResponseDto"];
                 };
             };
+            /** @description Not authenticated. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not the meeting teacher. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Meeting not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StruggleSignalsController_triggerExtraction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             /** @description Not authenticated. */
             401: {
                 headers: {
@@ -9444,13 +10246,53 @@ export interface operations {
             };
         };
         responses: {
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["GenerateLabResponseDto"];
+                content?: never;
+            };
+        };
+    };
+    LabsController_refine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefineLabDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
+            };
+        };
+    };
+    LabsController_regenerate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -9500,25 +10342,6 @@ export interface operations {
             };
         };
     };
-    LabsController_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LabDto"][];
-                };
-            };
-        };
-    };
     LabsController_get: {
         parameters: {
             query?: never;
@@ -9536,6 +10359,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LabDto"];
+                };
+            };
+        };
+    };
+    LabsController_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LabDto"];
+                };
+            };
+        };
+    };
+    LabsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LabDto"][];
                 };
             };
         };

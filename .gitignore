@@ -27,3 +27,6 @@ Design
 
 # Agent session logs
 session-ses_*.md
+
+# Generated presentation assets
+/presentation
