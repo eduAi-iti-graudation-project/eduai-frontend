@@ -68,6 +68,7 @@ import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage"
 import { AdminTimetablePage } from "./pages/admin/AdminTimetablePage"
 import { AdminAssistantPage } from "./pages/admin/AdminAssistantPage"
 import { AdminBillingPage } from "./pages/admin/AdminBillingPage"
+import { GroupManagementPage } from "./pages/admin/GroupManagementPage"
 import { AdminRequestsPage } from "./pages/admin/AdminRequestsPage"
 import { AdminJoinApprovalsPage } from "./pages/admin/AdminJoinApprovalsPage"
 import { GradeManagementPage } from "./pages/admin/GradeManagementPage"
@@ -222,6 +223,7 @@ export function adminRoutes() {
       { path: "insights", element: <InsightsPage /> },
       { path: "insights/students/:id", element: <StudentInsightsPage /> },
       { path: "billing", element: <AdminBillingPage /> },
+      { path: "groups", element: <GroupManagementPage /> },
       { path: "requests", element: <AdminRequestsPage /> },
       { path: "join-approvals", element: <AdminJoinApprovalsPage /> },
     ],

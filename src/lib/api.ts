@@ -2409,6 +2409,8 @@ export interface Organization {
   id: string
   name: string
   joinCode?: string
+  groupId?: string | null
+  groupName?: string | null
   subscriptionStatus: SubscriptionStatus
   subscriptionTier: SubscriptionTier
   seatLimit: number | null
@@ -2448,6 +2450,84 @@ export async function createBillingPortal(): Promise<CheckoutSession> {
 
 export async function changePlan(planId: PlanId, atPeriodEnd = false): Promise<ChangePlanResult> {
   const res = await api.post<ChangePlanResult>("/billing/change-plan", { planId, atPeriodEnd })
+  return res.data
+}
+
+// ── School groups (WP5) ────────────────────────────────────────────
+
+export interface GroupSchool {
+  id: string
+  name: string
+  joinCode: string
+  seatUsage: number
+  subscriptionTier: SubscriptionTier
+}
+
+export interface GroupInfo {
+  id: string
+  name: string
+  joinCode: string
+  subscriptionTier: SubscriptionTier
+  subscriptionStatus: SubscriptionStatus
+  seatLimit: number | null
+  schools: GroupSchool[]
+}
+
+export interface GroupInsightSchool {
+  id: string
+  name: string
+  users: number
+  students: number
+  teachers: number
+  activeAlerts: number
+  quizAttempts: number
+}
+
+export interface GroupInsights {
+  id: string
+  name: string
+  schools: GroupInsightSchool[]
+  totals: {
+    users: number
+    students: number
+    teachers: number
+    activeAlerts: number
+    quizAttempts: number
+  }
+}
+
+export interface CreateGroupResult {
+  id: string
+  name: string
+  joinCode: string
+  requiresCheckout: boolean
+  action: "UPGRADED" | "CHECKOUT_REQUIRED" | "OK"
+  message: string
+}
+
+export interface JoinGroupResult {
+  id: string
+  name: string
+  message: string
+}
+
+export async function getGroup(): Promise<GroupInfo> {
+  const res = await api.get<GroupInfo>("/groups/me")
+  return res.data
+}
+
+export async function getGroupInsights(): Promise<GroupInsights> {
+  const res = await api.get<GroupInsights>("/groups/me/insights")
+  return res.data
+}
+
+export async function createGroup(name: string): Promise<CreateGroupResult> {
+  const res = await api.post<CreateGroupResult>("/groups", { name })
+  return res.data
+}
+
+export async function joinGroup(joinCode: string): Promise<JoinGroupResult> {
+  const res = await api.post<JoinGroupResult>("/groups/join", { joinCode })
   return res.data
 }
 

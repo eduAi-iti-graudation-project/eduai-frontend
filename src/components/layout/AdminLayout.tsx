@@ -18,6 +18,7 @@ const navItems = [
   { icon: "campaign", label: "Broadcast", id: "broadcasts", href: "/admin/broadcasts" },
   { icon: "smart_toy", label: "AI Assistant", id: "assistant", href: "/admin/assistant" },
   { icon: "payments", label: "Billing", id: "billing", href: "/admin/billing" },
+  { icon: "domain", label: "School Groups", id: "groups", href: "/admin/groups" },
   { icon: "person_add", label: "Requests", id: "requests", href: "/admin/requests" },
   { icon: "how_to_reg", label: "Join Approvals", id: "join-approvals", href: "/admin/join-approvals" },
 ]
@@ -40,6 +41,7 @@ export function AdminLayout() {
     : path.startsWith("/admin/broadcasts") ? "broadcasts"
     : path.startsWith("/admin/assistant") ? "assistant"
     : path.startsWith("/admin/billing") ? "billing"
+    : path.startsWith("/admin/groups") ? "groups"
     : path.startsWith("/admin/requests") ? "requests"
     : path.startsWith("/admin/join-approvals") ? "join-approvals"
     : "dashboard"
