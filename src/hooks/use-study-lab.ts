@@ -44,8 +44,9 @@ export function useRetryStudyLab() {
 
   return useMutation({
     mutationFn: (generationId: string) => api.retryStudyLab(generationId),
-    onSuccess: () => {
+    onSuccess: (_, generationId) => {
       queryClient.invalidateQueries({ queryKey: ["study-lab", "history"] })
+      queryClient.invalidateQueries({ queryKey: ["study-lab", "generation", generationId] })
       toast.success("Retrying generation...")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -60,38 +61,57 @@ export function useStudyLabGeneration(generationId: string | null) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollIdRef = useRef(0)
 
+  const poll = async () => {
+    if (!generationId) return
+    const currentPollId = ++pollIdRef.current
+    setIsLoading(true)
+    try {
+      const next = await api.getStudyLabGeneration(generationId)
+      if (currentPollId !== pollIdRef.current) return
+      setGeneration(next)
+      if (next.status === "READY" || next.status === "FAILED") {
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+          timerRef.current = null
+        }
+      }
+    } catch {
+      // transient — keep polling
+    } finally {
+      if (currentPollId === pollIdRef.current) {
+        setIsLoading(false)
+      }
+    }
+  }
+
   useEffect(() => {
     if (!generationId) return
 
-    const poll = async () => {
-      const currentPollId = ++pollIdRef.current
-      setIsLoading(true)
-      try {
-        const next = await api.getStudyLabGeneration(generationId)
-        if (currentPollId !== pollIdRef.current) return
-        setGeneration(next)
-        if (next.status === "READY" || next.status === "FAILED") {
-          if (timerRef.current) clearInterval(timerRef.current)
-        }
-      } catch {
-        // transient — keep polling
-      } finally {
-        if (currentPollId === pollIdRef.current) {
-          setIsLoading(false)
-        }
-      }
-    }
-
     void poll()
-    timerRef.current = setInterval(poll, 4000)
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(poll, 3000)
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
       pollIdRef.current++
     }
   }, [generationId])
 
-  return { generation, isLoading }
+  const refetch = () => {
+    if (!generationId) return
+    // Optimistically update status to PROCESSING so UI shows stage indicator immediately
+    setGeneration((prev) =>
+      prev ? { ...prev, status: "PROCESSING", stage: "QUEUED", error: null } : null,
+    )
+    void poll()
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(poll, 3000)
+  }
+
+  return { generation, isLoading, refetch }
 }
 
 export function useDeleteStudyLabGeneration() {

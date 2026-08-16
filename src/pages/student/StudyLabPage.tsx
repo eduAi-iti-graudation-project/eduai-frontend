@@ -569,7 +569,7 @@ function GenerationDetailView({
   generationId: string
   onDelete: () => void
 }) {
-  const { generation, isLoading } = useStudyLabGeneration(generationId)
+  const { generation, isLoading, refetch } = useStudyLabGeneration(generationId)
   const remove = useDeleteStudyLabGeneration()
   const retry = useRetryStudyLab()
 
@@ -635,7 +635,13 @@ function GenerationDetailView({
             size="sm"
             className="border-red-300 text-red-700 hover:bg-red-100"
             disabled={retry.isPending}
-            onClick={() => retry.mutate(generation.id)}
+            onClick={() => {
+              retry.mutate(generation.id, {
+                onSuccess: () => {
+                  refetch()
+                },
+              })
+            }}
           >
             <span className="material-symbols-outlined text-[16px] mr-1.5">
               refresh
