@@ -12,6 +12,7 @@ const {
   useUpdateQuiz,
   useAssignQuiz,
   useTeacherOfferings,
+  useCourseMaterialChapters,
   getTeacherGrades,
   getUsers,
 } = vi.hoisted(() => ({
@@ -22,6 +23,7 @@ const {
   useUpdateQuiz: vi.fn(),
   useAssignQuiz: vi.fn(),
   useTeacherOfferings: vi.fn(),
+  useCourseMaterialChapters: vi.fn(),
   getTeacherGrades: vi.fn(),
   getUsers: vi.fn(),
 }))
@@ -41,6 +43,10 @@ vi.mock("@/hooks/use-quizzes", () => ({
 
 vi.mock("@/hooks/use-labs", () => ({
   useTeacherOfferings: () => useTeacherOfferings(),
+}))
+
+vi.mock("@/hooks/use-materials", () => ({
+  useCourseMaterialChapters: () => useCourseMaterialChapters(),
 }))
 
 vi.mock("@/lib/api", () => ({
@@ -101,8 +107,42 @@ function renderPage() {
 
 function mockUseGenerate() {
   const mutate = vi.fn()
-  useGenerateQuiz.mockReturnValue({ mutate, isPending: false })
+  useGenerateQuiz.mockReturnValue({
+    mutate,
+    isPending: false,
+    isLoading: false,
+    step: null,
+    lastToolStep: null,
+  })
   return mutate
+}
+
+const unit = {
+  id: "unit-1",
+  title: "Unit 1 — Forces",
+  order: 0,
+  materials: [{ id: "m-1" }, { id: "m-2" }],
+}
+
+function mockUnits(chapters: unknown[] = [unit]) {
+  useCourseMaterialChapters.mockReturnValue({
+    chapters,
+    unassigned: [],
+    isLoading: false,
+    refetch: vi.fn(),
+  })
+}
+
+async function selectUnit(label: string) {
+  const unitCombobox = screen.getByRole("combobox", { name: "Scope" })
+  fireEvent.click(unitCombobox)
+  fireEvent.click(await screen.findByText(new RegExp(label)))
+}
+
+function fillClosesAt() {
+  fireEvent.change(screen.getByLabelText("Closes at"), {
+    target: { value: "2026-08-01T23:59" },
+  })
 }
 
 describe("QuizzesPage", () => {
@@ -110,12 +150,13 @@ describe("QuizzesPage", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useQuizList.mockReturnValue({ data: [], isLoading: false, isError: false, refetch: vi.fn() })
-    useGenerateQuiz.mockReturnValue({ mutate: vi.fn(), isPending: false })
+    useGenerateQuiz.mockReturnValue({ mutate: vi.fn(), isPending: false, isLoading: false, step: null, lastToolStep: null })
     useDeleteQuiz.mockReturnValue({ mutate: vi.fn(), isPending: false })
     usePublishQuiz.mockReturnValue({ mutate: vi.fn(), isPending: false })
     useUpdateQuiz.mockReturnValue({ mutate: vi.fn(), isPending: false })
     useAssignQuiz.mockReturnValue({ mutate: vi.fn(), isPending: false })
     useTeacherOfferings.mockReturnValue({ data: offerings, isLoading: false })
+    mockUnits([])
     getTeacherGrades.mockResolvedValue([
       { id: "grade-9", level: 9, name: "", createdAt: "2026-01-01T00:00:00Z" },
     ])
@@ -160,6 +201,7 @@ describe("QuizzesPage", () => {
 
   it("passes a selected difficulty to the generate call", async () => {
     const mutate = mockUseGenerate()
+    mockUnits()
     useQuizList.mockReturnValue({ data: [], isLoading: false, isError: false, refetch: vi.fn() })
     renderPage()
 
@@ -177,13 +219,14 @@ describe("QuizzesPage", () => {
     await waitFor(() => expect(screen.getAllByText("9-A").length).toBeGreaterThan(0))
     fireEvent.click(screen.getByText("9-A", { selector: "span.font-label-md" }))
 
-    const topic = screen.getByPlaceholderText(/Photosynthesis/)
-    fireEvent.change(topic, { target: { value: "Photosynthesis" } })
+    await selectUnit("Unit 1 — Forces")
 
     const difficultyCombobox = screen.getByRole("combobox", { name: "Difficulty" })
     fireEvent.click(difficultyCombobox)
     const options = screen.getAllByRole("option")
     fireEvent.click(options.find((o) => o.textContent === "Hard")!)
+
+    fillClosesAt()
 
     fireEvent.click(screen.getByText("Generate"))
     await waitFor(() =>
@@ -254,8 +297,9 @@ describe("QuizzesPage", () => {
     expect(screen.getByText("Close")).toBeTruthy()
   })
 
-  it("submits the generate dialog with courseId and assignments", async () => {
+  it("submits the generate dialog with courseId, assignments and the selected unit", async () => {
     const mutate = mockUseGenerate()
+    mockUnits()
     useQuizList.mockReturnValue({ data: [], isLoading: false, isError: false, refetch: vi.fn() })
     renderPage()
 
@@ -273,21 +317,77 @@ describe("QuizzesPage", () => {
     await waitFor(() => expect(screen.getAllByText("9-A").length).toBeGreaterThan(0))
     fireEvent.click(screen.getByText("9-A", { selector: "span.font-label-md" }))
 
-    const topic = screen.getByPlaceholderText(/Photosynthesis/)
-    fireEvent.change(topic, { target: { value: "Photosynthesis" } })
+    await selectUnit("Unit 1 — Forces")
+
+    fillClosesAt()
 
     fireEvent.click(screen.getByText("Generate"))
     await waitFor(() =>
       expect(mutate).toHaveBeenCalledWith(
         expect.objectContaining({
           courseId: "course-physics",
-          topic: "Photosynthesis",
+          chapterId: "unit-1",
           difficulty: "MEDIUM",
+          timeLimit: 15,
+          endsAt: expect.any(String),
           assignments: [{ courseOfferingId: "off-a1", targetStudentIds: undefined }],
         }),
         expect.any(Object),
       ),
     )
+    expect(mutate.mock.calls[0][0]).not.toHaveProperty("topic")
+  })
+
+  it("closes the generate dialog immediately when Generate is clicked", async () => {
+    const mutate = vi.fn()
+    useGenerateQuiz.mockReturnValue({
+      mutate,
+      isPending: false,
+      isLoading: false,
+      step: null,
+      lastToolStep: null,
+    })
+    mockUnits()
+    renderPage()
+
+    fireEvent.click(screen.getByText("AI Generate"))
+    await waitFor(() => expect(screen.getByText("Generate quiz with AI")).toBeTruthy())
+
+    const gradeCombobox = screen.getByRole("combobox", { name: "Grade" })
+    fireEvent.click(gradeCombobox)
+    fireEvent.click(await screen.findByText("Grade 9"))
+
+    const courseCombobox = screen.getByRole("combobox", { name: "Course" })
+    fireEvent.click(courseCombobox)
+    fireEvent.click(await screen.findByText("Physics"))
+
+    await waitFor(() => expect(screen.getAllByText("9-A").length).toBeGreaterThan(0))
+    fireEvent.click(screen.getByText("9-A", { selector: "span.font-label-md" }))
+
+    await selectUnit("Unit 1 — Forces")
+
+    fillClosesAt()
+
+    fireEvent.click(screen.getByText("Generate"))
+
+    await waitFor(() =>
+      expect(screen.queryByText("Generate quiz with AI")).toBeNull(),
+    )
+    expect(mutate).toHaveBeenCalledTimes(1)
+  })
+
+  it("shows the inline agent loading card while generating", () => {
+    useGenerateQuiz.mockReturnValue({
+      mutate: vi.fn(),
+      isPending: true,
+      isLoading: true,
+      step: "search_curriculum",
+      lastToolStep: "search_curriculum",
+    })
+    renderPage()
+
+    expect(screen.getByText("Searching the unit material…")).toBeTruthy()
+    expect(screen.queryByText("No quizzes yet")).toBeTruthy()
   })
 
   it("shows an empty state when there are no quizzes", () => {

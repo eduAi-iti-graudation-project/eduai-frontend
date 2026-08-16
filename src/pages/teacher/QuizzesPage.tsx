@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useQuizList, useGenerateQuiz, useDeleteQuiz, usePublishQuiz, useUpdateQuiz, useAssignQuiz } from "@/hooks/use-quizzes"
+import { useCourseMaterialChapters } from "@/hooks/use-materials"
 import { QuizTargetPicker, type TargetOffering } from "@/components/quiz/QuizTargetPicker"
+import { QuizAgentGraph } from "@/components/quiz/QuizAgentGraph"
 import { QuizStatusBadge } from "@/components/quiz/QuizStatusBadge"
 import { QuizDifficultyBadge } from "@/components/quiz/QuizDifficultyBadge"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
@@ -64,11 +66,25 @@ export function QuizzesPage() {
 
   const [generatorOpen, setGeneratorOpen] = useState(false)
   const [genTargets, setGenTargets] = useState<TargetOffering[]>([])
-  const [genTopic, setGenTopic] = useState("")
+  const [genUnit, setGenUnit] = useState("")
   const [genCount, setGenCount] = useState(10)
   const [genTypes, setGenTypes] = useState<QuizQuestionType[]>(["MCQ", "TRUE_FALSE", "SHORT_ANSWER"])
   const [genDifficulty, setGenDifficulty] = useState<QuizDifficulty>("MEDIUM")
+  const [genTimeLimit, setGenTimeLimit] = useState(15)
   const [genClosesAt, setGenClosesAt] = useState("")
+
+  const genCourseId = genTargets[0]?.courseId ?? ""
+  const {
+    chapters: genUnits,
+    isLoading: genUnitsLoading,
+  } = useCourseMaterialChapters(genCourseId)
+
+  const handleGenTargetsChange = (next: TargetOffering[]) => {
+    const prevCourse = genTargets[0]?.courseId
+    const nextCourse = next[0]?.courseId
+    setGenTargets(next)
+    if (nextCourse !== prevCourse) setGenUnit("")
+  }
 
   const [assignTarget, setAssignTarget] = useState<QuizDto | null>(null)
   const [assignTargets, setAssignTargets] = useState<TargetOffering[]>([])
@@ -84,8 +100,9 @@ export function QuizzesPage() {
   }
 
   const runGenerate = () => {
-    if (genTargets.length === 0 || !genTopic.trim()) return
+    if (genTargets.length === 0 || !genUnit || !genTimeLimit || !genClosesAt) return
     const primary = genTargets[0]
+    setGeneratorOpen(false)
     generateQuiz.mutate(
       {
         courseId: primary.courseId,
@@ -93,22 +110,20 @@ export function QuizzesPage() {
           courseOfferingId: t.courseOfferingId,
           targetStudentIds: t.targetStudentIds.length > 0 ? t.targetStudentIds : undefined,
         })),
-        topic: genTopic.trim(),
+        chapterId: genUnit === ALL ? null : genUnit,
         questionCount: genCount,
         types: genTypes,
         difficulty: genDifficulty,
-        endsAt: genClosesAt ? new Date(genClosesAt).toISOString() : undefined,
+        timeLimit: genTimeLimit,
+        endsAt: new Date(genClosesAt).toISOString(),
       },
       {
-        onSuccess: (result) => {
-          setGeneratorOpen(false)
-          setGenTopic("")
+        onDone: (result) => {
+          setGenUnit("")
           setGenTargets([])
           setGenClosesAt("")
           if (result.quizId) {
             navigate(`/quizzes/${result.quizId}`)
-          } else {
-            navigate("/quizzes")
           }
         },
       },
@@ -196,11 +211,12 @@ export function QuizzesPage() {
           <div className="flex items-center gap-3">
             <Button
               type="button"
+              disabled={generateQuiz.isLoading}
               onClick={() => {
                 setGenTargets([])
                 setGeneratorOpen(true)
               }}
-              className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md nudge-hover inline-flex items-center gap-1"
+              className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md nudge-hover inline-flex items-center gap-1 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
               AI Generate
@@ -282,6 +298,18 @@ export function QuizzesPage() {
             {filtered.length} quiz{filtered.length === 1 ? "" : "zes"}
           </span>
         </div>
+
+        {generateQuiz.isLoading && (
+          <div className="max-w-4xl mx-auto mb-md">
+            <div className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant">
+              <QuizAgentGraph
+                variant="inline"
+                step={generateQuiz.step}
+                lastToolStep={generateQuiz.lastToolStep}
+              />
+            </div>
+          </div>
+        )}
 
         {quizzes.isLoading ? (
           <LoadingState className="flex-1 p-md max-w-4xl mx-auto w-full" />
@@ -471,22 +499,48 @@ export function QuizzesPage() {
             <div>
               <h3 className="font-headline-md text-headline-md text-on-surface">Generate quiz with AI</h3>
               <p id="quiz-generator-description" className="font-label-sm text-label-sm text-on-surface-variant">
-                The AI drafts a full quiz grounded in the course&apos;s material. You review it before publishing.
+                The AI drafts a full quiz from the selected scope&apos;s material. You review it before publishing.
               </p>
             </div>
           </div>
 
           <div className="mb-md">
-            <QuizTargetPicker value={genTargets} onChange={setGenTargets} disabled={generateQuiz.isPending} />
+            <QuizTargetPicker value={genTargets} onChange={handleGenTargetsChange} disabled={generateQuiz.isPending} />
           </div>
 
-          <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Topic</label>
-          <Input
-            value={genTopic}
-            onChange={(e) => setGenTopic(e.target.value)}
-            placeholder="e.g. Photosynthesis, World War II, Fractions…"
-            className="w-full h-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-md"
-          />
+          <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Scope</label>
+          <Select
+            value={genUnit}
+            onValueChange={setGenUnit}
+            disabled={generateQuiz.isPending || !genCourseId || genUnitsLoading}
+          >
+            <SelectTrigger
+              aria-label="Scope"
+              className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 mb-md"
+            >
+              <SelectValue placeholder={genCourseId ? "Pick a scope…" : "Pick a class first…"} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Entire course</SelectItem>
+              {genCourseId && !genUnitsLoading && genUnits.length === 0 && (
+                <p className="px-3 py-2 text-sm text-on-surface-variant">
+                  No material units in this course yet. Organize material into units first.
+                </p>
+              )}
+              {genUnits.map((u) => (
+                <SelectItem key={u.id} value={u.id}>
+                  {u.title}
+                  {u.materials.length > 0 && ` (${u.materials.length} material${u.materials.length === 1 ? "" : "s"})`}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {genCourseId && !genUnitsLoading && genUnits.length === 0 && genUnit !== ALL && (
+            <p className="font-label-sm text-label-sm text-on-surface-variant -mt-md mb-md">
+              Pick &quot;Entire course&quot; to generate from all uploaded material, or upload and group
+              material into units to scope the quiz to a unit.
+            </p>
+          )}
 
           <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
             Questions ({genCount})
@@ -540,11 +594,26 @@ export function QuizzesPage() {
           </Select>
 
           <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
-            Closes at (optional)
+            Time limit (minutes)
+          </label>
+          <Input
+            type="number"
+            min={1}
+            value={genTimeLimit || ""}
+            onChange={(e) => setGenTimeLimit(Number(e.target.value))}
+            placeholder="e.g. 15"
+            aria-label="Time limit"
+            className="w-full h-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-md"
+          />
+
+          <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
+            Closes at (required)
           </label>
           <Input
             type="datetime-local"
             value={genClosesAt}
+            required
+            aria-label="Closes at"
             min={new Date().toISOString().slice(0, 16)}
             onChange={(e) => setGenClosesAt(e.target.value)}
             className="w-full h-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-lg"
@@ -562,7 +631,7 @@ export function QuizzesPage() {
             <Button
               type="button"
               onClick={runGenerate}
-              disabled={generateQuiz.isPending || genTargets.length === 0 || !genTopic.trim() || genTypes.length === 0}
+              disabled={generateQuiz.isPending || genTargets.length === 0 || !genUnit || !genTimeLimit || !genClosesAt || genTypes.length === 0}
               className="flex-1 h-auto py-sm bg-primary text-white! font-label-md text-label-md rounded-md disabled:opacity-50 active:scale-95 transition-all"
             >
               {generateQuiz.isPending ? "AI is writing your quiz…" : "Generate"}

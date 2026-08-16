@@ -1831,6 +1831,7 @@ export interface QuizDto {
   timeLimit: number | null
   passingScore: number | null
   difficulty: QuizDifficulty
+  source?: "MANUAL" | "AI"
   status: QuizStatus
   endsAt: string | null
   createdAt: string
@@ -1869,21 +1870,22 @@ export interface CreateQuizDto {
   title: string
   description?: string
   assignments: QuizAssignmentInput[]
-  timeLimit?: number
+  timeLimit: number
   passingScore?: number
   difficulty?: QuizDifficulty
-  endsAt?: string
+  endsAt: string
   questions: CreateQuizQuestion[]
 }
 
 export interface GenerateQuizDto {
   courseId: string
   assignments: QuizAssignmentInput[]
-  topic: string
+  chapterId?: string | null
   questionCount: number
   types: QuizQuestionType[]
   difficulty?: QuizDifficulty
-  endsAt?: string
+  timeLimit: number
+  endsAt: string
 }
 
 export interface GenerateQuizResult {
@@ -1954,9 +1956,91 @@ export async function createQuiz(data: CreateQuizDto): Promise<QuizDto> {
   return res.data
 }
 
-export async function generateQuiz(data: GenerateQuizDto): Promise<GenerateQuizResult> {
-  const res = await api.post<GenerateQuizResult>("/quizzes/generate", data)
-  return res.data
+export type QuizAgentStep =
+  | "thinking"
+  | "search_curriculum"
+  | "generate_questions"
+  | "review_questions"
+  | "save_quiz"
+
+export interface QuizGenerationStreamHandlers {
+  onStep: (step: QuizAgentStep) => void
+  onDone: (data: GenerateQuizResult) => void
+}
+
+export async function streamGenerateQuiz(
+  data: GenerateQuizDto,
+  handlers: QuizGenerationStreamHandlers,
+): Promise<void> {
+  const token = getStoredToken()
+  const res = await fetch(`${API_URL}/quizzes/generate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!res.ok) {
+    if (shouldExpireSession(res.status, "/quizzes/generate", token !== null)) {
+      clearToken()
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT))
+    }
+    let message = "Something went wrong. Please try again."
+    try {
+      const body = await res.json()
+      if (body?.message) message = body.message
+    } catch {
+      // non-JSON error body; keep the default message
+    }
+    throw new Error(message)
+  }
+
+  if (!res.body) {
+    throw new Error("Streaming is not supported by this browser.")
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ""
+  let completed = false
+
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+
+    let idx: number
+    while ((idx = buffer.indexOf("\n\n")) !== -1) {
+      const rawEvent = buffer.slice(0, idx)
+      buffer = buffer.slice(idx + 2)
+      for (const line of rawEvent.split("\n")) {
+        if (!line.startsWith("data:")) continue
+        const payload = line.slice(5).trim()
+        if (!payload) continue
+        let evt: { type: string; step?: QuizAgentStep; data?: GenerateQuizResult; message?: string }
+        try {
+          evt = JSON.parse(payload)
+        } catch {
+          continue
+        }
+        if (evt.type === "step" && evt.step) {
+          handlers.onStep(evt.step)
+          await new Promise((resolve) => setTimeout(resolve, 60))
+        } else if (evt.type === "done" && evt.data) {
+          completed = true
+          handlers.onDone(evt.data)
+        } else if (evt.type === "error" && evt.message) {
+          throw new Error(evt.message)
+        }
+      }
+    }
+  }
+
+  if (!completed) {
+    throw new Error("Quiz generation ended unexpectedly. Please try again.")
+  }
 }
 
 export async function updateQuiz(id: string, data: Partial<CreateQuizDto> & { status?: QuizStatus }): Promise<QuizDto> {

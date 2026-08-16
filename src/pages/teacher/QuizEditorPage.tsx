@@ -133,6 +133,11 @@ export function QuizEditorPage() {
   }
 
   const readOnly = !isNew && (status === "PUBLISHED" || status === "CLOSED")
+  // AI-generated quizzes are assigned at generation time; the assignment
+  // picker is locked but questions/title stay editable until publish.
+  const assignmentsLocked =
+    !isNew &&
+    (status === "PUBLISHED" || status === "CLOSED" || quiz.data?.source === "AI")
 
   const totalPoints = useMemo(() => questions.reduce((sum, q) => sum + q.points, 0), [questions])
 
@@ -224,9 +229,9 @@ export function QuizEditorPage() {
       courseOfferingId: t.courseOfferingId,
       targetStudentIds: t.targetStudentIds.length > 0 ? t.targetStudentIds : undefined,
     })),
-    timeLimit: timeLimit ? Math.max(1, Number(timeLimit)) : undefined,
+    timeLimit: Math.max(1, Number(timeLimit)),
     passingScore: passingScore ? Math.max(0, Number(passingScore)) : undefined,
-    endsAt: closesAt ? new Date(closesAt).toISOString() : undefined,
+    endsAt: new Date(closesAt).toISOString(),
     questions: questions.map((q, index) => ({
       id: q.id,
       type: q.type,
@@ -237,8 +242,12 @@ export function QuizEditorPage() {
     })),
   })
 
+  const timeLimitError = !timeLimit || !(Number(timeLimit) >= 1)
+    ? "A time limit is required."
+    : null
+
   const closesAtError = !closesAt
-    ? null
+    ? "A closing date and time is required."
     : isNew && new Date(closesAt).getTime() <= new Date().getTime()
       ? "The closing time must be in the future."
       : null
@@ -246,6 +255,7 @@ export function QuizEditorPage() {
   const canSave =
     title.trim().length > 0 &&
     targets.length > 0 &&
+    timeLimitError === null &&
     closesAtError === null &&
     questions.length > 0 &&
     questions.every((q) => q.question.trim().length > 0)
@@ -359,8 +369,8 @@ export function QuizEditorPage() {
                 <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
                   Assign to sections
                 </label>
-                <QuizTargetPicker value={targets} onChange={setTargets} disabled={readOnly} />
-                {!isNew && readOnly && targets.length > 0 && (
+                <QuizTargetPicker value={targets} onChange={setTargets} disabled={assignmentsLocked} />
+                {!isNew && assignmentsLocked && targets.length > 0 && (
                   <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
                     This quiz is assigned to {targets.length} section{targets.length > 1 ? "s" : ""}.
                   </p>
@@ -368,16 +378,19 @@ export function QuizEditorPage() {
               </div>
               <div className="grid grid-cols-2 gap-md">
                 <div>
-                  <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Time limit (minutes, optional)</label>
+                  <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Time limit (minutes)</label>
                   <Input
                     type="number"
                     min={1}
                     value={timeLimit}
                     onChange={(e) => setTimeLimit(e.target.value)}
                     disabled={readOnly}
-                    placeholder="No limit"
+                    placeholder="e.g. 15"
                     className="w-full h-auto rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60"
                   />
+                  {timeLimitError && (
+                    <p className="font-label-sm text-label-sm text-error mt-1">{timeLimitError}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Passing score (optional)</label>
@@ -394,11 +407,12 @@ export function QuizEditorPage() {
               </div>
               <div>
                 <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
-                  Closes at <span className="text-on-surface-variant">(optional)</span>
+                  Closes at
                 </label>
                 <Input
                   type="datetime-local"
                   value={closesAt}
+                  required
                   min={isNew ? toLocalInputValue(new Date().toISOString()) : undefined}
                   onChange={(e) => setClosesAt(e.target.value)}
                   disabled={readOnly}
@@ -408,7 +422,7 @@ export function QuizEditorPage() {
                   <p className="font-label-sm text-label-sm text-error mt-1">{closesAtError}</p>
                 ) : (
                   <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
-                    Optional — leave empty and the quiz stays open until you close it manually.
+                    Students must finish before this time.
                   </p>
                 )}
               </div>

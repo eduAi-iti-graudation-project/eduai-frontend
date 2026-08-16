@@ -1,4 +1,6 @@
+import { useCallback } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useOperations, useOperationId, useOperation } from "@/providers/use-operations"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
 
@@ -54,14 +56,57 @@ export function useCreateQuiz() {
 
 export function useGenerateQuiz() {
   const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (data: api.GenerateQuizDto) => api.generateQuiz(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["quizzes"] })
-      toast.success("Quiz generated")
+  const { register, update, remove } = useOperations()
+  const operationId = useOperationId("quiz-generate")
+  const active = useOperation("quiz-generate")
+  const step = (active?.step ?? null) as api.QuizAgentStep | null
+  const lastToolStep = (active?.lastToolStep ?? null) as api.QuizAgentStep | null
+  const isLoading = active?.status === "running"
+
+  const mutate = useCallback(
+    (
+      data: api.GenerateQuizDto,
+      handlers?: {
+        onDone?: (result: api.GenerateQuizResult) => void
+        onError?: (err: Error) => void
+      },
+    ) => {
+      register({
+        id: operationId,
+        kind: "quiz-generate",
+        label: "Generating quiz…",
+        step: "thinking",
+        lastToolStep: null,
+      })
+
+      api
+        .streamGenerateQuiz(data, {
+          onStep: (s) => {
+            update(operationId, { step: s, lastToolStep: s !== "thinking" ? s : null })
+          },
+          onDone: (result) => {
+            remove(operationId)
+            if (result.quizId) {
+              queryClient.invalidateQueries({ queryKey: ["quizzes"] })
+              toast.success("Quiz generated")
+            } else {
+              toast.warning(
+                result.message || "Quiz could not be generated for this unit",
+              )
+            }
+            handlers?.onDone?.(result)
+          },
+        })
+        .catch((err: Error) => {
+          remove(operationId)
+          toast.error(err.message)
+          handlers?.onError?.(err)
+        })
     },
-    onError: (err: Error) => toast.error(err.message),
-  })
+    [operationId, register, update, remove, queryClient],
+  )
+
+  return { mutate, isPending: isLoading, isLoading, step, lastToolStep }
 }
 
 export function useUpdateQuiz() {
