@@ -953,7 +953,9 @@ export interface BulkUploadResult {
 export async function bulkUploadStudentDocuments(files: File[]): Promise<BulkUploadResult> {
   const form = new FormData()
   for (const file of files) form.append("files", file)
-  const res = await api.post<BulkUploadResult>("/documents/bulk-upload", form)
+  const res = await api.post<BulkUploadResult>("/documents/bulk-upload", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  })
   return res.data
 }
 
@@ -1755,11 +1757,11 @@ export interface QuizDto {
   id: string
   title: string
   description: string | null
-  courseOfferingId: string
+  classId: string
   timeLimit: number | null
   passingScore: number | null
-  endsAt: string | null
   status: QuizStatus
+  endsAt: string | null
   createdAt: string
   questions?: QuizQuestion[]
 }
@@ -1787,7 +1789,7 @@ export interface CreateQuizQuestion {
 export interface CreateQuizDto {
   title: string
   description?: string
-  courseOfferingId: string
+  classId: string
   timeLimit?: number
   passingScore?: number
   endsAt: string
@@ -1795,7 +1797,7 @@ export interface CreateQuizDto {
 }
 
 export interface GenerateQuizDto {
-  courseOfferingId: string
+  classId: string
   topic: string
   questionCount: number
   types: QuizQuestionType[]

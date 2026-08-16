@@ -100,7 +100,6 @@ export function useClasses() {
 
   return {
     classes,
-    offerings,
     isLoading: classes.isLoading || offerings.isLoading,
     isError: classes.isError || offerings.isError,
     error: classes.error ?? offerings.error,

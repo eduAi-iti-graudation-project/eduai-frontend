@@ -2,125 +2,150 @@
 
 /* ── Tailwind v4 Theme Tokens ────────────────────────────────── */
 @theme {
-  /* ── Colors ── */
-  --color-background: #f9f9ff;
-  --color-foreground: #1a1c20;
+  /* ── Colors (SugarScript Learning: pastel pink/sky/mint, off-white) ── */
+  --color-background: #faf9f8;
+  --color-foreground: #1a1c1c;
   --color-card: #ffffff;
-  --color-card-foreground: #1a1c20;
+  --color-card-foreground: #1a1c1c;
   --color-popover: #ffffff;
-  --color-popover-foreground: #1a1c20;
+  --color-popover-foreground: #1a1c1c;
+  --color-primary: #a43073;
   --color-primary-foreground: #ffffff;
+  --color-secondary: #00668a;
   --color-secondary-foreground: #ffffff;
-  --color-muted: #f3f3f9;
-  --color-muted-foreground: #464555;
-  --color-accent: #eef2ff;
-  --color-accent-foreground: #4338ca;
+  --color-muted: #eeeeed;
+  --color-muted-foreground: #544249;
+  --color-accent: #e9e8e7;
+  --color-accent-foreground: #1a1c1c;
   --color-destructive: #ba1a1a;
   --color-destructive-foreground: #ffffff;
-  --color-border: #c9c7d8;
-  --color-input: #c9c7d8;
-  --color-ring: #4f46e5;
+  --color-border: #dac0c9;
+  --color-input: #dac0c9;
+  --color-ring: #a43073;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f3f3f9;
-  --color-surface-container: #ededf3;
-  --color-surface-container-high: #e8e8ed;
-  --color-surface-container-highest: #e2e2e8;
-  --color-surface-dim: #d9d9df;
-  --color-surface-bright: #f9f9ff;
-  --color-surface: #f9f9ff;
-  --color-surface-tint: #4d44e3;
-  --color-surface-variant: #e2e2e8;
+  --color-surface-container-low: #f4f3f2;
+  --color-surface-container: #eeeeed;
+  --color-surface-container-high: #e9e8e7;
+  --color-surface-container-highest: #e3e2e1;
+  --color-surface-dim: #dadad9;
+  --color-surface-bright: #faf9f8;
+  --color-surface: #faf9f8;
+  --color-surface-tint: #a43073;
+  --color-surface-variant: #e3e2e1;
 
-  --color-on-surface: #1a1c20;
-  --color-on-surface-variant: #42404e;
-  --color-on-background: #1a1c20;
-  --color-inverse-surface: #2f3035;
-  --color-inverse-on-surface: #f0f0f6;
-  --color-inverse-primary: #c3c0ff;
+  --color-on-surface: #1a1c1c;
+  --color-on-surface-variant: #544249;
+  --color-on-background: #1a1c1c;
+  --color-inverse-surface: #2f3130;
+  --color-inverse-on-surface: #f1f0f0;
+  --color-inverse-primary: #ffafd3;
 
-  --color-primary: #4f46e5;
-  --color-primary-container: #eef2ff;
+  --color-primary-dark: #85145a;
+  --color-primary-container: #f472b6;
   --color-on-primary: #ffffff;
-  --color-on-primary-container: #4338ca;
-  --color-on-primary-fixed: #0f0069;
-  --color-on-primary-fixed-variant: #3323cc;
-  --color-primary-fixed: #e2dfff;
-  --color-primary-fixed-dim: #c3c0ff;
+  --color-on-primary-container: #6d0047;
+  --color-on-primary-fixed: #3d0026;
+  --color-on-primary-fixed-variant: #85145a;
+  --color-primary-fixed: #ffd8e7;
+  --color-primary-fixed-dim: #ffafd3;
 
-  --color-secondary: #5c5f60;
-  --color-secondary-container: #dee0e2;
+  --color-secondary-container: #40c2fd;
   --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #606365;
-  --color-on-secondary-fixed: #191c1e;
-  --color-on-secondary-fixed-variant: #444749;
-  --color-secondary-fixed: #e1e2e4;
-  --color-secondary-fixed-dim: #c5c7c8;
+  --color-on-secondary-container: #004d6a;
+  --color-on-secondary-fixed: #001e2c;
+  --color-on-secondary-fixed-variant: #004c69;
+  --color-secondary-fixed: #c4e7ff;
+  --color-secondary-fixed-dim: #7bd0ff;
 
-  --color-tertiary: #7e3000;
-  --color-tertiary-container: #a44100;
+  --color-tertiary: #006c4b;
+  --color-tertiary-container: #00b580;
   --color-on-tertiary: #ffffff;
-  --color-on-tertiary-container: #ffd2be;
-  --color-on-tertiary-fixed: #351000;
-  --color-on-tertiary-fixed-variant: #7b2f00;
-  --color-tertiary-fixed: #ffdbcc;
-  --color-tertiary-fixed-dim: #ffb695;
+  --color-on-tertiary-container: #003f2a;
+  --color-on-tertiary-fixed: #002114;
+  --color-on-tertiary-fixed-variant: #005137;
+  --color-tertiary-fixed: #68fcbf;
+  --color-tertiary-fixed-dim: #45dfa4;
 
   --color-error: #ba1a1a;
   --color-error-container: #ffdad6;
   --color-on-error: #ffffff;
   --color-on-error-container: #93000a;
 
-  --color-success: #15803d;
+  --color-success: #006c4b;
+  --color-success-container: #68fcbf;
+  --color-on-success-container: #005137;
+  --color-highlight: #fbbf24;
 
-  --color-outline: #625f70;
-  --color-outline-variant: #b6b3c4;
+  /* ── Accent: amber (attention/featured) ── */
+  --color-warning: #f59e0b;
+  --color-on-warning: #ffffff;
+  --color-warning-container: #fef3c7;
+  --color-on-warning-container: #92400e;
 
-  /* ── Font families (Inter only ── */
-  --font-headline-xl: "Inter", sans-serif;
-  --font-headline-lg: "Inter", sans-serif;
-  --font-headline-lg-mobile: "Inter", sans-serif;
-  --font-headline-md: "Inter", sans-serif;
-  --font-body-lg: "Inter", sans-serif;
-  --font-body-md: "Inter", sans-serif;
-  --font-label-md: "Inter", sans-serif;
-  --font-label-sm: "Inter", sans-serif;
-  --font-label-sm-mobile: "Inter", sans-serif;
+  /* ── Palette aliases (theme.extend.colors equivalent) ── */
+  --color-bg-light: #f4f3f2;
+  --color-danger: #ba1a1a;
+  --color-border-subtle: #e9e8e7;
+  --color-text-primary: #1a1c1c;
+  --color-text-muted: #544249;
+
+  --color-outline: #87717a;
+  --color-outline-variant: #dac0c9;
+
+  /* ── Font families (Quicksand for headlines + body, Inter fallback) ── */
+  --font-headline-xl: "Quicksand", sans-serif;
+  --font-headline-lg: "Quicksand", sans-serif;
+  --font-headline-lg-mobile: "Quicksand", sans-serif;
+  --font-headline-md: "Quicksand", sans-serif;
+  --font-headline-sub: "Quicksand", sans-serif;
+  --font-body-lg: "Quicksand", "Inter", sans-serif;
+  --font-body-md: "Quicksand", "Inter", sans-serif;
+  --font-label-md: "Quicksand", "Inter", sans-serif;
+  --font-label-lg: "Quicksand", "Inter", sans-serif;
+  --font-label-sm: "Quicksand", "Inter", sans-serif;
+  --font-label-sm-mobile: "Quicksand", "Inter", sans-serif;
 
   /* ── Font sizes ── */
-  --text-headline-xl: 36px;
-  --text-headline-xl-leading: 44px;
+  --text-headline-xl: 48px;
+  --text-headline-xl-leading: 56px;
   --text-headline-xl-tracking: -0.02em;
 
-  --text-headline-lg: 24px;
-  --text-headline-lg-leading: 32px;
+  --text-headline-lg: 32px;
+  --text-headline-lg-leading: 40px;
 
-  --text-headline-lg-mobile: 20px;
-  --text-headline-lg-mobile-leading: 28px;
+  --text-headline-lg-mobile: 28px;
+  --text-headline-lg-mobile-leading: 36px;
 
-  --text-headline-md: 20px;
-  --text-headline-md-leading: 28px;
+  --text-headline-md: 24px;
+  --text-headline-md-leading: 32px;
 
   --text-headline-sm: 16px;
   --text-headline-sm-leading: 24px;
 
-  --text-body-lg: 16px;
-  --text-body-lg-leading: 24px;
+  --text-headline-sub: 20px;
+  --text-headline-sub-leading: 28px;
 
-  --text-body-md: 14px;
-  --text-body-md-leading: 20px;
+  --text-body-lg: 18px;
+  --text-body-lg-leading: 28px;
+
+  --text-body-md: 16px;
+  --text-body-md-leading: 24px;
 
   --text-body-sm: 13px;
   --text-body-sm-leading: 18px;
 
-  --text-label-md: 12px;
-  --text-label-md-leading: 16px;
+  --text-label-md: 14px;
+  --text-label-md-leading: 20px;
   --text-label-md-tracking: 0.02em;
 
-  --text-label-sm: 11px;
-  --text-label-sm-leading: 14px;
+  --text-label-lg: 16px;
+  --text-label-lg-leading: 24px;
 
-  --text-label-sm-mobile: 11px;
-  --text-label-sm-mobile-leading: 14px;
+  --text-label-sm: 12px;
+  --text-label-sm-leading: 16px;
+
+  --text-label-sm-mobile: 12px;
+  --text-label-sm-mobile-leading: 16px;
 
   /* ── Spacing ── */
   --spacing-xs: 4px;
@@ -129,9 +154,12 @@
   --spacing-md: 24px;
   --spacing-lg: 48px;
   --spacing-xl: 80px;
+  --spacing-unit: 4px;
   --spacing-gutter: 16px;
-  --spacing-margin-mobile: 16px;
+  --spacing-gutter-desktop: 24px;
+  --spacing-margin-mobile: 20px;
   --spacing-margin-desktop: 40px;
+  --spacing-container-max: 1280px;
 
   /* ── Container (max-width) scale ── */
   /* Declared explicitly so `max-w-md/lg/xl` resolve to real widths instead of
@@ -145,12 +173,23 @@
   --max-width-lg: 32rem;
   --max-width-xl: 36rem;
 
-  /* ── Border radius ── */
-  --radius-sm: 0.25rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
-  --radius-3xl: 1.25rem;
+  /* ── Border radius (SugarScript: pill & generous soft radii) ── */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-2xl: 2.5rem;
+  --radius-3xl: 3rem;
+
+  /* ── Elevation (ambient pink-tinted, diffused) ── */
+  --shadow-card: 0 1px 2px rgba(164, 48, 115, 0.05), 0 8px 24px rgba(164, 48, 115, 0.09);
+  --shadow-card-hover: 0 1px 2px rgba(164, 48, 115, 0.06), 0 16px 40px rgba(164, 48, 115, 0.14);
+
+  /* ── Motion tokens (Data-Dense tier) ── */
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-micro: 150ms;
+  --duration-standard: 300ms;
+  --duration-enter: 450ms;
 }
 
 /* ── body styles ─────────────────────────────────────────────── */
@@ -161,16 +200,40 @@ body {
   min-height: 100dvh;
 }
 
-/* Solid indigo/purple surfaces always carry white text.
-   Declared in a mid layer so explicit text utilities still win,
-   but a stripped `text-primary-foreground` can never leave it black. */
 @layer components {
+  /* Brand gradient for buttons and headers (primary → tertiary) */
+  .gradient-brand {
+    background-image: linear-gradient(135deg, var(--color-primary) 0%, var(--color-tertiary) 100%);
+    color: var(--color-primary-foreground);
+  }
+
   .bg-primary,
   .bg-primary\/90,
   .bg-primary\/80,
   .bg-primary\/70,
-  .bg-indigo-600 {
+  .bg-primary-dark {
     color: var(--color-primary-foreground);
+  }
+
+  /* Design cards: white surface, borderless, soft pink ambient shadow */
+  .card {
+    border-color: transparent;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Gradient submit buttons (StudentAssignmentForm + AssignmentForm) */
+  .bg-gradient-submit {
+    background-image: linear-gradient(135deg, var(--color-primary) 0%, var(--color-tertiary) 100%);
+    color: var(--color-primary-foreground);
+  }
+
+  .glow-button {
+    box-shadow: 0 8px 28px rgba(164, 48, 115, 0.32);
+    transition: box-shadow 0.25s ease, transform 0.15s ease;
+  }
+
+  .glow-button:hover {
+    box-shadow: 0 10px 36px rgba(164, 48, 115, 0.45);
   }
 }
 
@@ -222,9 +285,13 @@ input:disabled {
   vertical-align: middle;
 }
 
+.nudge-hover {
+  transition: transform var(--duration-micro) var(--ease-premium), box-shadow var(--duration-micro) var(--ease-premium);
+}
+
 .nudge-hover:hover {
   transform: translateY(-2px) scale(1.01);
-  transition: all 0.2s ease;
+  box-shadow: var(--shadow-card);
 }
 
 .upload-zone {
@@ -241,16 +308,21 @@ input:disabled {
 /* ── Font weight utilities for headline/body tokens ──────────── */
 .font-headline-xl,
 .font-headline-lg,
-.font-headline-lg-mobile,
-.font-headline-md,
-.font-headline-sm {
-  font-weight: 600;
+.font-headline-lg-mobile {
+  font-weight: 700;
 }
 
-.font-label-md {
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
+.font-headline-md,
+  .font-headline-sm,
+  .font-headline-sub {
+    font-weight: 600;
+  }
+
+  .font-label-lg,
+  .font-label-md {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
 
 .font-label-sm,
 .font-label-sm-mobile {
@@ -260,7 +332,7 @@ input:disabled {
 .font-body-lg,
 .font-body-md,
 .font-body-sm {
-  font-weight: 400;
+  font-weight: 500;
 }
 
 /* ── Responsive adjustments ──────────────────────────────────── */
@@ -349,10 +421,10 @@ input:disabled {
   border-radius: 4px;
 }
 
-/* Dark scrollbar for the sidebar nav (scrolls independently) */
+/* Slate scrollbar for the sidebar nav (scrolls independently) */
 .sidebar-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  scrollbar-color: rgba(15, 23, 42, 0.14) transparent;
 }
 .sidebar-scroll::-webkit-scrollbar {
   width: 5px;
@@ -361,11 +433,11 @@ input:disabled {
   background: transparent;
 }
 .sidebar-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(15, 23, 42, 0.14);
   border-radius: 999px;
 }
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(15, 23, 42, 0.24);
 }
 
 /* ── Presentation player slide motion ────────────────────────── */
@@ -419,5 +491,112 @@ input:disabled {
   .deck-slide-in,
   .deck-zoom-in {
     animation: none;
+  }
+}
+
+/* ── Motion system (UI/UX Pro Max, Data-Dense tier) ─────────── */
+@keyframes rise-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes fade-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-rise-enter {
+  animation: rise-enter var(--duration-enter) var(--ease-premium) both;
+}
+
+.animate-fade-enter {
+  animation: fade-enter var(--duration-standard) ease-out both;
+}
+
+/* Staggered entrance: first 12 siblings, 60ms apart (capped per tier) */
+.stagger-enter > * {
+  animation: rise-enter var(--duration-enter) var(--ease-premium) both;
+}
+.stagger-enter > *:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.stagger-enter > *:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.stagger-enter > *:nth-child(4) {
+  animation-delay: 0.18s;
+}
+.stagger-enter > *:nth-child(5) {
+  animation-delay: 0.24s;
+}
+.stagger-enter > *:nth-child(6) {
+  animation-delay: 0.3s;
+}
+.stagger-enter > *:nth-child(7) {
+  animation-delay: 0.36s;
+}
+.stagger-enter > *:nth-child(8) {
+  animation-delay: 0.42s;
+}
+.stagger-enter > *:nth-child(9) {
+  animation-delay: 0.48s;
+}
+.stagger-enter > *:nth-child(10) {
+  animation-delay: 0.54s;
+}
+.stagger-enter > *:nth-child(11) {
+  animation-delay: 0.6s;
+}
+.stagger-enter > *:nth-child(12) {
+  animation-delay: 0.66s;
+}
+
+/* Press feedback: tactile scale-down on activation */
+.press-scale {
+  transition:
+    transform var(--duration-micro) var(--ease-premium),
+    box-shadow var(--duration-micro) var(--ease-premium),
+    background-color var(--duration-micro) ease-out;
+}
+
+.press-scale:active {
+  transform: scale(0.97);
+}
+
+/* Skeleton shimmer: 1.2s gradient sweep */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-container) 25%,
+    var(--color-surface-container-high) 45%,
+    var(--color-surface-container) 65%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-sweep 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise-enter,
+  .animate-fade-enter,
+  .stagger-enter > *,
+  .press-scale,
+  .nudge-hover,
+  .skeleton-shimmer {
+    animation: none;
+    transition: none;
   }
 }

@@ -89,197 +89,197 @@ import { TermsPage } from "./pages/TermsPage"
 import { PricingPage } from "./pages/PricingPage"
 
 export const TEACHER_ROUTES = [
-  { path: "/dashboard", element: <TeacherDashboardPage /> },
-  { path: "/timetable", element: <TimetablePage /> },
-  { path: "/classes", element: <ClassesPage /> },
-  { path: "/grades", element: <GradeListPage /> },
-  { path: "/grades/:gradeId", element: <GradeDetailPage /> },
-  { path: "/courses/:courseId", element: <CoursePage /> },
-  { path: "/classes/:id", element: <ClassDetailPage /> },
-  { path: "/assignments/new", element: <InstructorAssignmentForm /> },
-  { path: "/assignments/:id", element: <AssignmentDetailPage /> },
-  { path: "/students/:id", element: <StudentDetailPage /> },
-  { path: "/rubrics", element: <RubricsPage /> },
-  { path: "/rubrics/new", element: <RubricsPage /> },
-  { path: "/rubrics/confirm/:rubricId", element: <RubricConfirmPage /> },
-  { path: "/submissions", element: <SubmissionsPage /> },
-  { path: "/submissions/:id", element: <SubmissionDetailPage /> },
-  { path: "/quizzes", element: <QuizzesPage /> },
-  { path: "/quizzes/new", element: <QuizEditorPage /> },
-  { path: "/quizzes/:id", element: <QuizEditorPage /> },
-  { path: "/quizzes/:id/attempts", element: <QuizAttemptsListPage /> },
-  { path: "/quizzes/attempts/:id", element: <QuizAttemptDetailPage /> },
-  { path: "/labs", element: <LabsPage /> },
-  { path: "/labs/:id", element: <LabDetailPage /> },
-  { path: "/alerts", element: <AlertsPage /> },
-  { path: "/alerts/:alertId", element: <AlertDetailPage /> },
-  { path: "/insights", element: <InsightsPage /> },
-  { path: "/insights/students/:id", element: <StudentInsightsPage /> },
-  { path: "/chat", element: <ChatListPage /> },
-  { path: "/chat/:threadId", element: <ChatThreadPage /> },
-  { path: "/assistant", element: <AssistantPage /> },
-  { path: "/notifications", element: <NotificationsListPage /> },
-  { path: "/reports", element: <ReportsPage /> },
-  { path: "/attendance/import", element: <AttendanceImportPage /> },
-  { path: "/meetings", element: <MeetingsListPage /> },
-  { path: "/meetings/new", element: <ScheduleMeetingPage /> },
-  { path: "/meetings/:id", element: <MeetingDetailPage /> },
-  { path: "/meetings/:id/call", element: <MeetingCallPage /> },
-  { path: "/settings", element: <SettingsPage /> },
-  { path: "/support", element: <SupportPage /> },
+ { path: "/dashboard", element: <TeacherDashboardPage /> },
+ { path: "/timetable", element: <TimetablePage /> },
+ { path: "/classes", element: <ClassesPage /> },
+ { path: "/grades", element: <GradeListPage /> },
+ { path: "/grades/:gradeId", element: <GradeDetailPage /> },
+ { path: "/courses/:courseId", element: <CoursePage /> },
+ { path: "/classes/:id", element: <ClassDetailPage /> },
+ { path: "/assignments/new", element: <InstructorAssignmentForm /> },
+ { path: "/assignments/:id", element: <AssignmentDetailPage /> },
+ { path: "/students/:id", element: <StudentDetailPage /> },
+ { path: "/rubrics", element: <RubricsPage /> },
+ { path: "/rubrics/new", element: <RubricsPage /> },
+ { path: "/rubrics/confirm/:rubricId", element: <RubricConfirmPage /> },
+ { path: "/submissions", element: <SubmissionsPage /> },
+ { path: "/submissions/:id", element: <SubmissionDetailPage /> },
+ { path: "/quizzes", element: <QuizzesPage /> },
+ { path: "/quizzes/new", element: <QuizEditorPage /> },
+ { path: "/quizzes/:id", element: <QuizEditorPage /> },
+ { path: "/quizzes/:id/attempts", element: <QuizAttemptsListPage /> },
+ { path: "/quizzes/attempts/:id", element: <QuizAttemptDetailPage /> },
+ { path: "/labs", element: <LabsPage /> },
+ { path: "/labs/:id", element: <LabDetailPage /> },
+ { path: "/alerts", element: <AlertsPage /> },
+ { path: "/alerts/:alertId", element: <AlertDetailPage /> },
+ { path: "/insights", element: <InsightsPage /> },
+ { path: "/insights/students/:id", element: <StudentInsightsPage /> },
+ { path: "/chat", element: <ChatListPage /> },
+ { path: "/chat/:threadId", element: <ChatThreadPage /> },
+ { path: "/assistant", element: <AssistantPage /> },
+ { path: "/notifications", element: <NotificationsListPage /> },
+ { path: "/reports", element: <ReportsPage /> },
+ { path: "/attendance/import", element: <AttendanceImportPage /> },
+ { path: "/meetings", element: <MeetingsListPage /> },
+ { path: "/meetings/new", element: <ScheduleMeetingPage /> },
+ { path: "/meetings/:id", element: <MeetingDetailPage /> },
+ { path: "/meetings/:id/call", element: <MeetingCallPage /> },
+ { path: "/settings", element: <SettingsPage /> },
+ { path: "/support", element: <SupportPage /> },
 ]
 
 export const STUDENT_ROUTES = [
-  { path: "/student", element: <StudentDashboardPage /> },
-  { path: "/student/timetable", element: <StudentTimetablePage /> },
-  { path: "/student/classes", element: <AvailableClassesPage /> },
-  { path: "/student/classes/:classId", element: <StudentClassGradesPage /> },
-  { path: "/student/classes/:classId/materials", element: <StudentMaterialsPage /> },
-  { path: "/student/classes/:classId/assignments/:assignmentId", element: <StudentAssignmentGradePage /> },
-  { path: "/student/assignments", element: <StudentAssignmentsPage /> },
-  { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
-  { path: "/student/grades", element: <MyGradesPage /> },
-  { path: "/student/attendance", element: <MyAttendancePage /> },
-  { path: "/student/homework-help", element: <HomeworkHelpPage /> },
-  { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },
-  { path: "/student/study-lab", element: <StudyLabPage /> },
-  { path: "/student/labs", element: <StudentLabsPage /> },
-  { path: "/student/labs/:id", element: <StudentLabDetailPage /> },
-  { path: "/student/quizzes", element: <StudentQuizzesPage /> },
-  { path: "/student/quizzes/:id/take", element: <QuizTakePage /> },
-  { path: "/student/quizzes/:id/result", element: <StudentQuizResultPage /> },
-  { path: "/student/insights", element: <InsightsPage /> },
-  { path: "/student/chat", element: <ChatListPage /> },
-  { path: "/student/chat/:threadId", element: <ChatThreadPage /> },
-  { path: "/student/notifications", element: <NotificationsListPage /> },
-  { path: "/student/meetings", element: <MeetingsListPage /> },
-  { path: "/student/meetings/:id", element: <MeetingDetailPage /> },
-  { path: "/student/meetings/:id/call", element: <MeetingCallPage /> },
-  { path: "/student/support", element: <SupportPage /> },
-  { path: "/student/settings", element: <SettingsPage /> },
+ { path: "/student", element: <StudentDashboardPage /> },
+ { path: "/student/timetable", element: <StudentTimetablePage /> },
+ { path: "/student/classes", element: <AvailableClassesPage /> },
+ { path: "/student/classes/:classId", element: <StudentClassGradesPage /> },
+ { path: "/student/classes/:classId/materials", element: <StudentMaterialsPage /> },
+ { path: "/student/classes/:classId/assignments/:assignmentId", element: <StudentAssignmentGradePage /> },
+ { path: "/student/assignments", element: <StudentAssignmentsPage /> },
+ { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
+ { path: "/student/grades", element: <MyGradesPage /> },
+ { path: "/student/attendance", element: <MyAttendancePage /> },
+ { path: "/student/homework-help", element: <HomeworkHelpPage /> },
+ { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },
+ { path: "/student/study-lab", element: <StudyLabPage /> },
+ { path: "/student/labs", element: <StudentLabsPage /> },
+ { path: "/student/labs/:id", element: <StudentLabDetailPage /> },
+ { path: "/student/quizzes", element: <StudentQuizzesPage /> },
+ { path: "/student/quizzes/:id/take", element: <QuizTakePage /> },
+ { path: "/student/quizzes/:id/result", element: <StudentQuizResultPage /> },
+ { path: "/student/insights", element: <InsightsPage /> },
+ { path: "/student/chat", element: <ChatListPage /> },
+ { path: "/student/chat/:threadId", element: <ChatThreadPage /> },
+ { path: "/student/notifications", element: <NotificationsListPage /> },
+ { path: "/student/meetings", element: <MeetingsListPage /> },
+ { path: "/student/meetings/:id", element: <MeetingDetailPage /> },
+ { path: "/student/meetings/:id/call", element: <MeetingCallPage /> },
+ { path: "/student/support", element: <SupportPage /> },
+ { path: "/student/settings", element: <SettingsPage /> },
 ]
 
 export function teacherRoutes() {
-  return {
-    element: <TeacherRoute><TeacherLayout /></TeacherRoute>,
-    children: TEACHER_ROUTES,
-  }
+ return {
+  element: <TeacherRoute><TeacherLayout /></TeacherRoute>,
+  children: TEACHER_ROUTES,
+ }
 }
 
 export function studentRoutes() {
-  return {
-    element: <StudentRoute><StudentLayout /></StudentRoute>,
-    children: STUDENT_ROUTES,
-  }
+ return {
+  element: <StudentRoute><StudentLayout /></StudentRoute>,
+  children: STUDENT_ROUTES,
+ }
 }
 
 export function guardianRoutes() {
-  return {
-    path: "/guardian",
-    element: <GuardianRoute><div className="min-h-screen bg-surface-container-low"><header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-border">
-          <h1 className="font-headline-md text-headline-md text-on-surface">Guardian Portal</h1>
-          <div className="flex items-center gap-3">
-            <Link to="/guardian/insights" className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors">
-              <span className="material-symbols-outlined text-[20px]">monitoring</span>
-              Insights
-            </Link>
-            <NotificationBell />
-            <UserMenu />
-          </div>
-        </header><div className="flex-1 p-xl"><Outlet /></div></div></GuardianRoute>,
-    children: [
-      { index: true, element: <GuardianDashboardPage /> },
-      { path: "children/:id", element: <ChildDetailPage /> },
-      { path: "alerts/:id", element: <GuardianAlertDetailPage /> },
-      { path: "insights", element: <InsightsPage /> },
-      { path: "insights/students/:id", element: <StudentInsightsPage /> },
-      { path: "reports", element: <ReportsPage /> },
-      { path: "notifications", element: <NotificationsListPage /> },
-    ],
-  }
+ return {
+  path: "/guardian",
+  element: <GuardianRoute><div className="min-h-screen bg-surface"><header className="hidden md:flex items-center justify-between px-md py-4 bg-surface-container-lowest border-b border-border">
+     <h1 className="font-headline-md text-headline-md text-primary">Guardian Portal</h1>
+     <div className="flex items-center gap-3">
+      <Link to="/guardian/insights" className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors">
+       <span className="material-symbols-outlined text-[20px]">monitoring</span>
+       Insights
+      </Link>
+      <NotificationBell />
+      <UserMenu />
+     </div>
+    </header><div className="flex-1 p-xl"><Outlet /></div></div></GuardianRoute>,
+  children: [
+   { index: true, element: <GuardianDashboardPage /> },
+   { path: "children/:id", element: <ChildDetailPage /> },
+   { path: "alerts/:id", element: <GuardianAlertDetailPage /> },
+   { path: "insights", element: <InsightsPage /> },
+   { path: "insights/students/:id", element: <StudentInsightsPage /> },
+   { path: "reports", element: <ReportsPage /> },
+   { path: "notifications", element: <NotificationsListPage /> },
+  ],
+ }
 }
 
 export function adminRoutes() {
-  return {
-    path: "/admin",
-    element: <AdminRoute><AdminLayout /></AdminRoute>,
-    children: [
-      { index: true, element: <AdminDashboardPage /> },
-      { path: "timetable", element: <AdminTimetablePage /> },
-      { path: "assistant", element: <AdminAssistantPage /> },
-      { path: "alerts", element: <AdminAlertsPage /> },
-      { path: "grades", element: <GradeManagementPage /> },
-      { path: "migration", element: <MigrationWizardPage /> },
-      { path: "students", element: <StudentManagementPage /> },
-      { path: "students/:id", element: <AdminStudentDetailPage /> },
-      { path: "documents", element: <AdminBulkDocumentsPage /> },
-      { path: "import", element: <AdminCsvImportPage /> },
-      { path: "teachers", element: <TeacherManagementPage /> },
-      { path: "teachers/:id", element: <AdminTeacherDetailPage /> },
-      { path: "insights", element: <InsightsPage /> },
-      { path: "insights/students/:id", element: <StudentInsightsPage /> },
-      { path: "billing", element: <AdminBillingPage /> },
-      { path: "requests", element: <AdminRequestsPage /> },
-      { path: "join-approvals", element: <AdminJoinApprovalsPage /> },
-    ],
-  }
+ return {
+  path: "/admin",
+  element: <AdminRoute><AdminLayout /></AdminRoute>,
+  children: [
+   { index: true, element: <AdminDashboardPage /> },
+   { path: "timetable", element: <AdminTimetablePage /> },
+   { path: "assistant", element: <AdminAssistantPage /> },
+   { path: "alerts", element: <AdminAlertsPage /> },
+   { path: "grades", element: <GradeManagementPage /> },
+   { path: "migration", element: <MigrationWizardPage /> },
+   { path: "students", element: <StudentManagementPage /> },
+   { path: "students/:id", element: <AdminStudentDetailPage /> },
+   { path: "documents", element: <AdminBulkDocumentsPage /> },
+   { path: "import", element: <AdminCsvImportPage /> },
+   { path: "teachers", element: <TeacherManagementPage /> },
+   { path: "teachers/:id", element: <AdminTeacherDetailPage /> },
+   { path: "insights", element: <InsightsPage /> },
+   { path: "insights/students/:id", element: <StudentInsightsPage /> },
+   { path: "billing", element: <AdminBillingPage /> },
+   { path: "requests", element: <AdminRequestsPage /> },
+   { path: "join-approvals", element: <AdminJoinApprovalsPage /> },
+  ],
+ }
 }
 
 export const router = createBrowserRouter([
-  {
-    path: "/",
-    element: (
-      <GuestRoute>
-        <LandingPage />
-      </GuestRoute>
-    ),
-  },
-  {
-    path: "/login",
-    element: (
-      <GuestRoute>
-        <LoginPage />
-      </GuestRoute>
-    ),
-  },
-  {
-    path: "/signup",
-    element: (
-      <GuestRoute>
-        <SignupPage />
-      </GuestRoute>
-    ),
-  },
-  {
-    path: "/auth/callback",
-    element: <AuthCallbackPage />,
-  },
-  {
-    path: "/forgot-password",
-    element: <ForgotPasswordPage />,
-  },
-  {
-    path: "/verify",
-    element: <VerifyPage />,
-  },
-  {
-    path: "/privacy",
-    element: <PrivacyPage />,
-  },
-  {
-    path: "/terms",
-    element: <TermsPage />,
-  },
-  {
-    path: "/pricing",
-    element: <PricingPage />,
-  },
-  teacherRoutes(),
-  studentRoutes(),
-  guardianRoutes(),
-  adminRoutes(),
-  {
-    path: "*",
-    element: <NotFoundPage />,
-  },
+ {
+  path: "/",
+  element: (
+   <GuestRoute>
+    <LandingPage />
+   </GuestRoute>
+  ),
+ },
+ {
+  path: "/login",
+  element: (
+   <GuestRoute>
+    <LoginPage />
+   </GuestRoute>
+  ),
+ },
+ {
+  path: "/signup",
+  element: (
+   <GuestRoute>
+    <SignupPage />
+   </GuestRoute>
+  ),
+ },
+ {
+  path: "/auth/callback",
+  element: <AuthCallbackPage />,
+ },
+ {
+  path: "/forgot-password",
+  element: <ForgotPasswordPage />,
+ },
+ {
+  path: "/verify",
+  element: <VerifyPage />,
+ },
+ {
+  path: "/privacy",
+  element: <PrivacyPage />,
+ },
+ {
+  path: "/terms",
+  element: <TermsPage />,
+ },
+ {
+  path: "/pricing",
+  element: <PricingPage />,
+ },
+ teacherRoutes(),
+ studentRoutes(),
+ guardianRoutes(),
+ adminRoutes(),
+ {
+  path: "*",
+  element: <NotFoundPage />,
+ },
 ])

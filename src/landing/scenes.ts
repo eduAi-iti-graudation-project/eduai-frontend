@@ -112,14 +112,14 @@ export function warpStrength(global: number): number {
 
 /** Background color + fog per scene — swapped by the SceneManager. */
 export const BACKGROUNDS: { color: string; fogNear: number; fogFar: number }[] = [
-  { color: "#d9e6f6", fogNear: 26, fogFar: 75 },
-  { color: "#d9e6f6", fogNear: 26, fogFar: 75 },
-  { color: "#d9e6f6", fogNear: 26, fogFar: 75 },
+  { color: "#fceef5", fogNear: 26, fogFar: 75 },
+  { color: "#fceef5", fogNear: 26, fogFar: 75 },
+  { color: "#fceef5", fogNear: 26, fogFar: 75 },
   { color: "#07461f", fogNear: 16, fogFar: 50 },
   { color: "#021b0e", fogNear: 6, fogFar: 26 },
   { color: "#e6ecf7", fogNear: 14, fogFar: 42 },
   { color: "#e6ecf7", fogNear: 14, fogFar: 42 },
   { color: "#e6ecf7", fogNear: 14, fogFar: 42 },
-  { color: "#d9e6f6", fogNear: 26, fogFar: 75 },
-  { color: "#d9e6f6", fogNear: 26, fogFar: 75 },
+  { color: "#fceef5", fogNear: 26, fogFar: 75 },
+  { color: "#fceef5", fogNear: 26, fogFar: 75 },
 ]

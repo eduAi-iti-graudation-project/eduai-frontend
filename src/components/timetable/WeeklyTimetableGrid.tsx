@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+/* eslint-disable react-hooks/immutability */
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
@@ -21,7 +23,7 @@ import {
   fmtTimeRange,
   fromMinutes,
   isToday,
-  nowMinutes,
+ 
   toMinutes,
 } from "./timetable-utils"
 
@@ -135,7 +137,6 @@ export function WeeklyTimetableGrid({
   const [conflict, setConflict] = useState<SlotConflict | null>(null)
   const [conflictChecking, setConflictChecking] = useState(false)
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
-  const [now, setNow] = useState(nowMinutes)
   const [mobileDay, setMobileDay] = useState<DayOfWeek>(() => {
     const todayName = DAY_ORDER[(new Date().getDay() + 6) % 7]
     return orderedDays().find((d) => d === todayName) ?? DAY_ORDER[0]
@@ -143,11 +144,62 @@ export function WeeklyTimetableGrid({
 
   const mobile = useMediaQuery("(max-width: 767px)")
 
-  useEffect(() => {
-    if (!showNowIndicator) return
-    const timer = setInterval(() => setNow(nowMinutes()), 60_000)
-    return () => clearInterval(timer)
-  }, [showNowIndicator])
+  // ── Row-height expansion (content-aware) ──────────────────────────
+  // If a slot's content needs more vertical space than its time-proportional
+  // height gives it, we grow the *whole hour row* (across all day columns)
+  // instead of letting the slot overlap its neighbours.
+  const slotRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  const hourCount = Math.max(0, dayEndHour - dayStartHour)
+  const [rowExtra, setRowExtra] = useState<number[]>(() => new Array(hourCount).fill(0))
+
+  useLayoutEffect(() => {
+    if (mobile) {
+      setRowExtra((prev) => (prev.length === hourCount && prev.every((v) => v === 0) ? prev : new Array(hourCount).fill(0)))
+      return
+    }
+    const next = new Array(hourCount).fill(0)
+    for (const slot of localSlots) {
+      const el = slotRefs.current.get(slot.id)
+      if (!el) continue
+      const startMin = toMinutes(slot.startTime)
+      const endMin = toMinutes(slot.endTime)
+      const GAP = 8
+      const baseHeight = Math.max(HOUR_PX / 2 - GAP, ((endMin - startMin) / 60) * HOUR_PX - GAP)
+      const contentHeight = el.scrollHeight
+      if (contentHeight > baseHeight) {
+        const hourIdx = Math.floor((startMin - dayStartMin) / 60)
+        if (hourIdx >= 0 && hourIdx < next.length) {
+          next[hourIdx] = Math.max(next[hourIdx], contentHeight - baseHeight)
+        }
+      }
+    }
+    setRowExtra((prev) =>
+      prev.length === next.length && prev.every((v, i) => v === next[i]) ? prev : next,
+    )
+  })
+
+  const cumulativeExtra = useMemo(() => {
+    const arr: number[] = []
+    let sum = 0
+    for (let i = 0; i < rowExtra.length; i++) {
+      arr.push(sum)
+      sum += rowExtra[i]
+    }
+    return arr
+  }, [rowExtra])
+  const totalExtra = useMemo(() => rowExtra.reduce((a, b) => a + b, 0), [rowExtra])
+
+  // Converts a minute-of-day into a pixel offset that accounts for any
+  // hour rows that had to grow to fit their content.
+  const adjustedTop = (min: number) => {
+    const rawIdx = (min - dayStartMin) / 60
+    const hourIdx = Math.min(Math.max(Math.floor(rawIdx), 0), Math.max(rowExtra.length - 1, 0))
+    const fractionIntoHour = Math.min(Math.max(rawIdx - hourIdx, 0), 1)
+    const baseTop = rawIdx * HOUR_PX
+    const extraBefore = cumulativeExtra[hourIdx] ?? totalExtra
+    const extraWithin = (rowExtra[hourIdx] ?? 0) * fractionIntoHour
+    return baseTop + extraBefore + extraWithin
+  }
 
   const slotById = useMemo(() => {
     const map = new Map<string, TimetableSlotWithOffering>()
@@ -165,7 +217,7 @@ export function WeeklyTimetableGrid({
 
   const dayStartMin = dayStartHour * 60
   const daySpanMin = (dayEndHour - dayStartHour) * 60
-  const columnHeight = (daySpanMin / 60) * HOUR_PX
+  const columnHeight = (daySpanMin / 60) * HOUR_PX + totalExtra
 
   // ── Conflict preview (debounced, same backend check as save) ─────
   const pendingCheckRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -373,40 +425,115 @@ export function WeeklyTimetableGrid({
     deleteMutation.mutate(slotId)
   }
 
+  // ── Side-by-side layout for overlapping slots ─────────────────────
+  // Classic calendar-column algorithm: overlapping slots in the same day
+  // share the column width (split evenly, with a small horizontal gap)
+  // instead of stacking directly on top of each other.
+  type ColLayout = { col: number; cols: number }
+  const layoutDaySlots = (daySlots: TimetableSlotWithOffering[]): Map<string, ColLayout> => {
+    const sorted = [...daySlots].sort(
+      (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime) || toMinutes(a.endTime) - toMinutes(b.endTime),
+    )
+    const result = new Map<string, ColLayout>()
+    let clusterSlots: TimetableSlotWithOffering[] = []
+    let clusterEnd = -Infinity
+    let columnsEnd: number[] = []
+    let colAssign = new Map<string, number>()
+
+    const flushCluster = () => {
+      if (clusterSlots.length === 0) return
+      const cols = columnsEnd.length
+      for (const s of clusterSlots) {
+        result.set(s.id, { col: colAssign.get(s.id)!, cols })
+      }
+      clusterSlots = []
+      columnsEnd = []
+      colAssign = new Map()
+    }
+
+    for (const s of sorted) {
+      const start = toMinutes(s.startTime)
+      const end = toMinutes(s.endTime)
+      if (start >= clusterEnd) {
+        flushCluster()
+        clusterEnd = end
+      } else {
+        clusterEnd = Math.max(clusterEnd, end)
+      }
+      let placed = false
+      for (let i = 0; i < columnsEnd.length; i++) {
+        if (columnsEnd[i] <= start) {
+          columnsEnd[i] = end
+          colAssign.set(s.id, i)
+          placed = true
+          break
+        }
+      }
+      if (!placed) {
+        columnsEnd.push(end)
+        colAssign.set(s.id, columnsEnd.length - 1)
+      }
+      clusterSlots.push(s)
+    }
+    flushCluster()
+    return result
+  }
+
   // ── Rendering helpers ────────────────────────────────────────────
   const renderBlock = (
     slot: TimetableSlotWithOffering,
     overrides?: { startMin?: number; endMin?: number },
     ghost?: boolean,
+    layout?: ColLayout,
   ) => {
     const startMin = overrides?.startMin ?? toMinutes(slot.startTime)
     const endMin = overrides?.endMin ?? toMinutes(slot.endTime)
-    const top = ((startMin - dayStartMin) / 60) * HOUR_PX
-    const height = ((endMin - startMin) / 60) * HOUR_PX
+    const top = adjustedTop(startMin)
+    const slotHeight = ((endMin - startMin) / 60) * HOUR_PX
     const color = colorForTag(slot.courseOffering.course.colorTag)
     const isConflict = ghost && conflict !== null
+    // Small visual gap so back-to-back slots never look glued together.
+    const GAP = 8
+    const H_GAP = 6
+    const rawHeight = Math.max(HOUR_PX / 2, slotHeight)
+    const horizontal: React.CSSProperties =
+      layout && layout.cols > 1
+        ? {
+            left: `calc(${(layout.col / layout.cols) * 100}% + ${H_GAP / 2}px)`,
+            width: `calc(${(1 / layout.cols) * 100}% - ${H_GAP}px)`,
+          }
+        : {}
     const style: React.CSSProperties = ghost
       ? {
-          top: Math.max(0, top),
-          height: Math.max(HOUR_PX / 2, height),
-          background: isConflict ? "#FEE2E2" : color.tint,
-          borderColor: isConflict ? "#EF4444" : color.solid,
-          color: isConflict ? "#B91C1C" : color.solid,
+          top: Math.max(0, top) + GAP / 2,
+          minHeight: Math.max(rawHeight - GAP, HOUR_PX / 2 - GAP),
+          background: isConflict ? "#ffdad6" : color.tint,
+          borderColor: isConflict ? "#ef4444" : color.solid,
+          color: isConflict ? "#93000a" : color.solid,
+          ...horizontal,
         }
       : {
-          top,
-          height: Math.max(HOUR_PX / 2, height),
+          top: top + GAP / 2,
+          minHeight: Math.max(rawHeight - GAP, HOUR_PX / 2 - GAP),
           background: color.tint,
           borderColor: color.solid,
           color: color.solid,
+          ...horizontal,
         }
 
     return (
       <div
         key={slot.id}
+        ref={(el) => {
+          if (ghost) return
+          if (el) slotRefs.current.set(slot.id, el)
+          else slotRefs.current.delete(slot.id)
+        }}
         className={cn(
-          "absolute left-1 right-1 rounded-md border-l-[3px] px-2 py-1.5 overflow-hidden select-none z-10",
-          editable && !ghost && "cursor-grab active:cursor-grabbing group shadow-sm hover:shadow-md transition-shadow",
+          "absolute rounded-md border-l-[3px] px-2.5 py-1.5 select-none z-10",
+          ghost && "left-1 right-1",
+          editable && !ghost && "left-1 right-1 cursor-grab active:cursor-grabbing group shadow-sm hover:shadow-md transition-shadow",
+          !editable && "left-0 right-0",
         )}
         style={style}
         onPointerDown={
@@ -425,16 +552,16 @@ export function WeeklyTimetableGrid({
         onMouseLeave={() => setTooltip(null)}
       >
         <p className={cn(
-          "font-label-sm text-label-sm font-semibold truncate leading-4",
+          "font-label-sm text-[11px] font-semibold leading-[14px] break-words",
           editable && !ghost && "pr-4",
         )}>
           {slot.courseOffering.course.name}
         </p>
-        <p className="font-label-sm text-label-sm opacity-80 leading-4 truncate mt-0.5">
+        <p className="font-label-sm text-[10px] opacity-80 leading-[13px] break-words mt-0.5">
           {fmtTimeRange(slot.startTime, slot.endTime)}
         </p>
         {(slot.room || showSection) && (
-          <p className="font-label-sm text-label-sm opacity-70 truncate leading-4 mt-0.5">
+          <p className="font-label-sm text-[10px] opacity-70 break-words leading-[13px] mt-0.5">
             {[showSection ? slot.courseOffering.section.name : null, slot.room]
               .filter(Boolean)
               .join(" · ")}
@@ -566,7 +693,7 @@ export function WeeklyTimetableGrid({
     <div
       ref={containerRef}
       className={cn(
-        "relative overflow-x-auto rounded-xl border border-border bg-surface-container-lowest",
+        "relative   rounded-xl border border-border bg-surface-container-lowest",
         editable && "touch-none select-none",
         className,
       )}
@@ -614,12 +741,12 @@ export function WeeklyTimetableGrid({
           }}
         >
           {/* Time gutter */}
-          <div className="relative border-r border-border sticky left-0 z-20 bg-surface-container-lowest">
+          <div className="relative border-r border-border sticky left-0  z-20 bg-surface-container-lowest">
             {hours.map((hour) => (
               <div
                 key={hour}
                 className="absolute right-2.5 pl-2 -translate-y-1/2 font-label-sm text-label-sm text-on-surface-variant"
-                style={{ top: ((hour - dayStartHour) / 1) * HOUR_PX }}
+                style={{ top: adjustedTop(hour * 60) }}
               >
                 {fmtTime(`${String(hour).padStart(2, "0")}:00`)}
               </div>
@@ -631,6 +758,7 @@ export function WeeklyTimetableGrid({
             const daySlots = localSlots
               .filter((s) => s.dayOfWeek === day)
               .sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime))
+            const dayLayout = layoutDaySlots(daySlots)
             return (
               <div
                 key={day}
@@ -644,30 +772,11 @@ export function WeeklyTimetableGrid({
                   <div
                     key={hour}
                     className="absolute left-0 right-0 border-t border-outline-variant/40 pointer-events-none"
-                    style={{ top: ((hour - dayStartHour) / 1) * HOUR_PX }}
+                    style={{ top: adjustedTop(hour * 60) }}
                   />
                 ))}
 
-                {/* Now indicator (read-only) */}
-                {showNowIndicator && now >= dayStartMin && now <= dayEndHour * 60 && (
-                  <div
-                    className="absolute left-0 right-0 z-20 pointer-events-none"
-                    style={{ top: ((now - dayStartMin) / 60) * HOUR_PX }}
-                  >
-                    <div className="relative">
-                      <div
-                        className="h-[2px]"
-                        style={{ background: "#6366F1", opacity: isToday(day) ? 1 : 0.35 }}
-                      />
-                      <span
-                        className="absolute -left-1 -top-[5px] w-2.5 h-2.5 rounded-full"
-                        style={{ background: "#6366F1", opacity: isToday(day) ? 1 : 0.35 }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {daySlots.map((s) => renderBlock(s))}
+                {daySlots.map((s) => renderBlock(s, undefined, false, dayLayout.get(s.id)))}
 
                 {/* Ghost block during drag */}
                 {drag && drag.day === day && renderGhost()}
@@ -871,7 +980,7 @@ function CreatePopover({
           type="button"
           disabled={!effectiveSelected || submitting}
           onClick={() => effectiveSelected && onConfirm(effectiveSelected, room)}
-          className="px-4 py-1.5 rounded-md bg-primary text-on-primary font-label-sm text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="px-4 py-1.5 rounded-md bg-primary text-primary-foreground font-label-sm text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {submitting ? "Adding…" : "Add slot"}
         </button>
