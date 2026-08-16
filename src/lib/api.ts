@@ -2485,7 +2485,14 @@ export type SlideBlock =
     }
 
 export interface DeckTheme {
+  preset?: "modern" | "classic" | "dark" | "colorful" | "minimal"
   background: "light" | "dark" | "gradient"
+  colors?: {
+    primary?: string
+    secondary?: string
+    accent?: string
+    text?: string
+  }
   accent?: string
   motion: "fade" | "rise" | "slide" | "scale"
 }
@@ -2578,11 +2585,23 @@ export interface StudyGeneration {
   fileUrl: string | null
 }
 
+export type StudyLabThemePreset = "modern" | "classic" | "dark" | "colorful" | "minimal"
+export type StudyLabThemeBackground = "light" | "dark" | "gradient"
+export type StudyLabThemeMotion = "fade" | "rise" | "slide" | "scale"
+
+export interface DeckThemeInput {
+  preset?: StudyLabThemePreset
+  accent?: string
+  background?: StudyLabThemeBackground
+  motion?: StudyLabThemeMotion
+}
+
 export interface GenerateStudyLabInput {
   courseOfferingId: string
   kind: StudyLabKind
   materialKind?: StudyLabMaterialKind
   preset?: StudyLabPreset
+  theme?: DeckThemeInput
   topic: string
 }
 
@@ -2597,6 +2616,13 @@ export async function generateStudyLab(
   input: GenerateStudyLabInput,
 ): Promise<{ generationId: string; status: string }> {
   const res = await api.post("/assistant/study-lab/generate", input)
+  return res.data
+}
+
+export async function retryStudyLab(
+  generationId: string,
+): Promise<{ generationId: string; status: string }> {
+  const res = await api.post(`/assistant/study-lab/${generationId}/retry`)
   return res.data
 }
 

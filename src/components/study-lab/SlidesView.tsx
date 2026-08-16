@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { SlideVisualView } from "@/components/study-lab/SlideVisualView"
 
-const ACCENT_FALLBACK = "#a43073"
-
 type Palette = {
  bg: string
  panel: string
@@ -16,30 +14,90 @@ type Palette = {
  accent: string
 }
 
+const THEME_PRESETS: Record<string, Palette> = {
+  modern: {
+    bg: "#ffffff",
+    panel: "#ffffff",
+    border: "#E5E7EB",
+    text: "#1F2937",
+    muted: "#6B7280",
+    accent: "#10B981",
+  },
+  classic: {
+    bg: "#ffffff",
+    panel: "#ffffff",
+    border: "#E5E7EB",
+    text: "#1F2937",
+    muted: "#6B7280",
+    accent: "#DC2626",
+  },
+  dark: {
+    bg: "#0F172A",
+    panel: "#1E293B",
+    border: "#334155",
+    text: "#F1F5F9",
+    muted: "#94A3B8",
+    accent: "#6EE7B7",
+  },
+  colorful: {
+    bg: "#ffffff",
+    panel: "#ffffff",
+    border: "#E5E7EB",
+    text: "#1F2937",
+    muted: "#6B7280",
+    accent: "#F59E0B",
+  },
+  minimal: {
+    bg: "#ffffff",
+    panel: "#ffffff",
+    border: "#E5E7EB",
+    text: "#1F2937",
+    muted: "#6B7280",
+    accent: "#6B7280",
+  },
+}
+
 function paletteFor(deck: api.Deck): Palette {
- const accent = deck.theme?.accent ?? ACCENT_FALLBACK
- const base: Palette = {
-  bg: "#ffffff",
-  panel: "#ffffff",
-  border: "#334155",
-  text: "#1F2937",
-  muted: "#6B7280",
-  accent,
- }
- if (deck.theme?.background === "dark") {
-  return {
-   bg: "#2f3130",
-   panel: "#3a3d3c",
-   border: "#464a49",
-   text: "#f1f0f0",
-   muted: "#8f8b8a",
-   accent,
+  const preset = deck.theme?.preset
+  const accent = deck.theme?.accent ?? deck.theme?.colors?.accent ?? "#10B981"
+  const background = deck.theme?.background ?? (preset === "dark" ? "dark" : preset === "colorful" ? "gradient" : "light")
+  const presetPalette = preset ? THEME_PRESETS[preset] : null
+
+  if (background === "dark" || preset === "dark") {
+    return {
+      bg: "#0F172A",
+      panel: "#1E293B",
+      border: "#334155",
+      text: "#F1F5F9",
+      muted: "#94A3B8",
+      accent,
+    }
   }
- }
- if (deck.theme?.background === "gradient") {
-  base.bg = `linear-gradient(180deg, ${accent}1A 0%, #ffffff 55%)`
- }
- return base
+
+  if (background === "gradient" || preset === "colorful") {
+    return {
+      bg: `linear-gradient(135deg, ${accent}22 0%, #FFFFFF 60%, ${accent}11 100%)`,
+      panel: "#FFFFFF",
+      border: `${accent}40`,
+      text: "#1F2937",
+      muted: "#6B7280",
+      accent,
+    }
+  }
+
+  const basePanel = presetPalette?.panel ?? "#ffffff"
+  const baseText = presetPalette?.text ?? "#1F2937"
+  const baseMuted = presetPalette?.muted ?? "#6B7280"
+  const baseBorder = presetPalette?.border ?? "#E5E7EB"
+
+  return {
+    bg: presetPalette?.bg ?? "#ffffff",
+    panel: basePanel,
+    border: baseBorder,
+    text: baseText,
+    muted: baseMuted,
+    accent,
+  }
 }
 
 function motionClass(motion?: string): string {
@@ -445,50 +503,51 @@ export function SlidesView({ generation }: { generation: api.StudyGeneration }) 
 
  const progress = ((index + 1) / deck.slides.length) * 100
 
- return (
-  <div className="space-y-4">
-   <div className="flex items-center justify-between gap-3">
-    <div>
-     <h3 className="font-headline-md text-headline-md text-primary">
-      {deck.title}
-     </h3>
-     <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">
-      Slide {index + 1} of {deck.slides.length}
-     </p>
-    </div>
-    <Button
-     type="button"
-     size="sm"
-     onClick={() => window.open(api.studyLabFileUrl(generation.id), "_blank")}
-    >
-     <span className="material-symbols-outlined text-[18px] mr-1.5">
-      download
-     </span>
-     Download .pptx
-    </Button>
-   </div>
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-headline-md text-headline-md text-on-surface">
+            {deck.title}
+          </h3>
+          <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">
+            Slide {index + 1} of {deck.slides.length}
+          </p>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          onClick={async () => {
+            try {
+              const blob = await api.fetchFileBlob(api.studyLabFileUrl(generation.id))
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = generation.fileUrl?.split('/').pop() ?? 'study-file'
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+            } catch {
+              // fallback: open in new tab
+              window.open(api.studyLabFileUrl(generation.id), '_blank')
+            }
+          }}
+        >
+          <span className="material-symbols-outlined text-[18px] mr-1.5">
+            download
+          </span>
+          Download .pptx
+        </Button>
+      </div>
 
-   <div
-    ref={stageRef}
-    className="relative overflow-hidden rounded-lg border shadow-sm"
-    style={{
-     backgroundColor: palette.bg,
-     borderColor: palette.border,
-    }}
-   >
-    <div
-     className="h-1 transition-[width] duration-300"
-     style={{ width: `${progress}%`, backgroundColor: palette.accent }}
-    />
-    {overview ? (
-     <div className="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-3">
-      {deck.slides.map((s, i) => (
-       <button
-        key={i}
-        type="button"
-        onClick={() => {
-         setIndex(i)
-         setOverview(false)
+      <div
+        ref={stageRef}
+        className="relative overflow-hidden rounded-lg border shadow-sm flex flex-col justify-between"
+        style={{
+          background: palette.bg,
+          borderColor: palette.border,
+          color: palette.text,
         }}
         className={cn(
          "rounded-lg border p-4 text-left transition-colors",
