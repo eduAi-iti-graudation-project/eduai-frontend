@@ -59,39 +59,11 @@ const THEME_PRESETS: Record<string, Palette> = {
 
 function paletteFor(deck: api.Deck): Palette {
   const preset = deck.theme?.preset
-  const accent = deck.theme?.accent ?? deck.theme?.colors?.accent ?? "#4F46E5"
+  const accent = deck.theme?.accent ?? deck.theme?.colors?.accent ?? "#10B981"
+  const background = deck.theme?.background ?? (preset === "dark" ? "dark" : preset === "colorful" ? "gradient" : "light")
   const presetPalette = preset ? THEME_PRESETS[preset] : null
 
-  if (presetPalette) {
-    const base = { ...presetPalette, accent }
-    if (deck.theme?.background === "dark" || preset === "dark") {
-      return {
-        bg: "#0F172A",
-        panel: "#1E293B",
-        border: "#334155",
-        text: "#F1F5F9",
-        muted: "#94A3B8",
-        accent,
-      }
-    }
-    if (deck.theme?.background === "gradient" || preset === "colorful") {
-      return {
-        ...base,
-        bg: `linear-gradient(180deg, ${accent}1A 0%, #ffffff 55%)`,
-      }
-    }
-    return base
-  }
-
-  const base: Palette = {
-    bg: "#ffffff",
-    panel: "#ffffff",
-    border: "#E5E7EB",
-    text: "#1F2937",
-    muted: "#6B7280",
-    accent,
-  }
-  if (deck.theme?.background === "dark") {
+  if (background === "dark" || preset === "dark") {
     return {
       bg: "#0F172A",
       panel: "#1E293B",
@@ -101,13 +73,31 @@ function paletteFor(deck: api.Deck): Palette {
       accent,
     }
   }
-  if (deck.theme?.background === "gradient") {
+
+  if (background === "gradient" || preset === "colorful") {
     return {
-      ...base,
-      bg: `linear-gradient(180deg, ${accent}1A 0%, #ffffff 55%)`,
+      bg: `linear-gradient(135deg, ${accent}22 0%, #FFFFFF 60%, ${accent}11 100%)`,
+      panel: "#FFFFFF",
+      border: `${accent}40`,
+      text: "#1F2937",
+      muted: "#6B7280",
+      accent,
     }
   }
-  return base
+
+  const basePanel = presetPalette?.panel ?? "#ffffff"
+  const baseText = presetPalette?.text ?? "#1F2937"
+  const baseMuted = presetPalette?.muted ?? "#6B7280"
+  const baseBorder = presetPalette?.border ?? "#E5E7EB"
+
+  return {
+    bg: presetPalette?.bg ?? "#ffffff",
+    panel: basePanel,
+    border: baseBorder,
+    text: baseText,
+    muted: baseMuted,
+    accent,
+  }
 }
 
 function motionClass(motion?: string): string {
@@ -553,10 +543,11 @@ export function SlidesView({ generation }: { generation: api.StudyGeneration }) 
 
       <div
         ref={stageRef}
-        className="relative overflow-hidden rounded-lg border shadow-sm"
+        className="relative overflow-hidden rounded-lg border shadow-sm flex flex-col justify-between"
         style={{
-          backgroundColor: palette.bg,
+          background: palette.bg,
           borderColor: palette.border,
+          color: palette.text,
         }}
       >
         <div
