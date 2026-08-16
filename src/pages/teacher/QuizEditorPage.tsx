@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
+import { toast } from "sonner"
 import { useClasses } from "@/hooks/use-classes"
 import { useQuiz, useCreateQuiz, useUpdateQuiz, usePublishQuiz } from "@/hooks/use-quizzes"
 import { QuizStatusBadge } from "@/components/quiz/QuizStatusBadge"
@@ -87,9 +88,14 @@ export function QuizEditorPage() {
   const { id } = useParams<{ id: string }>()
   const isNew = !id
   const navigate = useNavigate()
-  const { classes } = useClasses()
+  const { classes, offerings } = useClasses()
 
   const quiz = useQuiz(id ?? "")
+
+  const offeringBySection = useMemo(
+    () => new Map((offerings.data ?? []).map((o) => [o.section.id, o])),
+    [offerings.data],
+  )
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -108,12 +114,19 @@ export function QuizEditorPage() {
   const publishQuiz = usePublishQuiz()
 
   const [loadedQuizId, setLoadedQuizId] = useState<string | null>(null)
+
+  // In edit mode the quiz stores a course offering id, but the dropdown shows
+  // the section — map the offering back to its section for display.
+  const resolvedClassId = useMemo(() => {
+    if (isNew) return classId
+    return (offerings.data ?? []).find((o) => o.id === quiz.data?.courseOfferingId)?.section.id ?? classId
+  }, [isNew, classId, quiz.data, offerings.data])
+
   if (id && quiz.data && loadedQuizId !== id) {
     const q = quiz.data
     setLoadedQuizId(id)
     setTitle(q.title)
     setDescription(q.description ?? "")
-    setClassId(q.classId)
     setTimeLimit(q.timeLimit != null ? String(q.timeLimit) : "")
     setPassingScore(q.passingScore != null ? String(q.passingScore) : "")
     setClosesAt(q.endsAt ? toLocalInputValue(q.endsAt) : "")
@@ -211,7 +224,9 @@ export function QuizEditorPage() {
   const buildPayload = () => ({
     title: title.trim(),
     description: description.trim() || undefined,
-    classId,
+    courseOfferingId: isNew
+      ? (offeringBySection.get(classId)?.id ?? "")
+      : (quiz.data?.courseOfferingId ?? ""),
     timeLimit: timeLimit ? Math.max(1, Number(timeLimit)) : undefined,
     passingScore: passingScore ? Math.max(0, Number(passingScore)) : undefined,
     endsAt: new Date(closesAt).toISOString(),
@@ -240,6 +255,10 @@ export function QuizEditorPage() {
 
   const save = (asPublish = false) => {
     if (!canSave) return
+    if (isNew && !offeringBySection.get(classId)) {
+      toast.error("This class has no course assigned yet — pick a class you teach.")
+      return
+    }
     setSaving(true)
     const done = () => setSaving(false)
     if (isNew) {
@@ -349,7 +368,7 @@ export function QuizEditorPage() {
               <div>
                 <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">Class</label>
                 <Select
-                  value={classId}
+                  value={resolvedClassId}
                   onValueChange={(v) => setClassId(v === NO_CLASS ? "" : v)}
                   disabled={!isNew || readOnly}
                 >
@@ -365,8 +384,8 @@ export function QuizEditorPage() {
                         ))}
                       </>
                     ) : (
-                      <SelectItem value={classId || NO_CLASS}>
-                        {(classes.data ?? []).find((c) => c.id === classId)?.name ?? "Class"}
+                      <SelectItem value={resolvedClassId || NO_CLASS}>
+                        {(classes.data ?? []).find((c) => c.id === resolvedClassId)?.name ?? "Class"}
                       </SelectItem>
                     )}
                   </SelectContent>

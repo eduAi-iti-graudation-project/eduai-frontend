@@ -82,7 +82,7 @@ export function StudentQuizzesPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-label-sm text-label-sm text-on-surface-variant">{className(quiz.classId)}</span>
+                      <span className="font-label-sm text-label-sm text-on-surface-variant">{className(quiz.courseOfferingId)}</span>
                       {quiz.questions && (
                         <>
                           <span className="font-label-sm text-label-sm text-on-surface-variant">·</span>

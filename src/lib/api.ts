@@ -1755,11 +1755,11 @@ export interface QuizDto {
   id: string
   title: string
   description: string | null
-  classId: string
+  courseOfferingId: string
   timeLimit: number | null
   passingScore: number | null
-  status: QuizStatus
   endsAt: string | null
+  status: QuizStatus
   createdAt: string
   questions?: QuizQuestion[]
 }
@@ -1787,7 +1787,7 @@ export interface CreateQuizQuestion {
 export interface CreateQuizDto {
   title: string
   description?: string
-  classId: string
+  courseOfferingId: string
   timeLimit?: number
   passingScore?: number
   endsAt: string
@@ -1795,7 +1795,7 @@ export interface CreateQuizDto {
 }
 
 export interface GenerateQuizDto {
-  classId: string
+  courseOfferingId: string
   topic: string
   questionCount: number
   types: QuizQuestionType[]

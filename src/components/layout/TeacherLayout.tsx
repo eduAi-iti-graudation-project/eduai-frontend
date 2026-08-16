@@ -8,7 +8,7 @@ export function TeacherLayout() {
   return (
     <div className="h-dvh overflow-hidden bg-surface-container-low">
       <Sidebar />
-      <div className="flex h-full flex-col md:pl-[280px]">
+      <div className="flex h-full flex-col md:pl-[260px]">
         <TopNavBar />
         <SubscriptionBanner />
         <main className="flex-1 min-h-0 overflow-y-auto">

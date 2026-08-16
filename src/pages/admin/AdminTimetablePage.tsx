@@ -79,11 +79,13 @@ export function AdminTimetablePage() {
     : "Pick a grade and section to edit its timetable."
 
   return (
-    <div className="px-6 pb-10">
-      <PageHeader
-        title="Timetable"
-        subtitle={subtitle}
-      />
+    <div className="flex-1 px-6 pb-10">
+      <div className="max-w-[1600px] mx-auto">
+        <PageHeader
+          title="Timetable"
+          subtitle={subtitle}
+          className="px-0"
+        />
 
       {loading ? (
         <LoadingState label="Loading timetable…" />
@@ -102,7 +104,7 @@ export function AdminTimetablePage() {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap items-center gap-3 mb-4">
+          <div className="flex flex-wrap items-center gap-3 mb-5">
             <Select
               value={effectiveGradeId ?? undefined}
               onValueChange={(v) => {
@@ -141,7 +143,7 @@ export function AdminTimetablePage() {
 
             <div className="flex-1" />
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <p className="font-label-sm text-label-sm text-on-surface-variant">Week starts:</p>
               <div className="flex rounded-lg border border-outline-variant bg-surface-container-lowest p-0.5">
                 {(["MONDAY", "SUNDAY"] as const).map((value) => (
@@ -150,7 +152,7 @@ export function AdminTimetablePage() {
                     type="button"
                     onClick={() => handleWeekStartChange(value)}
                     className={cn(
-                      "px-3 py-1 rounded-md font-label-sm text-label-sm transition-colors",
+                      "px-3 py-1.5 rounded-md font-label-sm text-label-sm transition-colors",
                       weekStart === value
                         ? "bg-primary text-on-primary"
                         : "text-on-surface-variant hover:text-on-surface",
@@ -188,6 +190,7 @@ export function AdminTimetablePage() {
           )}
         </>
       )}
+      </div>
     </div>
   )
 }

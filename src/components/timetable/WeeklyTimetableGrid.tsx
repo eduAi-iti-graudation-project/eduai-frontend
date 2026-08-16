@@ -405,8 +405,8 @@ export function WeeklyTimetableGrid({
       <div
         key={slot.id}
         className={cn(
-          "absolute left-1 right-1 rounded-md border-l-[3px] px-2 py-1 overflow-hidden select-none",
-          editable && !ghost && "cursor-grab active:cursor-grabbing group",
+          "absolute left-1 right-1 rounded-md border-l-[3px] px-2 py-1.5 overflow-hidden select-none z-10",
+          editable && !ghost && "cursor-grab active:cursor-grabbing group shadow-sm hover:shadow-md transition-shadow",
         )}
         style={style}
         onPointerDown={
@@ -424,14 +424,17 @@ export function WeeklyTimetableGrid({
         }}
         onMouseLeave={() => setTooltip(null)}
       >
-        <p className="font-label-sm text-label-sm font-semibold truncate leading-4">
+        <p className={cn(
+          "font-label-sm text-label-sm font-semibold truncate leading-4",
+          editable && !ghost && "pr-4",
+        )}>
           {slot.courseOffering.course.name}
         </p>
-        <p className="font-label-sm text-label-sm opacity-80 leading-4 truncate">
+        <p className="font-label-sm text-label-sm opacity-80 leading-4 truncate mt-0.5">
           {fmtTimeRange(slot.startTime, slot.endTime)}
         </p>
         {(slot.room || showSection) && (
-          <p className="font-label-sm text-label-sm opacity-70 truncate leading-4">
+          <p className="font-label-sm text-label-sm opacity-70 truncate leading-4 mt-0.5">
             {[showSection ? slot.courseOffering.section.name : null, slot.room]
               .filter(Boolean)
               .join(" · ")}
@@ -443,14 +446,14 @@ export function WeeklyTimetableGrid({
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => handleDelete(e, slot.id)}
-              className="absolute top-0.5 right-1 hidden group-hover:flex items-center justify-center w-4 h-4 rounded-full hover:bg-black/10 text-[12px] leading-none"
+              className="absolute top-1 right-1 hidden group-hover:flex items-center justify-center w-5 h-5 rounded-md hover:bg-black/10 text-[11px] leading-none"
               aria-label="Delete slot"
             >
               ✕
             </button>
             <div
               onPointerDown={(e) => dragStartSlot(e, slot, true)}
-              className="absolute bottom-0 left-0 right-0 h-1.5 cursor-ns-resize rounded-b-md hover:bg-black/10"
+              className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize rounded-b-md bg-black/5 opacity-0 group-hover:opacity-100 hover:bg-black/15 transition-opacity"
             />
           </>
         )}
@@ -570,17 +573,20 @@ export function WeeklyTimetableGrid({
     >
       <div style={{ minWidth: GRID_GUTTER + days.length * 140 }}>
         {/* Header */}
-        <div className="grid border-b border-border" style={{ gridTemplateColumns: `${GRID_GUTTER}px repeat(${days.length}, 1fr)` }}>
+        <div
+          className="grid border-b border-border sticky top-0 z-30 bg-surface-container-lowest"
+          style={{ gridTemplateColumns: `${GRID_GUTTER}px repeat(${days.length}, 1fr)` }}
+        >
           <div className="border-r border-border" />
           {days.map((day) => (
             <div
               key={day}
               className={cn(
-                "px-2 py-2.5 text-center border-r border-border last:border-r-0",
+                "px-2 py-3 text-center border-r border-border last:border-r-0",
                 showNowIndicator && isToday(day) && "bg-primary/5",
               )}
             >
-              <p className="font-label-md text-label-md text-on-surface font-medium">
+              <p className="font-label-md text-label-md text-on-surface font-medium tracking-wide">
                 {day.charAt(0) + day.slice(1).toLowerCase().slice(0, 2)}
               </p>
             </div>
@@ -608,11 +614,11 @@ export function WeeklyTimetableGrid({
           }}
         >
           {/* Time gutter */}
-          <div className="relative border-r border-border">
+          <div className="relative border-r border-border sticky left-0 z-20 bg-surface-container-lowest">
             {hours.map((hour) => (
               <div
                 key={hour}
-                className="absolute right-2 -translate-y-1/2 font-label-sm text-label-sm text-on-surface-variant"
+                className="absolute right-2.5 pl-2 -translate-y-1/2 font-label-sm text-label-sm text-on-surface-variant"
                 style={{ top: ((hour - dayStartHour) / 1) * HOUR_PX }}
               >
                 {fmtTime(`${String(hour).padStart(2, "0")}:00`)}

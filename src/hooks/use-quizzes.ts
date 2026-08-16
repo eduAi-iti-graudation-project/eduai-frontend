@@ -58,7 +58,6 @@ export function useGenerateQuiz() {
     mutationFn: (data: api.GenerateQuizDto) => api.generateQuiz(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quizzes"] })
-      toast.success("Quiz generated")
     },
     onError: (err: Error) => toast.error(err.message),
   })

@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 import { useClasses } from "@/hooks/use-classes"
 import { useQuizList, useGenerateQuiz, useDeleteQuiz, usePublishQuiz } from "@/hooks/use-quizzes"
 import { useUpdateQuiz } from "@/hooks/use-quizzes"
@@ -37,8 +38,17 @@ const NO_CLASS = "__none__"
 export function QuizzesPage() {
   const navigate = useNavigate()
   const [classFilter, setClassFilter] = useState("")
-  const { classes } = useClasses()
-  const quizzes = useQuizList(classFilter || undefined)
+  const { classes, offerings } = useClasses()
+
+  const offeringBySection = useMemo(
+    () => new Map((offerings.data ?? []).map((o) => [o.section.id, o])),
+    [offerings.data],
+  )
+  const offeringNameById = useMemo(
+    () => new Map((offerings.data ?? []).map((o) => [o.id, `${o.course.name} · ${o.section.name}`])),
+    [offerings.data],
+  )
+  const quizzes = useQuizList(offeringBySection.get(classFilter)?.id ?? (classFilter ? "__none__" : undefined))
   const generateQuiz = useGenerateQuiz()
   const deleteQuiz = useDeleteQuiz()
   const publishQuiz = usePublishQuiz()
@@ -62,12 +72,24 @@ export function QuizzesPage() {
 
   const runGenerate = () => {
     if (!genClassId || !genTopic.trim()) return
+    const courseOfferingId = offeringBySection.get(genClassId)?.id
+    if (!courseOfferingId) {
+      toast.error("This class has no course assigned yet — pick a class you teach.")
+      return
+    }
     generateQuiz.mutate(
-      { classId: genClassId, topic: genTopic.trim(), questionCount: genCount, types: genTypes },
+      { courseOfferingId, topic: genTopic.trim(), questionCount: genCount, types: genTypes },
       {
         onSuccess: (result) => {
+          if (!result.quizId) {
+            toast.error(
+              result.message || "No quiz was generated. Make sure the class has curriculum material uploaded.",
+            )
+            return
+          }
           setGeneratorOpen(false)
           setGenTopic("")
+          toast.success(result.message)
           navigate(`/quizzes/${result.quizId}`)
         },
       },
@@ -201,7 +223,7 @@ export function QuizzesPage() {
                         </p>
                       )}
                       <p className="font-label-sm text-label-sm text-on-surface-variant mt-2">
-                        {(classes.data ?? []).find((c) => c.id === quiz.classId)?.name ?? "Class"}
+                        {offeringNameById.get(quiz.courseOfferingId) ?? "Class"}
                       </p>
                     </Link>
                     <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
