@@ -523,15 +523,12 @@ export function StudyLabPage() {
 
             {/* Search Input */}
             <div className="relative mb-3">
-              <span className="material-symbols-outlined absolute left-2.5 top-2.5 text-[16px] text-on-surface-variant">
-                search
-              </span>
               <input
                 type="text"
                 value={historySearch}
                 onChange={(e) => setHistorySearch(e.target.value)}
                 placeholder="Search history..."
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-border bg-surface-container-lowest text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary"
+                className="w-full px-3 py-1.5 text-xs rounded-md border border-border bg-surface-container-lowest text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary"
               />
               {historySearch && (
                 <button
