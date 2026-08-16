@@ -2617,6 +2617,13 @@ export async function generateStudyLab(
   return res.data
 }
 
+export async function retryStudyLab(
+  generationId: string,
+): Promise<{ generationId: string; status: string }> {
+  const res = await api.post(`/assistant/study-lab/${generationId}/retry`)
+  return res.data
+}
+
 export async function getStudyLabHistory(
   courseOfferingId?: string,
 ): Promise<StudyGeneration[]> {

@@ -30,6 +30,25 @@ export function useStudyLabHistory(courseOfferingId?: string) {
   return useQuery({
     queryKey: ["study-lab", "history", courseOfferingId ?? "all"],
     queryFn: () => api.getStudyLabHistory(courseOfferingId),
+    refetchInterval: (query) => {
+      const hasProcessing = query.state.data?.some(
+        (item) => item.status === "PROCESSING",
+      )
+      return hasProcessing ? 3000 : false
+    },
+  })
+}
+
+export function useRetryStudyLab() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (generationId: string) => api.retryStudyLab(generationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["study-lab", "history"] })
+      toast.success("Retrying generation...")
+    },
+    onError: (err: Error) => toast.error(err.message),
   })
 }
 

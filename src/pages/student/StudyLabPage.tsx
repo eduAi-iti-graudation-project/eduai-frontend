@@ -6,6 +6,7 @@ import {
   useStudyLabHistory,
   useStudyLabGeneration,
   useDeleteStudyLabGeneration,
+  useRetryStudyLab,
 } from "@/hooks/use-study-lab"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/ui/EmptyState"
@@ -570,6 +571,7 @@ function GenerationDetailView({
 }) {
   const { generation, isLoading } = useStudyLabGeneration(generationId)
   const remove = useDeleteStudyLabGeneration()
+  const retry = useRetryStudyLab()
 
   if (isLoading && !generation) {
     return (
@@ -622,10 +624,24 @@ function GenerationDetailView({
         </div>
       )}
       {generation.status === "FAILED" && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="font-label-md text-label-md text-red-800">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 space-y-3">
+          <p className="font-label-md text-label-md text-red-800 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">error</span>
             Generation failed: {generation.error ?? "unknown error"}
           </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="border-red-300 text-red-700 hover:bg-red-100"
+            disabled={retry.isPending}
+            onClick={() => retry.mutate(generation.id)}
+          >
+            <span className="material-symbols-outlined text-[16px] mr-1.5">
+              refresh
+            </span>
+            {retry.isPending ? "Retrying..." : "Retry Generation"}
+          </Button>
         </div>
       )}
       {generation.status === "READY" && generation.payload && (
