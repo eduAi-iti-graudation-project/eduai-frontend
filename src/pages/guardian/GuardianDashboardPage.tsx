@@ -5,8 +5,11 @@ import * as api from "@/lib/api"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { WelcomeBanner } from "@/components/shared/WelcomeBanner"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useDashboardInsights } from "@/hooks/use-dashboard-insights"
+import { InsightSectionCard } from "@/components/insights/InsightSectionCard"
 
 interface ChildSummary {
   id: string
@@ -67,12 +70,14 @@ export function GuardianDashboardPage() {
     },
   })
 
-  const alerts = useQuery({
-    queryKey: ["guardian", "alerts"],
-    queryFn: () => api.getGuardianAlerts(),
-  })
+ const alerts = useQuery({
+  queryKey: ["guardian", "alerts"],
+  queryFn: () => api.getGuardianAlerts(),
+ })
 
-  if (dashboard.isError) {
+ const insights = useDashboardInsights("week")
+
+ if (dashboard.isError) {
     return (
       <ErrorState
         message={dashboard.error instanceof Error ? dashboard.error.message : "Failed to load dashboard"}
@@ -82,23 +87,27 @@ export function GuardianDashboardPage() {
   }
 
   const children = dashboard.data?.children ?? []
-  const firstName = user?.name?.split(" ")[0]
-  const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })
   const totalActiveAlerts = children.reduce((sum, c) => sum + c.activeAlertCount, 0)
   const avgOverall =
     children.length > 0
       ? Math.round(children.reduce((sum, c) => sum + c.overallAverage, 0) / children.length)
       : 0
   const recentAlerts = alerts.data ?? []
+ const insightSections = insights.data?.sections ?? []
 
   return (
     <div className="flex-1 p-xl max-w-7xl mx-auto w-full">
-      <header className="mb-6 border-b border-border pb-3">
-        <h1 className="font-headline-xl text-headline-xl text-primary">
-          {firstName ? `Good ${new Date().getHours() < 12 ? "morning" : "afternoon"}, ${firstName}` : "Guardian Dashboard"}
-        </h1>
-        <p className="font-body-lg text-body-lg text-on-surface-variant mt-0.5">{today}</p>
-      </header>
+   <WelcomeBanner
+    userName={user?.name ?? "Guardian"}
+    roleLabel="Guardian"
+    email={user?.email}
+    className="mb-6"
+    details={[
+     { icon: "family_history", label: "Children", value: children.length > 0 ? String(children.length) : "—" },
+     { icon: "trending_up", label: "Avg. score", value: avgOverall > 0 ? `${avgOverall}%` : "—" },
+     { icon: "warning", label: "Active alerts", value: String(totalActiveAlerts) },
+    ]}
+   />
 
       {dashboard.isLoading ? (
         <LoadingState />
@@ -290,6 +299,22 @@ export function GuardianDashboardPage() {
               </div>
             </aside>
           </div>
+
+          {insightSections.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between border-b border-border pb-2 mb-4">
+                <h2 className="font-headline-md text-headline-md text-primary">This week</h2>
+                <Link to="/guardian/insights" className="font-label-sm text-label-sm text-primary hover:underline">
+                  View all insights
+                </Link>
+              </div>
+              <div className="stagger-enter grid grid-cols-1 md:grid-cols-2 gap-4">
+                {insightSections.slice(0, 4).map((section) => (
+                  <InsightSectionCard key={section.key} section={section} interval="week" />
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
