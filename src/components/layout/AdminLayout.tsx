@@ -9,9 +9,8 @@ const navItems = [
  { icon: "calendar_month", label: "Timetable", id: "timetable", href: "/admin/timetable" },
  { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/admin/alerts" },
  { icon: "school", label: "Grades", id: "grades", href: "/admin/grades" },
- { icon: "group", label: "Students", id: "students", href: "/admin/students" },
- { icon: "folder_open", label: "Documents", id: "documents", href: "/admin/documents" },
- { icon: "co_present", label: "Teachers", id: "teachers", href: "/admin/teachers" },
+{ icon: "group", label: "Students", id: "students", href: "/admin/students" },
+  { icon: "co_present", label: "Teachers", id: "teachers", href: "/admin/teachers" },
 { icon: "import_export", label: "Import Students", id: "migration", href: "/admin/migration" },
  { icon: "monitoring", label: "Insights", id: "insights", href: "/admin/insights" },
  { icon: "chat_bubble", label: "Messages", id: "chat", href: "/admin/chat" },
@@ -32,7 +31,6 @@ export function AdminLayout() {
   : path.startsWith("/admin/alerts") ? "alerts"
   : path.startsWith("/admin/grades") ? "grades"
   : path.startsWith("/admin/students") ? "students"
-  : path.startsWith("/admin/documents") ? "documents"
   : path.startsWith("/admin/teachers") ? "teachers"
   : path.startsWith("/admin/import") ? "import"
   : path.startsWith("/admin/insights") ? "insights"
@@ -78,7 +76,7 @@ export function AdminLayout() {
    </aside>
 
    <div className="flex-1 flex flex-col min-w-0">
-    <header className="hidden md:flex items-center justify-between px-6 py-4 bg-surface/80 backdrop-blur-xl border-b border-surface-container">
+    <header className="hidden md:flex items-center justify-between px-6 py-4 bg-surface/80 backdrop-blur-xl border-b border-surface-container relative z-40">
      <h1 className="font-headline-md text-headline-md text-primary">
       {navItems.find((n) => n.id === activeItem)?.label ?? "Admin"}
      </h1>
@@ -93,7 +91,7 @@ export function AdminLayout() {
       <div className="absolute top-[-10%] right-[-5%] w-[800px] h-[800px] bg-primary-fixed/15 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-secondary-fixed/15 rounded-full blur-[100px]" />
      </div>
-     <div className="relative">
+     <div className="relative h-full">
       <Outlet />
      </div>
     </main>

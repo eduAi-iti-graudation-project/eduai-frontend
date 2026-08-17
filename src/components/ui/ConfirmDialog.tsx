@@ -60,10 +60,10 @@ export function ConfirmDialog({
     <DialogFooter className="flex gap-md sm:gap-md">
      <Button
       type="button"
-      variant="secondary"
+      variant="outline"
       onClick={onCancel}
       disabled={isLoading}
-      className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg"
+      className="flex-1 h-auto py-sm font-label-md text-label-md rounded-lg bg-surface-container text-on-surface-variant border-border hover:bg-surface-container-high hover:text-on-surface"
      >
       {cancelLabel}
      </Button>
@@ -74,7 +74,9 @@ export function ConfirmDialog({
       variant={variant === "danger" ? "destructive" : "default"}
       className={cn(
        "flex-1 h-auto py-sm font-label-md text-label-md rounded-lg",
-       variant === "default" && "bg-primary text-primary-foreground hover:bg-primary/90",
+       variant === "danger"
+        ? "bg-error-container text-on-error-container hover:bg-error-container/90"
+        : "bg-primary text-primary-foreground hover:bg-primary/90",
       )}
      >
       {isLoading ? `${confirmLabel}...` : confirmLabel}

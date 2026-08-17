@@ -217,6 +217,19 @@ export function useDeleteLab() {
   })
 }
 
+export function useDeleteLabs() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (ids: string[]) => api.deleteLabs(ids),
+    onSuccess: (result) => {
+      invalidateLabs(queryClient)
+      toast.success(`${result.deleted} lab${result.deleted === 1 ? "" : "s"} deleted.`)
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
 export function usePublishLab() {
   const queryClient = useQueryClient()
 

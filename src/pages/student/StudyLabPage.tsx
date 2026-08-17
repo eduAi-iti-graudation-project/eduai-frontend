@@ -18,8 +18,12 @@ import {
  SelectTrigger,
  SelectValue,
 } from "@/components/ui/select"
+import { PodcastView } from "@/components/study-lab/PodcastView"
+import { SlidesView } from "@/components/study-lab/SlidesView"
 import { PracticeView } from "@/components/study-lab/PracticeView"
 import { CheatSheetView } from "@/components/study-lab/CheatSheetView"
+import { StudyGuideView } from "@/components/study-lab/StudyGuideView"
+import { FlashcardsView } from "@/components/study-lab/FlashcardsView"
 import { cn } from "@/lib/utils"
 
 const kindOptions: { value: api.StudyLabKind; label: string; icon: string; description: string }[] = [
@@ -629,74 +633,22 @@ export function StudyLabPage() {
             </div>
           </div>
 
-    <div className="mt-6 grid gap-6 lg:grid-cols-[340px_1fr]">
-     <div>
-      <h2 className="font-headline-md text-headline-md text-primary mb-3">
-       History
-      </h2>
-      <div className="space-y-2">
-       {history.data?.length === 0 && (
-        <p className="font-body-md text-body-md text-on-surface-variant">
-         Nothing generated yet — pick a course and hit Generate.
-        </p>
-       )}
-       {history.data?.map((g) => (
-        <button
-         key={g.id}
-         type="button"
-         onClick={() => setActiveId(g.id === activeId ? null : g.id)}
-         className={cn(
-          "w-full text-left rounded-lg border p-3 transition-colors",
-          g.recommendedForAnalysisId
-           ? "border-primary/60 bg-primary/10"
-           : activeId === g.id
-            ? "border-primary/50 bg-primary/5"
-            : "border-border hover:border-primary/30",
-         )}
-        >
-         <div className="flex items-center justify-between gap-2">
-          {g.recommendedForAnalysisId ? (
-           <span className="inline-flex items-center gap-1 font-label-md text-label-md text-primary">
-            <span className="material-symbols-outlined text-[18px]">spark</span>
-            Recommended practice
-           </span>
-          ) : (
-           <span className="font-label-md text-label-md text-on-surface truncate">
-            {kindLabels[g.kind === "STUDY_MATERIAL" ? g.materialKind ?? "STUDY_MATERIAL" : g.kind]}
-           </span>
-          )}
-          <span className={cn("font-label-sm text-label-sm rounded-full px-2 py-0.5 shrink-0", statusStyles[g.status])}>
-           {g.status === "PROCESSING" ? g.stage : g.status.toLowerCase()}
-          </span>
-         </div>
-         <p className="font-label-sm text-label-sm text-on-surface-variant mt-1 truncate">
-          {g.topic}
-         </p>
-         <p className="font-label-sm text-label-sm text-on-surface-variant/70 mt-0.5">
-          {new Date(g.createdAt).toLocaleString()}
-         </p>
-        </button>
-       ))}
-      </div>
-     </div>
-
-     <div>
-      {!activeId && (
-       <EmptyState
-        icon="auto_stories"
-        title="Pick a generation to view it"
-        description="Your generated podcast, slides, and study materials will appear here."
-       />
-      )}
-      {activeId && (
-       <GenerationDetailView
-        key={activeId}
-        generationId={activeId}
-        onDelete={() => setActiveId(null)}
-       />
-     )}
-     </div>
-    </div>
+    <div>
+           {!activeId && (
+            <EmptyState
+             icon="auto_stories"
+             title="Pick a generation to view it"
+             description="Your generated podcast, slides, and study materials will appear here."
+            />
+           )}
+           {activeId && (
+            <GenerationDetailView
+             key={activeId}
+             generationId={activeId}
+             onDelete={() => setActiveId(null)}
+            />
+           )}
+          </div>
    </div>
   </div>
   </div>
@@ -791,14 +743,32 @@ function GenerationDetailView({
           </Button>
         </div>
       )}
-     {generation.kind === "STUDY_MATERIAL" &&
-      generation.materialKind === "PRACTICE_QUESTIONS" && (
-       <PracticeView generation={generation} />
-      )}
-     {generation.kind === "STUDY_MATERIAL" &&
-      generation.materialKind === "CHEAT_SHEET" && (
-       <CheatSheetView generation={generation} />
-      )}
+     {generation.status === "READY" && generation.payload && (
+      <>
+       {generation.kind === "PODCAST" && (
+        <PodcastView generation={generation} />
+       )}
+       {generation.kind === "SLIDES" && (
+        <SlidesView generation={generation} />
+       )}
+       {generation.kind === "STUDY_MATERIAL" &&
+        generation.materialKind === "STUDY_GUIDE" && (
+         <StudyGuideView generation={generation} />
+        )}
+       {generation.kind === "STUDY_MATERIAL" &&
+        generation.materialKind === "FLASHCARDS" && (
+         <FlashcardsView generation={generation} />
+        )}
+       {generation.kind === "STUDY_MATERIAL" &&
+        generation.materialKind === "PRACTICE_QUESTIONS" && (
+         <PracticeView generation={generation} />
+        )}
+       {generation.kind === "STUDY_MATERIAL" &&
+        generation.materialKind === "CHEAT_SHEET" && (
+         <CheatSheetView generation={generation} />
+        )}
+      </>
+     )}
     <Button
      type="button"
      variant="ghost"

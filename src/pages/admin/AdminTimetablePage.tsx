@@ -70,32 +70,35 @@ export function AdminTimetablePage() {
   : "Pick a grade and section to edit its timetable."
 
  return (
-  <div className="flex-1 px-6 pb-10">
-   <div className="max-w-[1600px] mx-auto">
-    <PageHeader
-     title="Timetable"
-     subtitle={subtitle}
-     className="px-0"
-    />
+  <div className="flex h-full flex-col px-6">
+   <PageHeader
+    title="Timetable"
+    subtitle={subtitle}
+    className="px-0"
+   />
 
    {loading ? (
-    <LoadingState label="Loading timetable…" />
+    <LoadingState label="Loading timetable…" className="flex-1" />
    ) : error ? (
-    <ErrorState message="Could not load the timetable." onRetry={() => {
-     gradesQ.refetch()
-     classesQ.refetch()
-     offeringsQ.refetch()
-    }} />
+    <div className="flex-1 min-h-0">
+     <ErrorState message="Could not load the timetable." onRetry={() => {
+      gradesQ.refetch()
+      classesQ.refetch()
+      offeringsQ.refetch()
+     }} />
+    </div>
    ) : grades.length === 0 || allSections.length === 0 ? (
-    <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest px-md py-lg text-center">
-     <p className="font-body-md text-body-md text-on-surface-variant">
-      No grade levels or sections yet — create them in{" "}
-      <span className="font-medium text-on-surface">Grade Management</span> first.
-     </p>
+    <div className="flex-1 min-h-0 flex items-center justify-center pb-10">
+     <div className="max-w-md w-full rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest px-md py-lg text-center">
+      <p className="font-body-md text-body-md text-on-surface-variant">
+       No grade levels or sections yet — create them in{" "}
+       <span className="font-medium text-on-surface">Grade Management</span> first.
+      </p>
+     </div>
     </div>
    ) : (
     <>
-     <div className="flex flex-wrap items-center gap-3 mb-md">
+     <div className="flex flex-wrap items-center gap-3 mb-md shrink-0">
       <Select
        value={displayGradeId ?? undefined}
        onValueChange={(v) => {
@@ -156,32 +159,36 @@ export function AdminTimetablePage() {
       </div>
      </div>
 
-     {!selectedSection ? (
-      <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest px-md py-lg text-center">
-       <p className="font-body-md text-body-md text-on-surface-variant">
-        No sections in this grade yet — create one in Grade Management.
-       </p>
-      </div>
-     ) : slotsQ.isLoading ? (
-      <LoadingState label="Loading section timetable…" />
-     ) : slotsQ.isError ? (
-      <ErrorState
-       message="Could not load the section timetable."
-       onRetry={() => slotsQ.refetch()}
-      />
-     ) : (
-      <WeeklyTimetableGrid
-       slots={slotsQ.data ?? []}
-       offerings={offerings}
-       sectionId={selectedSection.id}
-       days={orderedDays()}
-       editable
-       className="max-h-[calc(100vh-260px)] overflow-y-auto"
-      />
-     )}
+     <div className="flex-1 min-h-0 overflow-y-auto">
+       {!selectedSection ? (
+        <div className="h-full w-full min-h-56">
+         <div className="w-full h-full rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest flex items-center justify-center text-center px-md py-lg">
+          <p className="font-body-md text-body-md text-on-surface-variant">
+           No sections in this grade yet — create one in Grade Management.
+          </p>
+         </div>
+        </div>
+       ) : slotsQ.isLoading ? (
+       <LoadingState label="Loading section timetable…" className="h-full" />
+      ) : slotsQ.isError ? (
+       <ErrorState
+        message="Could not load the section timetable."
+        onRetry={() => slotsQ.refetch()}
+       />
+      ) : (
+       <WeeklyTimetableGrid
+        slots={slotsQ.data ?? []}
+        offerings={offerings}
+        sectionId={selectedSection.id}
+        days={orderedDays()}
+        editable
+        fillHeight
+        className="h-full"
+       />
+      )}
+     </div>
     </>
    )}
-   </div>
   </div>
  )
 }

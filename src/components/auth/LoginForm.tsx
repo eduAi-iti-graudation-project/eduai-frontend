@@ -44,8 +44,13 @@ export function LoginForm() {
  }
 
  return (
-  <div className="w-full max-w-[560px] bg-surface-container-lowest rounded-lg p-6 md:p-8 shadow-[0_20px_50px_rgba(164,48,115,0.12)]">
-   <div className="md:hidden mb-8 text-center">
+  <div className="w-full max-w-[440px]">
+   <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
+    <div className="w-9 h-9 rounded-lg gradient-brand flex items-center justify-center text-white shrink-0">
+     <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+      school
+     </span>
+    </div>
     <span className="font-headline-lg text-headline-lg text-on-surface">EduAI</span>
    </div>
 

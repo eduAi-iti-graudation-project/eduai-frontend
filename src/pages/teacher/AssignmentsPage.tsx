@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { useAssignments, useGenerateCourseAssignmentDraft } from "@/hooks/use-assignments"
+import { useAssignments, useDeleteAssignment, useGenerateCourseAssignmentDraft } from "@/hooks/use-assignments"
 import { useAssignmentDraft } from "@/hooks/use-assignment-draft"
 import { useCourseMaterialChapters } from "@/hooks/use-materials"
 import { useTeacherOfferingNameMap } from "@/hooks/use-labs"
@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/EmptyState"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -23,6 +24,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { AssignmentType } from "@/lib/api"
+import type { components } from "@/types/api-schema"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 const ALL = "__all__"
 
@@ -44,11 +47,13 @@ export function AssignmentsPage() {
   const [genScope, setGenScope] = useState("")
   const [genType, setGenType] = useState<AssignmentType>("essay")
   const [genDueDate, setGenDueDate] = useState("")
+  const [deleteTarget, setDeleteTarget] = useState<components["schemas"]["AssignmentDto"] | null>(null)
 
   const genCourseId = genTargets[0]?.courseId ?? ""
   const { chapters: genUnits, isLoading: genUnitsLoading } = useCourseMaterialChapters(genCourseId)
 
   const generate = useGenerateCourseAssignmentDraft()
+  const removeAssignment = useDeleteAssignment()
   const { store } = useAssignmentDraft()
 
   const handleGenTargetsChange = (next: TargetOffering[]) => {
@@ -174,50 +179,83 @@ export function AssignmentsPage() {
             description="Assignments will appear here once created."
           />
         ) : (
-          <div className="space-y-3 max-w-4xl mx-auto">
-            {rows.map((assignment) => {
-              const overdue = new Date(assignment.dueDate).getTime() < new Date().getTime()
-              const sectionName = offeringNames.get(assignment.courseOfferingId)
-              return (
-                <Link
-                  key={assignment.id}
-                  to={`/assignments/${assignment.id}`}
-                  className="block rounded-lg bg-surface-container-lowest p-md border border-outline-variant hover:border-primary transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h2 className="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">
-                        {assignment.title}
-                      </h2>
-                      <p className="font-body-md text-body-md text-on-surface-variant mt-0.5 line-clamp-1">
-                        {assignment.description}
-                      </p>
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {sectionName && (
+          <div className="rounded-lg bg-surface-container-lowest border border-outline-variant overflow-hidden shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-surface-container-low hover:bg-surface-container-low">
+                  <TableHead className="pl-5">Assignment</TableHead>
+                  <TableHead>Section</TableHead>
+                  <TableHead>Due date</TableHead>
+                  <TableHead className="text-right">Points</TableHead>
+                  <TableHead className="pr-5 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((assignment) => {
+                  const overdue = new Date(assignment.dueDate).getTime() < new Date().getTime()
+                  const sectionName = offeringNames.get(assignment.courseOfferingId)
+                  return (
+                    <TableRow key={assignment.id}>
+                      <TableCell className="pl-5 py-3">
+                        <Link to={`/assignments/${assignment.id}`} className="group flex items-center gap-3 cursor-pointer">
+                          <div className="w-9 h-9 rounded-md bg-primary-container flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[20px] text-on-primary-container">assignment</span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-body-lg text-body-lg text-on-surface truncate group-hover:text-primary transition-colors">
+                              {assignment.title}
+                            </p>
+                            <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-1">
+                              {assignment.description}
+                            </p>
+                          </div>
+                          <span className="ml-auto material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors shrink-0">
+                            chevron_right
+                          </span>
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        {sectionName ? (
                           <span className="inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface px-2 py-0.5 font-label-sm text-label-sm text-on-surface-variant">
                             <span className="material-symbols-outlined text-[12px]">groups</span>
                             {sectionName}
                           </span>
+                        ) : (
+                          <span className="font-label-sm text-label-sm text-on-surface-variant">—</span>
                         )}
+                      </TableCell>
+                      <TableCell>
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface px-2 py-0.5 font-label-sm text-label-sm ${
+                          className={`inline-flex items-center gap-1 font-label-sm text-label-sm ${
                             overdue ? "text-error" : "text-on-surface-variant"
                           }`}
                         >
-                          <span className="material-symbols-outlined text-[12px]">schedule</span>
+                          <span className="material-symbols-outlined text-[14px]">schedule</span>
                           Due {new Date(assignment.dueDate).toLocaleDateString()}
-                          {overdue && " · overdue"}
+                          {overdue && <span className="font-semibold">· overdue</span>}
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface px-2 py-0.5 font-label-sm text-label-sm text-on-surface-variant">
-                          {assignment.totalPoints} pts
-                        </span>
-                      </div>
-                    </div>
-                    <span className="material-symbols-outlined text-on-surface-variant shrink-0">chevron_right</span>
-                  </div>
-                </Link>
-              )
-            })}
+                      </TableCell>
+                      <TableCell className="text-right font-body-md text-body-md text-on-surface tabular-nums">
+                        {assignment.totalPoints} pts
+                      </TableCell>
+                      <TableCell className="pr-5">
+                        <div className="flex items-center justify-end">
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(assignment)}
+                            aria-label={`Delete assignment ${assignment.title}`}
+                            title="Delete assignment"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-md text-on-surface-variant hover:text-danger hover:bg-error-container/40 transition-colors cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          </button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>
@@ -348,6 +386,23 @@ export function AssignmentsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Delete this assignment?"
+        variant="danger"
+        message="This assignment, its rubric, and all student submissions will be permanently removed. This can't be undone."
+        confirmLabel="Delete assignment"
+        isLoading={removeAssignment.isPending}
+        onConfirm={() => {
+          if (!deleteTarget) return
+          removeAssignment.mutate(deleteTarget.id, {
+            onSuccess: () => setDeleteTarget(null),
+            onError: () => setDeleteTarget(null),
+          })
+        }}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </>
   )
 }

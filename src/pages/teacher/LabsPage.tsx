@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { useTeacherOfferings } from "@/hooks/use-labs"
-import { useGenerateLab, useLabs, useDeleteLab } from "@/hooks/use-labs"
+import { useGenerateLab, useLabs, useDeleteLab, useDeleteLabs } from "@/hooks/use-labs"
 import { useCourseMaterialChapters } from "@/hooks/use-materials"
 import { LabAgentGraph } from "@/components/labs/LabAgentGraph"
 import { LabStatusChip } from "@/components/labs/LabStatusChip"
@@ -33,6 +33,8 @@ export function LabsPage() {
   const [selectedOfferingIds, setSelectedOfferingIds] = useState<string[]>([])
   const [advancedMode, setAdvancedMode] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<api.Lab | null>(null)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
 
   const offerings = useTeacherOfferings()
   const gradesQ = useQuery({
@@ -87,6 +89,7 @@ export function LabsPage() {
   const { labs, isLoading } = useLabs(derivedOfferingId || undefined)
   const generate = useGenerateLab()
   const removeLab = useDeleteLab()
+  const removeLabs = useDeleteLabs()
   const { chapters: genUnits, isLoading: genUnitsLoading } =
     useCourseMaterialChapters(derivedCourseId)
 
@@ -119,6 +122,29 @@ export function LabsPage() {
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     )
   }
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    )
+  }
+
+  const allSelected = labs.length > 0 && labs.every((l) => selectedIds.includes(l.id))
+
+  // The checkbox reports its intent directly (`next` = checked after the click),
+  // so this works no matter how selection state drifted — stale ids, a freshly
+  // generated lab, or a filter change.
+  const toggleSelectAll = (next: boolean) => {
+    setSelectedIds(next ? labs.map((l) => l.id) : [])
+  }
+
+  // Selection only ever applies to the currently filtered list — prune any
+  // ids that no longer exist in it during render, so a stale selection can't
+  // linger across filter changes.
+  const visibleSelectedIds = useMemo(
+    () => selectedIds.filter((id) => labs.some((l) => l.id === id)),
+    [selectedIds, labs],
+  )
 
   const canGenerate = selectedOfferingIds.length > 0 && !!genUnit && prompt.trim().length >= 3 && !generate.isPending
 
@@ -284,45 +310,82 @@ export function LabsPage() {
             </p>
           </div>
         ) : (
-          <ul className="space-y-3">
-            {labs.map((lab) => (
-              <li
-                key={lab.id}
-                className="flex items-stretch rounded-lg border border-border bg-surface transition-colors hover:border-primary/40"
-              >
-                <Link
-                  to={`/labs/${lab.id}`}
-                  className="flex flex-1 min-w-0 flex-wrap items-center gap-3 p-4"
+          <div>
+            {labs.length > 0 && (
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 select-none">
+                  <Checkbox
+                    id="lab-select-all"
+                    aria-label="Select all"
+                    checked={allSelected}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                  <span
+                    onClick={() => toggleSelectAll(!allSelected)}
+                    className="font-label-md text-label-md text-on-surface cursor-pointer"
+                  >
+                    Select all
+                  </span>
+                </div>
+                {visibleSelectedIds.length > 0 && (
+                  <Button
+                    variant="outline"
+                    className="text-danger"
+                    disabled={removeLabs.isPending}
+                    onClick={() => setBulkDeleteOpen(true)}
+                  >
+                    Delete selected ({visibleSelectedIds.length})
+                  </Button>
+                )}
+              </div>
+            )}
+            <ul className="space-y-3">
+              {labs.map((lab) => (
+                <li
+                  key={lab.id}
+                  className="flex items-stretch rounded-lg border border-border bg-surface transition-colors hover:border-primary/40"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-label-lg text-label-lg text-on-surface truncate">{lab.topic}</p>
-                    <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">
-                      {offeringNameMap.get(lab.courseOfferingId) ?? "—"} · created {formatDate(lab.createdAt)}
-                    </p>
+                  <div className="flex items-center px-3">
+                    <Checkbox
+                      id={`lab-select-${lab.id}`}
+                      checked={selectedIds.includes(lab.id)}
+                      onCheckedChange={() => toggleSelect(lab.id)}
+                    />
                   </div>
-                  {lab.status === "PENDING_TEACHER_REVIEW" && lab.reviewApproved && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-success/10 text-success px-2 py-0.5 font-label-sm text-label-sm">
-                      <span className="material-symbols-outlined text-[14px]">verified</span>
-                      AI-approved
-                    </span>
-                  )}
-                  {lab.status === "AI_REVIEW_FAILED" && lab.reviewFlags && lab.reviewFlags.flags.length > 0 && (
-                    <span className="font-label-sm text-label-sm text-danger">{lab.reviewFlags.flags.length} flag(s)</span>
-                  )}
-                  <LabStatusChip status={lab.status} />
-                  <span className="material-symbols-outlined text-on-surface-variant text-[18px]">chevron_right</span>
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget(lab)}
-                  aria-label={`Delete lab ${lab.topic}`}
-                  className="flex items-center px-3 text-on-surface-variant hover:text-danger transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px]">delete</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+                  <Link
+                    to={`/labs/${lab.id}`}
+                    className="flex flex-1 min-w-0 flex-wrap items-center gap-3 py-4 pr-4"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-label-lg text-label-lg text-on-surface truncate">{lab.topic}</p>
+                      <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">
+                        {offeringNameMap.get(lab.courseOfferingId) ?? "—"} · created {formatDate(lab.createdAt)}
+                      </p>
+                    </div>
+                    {lab.status === "PENDING_TEACHER_REVIEW" && lab.reviewApproved && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-success/10 text-success px-2 py-0.5 font-label-sm text-label-sm">
+                        <span className="material-symbols-outlined text-[14px]">verified</span>
+                        AI-approved
+                      </span>
+                    )}
+                    {lab.status === "AI_REVIEW_FAILED" && lab.reviewFlags && lab.reviewFlags.flags.length > 0 && (
+                      <span className="font-label-sm text-label-sm text-danger">{lab.reviewFlags.flags.length} flag(s)</span>
+                    )}
+                    <LabStatusChip status={lab.status} />
+                    <span className="material-symbols-outlined text-on-surface-variant text-[18px]">chevron_right</span>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(lab)}
+                    aria-label={`Delete lab ${lab.topic}`}
+                    className="flex items-center px-3 text-on-surface-variant hover:text-danger transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
 
@@ -510,6 +573,7 @@ export function LabsPage() {
       <ConfirmDialog
         open={deleteTarget !== null}
         title="Delete this lab?"
+        variant="danger"
         message={
           deleteTarget?.status === "PUBLISHED"
             ? "This lab is currently published — deleting it removes student access immediately. This can't be undone."
@@ -525,6 +589,29 @@ export function LabsPage() {
           })
         }}
         onCancel={() => setDeleteTarget(null)}
+      />
+
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        title={`Delete ${visibleSelectedIds.length} lab${visibleSelectedIds.length === 1 ? "" : "s"}?`}
+        variant="danger"
+        message={`These labs and all their section links will be permanently removed. ${
+          visibleSelectedIds.some((id) => labs.find((l) => l.id === id)?.status === "PUBLISHED")
+            ? "Some are currently published — deleting them removes student access immediately. "
+            : ""
+        }This can't be undone.`}
+        confirmLabel={`Delete ${visibleSelectedIds.length} lab${visibleSelectedIds.length === 1 ? "" : "s"}`}
+        isLoading={removeLabs.isPending}
+        onConfirm={() => {
+          removeLabs.mutate(visibleSelectedIds, {
+            onSuccess: () => {
+              setSelectedIds([])
+              setBulkDeleteOpen(false)
+            },
+            onError: () => setBulkDeleteOpen(false),
+          })
+        }}
+        onCancel={() => setBulkDeleteOpen(false)}
       />
     </div>
   )

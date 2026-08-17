@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { colorForTag } from "@/components/timetable/timetable-utils"
 import * as api from "@/lib/api"
 
@@ -223,65 +224,81 @@ export function ClassesPage() {
             description="Try clearing the filters or searching for something else."
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
-            {filtered.map((c) => {
-              const gradeLabel = gradeLabelMap.get(c.gradeLevelId)
-              const courseChips = sectionCourseColors.get(c.id)
-              return (
-                <div
-                  key={c.id}
-                  className="bg-surface-container-lowest rounded-lg border border-outline-variant shadow-sm hover:shadow-md hover:border-primary/60 transition-all relative group"
-                >
-                  <div className="p-md border-b border-outline-variant">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className="font-headline-md text-headline-md text-on-surface truncate group-hover:text-primary transition-colors">{c.name}</h3>
-                        <p className="font-body-md text-body-md text-on-surface-variant mt-0.5 truncate">
-                          {c.section}
-                        </p>
-                      </div>
-                      {gradeLabel && (
-                        <span className="shrink-0 px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm border border-outline-variant">
-                          {gradeLabel}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="p-md">
-                    <div className="flex flex-wrap gap-1.5 min-h-[26px] mb-sm">
-                      {(courseChips && courseChips.length > 0 ? courseChips.map((course) => ({ name: course.name, colorTag: course.colorTag })) : c.courses.map((course) => ({ name: course, colorTag: null }))).map((course) => {
-                        const color = colorForTag(course.colorTag)
-                        return (
-                          <span
-                            key={course.name}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-label-sm text-label-sm"
-                            style={{ backgroundColor: color.tint, color: color.solid }}
-                          >
-                            {course.name}
+          <div className="rounded-lg bg-surface-container-lowest border border-outline-variant overflow-hidden shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-surface-container-low hover:bg-surface-container-low">
+                  <TableHead className="pl-5">Section</TableHead>
+                  <TableHead>Grade</TableHead>
+                  <TableHead>Courses</TableHead>
+                  <TableHead className="text-right">Students</TableHead>
+                  <TableHead className="pr-5 text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((c) => {
+                  const gradeLabel = gradeLabelMap.get(c.gradeLevelId)
+                  const courseChips = sectionCourseColors.get(c.id)
+                  const courses =
+                    courseChips && courseChips.length > 0
+                      ? courseChips.map((course) => ({ name: course.name, colorTag: course.colorTag }))
+                      : c.courses.map((course) => ({ name: course, colorTag: null }))
+                  return (
+                    <TableRow key={c.id}>
+                      <TableCell className="pl-5 py-3">
+                        <Link to={`/classes/${c.id}`} className="group flex items-center gap-3 cursor-pointer">
+                          <div className="w-9 h-9 rounded-md bg-primary-container flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[20px] text-on-primary-container">school</span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-body-lg text-body-lg text-on-surface truncate group-hover:text-primary transition-colors">{c.name}</p>
+                            <p className="font-body-sm text-body-sm text-on-surface-variant truncate">{c.section}</p>
+                          </div>
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        {gradeLabel && (
+                          <span className="inline-block px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm border border-outline-variant">
+                            {gradeLabel}
                           </span>
-                        )
-                      })}
-                      {(courseChips?.length ?? 0) === 0 && c.courses.length === 0 && (
-                        <span className="font-label-sm text-label-sm text-on-surface-variant">No courses assigned</span>
-                      )}
-                    </div>
-                    <div className="flex justify-between items-center mb-sm">
-                      <span className="font-meta text-meta text-on-surface-variant flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[16px]">group</span>
-                        {c.students} Student{c.students !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <Link
-                      to={`/classes/${c.id}`}
-                      className="mt-md w-full flex items-center justify-center gap-1 px-3 py-2 rounded-md border border-outline-variant bg-surface-container-highest/40 text-on-surface hover:border-primary hover:bg-primary hover:text-on-primary transition-colors font-body-md text-body-md"
-                    >
-                      View Section
-                      <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-                    </Link>
-                  </div>
-                </div>
-              )
-            })}
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1.5 min-h-[26px]">
+                          {courses.map((course) => {
+                            const color = colorForTag(course.colorTag)
+                            return (
+                              <span
+                                key={course.name}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-label-sm text-label-sm"
+                                style={{ backgroundColor: color.tint, color: color.solid }}
+                              >
+                                {course.name}
+                              </span>
+                            )
+                          })}
+                          {courses.length === 0 && (
+                            <span className="font-label-sm text-label-sm text-on-surface-variant">No courses assigned</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-body-md text-body-md text-on-surface tabular-nums">
+                        {c.students}
+                      </TableCell>
+                      <TableCell className="pr-5 text-right">
+                        <Link
+                          to={`/classes/${c.id}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-outline-variant bg-surface-container-highest/40 text-on-surface hover:border-primary hover:bg-primary hover:text-on-primary transition-colors font-body-md text-body-md cursor-pointer"
+                        >
+                          View
+                          <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>

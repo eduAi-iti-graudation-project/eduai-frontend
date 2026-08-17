@@ -7,6 +7,7 @@ const KIND_ICON: Record<string, string> = {
   "lab-regenerate": "refresh",
   "quiz-generate": "quiz",
   "homework-help": "school",
+  "guardian-chat": "family_history",
 }
 
 function OperationPill({ operation }: { operation: Operation }) {

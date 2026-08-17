@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 type SortKey = "level-asc" | "level-desc" | "name" | "sections" | "courses" | "students"
 
@@ -24,16 +25,6 @@ function StatCard({ icon, iconClass, label, value }: { icon: string; iconClass: 
         <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5 truncate">{label}</p>
       </div>
     </div>
-  )
-}
-
-function StatChip({ icon, value, label }: { icon: string; value: number; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-surface-container text-on-surface-variant">
-      <span className="material-symbols-outlined text-[15px]">{icon}</span>
-      <span className="font-label-sm text-label-sm font-semibold text-on-surface tabular-nums">{value}</span>
-      <span className="font-label-sm text-label-sm">{label}</span>
-    </span>
   )
 }
 
@@ -169,48 +160,50 @@ export function GradeListPage() {
           description="Try clearing the search or turning off the empty-grade filter."
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md">
-          {list.map((grade) => {
-            const isEmpty = grade.sections === 0 && grade.courses === 0 && grade.students === 0
-            return (
-              <Link
-                key={grade.id}
-                to={`/grades/${grade.id}`}
-                className={`block rounded-lg bg-surface-container-lowest p-md border transition-colors group ${
-                  isEmpty
-                    ? "border-outline-variant/60 opacity-70 hover:opacity-100 hover:border-primary/50"
-                    : "border-outline-variant hover:border-primary"
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-11 h-11 rounded-md flex items-center justify-center shrink-0 ${isEmpty ? "bg-surface-container text-on-surface-variant" : "bg-primary-container"}`}>
-                    <span className={`material-symbols-outlined text-[22px] ${isEmpty ? "" : "text-on-primary-container"}`}>school</span>
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="font-headline-md text-headline-md text-on-surface truncate group-hover:text-primary transition-colors">
-                      Grade {grade.level}
-                    </h2>
-                    <p className="font-body-sm text-body-sm text-on-surface-variant truncate">
-                      {grade.name || (isEmpty ? "Empty grade" : "—")}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-sm mb-3">
-                  <StatChip icon="groups" value={grade.sections} label={grade.sections === 1 ? "section" : "sections"} />
-                  <StatChip icon="menu_book" value={grade.courses} label={grade.courses === 1 ? "course" : "courses"} />
-                  <StatChip icon="person" value={grade.students} label={grade.students === 1 ? "student" : "students"} />
-                </div>
-                <div className="flex items-center justify-between border-t border-outline-variant pt-3">
-                  <span className="font-label-sm text-label-sm text-on-surface-variant">
-                    {isEmpty ? "No sections or courses yet" : "View sections & courses"}
-                  </span>
-                  <span className="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors">
-                    arrow_forward
-                  </span>
-                </div>
-              </Link>
-            )
-          })}
+        <div className="rounded-lg bg-surface-container-lowest border border-outline-variant overflow-hidden shadow-sm">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-surface-container-low hover:bg-surface-container-low">
+                <TableHead className="pl-5">Grade</TableHead>
+                <TableHead className="text-right">Sections</TableHead>
+                <TableHead className="text-right">Courses</TableHead>
+                <TableHead className="pr-5 text-right">Students</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {list.map((grade) => {
+                const isEmpty = grade.sections === 0 && grade.courses === 0 && grade.students === 0
+                return (
+                  <TableRow key={grade.id} className={isEmpty ? "opacity-70" : ""}>
+                    <TableCell className="pl-5 py-3">
+                      <Link
+                        to={`/grades/${grade.id}`}
+                        className="group flex items-center gap-3 cursor-pointer"
+                      >
+                        <div className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 ${isEmpty ? "bg-surface-container text-on-surface-variant" : "bg-primary-container"}`}>
+                          <span className={`material-symbols-outlined text-[20px] ${isEmpty ? "" : "text-on-primary-container"}`}>school</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-body-lg text-body-lg text-on-surface truncate group-hover:text-primary transition-colors">
+                            Grade {grade.level}
+                          </p>
+                          <p className="font-body-sm text-body-sm text-on-surface-variant truncate">
+                            {grade.name || (isEmpty ? "Empty grade" : "—")}
+                          </p>
+                        </div>
+                        <span className="ml-auto material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors shrink-0">
+                          chevron_right
+                        </span>
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-right font-body-md text-body-md text-on-surface tabular-nums">{grade.sections}</TableCell>
+                    <TableCell className="text-right font-body-md text-body-md text-on-surface tabular-nums">{grade.courses}</TableCell>
+                    <TableCell className="pr-5 text-right font-body-md text-body-md text-on-surface tabular-nums">{grade.students}</TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

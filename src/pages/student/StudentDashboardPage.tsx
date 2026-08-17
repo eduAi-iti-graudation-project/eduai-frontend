@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/table"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { WelcomeBanner } from "@/components/shared/WelcomeBanner"
+import { useDashboardInsights } from "@/hooks/use-dashboard-insights"
+import { InsightSectionCard } from "@/components/insights/InsightSectionCard"
 
 interface StudentDashboardData {
  upcomingAssignments: { title: string; dueDate: string; className: string }[]
@@ -87,10 +90,10 @@ export function StudentDashboardPage() {
   retry: 1,
  })
 
+ const insights = useDashboardInsights("week")
+
  const data = dashboard.data
  const studentGrade = data?.grade
- const firstName = user?.name?.split(" ")[0]
- const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })
 
  if (dashboard.isError) {
   return (
@@ -136,23 +139,25 @@ export function StudentDashboardPage() {
  const activeAlerts = data?.activeAlerts ?? []
  const attendanceRate = Math.round((data?.attendanceRate ?? 0) * 100)
  const upcomingMeetings = meetingsQuery.data?.meetings ?? []
+ const insightSections = insights.data?.sections ?? []
 
  return (
   <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
-   <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
-    <div>
-     <h1 className="font-headline-lg text-headline-lg text-primary">
-      {firstName ? `Good ${new Date().getHours() < 12 ? "morning" : "afternoon"}, ${firstName}` : "Dashboard"}
-     </h1>
-     <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">{today}</p>
-    </div>
-    {studentGrade && (
-     <Badge variant="outline" className="bg-primary text-primary-foreground font-label-md text-label-md font-semibold px-md py-1.5 rounded-full border-0 shadow-card">
-      {studentGrade.name}
-     </Badge>
-    )}
-   </div>
-
+   <WelcomeBanner
+    userName={user?.name ?? "Student"}
+    roleLabel="Student"
+    email={user?.email}
+    details={[
+     { icon: "workspaces", label: "Grade", value: studentGrade?.name ?? "—" },
+     {
+      icon: "school",
+      label: "Section",
+      value: studentClasses.data?.[0]?.name ?? "—",
+     },
+     { icon: "check_circle", label: "Attendance", value: `${attendanceRate}%` },
+    ]}
+    className="mb-6"
+   />
    <div className="stagger-enter grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <Metric
      label="Upcoming deadlines"
@@ -305,6 +310,20 @@ export function StudentDashboardPage() {
        </li>
       ))}
      </ul>
+    </div>
+   )}
+
+   {insightSections.length > 0 && (
+    <div className="mb-6">
+     <div className="flex items-center justify-between mb-4">
+      <h2 className="font-headline-md text-headline-md text-primary">This week</h2>
+      <Link to="/student/insights" className="font-label-sm text-label-sm text-primary hover:underline">View all</Link>
+     </div>
+     <div className="stagger-enter grid grid-cols-1 md:grid-cols-2 gap-4">
+      {insightSections.slice(0, 4).map((section) => (
+       <InsightSectionCard key={section.key} section={section} interval="week" />
+      ))}
+     </div>
     </div>
    )}
 

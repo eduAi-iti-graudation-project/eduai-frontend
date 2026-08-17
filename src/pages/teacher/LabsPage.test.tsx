@@ -9,6 +9,7 @@ const {
   useLabs,
   useGenerateLab,
   useDeleteLab,
+  useDeleteLabs,
   getTeacherGrades,
   useCourseMaterialChapters,
 } = vi.hoisted(() => ({
@@ -16,12 +17,14 @@ const {
   useLabs: vi.fn(),
   useGenerateLab: vi.fn(),
   useDeleteLab: vi.fn(),
+  useDeleteLabs: vi.fn(),
   getTeacherGrades: vi.fn(),
   useCourseMaterialChapters: vi.fn(),
 }))
 
 const mutateLab = vi.fn()
 const deleteLab = vi.fn()
+const deleteLabsMany = vi.fn()
 
 vi.mock("@/providers/use-auth", () => ({
   useAuth: () => ({ user: { id: "teacher-1" } }),
@@ -36,6 +39,7 @@ vi.mock("@/hooks/use-labs", () => ({
   useLabs: () => useLabs(),
   useGenerateLab: () => useGenerateLab(),
   useDeleteLab: () => useDeleteLab(),
+  useDeleteLabs: () => useDeleteLabs(),
 }))
 
 vi.mock("@/hooks/use-materials", () => ({
@@ -71,6 +75,7 @@ describe("LabsPage", () => {
     vi.clearAllMocks()
     mutateLab.mockReset()
     deleteLab.mockReset()
+    deleteLabsMany.mockReset()
     getTeacherGrades.mockResolvedValue([
       { id: "grade-a", level: 9, name: "", createdAt: "2026-01-01T00:00:00Z" },
       { id: "grade-b", level: 10, name: "", createdAt: "2026-01-01T00:00:00Z" },
@@ -106,6 +111,7 @@ describe("LabsPage", () => {
       mutate: mutateLab,
     })
     useDeleteLab.mockReturnValue({ isPending: false, mutate: deleteLab })
+    useDeleteLabs.mockReturnValue({ isPending: false, mutate: deleteLabsMany })
     useCourseMaterialChapters.mockReturnValue({ chapters: UNITS, isLoading: false })
   })
 
@@ -270,6 +276,110 @@ describe("LabsPage", () => {
     within(dialog).getByRole("button", { name: "Delete lab" }).click()
 
     expect(deleteLab).toHaveBeenCalledWith("lab-1", expect.any(Object))
+  })
+
+  it("selects all labs with one click and deselects them with another", async () => {
+    const labs = [
+      {
+        id: "lab-1",
+        courseOfferingId: "off-a",
+        courseOfferingIds: ["off-a"],
+        topic: "Pendulum period",
+        chapterId: "unit-1",
+        status: "PENDING_TEACHER_REVIEW",
+        generatedCode: "// x",
+        template: null,
+        gameSpec: null,
+        reviewApproved: true,
+        reviewFlags: null,
+        teacherNotes: null,
+        publishedAt: null,
+        createdAt: "2026-01-01T00:00:00Z",
+      },
+      {
+        id: "lab-2",
+        courseOfferingId: "off-a",
+        courseOfferingIds: ["off-a"],
+        topic: "Projectile motion",
+        chapterId: "unit-1",
+        status: "PUBLISHED",
+        generatedCode: "// y",
+        template: null,
+        gameSpec: null,
+        reviewApproved: null,
+        reviewFlags: null,
+        teacherNotes: null,
+        publishedAt: "2026-01-02T00:00:00Z",
+        createdAt: "2026-01-01T00:00:00Z",
+      },
+    ]
+    useLabs.mockReturnValue({ labs, isLoading: false })
+    renderPage()
+    await screen.findByText("Grade 9")
+
+    const checkboxes = () => screen.getAllByRole("checkbox")
+    fireEvent.click(checkboxes()[0])
+    expect(checkboxes()[1].getAttribute("aria-checked")).toBe("true")
+    expect(checkboxes()[2].getAttribute("aria-checked")).toBe("true")
+
+    fireEvent.click(checkboxes()[0])
+    expect(checkboxes()[1].getAttribute("aria-checked")).toBe("false")
+    expect(checkboxes()[2].getAttribute("aria-checked")).toBe("false")
+    expect(screen.queryByRole("button", { name: "Delete selected (2)" })).not.toBeInTheDocument()
+  })
+
+  it("bulk-deletes every selected lab after confirmation", async () => {
+    const labs = [
+      {
+        id: "lab-1",
+        courseOfferingId: "off-a",
+        courseOfferingIds: ["off-a"],
+        topic: "Pendulum period",
+        chapterId: "unit-1",
+        status: "PENDING_TEACHER_REVIEW",
+        generatedCode: "// x",
+        template: null,
+        gameSpec: null,
+        reviewApproved: true,
+        reviewFlags: null,
+        teacherNotes: null,
+        publishedAt: null,
+        createdAt: "2026-01-01T00:00:00Z",
+      },
+      {
+        id: "lab-2",
+        courseOfferingId: "off-a",
+        courseOfferingIds: ["off-a"],
+        topic: "Projectile motion",
+        chapterId: "unit-1",
+        status: "PUBLISHED",
+        generatedCode: "// y",
+        template: null,
+        gameSpec: null,
+        reviewApproved: null,
+        reviewFlags: null,
+        teacherNotes: null,
+        publishedAt: "2026-01-02T00:00:00Z",
+        createdAt: "2026-01-01T00:00:00Z",
+      },
+    ]
+    useLabs.mockReturnValue({ labs, isLoading: false })
+    renderPage()
+    await screen.findByText("Grade 9")
+
+    // Select both labs via the checkboxes, then the toolbar button appears.
+    screen.getByRole("checkbox", { name: "Select all" }).click()
+    const deleteButton = await screen.findByRole("button", { name: "Delete selected (2)" })
+    deleteButton.click()
+
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).getByText(/currently published/)).toBeInTheDocument()
+    within(dialog).getByRole("button", { name: "Delete 2 labs" }).click()
+
+    expect(deleteLabsMany).toHaveBeenCalledWith(
+      ["lab-1", "lab-2"],
+      expect.any(Object),
+    )
   })
 
   it("closes the dialog immediately and shows the inline agent card while generating", async () => {

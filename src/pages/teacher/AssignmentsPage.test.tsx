@@ -7,6 +7,7 @@ import { AssignmentsPage } from "@/pages/teacher/AssignmentsPage"
 const {
   useAssignments,
   useGenerateCourseAssignmentDraft,
+  useDeleteAssignment,
   useAssignmentDraft,
   useTeacherOfferings,
   useCourseMaterialChapters,
@@ -15,6 +16,7 @@ const {
 } = vi.hoisted(() => ({
   useAssignments: vi.fn(),
   useGenerateCourseAssignmentDraft: vi.fn(),
+  useDeleteAssignment: vi.fn(),
   useAssignmentDraft: vi.fn(),
   useTeacherOfferings: vi.fn(),
   useCourseMaterialChapters: vi.fn(),
@@ -29,6 +31,7 @@ vi.mock("@/providers/use-auth", () => ({
 vi.mock("@/hooks/use-assignments", () => ({
   useAssignments: (...a: unknown[]) => useAssignments(...a),
   useGenerateCourseAssignmentDraft: () => useGenerateCourseAssignmentDraft(),
+  useDeleteAssignment: () => useDeleteAssignment(),
 }))
 
 vi.mock("@/hooks/use-assignment-draft", () => ({
@@ -101,6 +104,7 @@ describe("AssignmentsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useAssignments.mockReturnValue({ data: [], isLoading: false, isError: false, refetch: vi.fn() })
+    useDeleteAssignment.mockReturnValue({ mutate: vi.fn(), isPending: false })
     useGenerateCourseAssignmentDraft.mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
@@ -138,7 +142,7 @@ describe("AssignmentsPage", () => {
     renderPage()
     expect(screen.getByText("Photosynthesis Essay")).toBeTruthy()
     expect(screen.getByText(/100 pts/)).toBeTruthy()
-    expect(screen.getByText(/Due /)).toBeTruthy()
+    expect(screen.getAllByText(/Due /).length).toBeGreaterThan(0)
   })
 
   it("shows an empty state when there are no assignments", () => {

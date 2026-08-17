@@ -191,7 +191,7 @@ export function GroupManagementPage() {
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {(
                 [
-                  ["total_users", "Users", insights.totals.users],
+                  ["groups", "Users", insights.totals.users],
                   ["group", "Students", insights.totals.students],
                   ["co_present", "Teachers", insights.totals.teachers],
                   ["notifications_active", "Active alerts", insights.totals.activeAlerts],

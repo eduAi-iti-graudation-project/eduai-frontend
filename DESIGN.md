@@ -155,3 +155,24 @@ The shape language is fundamentally **Pill-shaped** and **Organic**.
 - **Lists:** Items are housed in individual soft-cornered containers rather than a single list with dividers. Each item should feel like its own "module."
 - **Progress Bars:** Thick (12px height), fully rounded tracks. The unfilled portion should be a very pale version of the filled color, never gray.
 - **Checkboxes/Radios:** Oversized and circular. When selected, they should "pop" with a scale-up animation and fill with the Primary color.
+
+## Data-Dense Tier ("Table Philosophy")
+
+For workspaces (inbox, grades, timetables, management) the airy Minimalism leans into a **structured, data-dense** mode: full-width multi-pane layouts, stats strips, searchable/filterable lists, compact tables and timelines. The soft pastel palette stays, but density comes from organizing information into readable modules.
+
+### Layout Patterns
+
+- **Master-Detail Workspaces:** Multi-purpose pages (e.g. chat) use a master-detail shell — a narrow list rail on the left, a primary detail pane in the center, and an optional context rail on the right. On desktop all three panes are visible; on mobile only one pane at a time with a back affordance. This replaces the old "floating cards in a narrow column" pattern for dense pages.
+- **Stats Strips:** A row of small stat tiles (icon + label + big tabular number + tone chip) at the top of a workspace summarizing the collection: totals, unread counts, active today, averages. Tiles use `MiniStat` / `PrecisionStatCard` styles with tone-colored icon squares.
+- **Filterable Lists:** Dense lists sit inside the rail with a segmented filter row (All / Unread / Grouped), a search input, and grouped sections with sticky headers (e.g. Unread · Today · This week · Earlier). Rows are table-like: avatar with presence dot, primary text, secondary preview text, trailing meta (time, count badge).
+- **Compact Tables:** Small read-only tables (3–4 columns) for derived data inside panels. Plain white surface, `outline-variant` row dividers, `font-label-sm`/`font-body-sm`, tone-colored cells for values (positive/negative/neutral).
+
+### Timeline Components
+
+- **ActivityTimeline** (`components/shared/ActivityTimeline.tsx`): a generic vertical timeline. A thin `outline-variant` rail with tone-colored dot nodes (primary/secondary/success/warning/danger/neutral) and timestamped events; each event may link to a route. Reusable on dashboards, alerts, meetings and detail panels.
+- **Message Timeline** (chat): conversation history rendered as a timeline with centered day separators (Today / Yesterday / full date), sender grouping (peer avatar + name shown once per run of bubbles), and Sent/Seen read receipts (`done` / `done_all`).
+
+### Context Rails
+
+- Right-side context panels surface **role-aware related data** instead of empty space: a peer profile card, four stat tiles, a compact data table (e.g. recent grades), a recent-activity timeline, and quick-action links. Panels lazy-load and degrade gracefully (skeleton shimmer while loading, empty states when no data).
+- Empty states in dense pages are "invitations to act" rather than blank pages: an icon medallion, a clear headline, and a one-line hint about how to populate the space.

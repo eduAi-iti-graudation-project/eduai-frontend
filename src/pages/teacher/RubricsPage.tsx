@@ -14,6 +14,7 @@ import {
  SelectValue,
 } from "@/components/ui/select"
 import * as api from "@/lib/api"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { toast } from "sonner"
 
 interface CriteriaRow {
@@ -434,56 +435,76 @@ export function RubricsPage() {
        <h3 className="font-headline-md text-headline-md text-primary">Saved Rubrics</h3>
        <p className="font-label-sm text-label-sm text-on-surface-variant">{rubrics.data.length} total</p>
       </div>
-      <div className="stagger-enter grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
-       {rubrics.data.map((rubric) => (
-        <div
-         key={rubric.id}
-         className={`text-left bg-surface-container-lowest rounded-lg shadow-card p-md transition-all hover:shadow-card-hover ${
-          selectedRubricId === rubric.id ? "ring-2 ring-primary border-primary" : ""
-         }`}
-        >
-         <div className="flex items-start justify-between gap-2 mb-2">
-          <h4 className="font-headline-md text-headline-md text-primary truncate">{rubric.title}</h4>
-          {rubric.isConfirmed ? (
-           <Badge className="px-2 py-0.5 rounded-md bg-primary text-primary-foreground font-label-sm text-label-sm border-0 shrink-0">Confirmed</Badge>
-          ) : (
-           <Badge variant="outline" className="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface font-label-sm text-label-sm border-0 shrink-0">Draft</Badge>
-          )}
-         </div>
-         <p className="font-label-sm text-label-sm text-on-surface-variant">
-          {rubric.criteria.length} criteria · {rubric.criteria.reduce((s, c) => s + c.maxPoints, 0)} pts
-         </p>
-         <p className="font-label-sm text-label-sm text-outline mt-0.5">{new Date(rubric.createdAt).toLocaleDateString()}</p>
-
-         <div className="mt-md grid grid-cols-2 gap-2">
-          <Button
-           type="button"
-           onClick={() => setSelectedRubricId(rubric.id)}
-           variant="outline"
-           className=" bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container hover:text-primary text-label-sm font-medium rounded-full px-2 py-1.5 h-auto"
-          >
-           View
-          </Button>
-          <Button
-           type="button"
-           onClick={() => handleUseInBuilder(rubric)}
-           className="rounded-full bg-primary text-primary-foreground text-label-sm font-medium hover:bg-primary/90 px-2 py-1.5 h-auto"
-          >
-           Use in Builder
-          </Button>
-          {resolvedAssignmentId && (
-           <Button
-            type="button"
-            onClick={() => handleCopyToAssignment(rubric)}
-            disabled={createRubric.isPending}
-            className="col-span-2 rounded-full bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container hover:text-primary text-label-sm font-medium px-2 py-1.5 h-auto disabled:opacity-50"
-           >
-            Copy to Assignment
-           </Button>
-          )}
-         </div>
-        </div>
-       ))}
+      <div className="rounded-lg bg-surface-container-lowest border border-outline-variant overflow-hidden shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-surface-container-low hover:bg-surface-container-low">
+              <TableHead className="pl-5">Title</TableHead>
+              <TableHead>Criteria</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="pr-5 text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rubrics.data.map((rubric) => {
+              const selected = selectedRubricId === rubric.id
+              return (
+                <TableRow key={rubric.id} className={selected ? "bg-primary-fixed/40" : ""}>
+                  <TableCell className="pl-5 py-3">
+                    <p className="font-body-lg text-body-lg text-on-surface truncate">{rubric.title}</p>
+                  </TableCell>
+                  <TableCell className="font-body-md text-body-md text-on-surface tabular-nums">
+                    {rubric.criteria.length}
+                  </TableCell>
+                  <TableCell className="font-body-md text-body-md text-on-surface tabular-nums">
+                    {rubric.criteria.reduce((s, c) => s + c.maxPoints, 0)} pts
+                  </TableCell>
+                  <TableCell className="font-label-sm text-label-sm text-on-surface-variant">
+                    {new Date(rubric.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    {rubric.isConfirmed ? (
+                      <Badge className="px-2 py-0.5 rounded-md bg-primary text-primary-foreground font-label-sm text-label-sm border-0">Confirmed</Badge>
+                    ) : (
+                      <Badge variant="outline" className="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface font-label-sm text-label-sm border-0">Draft</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="pr-5 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        type="button"
+                        onClick={() => setSelectedRubricId(rubric.id)}
+                        variant="outline"
+                        className="bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container hover:text-primary text-label-sm font-medium rounded-md px-2.5 py-1.5 h-auto"
+                      >
+                        View
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => handleUseInBuilder(rubric)}
+                        className="rounded-md bg-primary text-primary-foreground text-label-sm font-medium hover:bg-primary/90 px-2.5 py-1.5 h-auto"
+                      >
+                        Use in Builder
+                      </Button>
+                      {resolvedAssignmentId && (
+                        <Button
+                          type="button"
+                          onClick={() => handleCopyToAssignment(rubric)}
+                          disabled={createRubric.isPending}
+                          className="rounded-md bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container hover:text-primary text-label-sm font-medium px-2.5 py-1.5 h-auto disabled:opacity-50"
+                        >
+                          Copy to Assignment
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
       </div>
      </section>
     )}

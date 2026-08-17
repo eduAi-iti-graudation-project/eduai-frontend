@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { QuizDto, QuizDifficulty, QuizQuestionType, QuizStatus } from "@/lib/api"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 const DIFFICULTY_LABELS: Record<QuizDifficulty, string> = {
   EASY: "Easy",
@@ -350,31 +351,82 @@ export function QuizzesPage() {
             description="Try clearing the filters or searching for something else."
           />
         ) : (
-          <div className="space-y-3 max-w-4xl mx-auto">
-            {filtered.map((quiz) => {
-              const totalPoints = (quiz.questions ?? []).reduce((sum, q) => sum + q.points, 0)
-              return (
-                <div key={quiz.id} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant hover:border-primary transition-colors">
-                  <div className="flex items-start justify-between gap-4">
-                    <Link to={`/quizzes/${quiz.id}`} className="flex-1 min-w-0 group">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <QuizStatusBadge status={quiz.status} />
+          <div className="rounded-lg bg-surface-container-lowest border border-outline-variant overflow-hidden shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-surface-container-low hover:bg-surface-container-low">
+                  <TableHead className="pl-5">Quiz</TableHead>
+                  <TableHead>Assigned to</TableHead>
+                  <TableHead>Difficulty</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Closes</TableHead>
+                  <TableHead className="pr-5 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((quiz) => {
+                  const totalPoints = (quiz.questions ?? []).reduce((sum, q) => sum + q.points, 0)
+                  return (
+                    <TableRow key={quiz.id}>
+                      <TableCell className="pl-5 py-3">
+                        <Link to={`/quizzes/${quiz.id}`} className="group flex items-center gap-3 cursor-pointer">
+                          <div className="w-9 h-9 rounded-md bg-primary-container flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[20px] text-on-primary-container">quiz</span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-body-lg text-body-lg text-on-surface truncate group-hover:text-primary transition-colors">
+                              {quiz.title}
+                            </p>
+                            <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-1">
+                              {quiz.description}
+                            </p>
+                            <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5 inline-flex items-center flex-wrap">
+                              {quiz.questions && (
+                                <span>{quiz.questions.length} questions · {totalPoints} pts</span>
+                              )}
+                              {quiz.timeLimit != null && (
+                                <span className="inline-flex items-center gap-0.5 ml-1.5">
+                                  <span className="material-symbols-outlined text-[14px]">timer</span>
+                                  {quiz.timeLimit} min
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          <span className="ml-auto material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors shrink-0">
+                            chevron_right
+                          </span>
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        {quiz.assignments.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5 max-w-[240px]">
+                            {quiz.assignments.map((a) => (
+                              <span
+                                key={a.id}
+                                className="inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface px-2 py-0.5 font-label-sm text-label-sm text-on-surface-variant"
+                              >
+                                <span className="material-symbols-outlined text-[12px]">groups</span>
+                                {a.sectionName}
+                                {a.targetStudentIds.length > 0 && (
+                                  <span className="text-primary">{a.targetStudentIds.length} targeted</span>
+                                )}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="font-label-sm text-label-sm text-on-surface-variant">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <QuizDifficultyBadge difficulty={quiz.difficulty} />
-                        {quiz.questions && (
-                          <span className="font-label-sm text-label-sm text-on-surface-variant">
-                            {quiz.questions.length} questions · {totalPoints} pts
-                          </span>
-                        )}
-                        {quiz.timeLimit != null && (
-                          <span className="font-label-sm text-label-sm text-on-surface-variant inline-flex items-center gap-0.5">
-                            <span className="material-symbols-outlined text-[14px]">timer</span>
-                            {quiz.timeLimit} min
-                          </span>
-                        )}
-                        {quiz.endsAt != null && (
-                          <span className="font-label-sm text-label-sm text-on-surface-variant inline-flex items-center gap-0.5">
+                      </TableCell>
+                      <TableCell>
+                        <QuizStatusBadge status={quiz.status} />
+                      </TableCell>
+                      <TableCell>
+                        {quiz.endsAt != null ? (
+                          <span className="font-label-sm text-label-sm text-on-surface-variant inline-flex items-center gap-1">
                             <span className="material-symbols-outlined text-[14px]">schedule</span>
-                            Closes{" "}
                             {new Date(quiz.endsAt).toLocaleString(undefined, {
                               month: "short",
                               day: "numeric",
@@ -382,104 +434,84 @@ export function QuizzesPage() {
                               minute: "2-digit",
                             })}
                           </span>
+                        ) : (
+                          <span className="font-label-sm text-label-sm text-on-surface-variant">—</span>
                         )}
-                      </div>
-                      <h2 className="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">
-                        {quiz.title}
-                      </h2>
-                      {quiz.description && (
-                        <p className="font-body-md text-body-md text-on-surface-variant mt-0.5 line-clamp-1">
-                          {quiz.description}
-                        </p>
-                      )}
-                      {quiz.assignments.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          {quiz.assignments.map((a) => (
-                            <span
-                              key={a.id}
-                              className="inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface px-2 py-0.5 font-label-sm text-label-sm text-on-surface-variant"
-                            >
-                              <span className="material-symbols-outlined text-[12px]">groups</span>
-                              {a.sectionName}
-                              {a.targetStudentIds.length > 0 && (
-                                <span className="text-primary">{a.targetStudentIds.length} targeted</span>
-                              )}
-                            </span>
-                          ))}
+                      </TableCell>
+                      <TableCell className="pr-5">
+                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                          {quiz.status === "DRAFT" && (
+                            <>
+                              <Button
+                                asChild
+                                className="bg-primary text-primary-foreground px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                              >
+                                <Link to={`/quizzes/${quiz.id}`}>Edit</Link>
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => setPublishTarget(quiz)}
+                                className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                              >
+                                Publish
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => setDeleteTarget(quiz)}
+                                className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
+                              >
+                                Delete
+                              </Button>
+                            </>
+                          )}
+                          {quiz.status === "PUBLISHED" && (
+                            <>
+                              <Button
+                                asChild
+                                className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                              >
+                                <Link to={`/quizzes/${quiz.id}/attempts`}>View attempts</Link>
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => { setAssignTarget(quiz); setAssignTargets([]) }}
+                                className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                              >
+                                Reassign
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => setCloseTarget(quiz)}
+                                className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
+                              >
+                                Close
+                              </Button>
+                            </>
+                          )}
+                          {quiz.status === "CLOSED" && (
+                            <>
+                              <Button
+                                asChild
+                                className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
+                              >
+                                <Link to={`/quizzes/${quiz.id}/attempts`}>View attempts</Link>
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => setDeleteTarget(quiz)}
+                                className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
+                              >
+                                Delete
+                              </Button>
+                            </>
+                          )}
                         </div>
-                      )}
-                    </Link>
-                    <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-                      {quiz.status === "DRAFT" && (
-                        <>
-                          <Button
-                            asChild
-                            className="bg-primary text-primary-foreground px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
-                          >
-                            <Link to={`/quizzes/${quiz.id}`}>Edit</Link>
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => setPublishTarget(quiz)}
-                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
-                          >
-                            Publish
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => setDeleteTarget(quiz)}
-                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
-                          >
-                            Delete
-                          </Button>
-                        </>
-                      )}
-                      {quiz.status === "PUBLISHED" && (
-                        <>
-                          <Button
-                            asChild
-                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
-                          >
-                            <Link to={`/quizzes/${quiz.id}/attempts`}>View attempts</Link>
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => { setAssignTarget(quiz); setAssignTargets([]) }}
-                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
-                          >
-                            Reassign
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => setCloseTarget(quiz)}
-                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
-                          >
-                            Close
-                          </Button>
-                        </>
-                      )}
-                      {quiz.status === "CLOSED" && (
-                        <>
-                          <Button
-                            asChild
-                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
-                          >
-                            <Link to={`/quizzes/${quiz.id}/attempts`}>View attempts</Link>
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => setDeleteTarget(quiz)}
-                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
-                          >
-                            Delete
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>

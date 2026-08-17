@@ -30,3 +30,15 @@ export function useSaveGeneratedAssignments() {
     onError: (err: Error) => toast.error(err.message),
   })
 }
+
+export function useDeleteAssignment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.deleteAssignment(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["assignments"] })
+      toast.success("Assignment deleted")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}

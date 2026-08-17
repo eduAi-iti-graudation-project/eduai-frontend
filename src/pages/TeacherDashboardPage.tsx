@@ -1,8 +1,14 @@
 import { Link } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
+import * as api from "@/lib/api"
+import { useAuth } from "@/providers/use-auth"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
+import { useDashboardInsights } from "@/hooks/use-dashboard-insights"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
+import { WelcomeBanner } from "@/components/shared/WelcomeBanner"
 import { FriendlyAlert } from "@/components/admin/AlertPresentation"
+import { InsightSectionCard } from "@/components/insights/InsightSectionCard"
 import type { AlertListItem as Alert } from "@/lib/api"
 
 function getInitials(name: string): string {
@@ -43,11 +49,23 @@ function StatCard({ label, icon, iconClass, value, caption }: { label: string; i
 }
 
 export function TeacherDashboardPage() {
+ const { user } = useAuth()
  const { isLoading, isError, error, classCards, submissionRate, avgGrade, totalSubmissions, alerts, confirmedSubmissions } = useDashboardData()
+ const insights = useDashboardInsights("week")
+
+ const gradesQuery = useQuery({
+  queryKey: ["teacher", "grades", "banner", user?.id],
+  queryFn: () => api.getTeacherGrades(user!.id),
+  enabled: !!user?.id,
+ })
+ const teacherGrades = gradesQuery.data ?? []
+ const totalSections = teacherGrades.reduce((s, g) => s + g.sections, 0)
+ const totalStudents = teacherGrades.reduce((s, g) => s + g.students, 0)
+ const totalCourses = teacherGrades.reduce((s, g) => s + g.courses, 0)
 
  if (isError) {
   return <ErrorState message={error} onRetry={() => window.location.reload()} className="p-margin-desktop" />
- }
+  }
 
  if (isLoading) {
   return <LoadingState label="Loading dashboard..." />
@@ -71,7 +89,18 @@ export function TeacherDashboardPage() {
 
  return (
   <div className="min-h-full bg-surface">
-   <div className="mx-auto flex max-w-6xl flex-col gap-md p-gutter pb-24 md:pb-0">
+   <div className="mx-auto flex max-w-[1600px] flex-col gap-md p-gutter pb-24 md:pb-0">
+    <WelcomeBanner
+     userName={user?.name ?? "Teacher"}
+     roleLabel="Teacher"
+     email={user?.email}
+     details={[
+      { icon: "workspaces", label: "Grades", value: teacherGrades.length > 0 ? String(teacherGrades.length) : "—" },
+      { icon: "school", label: "Sections", value: totalSections > 0 ? String(totalSections) : "—" },
+      { icon: "menu_book", label: "Courses", value: totalCourses > 0 ? String(totalCourses) : "—" },
+      { icon: "groups", label: "Students", value: totalStudents > 0 ? String(totalStudents) : "—" },
+     ]}
+    />
     {/* Page Header */}
     <div className="flex justify-between items-end">
      <div>
@@ -203,6 +232,23 @@ export function TeacherDashboardPage() {
       )}
      </div>
     </div>
+
+    {/* This week */}
+    {insights.data && insights.data.sections.length > 0 && (
+     <div className="flex flex-col gap-md">
+      <div className="flex justify-between items-end">
+       <h3 className="font-headline-md text-headline-md font-semibold text-primary">This week</h3>
+       <Link to="/insights" className="text-sm font-medium text-primary hover:underline cursor-pointer">
+        View all insights
+       </Link>
+      </div>
+      <div className="stagger-enter grid grid-cols-1 md:grid-cols-2 gap-4">
+       {insights.data.sections.slice(0, 4).map((section) => (
+        <InsightSectionCard key={section.key} section={section} interval="week" />
+       ))}
+      </div>
+     </div>
+    )}
    </div>
   </div>
  )

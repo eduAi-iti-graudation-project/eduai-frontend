@@ -85,6 +85,7 @@ export interface WeeklyTimetableGridProps {
   dayStartHour?: number
   dayEndHour?: number
   showNowIndicator?: boolean
+  fillHeight?: boolean
   className?: string
 }
 
@@ -120,6 +121,7 @@ export function WeeklyTimetableGrid({
   dayStartHour = 7,
   dayEndHour = 18,
   showNowIndicator = !editable,
+  fillHeight = false,
   className,
 }: WeeklyTimetableGridProps) {
   const queryClient = useQueryClient()
@@ -150,6 +152,33 @@ export function WeeklyTimetableGrid({
   // instead of letting the slot overlap its neighbours.
   const slotRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
   const hourCount = Math.max(0, dayEndHour - dayStartHour)
+
+  // ── Fill-height mode ─────────────────────────────────────────────
+  // When `fillHeight` is set, scale the hour row height so the grid
+  // body fills whatever vertical space the container provides, instead
+  // of leaving dead space below a fixed 56px-per-hour grid.
+  const [size, setSize] = useState<{ height: number; header: number } | null>(null)
+
+  useLayoutEffect(() => {
+    if (!fillHeight) return
+    const el = containerRef.current
+    if (!el) return
+    const headerEl = el.querySelector<HTMLElement>("[data-grid-header]")
+    const measure = () => {
+      setSize({ height: el.clientHeight, header: headerEl?.offsetHeight ?? 44 })
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    if (headerEl) ro.observe(headerEl)
+    return () => ro.disconnect()
+  }, [fillHeight])
+
+  const hourPx =
+    fillHeight && size
+      ? Math.max(34, Math.min(88, (size.height - size.header) / Math.max(hourCount, 1)))
+      : HOUR_PX
+
   const [rowExtra, setRowExtra] = useState<number[]>(() => new Array(hourCount).fill(0))
 
   useLayoutEffect(() => {
@@ -164,7 +193,7 @@ export function WeeklyTimetableGrid({
       const startMin = toMinutes(slot.startTime)
       const endMin = toMinutes(slot.endTime)
       const GAP = 8
-      const baseHeight = Math.max(HOUR_PX / 2 - GAP, ((endMin - startMin) / 60) * HOUR_PX - GAP)
+      const baseHeight = Math.max(hourPx / 2 - GAP, ((endMin - startMin) / 60) * hourPx - GAP)
       const contentHeight = el.scrollHeight
       if (contentHeight > baseHeight) {
         const hourIdx = Math.floor((startMin - dayStartMin) / 60)
@@ -195,7 +224,7 @@ export function WeeklyTimetableGrid({
     const rawIdx = (min - dayStartMin) / 60
     const hourIdx = Math.min(Math.max(Math.floor(rawIdx), 0), Math.max(rowExtra.length - 1, 0))
     const fractionIntoHour = Math.min(Math.max(rawIdx - hourIdx, 0), 1)
-    const baseTop = rawIdx * HOUR_PX
+    const baseTop = rawIdx * hourPx
     const extraBefore = cumulativeExtra[hourIdx] ?? totalExtra
     const extraWithin = (rowExtra[hourIdx] ?? 0) * fractionIntoHour
     return baseTop + extraBefore + extraWithin
@@ -217,7 +246,7 @@ export function WeeklyTimetableGrid({
 
   const dayStartMin = dayStartHour * 60
   const daySpanMin = (dayEndHour - dayStartHour) * 60
-  const columnHeight = (daySpanMin / 60) * HOUR_PX + totalExtra
+  const columnHeight = (daySpanMin / 60) * hourPx + totalExtra
 
   // ── Conflict preview (debounced, same backend check as save) ─────
   const pendingCheckRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -489,13 +518,13 @@ export function WeeklyTimetableGrid({
     const startMin = overrides?.startMin ?? toMinutes(slot.startTime)
     const endMin = overrides?.endMin ?? toMinutes(slot.endTime)
     const top = adjustedTop(startMin)
-    const slotHeight = ((endMin - startMin) / 60) * HOUR_PX
+    const slotHeight = ((endMin - startMin) / 60) * hourPx
     const color = colorForTag(slot.courseOffering.course.colorTag)
     const isConflict = ghost && conflict !== null
     // Small visual gap so back-to-back slots never look glued together.
     const GAP = 8
     const H_GAP = 6
-    const rawHeight = Math.max(HOUR_PX / 2, slotHeight)
+    const rawHeight = Math.max(hourPx / 2, slotHeight)
     const horizontal: React.CSSProperties =
       layout && layout.cols > 1
         ? {
@@ -693,14 +722,16 @@ export function WeeklyTimetableGrid({
     <div
       ref={containerRef}
       className={cn(
-        "relative   rounded-xl border border-border bg-surface-container-lowest",
+        "relative rounded-xl border border-border bg-surface-container-lowest",
         editable && "touch-none select-none",
+        fillHeight && "h-full",
         className,
       )}
     >
       <div style={{ minWidth: GRID_GUTTER + days.length * 140 }}>
         {/* Header */}
         <div
+          data-grid-header
           className="grid border-b border-border sticky top-0 z-30 bg-surface-container-lowest"
           style={{ gridTemplateColumns: `${GRID_GUTTER}px repeat(${days.length}, 1fr)` }}
         >

@@ -1,6 +1,7 @@
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { Link } from "react-router-dom"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { Link, useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 import * as api from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +11,20 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { MiniStat } from "@/components/admin/MiniStat"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+ AlertDialog,
+ AlertDialogTrigger,
+ AlertDialogPortal,
+ AlertDialogOverlay,
+ AlertDialogContent,
+ AlertDialogHeader,
+ AlertDialogTitle,
+ AlertDialogDescription,
+ AlertDialogFooter,
+ AlertDialogCancel,
+ AlertDialogAction,
+} from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 
 function initials(name: string) {
@@ -148,6 +163,7 @@ export function TeacherManagementPage() {
         teacher={selectedTeacher}
         profile={profileQ.data!}
         history={historyQ.data ?? []}
+        onRemoved={() => setSelectedTeacher(null)}
        />
       )}
      </div>
@@ -161,16 +177,55 @@ function TeacherDetail({
  teacher,
  profile,
  history,
+ onRemoved,
 }: {
  teacher: api.AdminUser
  profile: api.AdminTeacherProfile
  history: api.TeacherHistoryEntry[]
+ onRemoved: () => void
 }) {
  const activeHistory = history.filter((h) => h.active).length
+ const navigate = useNavigate()
+ const qc = useQueryClient()
+ const [removeOpen, setRemoveOpen] = useState(false)
+ const [confirmName, setConfirmName] = useState("")
+ const [confirmChecked, setConfirmChecked] = useState(false)
+
+ const chatM = useMutation({
+  mutationFn: () => api.createOrGetAdminChatThread(teacher.id, "TEACHER"),
+  onSuccess: (thread) => {
+   qc.invalidateQueries({ queryKey: ["chat-threads"] })
+   navigate(`/admin/chat/${thread.id}`)
+  },
+  onError: () => toast.error("Could not open a chat with this teacher"),
+ })
+
+ const removeM = useMutation({
+  mutationFn: () => api.deleteUser(teacher.id),
+  onSuccess: (deleted) => {
+   toast.success(`${deleted.name} was removed and their account deleted`)
+   qc.invalidateQueries({ queryKey: ["users", "TEACHER"] })
+   setRemoveOpen(false)
+   setConfirmName("")
+   setConfirmChecked(false)
+   onRemoved()
+  },
+  onError: (err: Error) => toast.error(err.message),
+ })
+
+ const nameConfirmed =
+  confirmName.trim().toLowerCase() === teacher.name.trim().toLowerCase()
+ const canRemove = nameConfirmed && confirmChecked && !removeM.isPending
 
  return (
   <>
-   <ProfileHeader teacher={teacher} profile={profile} activeHistoryCount={activeHistory} />
+   <ProfileHeader
+    teacher={teacher}
+    profile={profile}
+    activeHistoryCount={activeHistory}
+    chatPending={chatM.isPending}
+    onChat={() => chatM.mutate()}
+   />
 
    <div className="rounded-lg bg-surface-container-lowest overflow-hidden min-w-0">
     <div className="px-md py-3 border-b border-outline-variant flex items-center justify-between gap-3 flex-wrap">
@@ -234,23 +289,130 @@ function TeacherDetail({
         ) : (
          <span className="shrink-0 inline-flex items-center font-label-sm text-label-sm px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant font-medium">Ended</span>
         )}
+        </div>
+       ))}
+      </div>
+     )}
+    </div>
+
+    <div className="rounded-lg border border-error-container bg-error-container/20 p-md">
+     <div className="flex items-start justify-between gap-3 flex-wrap">
+      <div className="flex items-center gap-3 min-w-0">
+       <span className="material-symbols-outlined text-[22px] text-on-error-container shrink-0">delete_forever</span>
+       <div className="min-w-0">
+        <h3 className="font-headline-sm text-headline-sm text-primary">Danger zone</h3>
+        <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">
+         Remove this teacher and permanently delete their account
+        </p>
        </div>
-      ))}
+      </div>
+      <AlertDialog open={removeOpen} onOpenChange={setRemoveOpen}>
+       <AlertDialogTrigger asChild>
+        <Button
+         type="button"
+         variant="outline"
+         size="sm"
+         className="rounded-lg border-error-container bg-transparent text-on-error px-3 py-1.5 font-label-md text-label-md hover:bg-error-container hover:text-on-error-container"
+        >
+         <span className="material-symbols-outlined text-[16px]">person_remove</span>
+         Remove teacher
+        </Button>
+       </AlertDialogTrigger>
+       <AlertDialogPortal>
+        <AlertDialogOverlay className="bg-black/80" />
+        <AlertDialogContent className="rounded-xl bg-surface-container-lowest max-w-[460px]">
+         <AlertDialogHeader>
+          <div className="flex items-center gap-2 mb-1">
+           <span className="material-symbols-outlined text-[22px] text-on-error-container">warning</span>
+           <AlertDialogTitle className="font-headline-md text-headline-md text-on-surface">
+            Remove {teacher.name}?
+           </AlertDialogTitle>
+          </div>
+          <AlertDialogDescription className="space-y-2 font-body-md text-body-md text-on-surface-variant">
+           <p>
+            This <span className="font-semibold text-on-error-container">cannot be undone</span>. The teacher's
+            profile, salary records, documents and login account will be permanently deleted.
+           </p>
+           <p>To confirm, type the teacher's full name exactly as shown below.</p>
+          </AlertDialogDescription>
+         </AlertDialogHeader>
+
+         <div className="mt-3">
+          <Input
+           value={confirmName}
+           onChange={(e) => setConfirmName(e.target.value)}
+           placeholder={`Type "${teacher.name}"`}
+           className="w-full rounded-md bg-surface-container-low font-body-md text-body-md h-auto py-2 px-3 outline-none focus:border-primary focus-visible:ring-transparent focus-visible:ring-offset-0"
+          />
+         </div>
+
+         <label className="flex items-start gap-2.5 mt-3 cursor-pointer select-none">
+          <Checkbox
+           checked={confirmChecked}
+           onCheckedChange={(v) => setConfirmChecked(!!v)}
+           className="mt-0.5 border-outline data-[state=checked]:bg-error data-[state=checked]:border-error"
+          />
+          <span className="font-label-md text-label-md text-on-surface leading-snug">
+           I understand this permanently removes {teacher.name} and their account.
+          </span>
+         </label>
+
+         {!nameConfirmed && confirmName.trim().length > 0 && (
+          <p className="font-label-sm text-label-sm text-error mt-2">
+           Name doesn't match — the removed teacher
+          </p>
+         )}
+         {nameConfirmed && !confirmChecked && (
+          <p className="font-label-sm text-label-sm text-error mt-2">
+           Tick the checkbox above to confirm.
+          </p>
+         )}
+
+         <AlertDialogFooter className="mt-4">
+          <AlertDialogCancel
+           className="rounded-lg font-label-md text-label-md text-on-surface bg-surface-container-lowest hover:bg-surface-container-low"
+           onClick={() => {
+            setConfirmName("")
+            setConfirmChecked(false)
+           }}
+          >
+           Keep teacher
+          </AlertDialogCancel>
+          <AlertDialogAction
+           disabled={!canRemove}
+           onClick={async (e) => {
+            e.preventDefault()
+            removeM.mutate()
+           }}
+           className={cn(
+            "rounded-full px-3 py-1.5 font-label-md text-label-md text-on-error hover:brightness-95",
+            canRemove ? "bg-error" : "bg-error/40 cursor-not-allowed",
+           )}
+          >
+           {removeM.isPending ? "Removing…" : "Remove permanently"}
+          </AlertDialogAction>
+         </AlertDialogFooter>
+        </AlertDialogContent>
+       </AlertDialogPortal>
+      </AlertDialog>
      </div>
-    )}
-   </div>
-  </>
- )
-}
+    </div>
+   </>
+  )
+ }
 
 function ProfileHeader({
  teacher,
  profile,
  activeHistoryCount,
+ chatPending,
+ onChat,
 }: {
  teacher: api.AdminUser
  profile: api.AdminTeacherProfile
  activeHistoryCount: number
+ chatPending: boolean
+ onChat: () => void
 }) {
  return (
   <div className="rounded-lg bg-surface-container-lowest p-md">
@@ -281,12 +443,23 @@ function ProfileHeader({
        {gradeName(g)}
       </span>
      ))}
-     <Button asChild variant="outline" size="sm" className="rounded-md font-label-md text-label-md">
-      <Link to={`/admin/teachers/${profile.id}`}>
-       <span className="material-symbols-outlined text-[16px]">manage_accounts</span>
-       Full profile
-      </Link>
-     </Button>
+      <Button
+       type="button"
+       variant="outline"
+       size="sm"
+       className="rounded-md font-label-md text-label-md"
+       onClick={onChat}
+       disabled={chatPending}
+      >
+       <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
+       {chatPending ? "Opening…" : "Chat"}
+      </Button>
+      <Button asChild variant="outline" size="sm" className="rounded-md font-label-md text-label-md">
+       <Link to={`/admin/teachers/${profile.id}`}>
+        <span className="material-symbols-outlined text-[16px]">manage_accounts</span>
+        Full profile
+       </Link>
+      </Button>
     </div>
    </div>
 

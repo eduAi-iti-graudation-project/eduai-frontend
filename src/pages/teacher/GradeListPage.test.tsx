@@ -56,9 +56,9 @@ describe("GradeListPage", () => {
     expect(screen.getByText("Grade 10")).toBeTruthy()
     expect(screen.getByText("Grade 12")).toBeTruthy()
     expect(screen.getByText("Grade levels")).toBeTruthy()
-    expect(screen.getByText("Sections")).toBeTruthy()
-    expect(screen.getByText("Courses")).toBeTruthy()
-    expect(screen.getByText("Students")).toBeTruthy()
+    expect(screen.getAllByText("Sections").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Courses").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Students").length).toBeGreaterThan(0)
     expect(screen.getByText("3 of 3 grades")).toBeTruthy()
   })
 

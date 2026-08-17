@@ -13,12 +13,17 @@ import {
 } from "recharts"
 import * as api from "@/lib/api"
 import { getErrorCode } from "@/lib/api"
+import { useAuth } from "@/providers/use-auth"
 import { useAlerts } from "@/hooks/use-alerts"
 import { useDashboardInsights } from "@/hooks/use-dashboard-insights"
+import { useFlaggedTeachers } from "@/hooks/use-flagged-teachers"
 import { useMembershipRequests } from "@/hooks/use-membership-requests"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { WelcomeBanner } from "@/components/shared/WelcomeBanner"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { InsightPointDetailSheet } from "@/components/insights/InsightPointDetailSheet"
+import { clickableDot } from "@/components/insights/clickable-dot"
 import { PrecisionStatCard } from "@/components/admin/PrecisionStatCard"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -66,6 +71,7 @@ interface Point {
 }
 
 export function AdminDashboardPage() {
+ const { user } = useAuth()
  const dashboard = useQuery({
   queryKey: ["dashboard", "admin"],
   queryFn: () => api.getDashboard(),
@@ -98,13 +104,13 @@ export function AdminDashboardPage() {
  const trend = useMemo(() => {
   const section = insights.data?.sections.find((s) => s.chartType === "area" || s.chartType === "line")
   if (section && section.series.length > 1) {
-   return section.series.map((p) => ({ label: p.label, value: p.value }))
+   return { section, series: section.series.map((p) => ({ label: p.label, value: p.value })) }
   }
-  return fallbackTrend
+  return { section: undefined, series: fallbackTrend }
  }, [insights.data])
 
  const passRate = useMemo(() => {
-  const last = trend[trend.length - 1]?.value
+  const last = trend.series[trend.series.length - 1]?.value
   return typeof last === "number" ? last : 78
  }, [trend])
 
@@ -114,6 +120,7 @@ export function AdminDashboardPage() {
  }, [passRate])
 
  const usersLoading = users.isLoading
+ const [detailPoint, setDetailPoint] = useState<{ label: string; value: number } | null>(null)
 
  if (dashboard.isError) {
   return (
@@ -137,6 +144,17 @@ export function AdminDashboardPage() {
  return (
   <div className="flex-1 px-6 py-6">
    <div className="max-w-[1600px] mx-auto space-y-4">
+    <WelcomeBanner
+     userName={user?.name ?? "Administrator"}
+     roleLabel="Administrator"
+     email={user?.email}
+     details={[
+      { icon: "groups", label: "Students", value: stats.students.toLocaleString() },
+      { icon: "co_present", label: "Teachers", value: String(stats.teachers) },
+      { icon: "meeting_room", label: "Classes", value: String(data.classCount ?? 0) },
+      { icon: "warning", label: "Active alerts", value: String(data.activeAlertCount ?? 0) },
+     ]}
+    />
     <PageHeader
      title="Administrative Overview"
      subtitle="Real-time institutional metrics for the current term."
@@ -205,7 +223,11 @@ export function AdminDashboardPage() {
     </div>
 
     <div className="stagger-enter grid grid-cols-1 lg:grid-cols-3 gap-4">
-     <TrendChartCard title="Performance trend" series={trend} />
+     <TrendChartCard
+      title="Performance trend"
+      series={trend.series}
+      onPointClick={trend.section ? (label, value) => setDetailPoint({ label, value }) : undefined}
+     />
      <WatchListCard alerts={alerts} />
     </div>
 
@@ -213,12 +235,35 @@ export function AdminDashboardPage() {
      <FlaggedStudentsCard students={flagged} />
      <JoinRequestsCard />
     </div>
+
+    <FlaggedTeachersCard />
+
+    {detailPoint && trend.section && (
+     <InsightPointDetailSheet
+      open
+      onOpenChange={(open) => {
+       if (!open) setDetailPoint(null)
+      }}
+      section={trend.section}
+      point={detailPoint}
+      interval="week"
+     />
+    )}
    </div>
   </div>
  )
 }
 
-function TrendChartCard({ title, series }: { title: string; series: Point[] }) {
+function TrendChartCard({
+ title,
+ series,
+ onPointClick,
+}: {
+ title: string
+ series: Point[]
+ onPointClick?: (label: string, value: number) => void
+}) {
+ const clickable = Boolean(onPointClick)
  return (
   <div className="lg:col-span-2 rounded-lg bg-surface-container-lowest flex flex-col overflow-hidden">
    <div className="px-md py-4 border-b border-outline-variant flex items-center justify-between">
@@ -263,15 +308,15 @@ function TrendChartCard({ title, series }: { title: string; series: Point[] }) {
 contentStyle={{ backgroundColor: "var(--color-surface-container-lowest)", border: "none", borderRadius: 12 }}
       labelStyle={{ color: "var(--color-primary)", fontWeight: 600 }}
       />
-      <Area
-       type="monotone"
-       dataKey="value"
-       stroke="#a43073"
-       strokeWidth={2.5}
-       fill="url(#trendFill)"
-       dot={{ r: 3, fill: "#ffffff", stroke: "#a43073", strokeWidth: 2 }}
-       activeDot={{ r: 5 }}
-      />
+<Area
+        type="monotone"
+        dataKey="value"
+        stroke="#a43073"
+        strokeWidth={2.5}
+        fill="url(#trendFill)"
+        dot={clickableDot("#a43073", 3, onPointClick) ?? { r: 3, fill: "#ffffff", stroke: "#a43073", strokeWidth: 2 }}
+        activeDot={clickableDot("#a43073", 6, onPointClick) ?? { r: 6, style: { cursor: clickable ? "pointer" : undefined } }}
+       />
      </AreaChart>
     </ResponsiveContainer>
    </div>
@@ -370,6 +415,102 @@ function FlaggedStudentsCard({ students }: { students: api.AlertListItem[] }) {
      ))}
     </div>
    )}
+  </div>
+ )
+}
+
+function FlaggedTeachersCard() {
+ const flaggedQ = useFlaggedTeachers()
+ const flagged = flaggedQ.data ?? []
+ const loading = flaggedQ.isLoading
+
+ return (
+  <div className="rounded-lg bg-surface-container-lowest overflow-hidden">
+   <div className="px-md py-4 border-b border-outline-variant flex items-center justify-between">
+    <div className="flex items-center gap-2">
+     <h3 className="font-headline-sm text-headline-sm text-primary">Flagged teachers</h3>
+     <span className="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-md bg-primary text-primary-foreground">
+      <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
+      AI
+     </span>
+    </div>
+    <Button asChild variant="link" size="sm" className="font-label-md text-label-md text-primary px-0">
+     <Link to="/admin/teachers">View all</Link>
+    </Button>
+   </div>
+
+   {loading ? (
+    <div className="space-y-2 p-md" aria-busy="true">
+     {[0, 1, 2].map((i) => (
+      <div key={i} className="h-14 rounded-lg bg-surface-container-high animate-pulse" />
+     ))}
+    </div>
+   ) : flagged.length === 0 ? (
+    <div className="flex flex-col items-center justify-center py-lg text-center px-6">
+     <span className="material-symbols-outlined text-[40px] text-outline mb-2">co_present</span>
+     <p className="font-body-md text-body-md text-on-surface-variant">No teacher flags detected.</p>
+     <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+      The analysis agent watches class-wide performance — teachers with widespread issues appear here.
+     </p>
+    </div>
+   ) : (
+<div className="divide-y divide-border">
+      {flagged.map((f) => (
+       <Link
+        key={f.courseOfferingId}
+        to={`/admin/teachers/${f.teacherId}`}
+        className="flex items-center gap-3 px-md py-3 hover:bg-surface-container-low transition-colors"
+       >
+        <Avatar className="h-8 w-8 rounded-full shrink-0">
+         <AvatarFallback className="bg-error-container text-on-error-container font-label-md text-label-md">
+          {initials(f.teacherName)}
+         </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+         <div className="flex items-center gap-2">
+          <p className="font-body-md text-body-md text-on-surface font-semibold truncate">{f.teacherName}</p>
+          <span
+           className={cn(
+            "inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full font-semibold shrink-0",
+            f.attribution === "BOTH" ? "bg-secondary-fixed text-on-secondary-fixed-variant" : "bg-error-container text-on-error-container",
+           )}
+          >
+           {f.attribution === "BOTH" ? "Class & student" : "Class issue"}
+          </span>
+         </div>
+         <p className="font-label-sm text-label-sm text-on-surface-variant truncate mt-0.5">
+          {f.courseName}
+          {f.sectionName ? ` · ${f.sectionName}` : ""}
+          {f.alertCount > 1 ? ` · ${f.alertCount} alerts` : ""}
+         </p>
+         {(f.reason ?? f.headline) && (
+          <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">
+           {f.reason ?? f.headline}
+          </p>
+         )}
+        </div>
+        <div className="text-right shrink-0">
+         <span className={cn("inline-flex items-center font-label-sm text-label-sm px-2 py-0.5 rounded-full font-semibold", riskChip[f.severity ?? "LOW"] ?? riskChip.LOW)}>
+          {f.severity ?? "LOW"}
+         </span>
+         {f.classStats && (
+          <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">
+           {f.classStats.droppingCount} of {f.classStats.studentCount} dropping · avg {f.classStats.classAvgPct}%
+          </p>
+         )}
+        </div>
+        <span className="material-symbols-outlined text-[18px] text-on-surface-variant shrink-0">chevron_right</span>
+       </Link>
+      ))}
+     </div>
+   )}
+
+   <div className="px-md py-3 border-t border-outline-variant">
+    <p className="font-body-sm text-body-sm text-on-surface-variant">
+     Detected by the analysis agent: when a majority of a class is dropping at once, the issue is attributed
+     to the class side rather than any single student.
+    </p>
+   </div>
   </div>
  )
 }
