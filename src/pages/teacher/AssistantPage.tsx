@@ -9,10 +9,12 @@ import { useSearchParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/providers/use-auth"
 import { useAssistantChat } from "@/hooks/use-assistant"
+import { useLocalChatHistory } from "@/hooks/use-local-chat-history"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { RichText } from "@/components/shared/RichText"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -26,6 +28,7 @@ import {
   ScopeSearch,
 } from "@/components/assistant/ScopeSearch"
 import { AssistantAgentGraph } from "@/components/assistant/AssistantAgentGraph"
+import { ChatHistorySidebar } from "@/components/assistant/ChatHistorySidebar"
 import type { AssistantScope } from "@/components/assistant/scope"
 import type { components } from "@/types/api-schema"
 import * as api from "@/lib/api"
@@ -39,6 +42,8 @@ const COURSE_SUGGESTIONS = [
   "Suggest teaching strategies for this class",
   "Draft a homework assignment",
 ]
+
+const RETENTION_NOTE = "Only your most recent chats are kept."
 
 export function AssistantPage() {
   const [tab, setTab] = useState<TabId>("course")
@@ -79,12 +84,41 @@ export function AssistantPage() {
         }
       />
       <div className="flex-1 min-h-0">
-        {tab === "course" ? (
+        <div className={cn("h-full", tab !== "course" && "hidden")}>
           <CourseAssistantTab initialOfferingId={initialOfferingId} />
-        ) : (
+        </div>
+        <div className={cn("h-full", tab !== "students" && "hidden")}>
           <StudentsAssistantTab />
-        )}
+        </div>
       </div>
+    </div>
+  )
+}
+
+// ── Shared: persistent suggestion chips ────────────────────────────
+
+function SuggestionChips({
+  prompts,
+  onPick,
+  disabled,
+}: {
+  prompts: string[]
+  onPick: (prompt: string) => void
+  disabled?: boolean
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {prompts.map((s) => (
+        <button
+          key={s}
+          type="button"
+          onClick={() => onPick(s)}
+          disabled={disabled}
+          className="font-label-md text-label-md px-3 py-1.5 rounded-md bg-surface-container-low text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-40 disabled:pointer-events-none"
+        >
+          {s}
+        </button>
+      ))}
     </div>
   )
 }
@@ -152,16 +186,50 @@ function CourseAssistantTab({ initialOfferingId }: { initialOfferingId?: string 
       ? offeringId
       : initialOfferingId
 
-  const { messages, sendMessage, clearMessages, isLoading } = useAssistantChat(derivedOfferingId || null)
+  const {
+    messages,
+    messagesLoading,
+    conversations,
+    conversationsLoading,
+    activeConversationId,
+    sendMessage,
+    selectConversation,
+    newConversation,
+    deleteConversation,
+    isLoading,
+  } = useAssistantChat(derivedOfferingId || null)
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+  }, [messages, messagesLoading])
+
+  function startFresh() {
+    newConversation()
+    setInput("")
+    inputRef.current?.focus()
+  }
+
+  async function openConversation(conversationId: string) {
+    const conv = await selectConversation(conversationId)
+    if (!conv?.courseOfferingId) return
+    const offering = (offeringsQ.data ?? []).find((o) => o.id === conv.courseOfferingId)
+    if (!offering) return
+    setTouched(true)
+    setGradeId(offering.section.gradeLevelId)
+    setCourseId(offering.course.id)
+    setOfferingId(offering.id)
+  }
 
   function handleSend() {
-    if (!input.trim() || isLoading) return
+    if (!input.trim() || isLoading || messagesLoading) return
     sendMessage(input)
     setInput("")
+  }
+
+  function handlePrompt(prompt: string) {
+    if (!derivedOfferingId || isLoading || messagesLoading) return
+    sendMessage(prompt)
+    inputRef.current?.focus()
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -180,6 +248,7 @@ function CourseAssistantTab({ initialOfferingId }: { initialOfferingId?: string 
             value={derivedGradeId}
             onValueChange={(v) => {
               setTouched(true)
+              newConversation()
               setGradeId(v)
               setCourseId("")
               setOfferingId("")
@@ -210,6 +279,7 @@ function CourseAssistantTab({ initialOfferingId }: { initialOfferingId?: string 
             value={derivedCourseId}
             onValueChange={(v) => {
               setTouched(true)
+              newConversation()
               setCourseId(v)
               setOfferingId("")
             }}
@@ -239,6 +309,7 @@ function CourseAssistantTab({ initialOfferingId }: { initialOfferingId?: string 
             value={derivedOfferingId}
             onValueChange={(v) => {
               setTouched(true)
+              newConversation()
               setOfferingId(v)
             }}
             disabled={!derivedCourseId}
@@ -262,89 +333,91 @@ function CourseAssistantTab({ initialOfferingId }: { initialOfferingId?: string 
             </SelectContent>
           </Select>
         </div>
-
-        {messages.length > 0 && (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={clearMessages}
-            className="text-sm text-on-surface-variant hover:text-on-surface hover:bg-transparent h-auto px-2 py-1"
-          >
-            Clear chat
-          </Button>
-        )}
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col max-w-3xl mx-auto w-full p-md gap-4 overflow-y-auto">
-        {messages.length === 0 && (
-          <div className="flex-1 flex items-center justify-center">
-            <EmptyState
-              icon="psychology"
-              title="How can I help you?"
-              description="Pick a grade, course and section, then ask me to create quizzes, summarize materials, or get teaching suggestions for that class."
-            />
-          </div>
-        )}
+      <div className="flex-1 min-h-0 flex">
+        <ChatHistorySidebar
+          conversations={conversations}
+          activeId={activeConversationId}
+          isLoading={conversationsLoading}
+          onSelect={(id) => void openConversation(id)}
+          onNew={startFresh}
+          onDelete={(id) => void deleteConversation(id)}
+          retentionNote={RETENTION_NOTE}
+        />
 
-        <div className="flex-1 space-y-4">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[80%] rounded-lg px-4 py-3 ${msg.role === "user" ? "bg-primary text-on-primary rounded-br-[6px]" : "bg-surface-container-low text-on-surface border border-outline-variant rounded-bl-[6px]"}`}>
-                {msg.role === "user" ? (
-                  <p className="font-body-md text-body-md whitespace-pre-wrap">{msg.content}</p>
-                ) : (
-                  <RichText text={msg.content} />
-                )}
-                <p className={`font-label-sm text-label-sm mt-1 ${msg.role === "user" ? "text-on-primary/60" : "text-on-surface-variant"}`}>
-                  {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </p>
+        <div className="flex-1 min-h-0 flex flex-col">
+          <div className="flex-1 min-h-0 flex flex-col max-w-3xl mx-auto w-full p-md gap-4 overflow-y-auto">
+            {messagesLoading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <LoadingState label="Loading chat…" />
               </div>
-            </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <AssistantAgentGraph />
-            </div>
-          )}
-          <div ref={chatEndRef} />
-        </div>
-      </div>
-
-      <div className="max-w-3xl mx-auto w-full px-md pb-md md:pb-6 mb-24 md:mb-0">
-        {derivedOfferingId && (
-          <div className="flex flex-wrap justify-center gap-2 pb-sm">
-            {COURSE_SUGGESTIONS.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => { sendMessage(s); setInput("") }}
-                className="font-label-md text-label-md px-3 py-1.5 rounded-md border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container-high transition-colors"
-              >
-                {s}
-              </button>
-            ))}
+            ) : messages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center gap-6">
+                <EmptyState
+                  icon="psychology"
+                  title="How can I help you?"
+                  description="Pick a grade, course and section, then ask me to create quizzes, summarize materials, or get teaching suggestions for that class."
+                />
+              </div>
+            ) : (
+              <div className="flex-1 space-y-4">
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[80%] rounded-lg px-4 py-3 ${msg.role === "user" ? "bg-primary text-on-primary rounded-br-[6px]" : "bg-surface-container-low text-on-surface border border-outline-variant rounded-bl-[6px]"}`}>
+                      {msg.role === "user" ? (
+                        <p className="font-body-md text-body-md whitespace-pre-wrap">{msg.content}</p>
+                      ) : (
+                        <RichText text={msg.content} />
+                      )}
+                      <p className={`font-label-sm text-label-sm mt-1 ${msg.role === "user" ? "text-on-primary/60" : "text-on-surface-variant"}`}>
+                        {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <AssistantAgentGraph />
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+            )}
           </div>
-        )}
-        <div className="flex items-end gap-2 bg-surface-container-low rounded-lg border border-outline-variant p-2">
-          <Textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={derivedOfferingId ? "Type your message..." : "Pick a grade, course and section to start chatting..."}
-            disabled={!derivedOfferingId || isLoading}
-            rows={1}
-            className="flex-1 bg-transparent border-0 rounded-none shadow-none outline-none resize-none px-3 py-2 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 min-h-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-          />
-          <Button
-            type="button"
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading || !derivedOfferingId}
-            aria-label="Send message"
-            className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center disabled:opacity-40 transition-opacity hover:opacity-90"
-          >
-            <span className="material-symbols-outlined text-[20px]">send</span>
-          </Button>
+
+          <div className="max-w-3xl mx-auto w-full px-md pb-md md:pb-6 mb-24 md:mb-0">
+            {derivedOfferingId && (
+              <div className="mb-2">
+                <SuggestionChips
+                  prompts={COURSE_SUGGESTIONS}
+                  onPick={handlePrompt}
+                  disabled={isLoading || messagesLoading}
+                />
+              </div>
+            )}
+            <div className="flex items-end gap-2 bg-surface-container-low rounded-lg border border-outline-variant p-2">
+              <Textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={derivedOfferingId ? "Type your message..." : "Pick a grade, course and section to start chatting..."}
+                disabled={!derivedOfferingId || isLoading || messagesLoading}
+                rows={1}
+                className="flex-1 bg-transparent border-0 rounded-none shadow-none outline-none resize-none px-3 py-2 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 min-h-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+              <Button
+                type="button"
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading || !derivedOfferingId || messagesLoading}
+                aria-label="Send message"
+                className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center disabled:opacity-40 transition-opacity hover:opacity-90"
+              >
+                <span className="material-symbols-outlined text-[20px]">send</span>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -435,11 +508,6 @@ function teacherStudentsAnswer(q: string, ctx: StudentsAnswerContext): string {
     return studentBrief({ name: scope.name!, classes: ctx.classes ?? [], attendance: ctx.attendance ?? [], grades: ctx.grades ?? [], insight: ctx.insight })
   }
 
-  if (/how many|student count|roster/.test(text) || text.includes("students")) {
-    const n = ctx.roster.length
-    return `You teach ${n} student${n === 1 ? "" : "s"} across ${ctx.sectionCount} section${ctx.sectionCount === 1 ? "" : "s"}. Search for a student above for attendance, grades, risk and more.`
-  }
-
   if (/risk|at-risk|attention|flagged|alert/.test(text)) {
     const scoped = scope.kind === "student"
     const alerts = ctx.upcomingAlerts.filter((a) => !scoped || a.studentName?.toLowerCase().includes(scope.name!.toLowerCase()))
@@ -449,6 +517,11 @@ function teacherStudentsAnswer(q: string, ctx: StudentsAnswerContext): string {
     const high = alerts.filter((a) => a.severity === "HIGH").length
     const top = alerts.slice(0, 5).map((a) => `• ${a.studentName ?? "Unknown"} (${a.severity}) — ${a.type.replace("_", " ").toLowerCase()}`).join("\n")
     return `${alerts.length} student alert${alerts.length === 1 ? "" : "s"} active (${high} HIGH). Top of list:\n${top}`
+  }
+
+  if (/how many|student count|roster/.test(text) || text.includes("students")) {
+    const n = ctx.roster.length
+    return `You teach ${n} student${n === 1 ? "" : "s"} across ${ctx.sectionCount} section${ctx.sectionCount === 1 ? "" : "s"}. Search for a student above for attendance, grades, risk and more.`
   }
 
   if (/review|queue|pending|waiting|submission/.test(text)) {
@@ -484,14 +557,23 @@ function suggestionsForStudents(scope: AssistantScope): string[] {
   ]
 }
 
+interface StudentsChatMessage {
+  id: string
+  role: "user" | "assistant"
+  content: string
+}
+
 function StudentsAssistantTab() {
   const { user } = useAuth()
   const [scope, setScope] = useState<AssistantScope>({ kind: "all" })
   const [input, setInput] = useState("")
-  const [messages, setMessages] = useState<{ id: string; role: "user" | "assistant"; content: string }[]>([])
+  const [messages, setMessages] = useState<StudentsChatMessage[]>([])
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
+
+  const { conversations, upsert, remove } = useLocalChatHistory("teacher-students-chat-history", 10)
 
   const dashboard = useDashboardData()
   const classesQ = useQuery({
@@ -559,10 +641,25 @@ function StudentsAssistantTab() {
 
   useEffect(() => () => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }, [])
 
+  function persistConversation(nextMessages: StudentsChatMessage[], nextScope: AssistantScope, id: string) {
+    const last = nextMessages[nextMessages.length - 1]
+    upsert({
+      id,
+      scope: nextScope,
+      title: nextMessages.find((m) => m.role === "user")?.content.slice(0, 60) ?? null,
+      lastMessage: last?.content.slice(0, 80) ?? null,
+      updatedAt: new Date().toISOString(),
+      messages: nextMessages,
+    })
+  }
+
   function ask(question: string) {
     if (!question.trim() || pending) return
-    const userMsg = { id: crypto.randomUUID(), role: "user" as const, content: question }
-    setMessages((prev) => [...prev, userMsg])
+    const userMsg: StudentsChatMessage = { id: crypto.randomUUID(), role: "user", content: question }
+    const nextMessages = [...messages, userMsg]
+    setMessages(nextMessages)
+    const convId = activeConversationId ?? crypto.randomUUID()
+    if (!activeConversationId) setActiveConversationId(convId)
     setPending(true)
     const ctx: StudentsAnswerContext = {
       scope,
@@ -582,12 +679,32 @@ function StudentsAssistantTab() {
         : {}),
     }
     timeoutRef.current = setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: crypto.randomUUID(), role: "assistant", content: teacherStudentsAnswer(question, ctx) },
-      ])
+      setMessages((prev) => {
+        const assistantMsg: StudentsChatMessage = { id: crypto.randomUUID(), role: "assistant", content: teacherStudentsAnswer(question, ctx) }
+        const all = [...prev, assistantMsg]
+        persistConversation(all, scope, convId)
+        return all
+      })
       setPending(false)
     }, WAIT)
+  }
+
+  function startFresh() {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setActiveConversationId(null)
+    setMessages([])
+    setPending(false)
+    setInput("")
+  }
+
+  function openConversation(conversationId: string) {
+    const conv = conversations.find((c) => c.id === conversationId)
+    if (!conv) return
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setActiveConversationId(conversationId)
+    setScope(conv.scope as AssistantScope)
+    setMessages(conv.messages)
+    setPending(false)
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -612,92 +729,93 @@ function StudentsAssistantTab() {
           placeholder="All students…"
           clearLabel="All students"
           onChange={(next) => {
+            if (JSON.stringify(next) !== JSON.stringify(scope)) startFresh()
             setScope(next)
-            setMessages([])
           }}
           className="w-64"
         />
-        {messages.length > 0 && (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => setMessages([])}
-            className="text-sm text-on-surface-variant hover:text-on-surface hover:bg-transparent h-auto px-2 py-1"
-          >
-            Clear chat
-          </Button>
-        )}
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col max-w-3xl mx-auto w-full p-md gap-4 overflow-y-auto">
-        {messages.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
-            <EmptyState
-              icon="co_present"
-              title="Ask about your students"
-              description="Counts, alerts, review queues and per-student attendance & grades — computed from your live data. Search a student above to zoom in."
-            />
-          </div>
-        ) : (
-          <div className="flex-1 space-y-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-lg px-4 py-3 ${msg.role === "user" ? "bg-primary text-on-primary rounded-br-[6px]" : "bg-surface-container-low text-on-surface border border-outline-variant rounded-bl-[6px]"}`}>
-                  {msg.role === "user" ? (
-                    <p className="font-body-md text-body-md whitespace-pre-wrap">{msg.content}</p>
-                  ) : (
-                    <RichText text={msg.content} />
-                  )}
-                </div>
+      <div className="flex-1 min-h-0 flex">
+        <ChatHistorySidebar
+          conversations={conversations}
+          activeId={activeConversationId}
+          onSelect={openConversation}
+          onNew={startFresh}
+          onDelete={(id) => {
+            remove(id)
+            if (activeConversationId === id) startFresh()
+          }}
+          retentionNote={RETENTION_NOTE}
+        />
+
+        <div className="flex-1 min-h-0 flex flex-col">
+          <div className="flex-1 min-h-0 flex flex-col max-w-3xl mx-auto w-full p-md gap-4 overflow-y-auto">
+            {messages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center gap-6">
+                <EmptyState
+                  icon="co_present"
+                  title="Ask about your students"
+                  description="Counts, alerts, review queues and per-student attendance & grades — computed from your live data. Search a student above to zoom in."
+                />
               </div>
-            ))}
-            {pending && (
-              <div className="flex justify-start">
-                <div className="max-w-[80%] rounded-lg rounded-bl-[6px] px-4 py-3 bg-surface-container-low border border-outline-variant">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+            ) : (
+              <div className="flex-1 space-y-4">
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[80%] rounded-lg px-4 py-3 ${msg.role === "user" ? "bg-primary text-on-primary rounded-br-[6px]" : "bg-surface-container-low text-on-surface border border-outline-variant rounded-bl-[6px]"}`}>
+                      {msg.role === "user" ? (
+                        <p className="font-body-md text-body-md whitespace-pre-wrap">{msg.content}</p>
+                      ) : (
+                        <RichText text={msg.content} />
+                      )}
+                    </div>
                   </div>
-                </div>
+                ))}
+                {pending && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] rounded-lg rounded-bl-[6px] px-4 py-3 bg-surface-container-low border border-outline-variant">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <div className="w-2 h-2 rounded-lg bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
               </div>
             )}
-            <div ref={chatEndRef} />
           </div>
-        )}
-      </div>
 
-      <div className="max-w-3xl mx-auto w-full px-md pb-md md:pb-6 mb-24 md:mb-0">
-        <div className="flex flex-wrap justify-center gap-2 pb-sm">
-          {suggestionsForStudents(scope).map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => { ask(s); setInput("") }}
-              className="font-label-md text-label-md px-3 py-1.5 rounded-md border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container-high transition-colors"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-end gap-2 bg-surface-container-low rounded-lg border border-outline-variant p-2">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="e.g. Which students need attention right now?"
-            rows={1}
-            className="flex-1 bg-transparent border-0 rounded-none shadow-none outline-none resize-none px-3 py-2 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 min-h-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-          />
-          <Button
-            type="button"
-            onClick={() => { ask(input); setInput("") }}
-            disabled={!input.trim() || pending}
-            aria-label="Send message"
-            className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center disabled:opacity-40 transition-opacity hover:opacity-90"
-          >
-            <span className="material-symbols-outlined text-[20px]">send</span>
-          </Button>
+          <div className="max-w-3xl mx-auto w-full px-md pb-md md:pb-6 mb-24 md:mb-0">
+            <div className="mb-2">
+              <SuggestionChips
+                prompts={suggestionsForStudents(scope)}
+                onPick={(s) => { ask(s); setInput("") }}
+                disabled={pending}
+              />
+            </div>
+            <div className="flex items-end gap-2 bg-surface-container-low rounded-lg border border-outline-variant p-2">
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="e.g. Which students need attention right now?"
+                rows={1}
+                className="flex-1 bg-transparent border-0 rounded-none shadow-none outline-none resize-none px-3 py-2 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 min-h-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+              <Button
+                type="button"
+                onClick={() => { ask(input); setInput("") }}
+                disabled={!input.trim() || pending}
+                aria-label="Send message"
+                className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center disabled:opacity-40 transition-opacity hover:opacity-90"
+              >
+                <span className="material-symbols-outlined text-[20px]">send</span>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

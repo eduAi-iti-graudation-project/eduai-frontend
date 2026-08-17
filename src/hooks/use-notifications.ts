@@ -16,12 +16,20 @@ export function useNotifications() {
     },
   })
 
+  const markAllRead = useMutation({
+    mutationFn: (ids: string[]) => Promise.all(ids.map((id) => api.markNotificationRead(id))),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] })
+    },
+  })
+
   return {
     notifications: query.data ?? [],
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
     markRead,
+    markAllRead,
     refetch: query.refetch,
   }
 }

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useNotifications } from "@/hooks/use-notifications"
 import { useAuth } from "@/providers/use-auth"
+import { notificationTargetPath, isUserRole } from "@/lib/notification-routes"
 
 export function NotificationBell() {
  const { user } = useAuth()
@@ -57,14 +58,14 @@ export function NotificationBell() {
         <p className="font-body-sm text-body-sm text-on-surface-variant">No notifications yet</p>
        </div>
       ) : (
-       recent.map((n) => (
-        <button
-         key={n.id}
-         onClick={() => {
-          if (!n.readAt) markRead.mutate(n.id)
-          navigate(notificationsPath)
-          setOpen(false)
-         }}
+recent.map((n) => (
+         <button
+          key={n.id}
+          onClick={() => {
+           if (!n.readAt) markRead.mutate(n.id)
+           navigate(notificationTargetPath(n, isUserRole(user?.role) ? user.role : undefined) ?? notificationsPath)
+           setOpen(false)
+          }}
          className={`w-full text-left p-3 flex items-start gap-3 hover:bg-surface-container transition-colors ${!n.readAt ? "border-l-4 border-primary" : ""}`}
         >
          <div className="w-8 h-8 rounded-lg bg-primary-fixed/20 flex items-center justify-center shrink-0">

@@ -76,14 +76,12 @@ import { GradeManagementPage } from "./pages/admin/GradeManagementPage"
 import { MigrationWizardPage } from "./pages/admin/MigrationWizardPage"
 import { StudentManagementPage } from "./pages/admin/StudentManagementPage"
 import { AdminStudentDetailPage } from "./pages/admin/AdminStudentDetailPage"
-import { AdminBulkDocumentsPage } from "./pages/admin/AdminBulkDocumentsPage"
 import { AdminCsvImportPage } from "./pages/admin/AdminCsvImportPage"
 import { TeacherManagementPage } from "./pages/admin/TeacherManagementPage"
 import { AdminTeacherDetailPage } from "./pages/admin/AdminTeacherDetailPage"
 import { InsightsPage } from "./pages/insights/InsightsPage"
 import { StudentInsightsPage } from "./pages/insights/StudentInsightsPage"
-import { ChatListPage } from "./pages/chat/ChatListPage"
-import { ChatThreadPage } from "./pages/chat/ChatThreadPage"
+import { ChatPage } from "./pages/chat/ChatPage"
 import { AdminBroadcastsPage } from "./pages/admin/AdminBroadcastsPage"
 import { NotFoundPage } from "./pages/NotFoundPage"
 import { AuthCallbackPage } from "./pages/AuthCallbackPage"
@@ -124,8 +122,8 @@ export const TEACHER_ROUTES = [
   { path: "/alerts/:alertId", element: <AlertDetailPage /> },
   { path: "/insights", element: <InsightsPage /> },
   { path: "/insights/students/:id", element: <StudentInsightsPage /> },
-  { path: "/chat", element: <ChatListPage /> },
-  { path: "/chat/:threadId", element: <ChatThreadPage /> },
+  { path: "/chat", element: <ChatPage /> },
+  { path: "/chat/:threadId", element: <ChatPage /> },
   { path: "/assistant", element: <AssistantPage /> },
   { path: "/notifications", element: <NotificationsListPage /> },
   { path: "/reports", element: <ReportsPage /> },
@@ -158,8 +156,8 @@ export const STUDENT_ROUTES = [
   { path: "/student/quizzes/:id/take", element: <QuizTakePage /> },
   { path: "/student/quizzes/:id/result", element: <StudentQuizResultPage /> },
   { path: "/student/insights", element: <InsightsPage /> },
-  { path: "/student/chat", element: <ChatListPage /> },
-  { path: "/student/chat/:threadId", element: <ChatThreadPage /> },
+  { path: "/student/chat", element: <ChatPage /> },
+  { path: "/student/chat/:threadId", element: <ChatPage /> },
   { path: "/student/notifications", element: <NotificationsListPage /> },
   { path: "/student/meetings", element: <MeetingsListPage /> },
   { path: "/student/meetings/:id", element: <MeetingDetailPage /> },
@@ -192,8 +190,8 @@ export function guardianRoutes() {
       { path: "children/:id", element: <ChildDetailPage /> },
       { path: "alerts", element: <GuardianAlertsPage /> },
       { path: "alerts/:id", element: <GuardianAlertDetailPage /> },
-      { path: "chat", element: <ChatListPage /> },
-      { path: "chat/:threadId", element: <ChatThreadPage /> },
+      { path: "chat", element: <ChatPage /> },
+      { path: "chat/:threadId", element: <ChatPage /> },
       { path: "insights", element: <InsightsPage /> },
       { path: "insights/students/:id", element: <StudentInsightsPage /> },
       { path: "reports", element: <ReportsPage /> },
@@ -212,13 +210,12 @@ export function adminRoutes() {
       { path: "assistant", element: <AdminAssistantPage /> },
       { path: "alerts", element: <AdminAlertsPage /> },
       { path: "broadcasts", element: <AdminBroadcastsPage /> },
-      { path: "chat", element: <ChatListPage /> },
-      { path: "chat/:threadId", element: <ChatThreadPage /> },
+      { path: "chat", element: <ChatPage /> },
+      { path: "chat/:threadId", element: <ChatPage /> },
       { path: "grades", element: <GradeManagementPage /> },
       { path: "migration", element: <MigrationWizardPage /> },
       { path: "students", element: <StudentManagementPage /> },
       { path: "students/:id", element: <AdminStudentDetailPage /> },
-      { path: "documents", element: <AdminBulkDocumentsPage /> },
       { path: "import", element: <AdminCsvImportPage /> },
       { path: "teachers", element: <TeacherManagementPage /> },
       { path: "teachers/:id", element: <AdminTeacherDetailPage /> },
