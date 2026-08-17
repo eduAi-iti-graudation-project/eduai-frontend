@@ -87,11 +87,12 @@ export function useStudyLabGeneration(generationId: string | null) {
   useEffect(() => {
     if (!generationId) return
 
-    void poll()
+    const initialPoll = setTimeout(poll, 0)
     if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(poll, 3000)
 
     return () => {
+      clearTimeout(initialPoll)
       if (timerRef.current) {
         clearInterval(timerRef.current)
         timerRef.current = null

@@ -499,9 +499,7 @@ export function SlidesView({ generation }: { generation: api.StudyGeneration }) 
   } else {
    void stageRef.current?.requestFullscreen?.()
   }
- }
-
- const progress = ((index + 1) / deck.slides.length) * 100
+  }
 
   return (
     <div className="space-y-4">
@@ -549,31 +547,42 @@ export function SlidesView({ generation }: { generation: api.StudyGeneration }) 
           borderColor: palette.border,
           color: palette.text,
         }}
-        className={cn(
-         "rounded-lg border p-4 text-left transition-colors",
-         i === index && "ring-2",
-        )}
-        style={{
-         borderColor: i === index ? palette.accent : palette.border,
-         backgroundColor: palette.panel,
-        }}
-       >
-        <span
-         className="font-label-sm text-label-sm uppercase"
-         style={{ color: palette.muted }}
-        >
-         Slide {i + 1}
-        </span>
-        <span
-         className="mt-1 block truncate font-headline-md text-headline-md"
-         style={{ color: palette.text }}
-        >
-         {s.title ?? deck.title}
-        </span>
-       </button>
-      ))}
-     </div>
-    ) : (
+      >
+        {overview ? (
+          <div className="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-3">
+            {deck.slides.map((s, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => {
+                  setIndex(i)
+                  setOverview(false)
+                }}
+                className={cn(
+                 "rounded-lg border p-4 text-left transition-colors",
+                 i === index && "ring-2",
+                )}
+                style={{
+                 borderColor: i === index ? palette.accent : palette.border,
+                 backgroundColor: palette.panel,
+                }}
+               >
+                <span
+                 className="font-label-sm text-label-sm uppercase"
+                 style={{ color: palette.muted }}
+                >
+                 Slide {i + 1}
+                </span>
+                <span
+                 className="mt-1 block truncate font-headline-md text-headline-md"
+                 style={{ color: palette.text }}
+                >
+                 {s.title ?? deck.title}
+                </span>
+               </button>
+            ))}
+          </div>
+        ) : (
      <div className="relative" style={{ aspectRatio: "16 / 9" }}>
       <div className="absolute inset-0 flex flex-col p-6 sm:p-10">
        <SlideBody

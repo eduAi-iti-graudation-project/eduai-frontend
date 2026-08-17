@@ -1,6 +1,4 @@
 import { Link } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
-import { useAuth } from "@/providers/use-auth"
 import * as api from "@/lib/api"
 import { useStudentQuizList } from "@/hooks/use-quizzes"
 import { Badge } from "@/components/ui/badge"
@@ -14,14 +12,7 @@ const attemptBadge: Record<string, { label: string; className: string }> = {
 }
 
 export function StudentQuizzesPage() {
- const { user } = useAuth()
  const quizzes = useStudentQuizList()
-
- const studentClasses = useQuery({
-  queryKey: ["student", "classes", user?.id],
-  queryFn: () => api.getStudentClasses(user!.id),
-  enabled: !!user?.id,
- })
 
  const published = (quizzes.data ?? []).filter(
   (q) =>
@@ -37,8 +28,8 @@ export function StudentQuizzesPage() {
    minute: "2-digit",
   })
 
- const className = (classId: string) =>
-  studentClasses.data?.find((c) => c.id === classId)?.name ?? "Class"
+ const assignmentLabel = (assignments: api.QuizAssignmentDto[]) =>
+ assignments.map((a) => a.sectionName).join(", ")
 
  return (
   <div className="flex-1 p-margin-desktop max-w-7xl mx-auto w-full">
@@ -82,7 +73,7 @@ export function StudentQuizzesPage() {
         <div className="flex items-start justify-between gap-4">
          <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-           <span className="font-label-sm text-label-sm text-on-surface-variant">{className(quiz.classId)}</span>
+           <span className="font-label-sm text-label-sm text-on-surface-variant">{assignmentLabel(quiz.assignments ?? [])}</span>
            {quiz.questions && (
             <>
              <span className="font-label-sm text-label-sm text-on-surface-variant">·</span>

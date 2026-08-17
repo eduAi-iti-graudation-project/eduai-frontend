@@ -275,7 +275,7 @@ export function InstructorAssignmentForm() {
    })
 
    if (data.file) {
-    await api.uploadMaterial(data.title, classId, data.file, undefined, assignment.id)
+    await api.uploadMaterial(data.title, data.file, { courseOfferingId: classId, assignmentId: assignment.id })
    }
 
    toast.success("Assignment created. Now review and confirm the rubric.")

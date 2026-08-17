@@ -18,10 +18,6 @@ import {
  SelectTrigger,
  SelectValue,
 } from "@/components/ui/select"
-import { PodcastView } from "@/components/study-lab/PodcastView"
-import { SlidesView } from "@/components/study-lab/SlidesView"
-import { StudyGuideView } from "@/components/study-lab/StudyGuideView"
-import { FlashcardsView } from "@/components/study-lab/FlashcardsView"
 import { PracticeView } from "@/components/study-lab/PracticeView"
 import { CheatSheetView } from "@/components/study-lab/CheatSheetView"
 import { cn } from "@/lib/utils"
@@ -240,8 +236,8 @@ export function StudyLabPage() {
       </SelectTrigger>
       <SelectContent>
        {offerings.data?.map((o) => (
-        <SelectItem key={o.id} value={o.id}>
-         {o.courseName} · {o.sectionName} ·{" "}
+        <SelectItem key={o.offeringId} value={o.offeringId}>
+         {o.courseName} ·{" "}
          <span className={o.materialCount > 0 ? "text-primary" : "text-error"}>
           {o.materialCount > 0 ? `${o.materialCount} material${o.materialCount === 1 ? "" : "s"}` : "no materials"}
          </span>
@@ -698,13 +694,14 @@ export function StudyLabPage() {
         generationId={activeId}
         onDelete={() => setActiveId(null)}
        />
-      )}
+     )}
      </div>
     </div>
    </div>
   </div>
- )
-}
+  </div>
+  )
+ }
 
 function GenerationDetailView({
  generationId,
@@ -802,22 +799,20 @@ function GenerationDetailView({
       generation.materialKind === "CHEAT_SHEET" && (
        <CheatSheetView generation={generation} />
       )}
-    </div>
-   )}
-   <Button
-    type="button"
-    variant="ghost"
-    size="sm"
-    className="text-destructive"
-    onClick={() => {
-     remove.mutate(generation.id)
-     onDelete()
-    }}
-   >
-    <span className="material-symbols-outlined text-[18px] mr-1">delete</span>
-    Delete
-   </Button>
-  </div>
- )
-}
+    <Button
+     type="button"
+     variant="ghost"
+     size="sm"
+     className="text-destructive"
+     onClick={() => {
+      remove.mutate(generation.id)
+      onDelete()
+     }}
+    >
+     <span className="material-symbols-outlined text-[18px] mr-1">delete</span>
+     Delete
+    </Button>
+   </div>
+  )
+ }
 

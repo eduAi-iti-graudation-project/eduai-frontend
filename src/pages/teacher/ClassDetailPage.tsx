@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { toast } from "sonner"
 import { useClassDetail } from "@/hooks/use-classes"
@@ -54,6 +54,32 @@ export function ClassDetailPage() {
 
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const students = cls ? (cls as any).enrollments?.map((e: any) => ({ ...e.student, enrollmentId: e.id })) ?? [] : []
+
+ const sectionCourses = useMemo<import("./ClassMaterialsTab").SectionCourse[]>(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const offerings: any[] = (cls as any)?.offerings ?? []
+  const seen = new Map<
+   string,
+   import("./ClassMaterialsTab").SectionCourse
+  >()
+  for (const o of offerings) {
+   const course = o?.course
+   if (!course?.id) continue
+   const taughtByMe = o.teacher?.id === user?.id
+   const prev = seen.get(course.id)
+   if (!prev) {
+    seen.set(course.id, {
+     offeringId: o.id,
+     courseId: course.id,
+     courseName: course.name ?? "Untitled course",
+     taughtByMe,
+    })
+   } else if (taughtByMe) {
+    seen.set(course.id, { ...prev, offeringId: o.id, taughtByMe: true })
+   }
+  }
+  return Array.from(seen.values())
+ }, [cls, user?.id])
 
  const q = studentQuery.trim().toLowerCase()
  const filteredStudents = students.filter(
@@ -216,7 +242,7 @@ export function ClassDetailPage() {
     )
 
    case "materials":
-    return <ClassMaterialsTab classId={cls!.id} />
+    return <ClassMaterialsTab classId={cls!.id} courses={sectionCourses} />
 
    case "attendance":
     return (

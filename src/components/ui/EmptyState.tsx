@@ -7,6 +7,7 @@ interface EmptyStateProps {
  title: string
  description?: string
  action?: ReactNode
+ flat?: boolean
  className?: string
 }
 
@@ -15,10 +16,18 @@ export function EmptyState({
  title,
  description,
  action,
+ flat = false,
  className,
 }: EmptyStateProps) {
  return (
-  <Card className={cn("animate-rise-enter border-0 shadow-none bg-transparent", className)}>
+  <Card
+   className={cn(
+    flat
+     ? "border-0 shadow-none bg-transparent"
+     : "animate-rise-enter border-0 shadow-none bg-transparent",
+    className,
+   )}
+  >
    <CardContent className="flex flex-col items-center justify-center text-center py-lg">
     <div className="w-16 h-16 rounded-lg bg-surface-container-low flex items-center justify-center mb-4">
      <span className="material-symbols-outlined text-on-surface-variant text-3xl">{icon}</span>

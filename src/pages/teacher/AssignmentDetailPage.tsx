@@ -21,7 +21,7 @@ export function AssignmentDetailPage() {
  })
 
  const assignment = assignmentQuery.data
- const { submissions: submissionsQuery, isLoading: subsLoading } = useSubmissions(undefined, id)
+ const { submissions: submissionsQuery, isLoading: subsLoading } = useSubmissions({ assignmentId: id })
  const { rubrics: rubricsQuery } = useRubrics(id)
 
  const subs = submissionsQuery.data ?? []

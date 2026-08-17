@@ -147,12 +147,9 @@ export function PracticeView({ generation }: { generation: api.StudyGeneration }
             </button>
           </div>
         </div>
-      </div>
+</div>
     )
   }
-  setSelected(null)
-  setRevealed(false)
- }
 
   return (
     <div className="space-y-4">
@@ -276,10 +273,8 @@ export function PracticeView({ generation }: { generation: api.StudyGeneration }
               </button>
             )}
           </div>
-        </div>
-      )}
-    </div>
-   )}
-  </div>
- )
-}
+</div>
+       )}
+     </div>
+   )
+ }
