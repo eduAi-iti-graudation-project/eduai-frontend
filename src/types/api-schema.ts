@@ -1234,6 +1234,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/alerts/teacher-flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List class-wide issues the analysis agent attributed to teachers */
+        get: operations["AlertsController_findTeacherFlags"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/alerts/{id}/teacher-detail": {
         parameters: {
             query?: never;
@@ -4124,6 +4141,29 @@ export interface components {
             severity: string | null;
             skillGapCount: number;
         };
+        TeacherFlagDto: {
+            /** Format: uuid */
+            courseOfferingId: string;
+            /** Format: uuid */
+            teacherId: string;
+            teacherName: string;
+            courseName: string;
+            sectionName: string | null;
+            /** @enum {string} */
+            attribution: "CLASS" | "BOTH";
+            /** @enum {string} */
+            severity: "LOW" | "MEDIUM" | "HIGH" | null;
+            reason: string | null;
+            headline: string | null;
+            classStats: {
+                studentCount: number;
+                classAvgPct: number;
+                droppingCount: number;
+                belowAverageCount: number;
+            } | null;
+            alertCount: number;
+            latestAt: string;
+        };
         ResolveAlertDto: {
             /** @enum {string} */
             status: "RESOLVED" | "DISMISSED";
@@ -6835,6 +6875,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AlertDto"][];
+                };
+            };
+        };
+    };
+    AlertsController_findTeacherFlags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherFlagDto"][];
                 };
             };
         };

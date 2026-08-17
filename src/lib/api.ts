@@ -206,6 +206,7 @@ export interface AssistantChatMessage {
 
 export interface ChatResponse {
   reply: string
+  conversationId: string
   quiz?: {
     title: string
     questions: {
@@ -457,6 +458,23 @@ export interface DiagnosisPayload {
   severity: "LOW" | "MEDIUM" | "HIGH" | null
   summary: string | null
   classContext: string | null
+  /** analysis-agent attribution (current contract) */
+  attribution?: "STUDENT" | "CLASS" | "BOTH" | null
+  /** agent explanation paragraph */
+  reason?: string | null
+  brief?: {
+    headline?: string | null
+    highlights?: string[]
+    strengths?: string[]
+    concerns?: string[]
+    recommendation?: string | null
+  } | null
+  classStats?: {
+    studentCount?: number
+    classAvgPct?: number
+    droppingCount?: number
+    belowAverageCount?: number
+  } | null
 }
 
 export interface TeacherContentPayload {
@@ -882,6 +900,31 @@ export type AlertListItem = components["schemas"]["AlertDto"] & {
 export async function getAlerts(status?: string): Promise<AlertListItem[]> {
   const params = status ? { status } : undefined
   const res = await api.get<AlertListItem[]>("/alerts", { params })
+  return res.data
+}
+
+export interface TeacherFlag {
+  courseOfferingId: string
+  teacherId: string
+  teacherName: string
+  courseName: string
+  sectionName: string | null
+  attribution: "CLASS" | "BOTH"
+  severity: "LOW" | "MEDIUM" | "HIGH" | null
+  reason: string | null
+  headline: string | null
+  classStats: {
+    studentCount: number
+    classAvgPct: number
+    droppingCount: number
+    belowAverageCount: number
+  } | null
+  alertCount: number
+  latestAt: string
+}
+
+export async function getTeacherFlags(): Promise<TeacherFlag[]> {
+  const res = await api.get<TeacherFlag[]>("/alerts/teacher-flags")
   return res.data
 }
 
@@ -1713,13 +1756,69 @@ export async function removeClassFromGrade(gradeId: string, classId: string): Pr
 
 // ── Assistant Chat ────────────────────────────────────────────────
 
+export interface AiChatConversation {
+  id: string
+  kind: string
+  courseOfferingId: string | null
+  studentId: string | null
+  title: string | null
+  lastMessage: string | null
+  lastMessageRole: "user" | "assistant" | null
+  messageCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AiChatMessageItem {
+  id: string
+  conversationId: string
+  role: "user" | "assistant"
+  content: string
+  sources: string[] | null
+  createdAt: string
+}
+
 export async function sendChatMessage(
   courseOfferingId: string,
   messages: AssistantChatMessage[],
   newMessage: string,
+  conversationId?: string,
 ): Promise<ChatResponse> {
-  const res = await api.post<ChatResponse>("/assistant/chat", { courseOfferingId, messages, newMessage })
+  const res = await api.post<ChatResponse>("/assistant/chat", {
+    courseOfferingId,
+    ...(conversationId ? { conversationId } : {}),
+    messages,
+    newMessage,
+  })
   return res.data
+}
+
+export async function listAssistantConversations(): Promise<{ items: AiChatConversation[] }> {
+  const res = await api.get<{ items: AiChatConversation[] }>("/assistant/chat/conversations")
+  return res.data
+}
+
+export async function getAssistantConversation(conversationId: string): Promise<AiChatMessageItem[]> {
+  const res = await api.get<AiChatMessageItem[]>(`/assistant/chat/conversations/${conversationId}`)
+  return res.data
+}
+
+export async function deleteAssistantConversation(conversationId: string): Promise<void> {
+  await api.delete(`/assistant/chat/conversations/${conversationId}`)
+}
+
+export async function listGuardianConversations(): Promise<{ items: AiChatConversation[] }> {
+  const res = await api.get<{ items: AiChatConversation[] }>("/assistant/guardian-chat/conversations")
+  return res.data
+}
+
+export async function getGuardianConversation(conversationId: string): Promise<AiChatMessageItem[]> {
+  const res = await api.get<AiChatMessageItem[]>(`/assistant/guardian-chat/conversations/${conversationId}`)
+  return res.data
+}
+
+export async function deleteGuardianConversation(conversationId: string): Promise<void> {
+  await api.delete(`/assistant/guardian-chat/conversations/${conversationId}`)
 }
 
 // ── Homework Help ─────────────────────────────────────────────────
@@ -1853,6 +1952,236 @@ export async function getHomeworkHelpHistory(courseOfferingId?: string): Promise
 
 export async function submitHomeworkHelpFeedback(interactionId: string, feedback: HomeworkHelpFeedbackValue): Promise<void> {
   await api.patch(`/assistant/homework-help/${interactionId}/feedback`, { feedback })
+}
+
+// ── Guardian Chat ─────────────────────────────────────────────────
+
+export type GuardianAgentStep =
+  | "read_grades"
+  | "read_attendance"
+  | "read_classes"
+  | "read_alerts"
+  | "read_insights"
+  | "thinking"
+
+export interface GuardianChatResponse {
+  reply: string
+  sources: string[]
+  conversationId: string
+}
+
+export interface GuardianChatMessage {
+  role: "user" | "assistant"
+  content: string
+}
+
+export interface GuardianChatStreamHandlers {
+  onStep: (step: GuardianAgentStep) => void
+  onDone: (data: GuardianChatResponse) => void
+}
+
+/**
+ * Streams the guardian copilot agent's progress over SSE (POST + ReadableStream).
+ * Emits a `step` event as each ward-data read runs, then a `done` event carrying
+ * the final GuardianChatResponse payload.
+ */
+export async function streamGuardianChat(
+  data: { studentId: string; messages: GuardianChatMessage[]; newMessage: string; conversationId?: string },
+  handlers: GuardianChatStreamHandlers,
+): Promise<void> {
+  const token = getStoredToken()
+  const res = await fetch(`${API_URL}/assistant/guardian-chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!res.ok) {
+    if (shouldExpireSession(res.status, "/assistant/guardian-chat", token !== null)) {
+      clearToken()
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT))
+    }
+    let message = "Something went wrong. Please try again."
+    try {
+      const body = await res.json()
+      if (body?.message) message = body.message
+    } catch {
+      // non-JSON error body; keep the default message
+    }
+    throw new Error(message)
+  }
+
+  if (!res.body) {
+    throw new Error("Streaming is not supported by this browser.")
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ""
+  let completed = false
+
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+
+    let idx: number
+    while ((idx = buffer.indexOf("\n\n")) !== -1) {
+      const rawEvent = buffer.slice(0, idx)
+      buffer = buffer.slice(idx + 2)
+      for (const line of rawEvent.split("\n")) {
+        if (!line.startsWith("data:")) continue
+        const payload = line.slice(5).trim()
+        if (!payload) continue
+        let evt: { type: string; step?: GuardianAgentStep; data?: GuardianChatResponse; message?: string }
+        try {
+          evt = JSON.parse(payload)
+        } catch {
+          continue
+        }
+        if (evt.type === "step" && evt.step) {
+          handlers.onStep(evt.step)
+          await new Promise((resolve) => setTimeout(resolve, 60))
+        } else if (evt.type === "done" && evt.data) {
+          completed = true
+          handlers.onDone(evt.data)
+        } else if (evt.type === "error" && evt.message) {
+          throw new Error(evt.message)
+        }
+      }
+    }
+  }
+
+  if (!completed) {
+    throw new Error("The assistant response ended unexpectedly. Please try again.")
+  }
+}
+
+// ── Admin Chat ────────────────────────────────────────────────────
+
+export type AdminAgentStep =
+  | "routing"
+  | "read_overview"
+  | "read_alerts"
+  | "read_insights"
+  | "read_requests"
+  | "read_billing"
+  | "read_profile"
+  | "thinking"
+
+export interface AdminChatResponse {
+  reply: string
+  sources: string[]
+  conversationId: string
+}
+
+export interface AdminChatStreamHandlers {
+  onStep: (step: AdminAgentStep) => void
+  onDone: (data: AdminChatResponse) => void
+}
+
+export async function listAdminConversations(): Promise<{ items: AiChatConversation[] }> {
+  const res = await api.get<{ items: AiChatConversation[] }>("/assistant/admin-chat/conversations")
+  return res.data
+}
+
+export async function getAdminConversation(conversationId: string): Promise<AiChatMessageItem[]> {
+  const res = await api.get<AiChatMessageItem[]>(`/assistant/admin-chat/conversations/${conversationId}`)
+  return res.data
+}
+
+export async function deleteAdminConversation(conversationId: string): Promise<void> {
+  await api.delete(`/assistant/admin-chat/conversations/${conversationId}`)
+}
+
+/**
+ * Streams the admin copilot agent's progress over SSE (POST + ReadableStream).
+ * Emits a `step` event as each school-data read runs, then a `done` event carrying
+ * the final AdminChatResponse payload. The scope may target a single student or
+ * teacher; omitting both asks about the whole school.
+ */
+export async function streamAdminChat(
+  data: {
+    scopeStudentId?: string
+    scopeTeacherId?: string
+    messages: GuardianChatMessage[]
+    newMessage: string
+    conversationId?: string
+  },
+  handlers: AdminChatStreamHandlers,
+): Promise<void> {
+  const token = getStoredToken()
+  const res = await fetch(`${API_URL}/assistant/admin-chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!res.ok) {
+    if (shouldExpireSession(res.status, "/assistant/admin-chat", token !== null)) {
+      clearToken()
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT))
+    }
+    let message = "Something went wrong. Please try again."
+    try {
+      const body = await res.json()
+      if (body?.message) message = body.message
+    } catch {
+      // non-JSON error body; keep the default message
+    }
+    throw new Error(message)
+  }
+
+  if (!res.body) {
+    throw new Error("Streaming is not supported by this browser.")
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ""
+  let completed = false
+
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+
+    let idx: number
+    while ((idx = buffer.indexOf("\n\n")) !== -1) {
+      const rawEvent = buffer.slice(0, idx)
+      buffer = buffer.slice(idx + 2)
+      for (const line of rawEvent.split("\n")) {
+        if (!line.startsWith("data:")) continue
+        const payload = line.slice(5).trim()
+        if (!payload) continue
+        let evt: { type: string; step?: AdminAgentStep; data?: AdminChatResponse; message?: string }
+        try {
+          evt = JSON.parse(payload)
+        } catch {
+          continue
+        }
+        if (evt.type === "step" && evt.step) {
+          handlers.onStep(evt.step)
+          await new Promise((resolve) => setTimeout(resolve, 60))
+        } else if (evt.type === "done" && evt.data) {
+          completed = true
+          handlers.onDone(evt.data)
+        } else if (evt.type === "error" && evt.message) {
+          throw new Error(evt.message)
+        }
+      }
+    }
+  }
+
+  if (!completed) {
+    throw new Error("The assistant response ended unexpectedly. Please try again.")
+  }
 }
 
 // ── Quizzes ───────────────────────────────────────────────────────
@@ -3330,6 +3659,13 @@ export async function streamRegenerateLab(
 
 export async function deleteLab(id: string): Promise<Lab> {
   const res = await api.delete<Lab>(`/labs/${id}`)
+  return res.data
+}
+
+export async function deleteLabs(ids: string[]): Promise<{ deleted: number }> {
+  const res = await api.delete<{ deleted: number }>("/labs/bulk", {
+    data: { ids },
+  })
   return res.data
 }
 
