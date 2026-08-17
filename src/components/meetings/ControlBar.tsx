@@ -40,6 +40,7 @@ function ControlButton({ label, icon, active, destructive, onClick }: ControlBut
    <TooltipTrigger asChild>
     <button
      type="button"
+     aria-label={label}
      onClick={onClick}
      className={cn(
       "w-12 h-12 rounded-full flex items-center justify-center transition-colors",
@@ -72,14 +73,22 @@ export function ControlBar({
  onEnd,
  className,
 }: ControlBarProps) {
- const [emojiOpen, setEmojiOpen] = useState(false)
- const micOn = call.localParticipant?.isMicrophoneEnabled ?? false
- const camOn = call.localParticipant?.isCameraEnabled ?? false
- const screenOn = call.localParticipant?.isScreenShareEnabled ?? false
- const handUp = call.raisedHands[call.localParticipant?.identity ?? ""]
+  const [emojiOpen, setEmojiOpen] = useState(false)
+  // Track presence + mute state is the ground truth for "is it on" — a
+  // published-but-muted track must read as OFF so the button always shows
+  // "Turn camera on" when the tile shows the camera-off avatar.
+  const micOn = call.trackStates.mic
+  const camOn = call.trackStates.camera
+  const screenOn = call.trackStates.screen
+  const handUp = call.raisedHands[call.localParticipant?.identity ?? ""]
 
- return (
-  <div className={cn("flex items-center justify-center gap-3 px-lg py-base flex-wrap", className)}>
+  return (
+   <div
+    className={cn(
+     "flex items-center justify-center gap-3 px-lg py-base flex-wrap bg-inverse-surface border-t border-white/10",
+     className,
+    )}
+   >
    <ControlButton label={micOn ? "Mute microphone" : "Unmute microphone"} icon={micOn ? "mic" : "mic_off"} active={!micOn} onClick={call.toggleMic} />
    <ControlButton label={camOn ? "Turn camera off" : "Turn camera on"} icon={camOn ? "videocam" : "videocam_off"} active={!camOn} onClick={call.toggleCam} />
    <ControlButton label={screenOn ? "Stop sharing screen" : "Share screen"} icon="present_to_all" active={screenOn} onClick={call.toggleScreenShare} />
@@ -87,20 +96,21 @@ export function ControlBar({
 
    <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
     <PopoverTrigger asChild>
-     <button
-      type="button"
-      className="w-12 h-12 rounded-full bg-background/10 text-white hover:bg-background/20 flex items-center justify-center"
-     >
+      <button
+       type="button"
+       aria-label="Send emoji"
+       className="w-12 h-12 rounded-full bg-background/10 text-white hover:bg-background/20 flex items-center justify-center"
+      >
       <span className="material-symbols-outlined text-[22px]">sentiment_satisfied</span>
      </button>
     </PopoverTrigger>
-    <PopoverContent className="w-auto bg-surface-container-high border-white/10 p-2">
+    <PopoverContent className="w-auto bg-surface-container-high border-black/10 p-2">
      <div className="flex gap-1.5">
       {EMOJIS.map((emoji) => (
        <button
         key={emoji}
         type="button"
-        className="w-9 h-9 rounded-lg hover:bg-background/10 text-[20px]"
+        className="w-9 h-9 rounded-lg hover:bg-black/10 text-[20px]"
         onClick={() => {
          call.sendEmoji(emoji)
          setEmojiOpen(false)

@@ -26,6 +26,15 @@ interface JoinSession {
  micId?: string
 }
 
+function MediaStatus({ dot, label, on }: { dot: string; label: string; on: boolean }) {
+ return (
+  <span className="flex items-center gap-1.5 font-label-sm text-label-sm text-inverse-on-surface/70">
+   <span className={cn("w-2 h-2 rounded-full", on ? dot : "bg-on-surface/25")} />
+   {label}: {on ? "On" : "Off"}
+  </span>
+ )
+}
+
 export function MeetingCallPage() {
  const { id } = useParams<{ id: string }>()
  const { user } = useAuth()
@@ -39,10 +48,20 @@ export function MeetingCallPage() {
  const end = useEndMeeting()
  const recording = useSetMeetingRecording()
 
- const [session, setSession] = useState<JoinSession | null>(null)
- const [joining, setJoining] = useState(false)
- const [chatOpen, setChatOpen] = useState(true)
- const [transcriptOpen, setTranscriptOpen] = useState(false)
+const [session, setSession] = useState<JoinSession | null>(null)
+  const [joining, setJoining] = useState(false)
+  const [chatOpen, setChatOpen] = useState(true)
+  const [transcriptOpen, setTranscriptOpen] = useState(false)
+
+  // React Router reuses this component across /meetings/:id/call navigations,
+  // so a session from a previous meeting would otherwise bleed into the next
+  // one (wrong room, wrong token). Reset back to the lobby when the id changes.
+  const [prevId, setPrevId] = useState(id)
+  if (prevId !== id) {
+   setPrevId(id)
+   setSession(null)
+   setJoining(false)
+  }
 
  const call = useLivekitCall(
   session?.url,
@@ -56,10 +75,15 @@ export function MeetingCallPage() {
    : undefined,
  )
 
- const participants = useMemo<Participant[]>(() => {
-  if (!call.localParticipant) return call.participants
-  return [call.localParticipant, ...call.participants]
- }, [call.localParticipant, call.participants])
+  const participants = useMemo<Participant[]>(() => {
+   if (!call.localParticipant) return call.participants
+   const remotes = call.participants.filter(
+    // A remote with our own identity is a stale echo/ghost from a previous
+    // connection — never render it as a separate tile.
+    (p) => p.identity !== call.localParticipant?.identity,
+   )
+   return [call.localParticipant, ...remotes]
+  }, [call.localParticipant, call.participants])
 
  const handleJoin = async ({ cameraId, micId }: { cameraId?: string; micId?: string }) => {
   if (!id || joining) return
@@ -150,6 +174,32 @@ export function MeetingCallPage() {
     </Link>
    </header>
 
+   {call.mediaError && (
+    <div className="flex items-center justify-between gap-3 px-lg py-2 bg-danger/15 border-b border-white/10">
+     <div className="flex items-center gap-2 min-w-0">
+      <span className="material-symbols-outlined text-[18px] text-danger shrink-0">error_outline</span>
+      <span className="font-label-md text-label-md text-danger truncate">{call.mediaError}</span>
+     </div>
+     <button
+      type="button"
+      aria-label="Dismiss error"
+      onClick={call.clearMediaError}
+      className="shrink-0 text-inverse-on-surface/60 hover:text-inverse-on-surface transition-colors"
+     >
+      <span className="material-symbols-outlined text-[18px]">close</span>
+     </button>
+    </div>
+   )}
+
+   {call.connected && (
+    <div className="px-lg py-1.5 border-b border-white/10 flex items-center gap-4 flex-wrap bg-inverse-surface/60">
+     <span className="font-label-sm text-label-sm text-inverse-on-surface/50">Media:</span>
+     <MediaStatus dot="bg-success" label="Camera" on={call.trackStates.camera} />
+     <MediaStatus dot="bg-success" label="Mic" on={call.trackStates.mic} />
+     <MediaStatus dot="bg-primary" label="Screen" on={call.trackStates.screen} />
+    </div>
+   )}
+
    <div className="flex-1 flex overflow-hidden">
     <main className="flex-1 flex flex-col min-w-0">
      <div className="flex-1 p-md overflow-y-auto">
@@ -190,7 +240,6 @@ export function MeetingCallPage() {
       onToggleRecording={handleRecord}
       onLeave={handleLeave}
       onEnd={handleEnd}
-      className="border-t border-white/5 bg-surface-container"
      />
     </main>
 

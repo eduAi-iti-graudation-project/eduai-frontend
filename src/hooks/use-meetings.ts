@@ -26,6 +26,9 @@ export function useMeeting(id: string | undefined) {
     queryKey: meetingQueryKey(id ?? ""),
     queryFn: () => api.getMeeting(id as string),
     enabled: !!id,
+    // Keep recording/transcript state truthful while the meeting is live
+    // (egress webhooks update the server, this picks it up).
+    refetchInterval: 10_000,
   })
 }
 

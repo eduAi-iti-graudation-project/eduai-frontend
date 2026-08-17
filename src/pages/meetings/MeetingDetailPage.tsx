@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/EmptyState"
@@ -11,6 +12,7 @@ import { useMeeting } from "@/hooks/use-meetings"
 import { MeetingStatusBadge, TranscriptStatusBadge } from "@/components/meetings/MeetingStatusBadge"
 import { TranscriptPanel } from "@/components/meetings/TranscriptPanel"
 import { StruggleSignalsPanel } from "@/components/meetings/StruggleSignalsPanel"
+import * as api from "@/lib/api"
 import type { MeetingDetail } from "@/lib/api"
 
 function formatDate(iso: string): string {
@@ -35,50 +37,76 @@ function MetaRow({ icon, label, value }: { icon: string; label: string; value: R
 }
 
 function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
- if (!meeting.recordingEnabled) {
+  const { id } = useParams<{ id: string }>()
+  // `meeting.recordingUrl` is the raw storage key — the playable URL is a
+  // short-lived signed link from GET /meetings/:id/recording.
+  const recording = useQuery({
+    queryKey: ["meetings", id, "recording"],
+    queryFn: () => api.getMeetingRecording(id as string),
+    enabled: !!id && !!meeting.recordingUrl,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  if (!meeting.recordingEnabled) {
+    return (
+      <EmptyState
+        icon="videocam_off"
+        title="No recording"
+        description="Recording wasn't enabled for this meeting."
+      />
+    )
+  }
+  if (meeting.status !== "ENDED") {
+    return (
+      <EmptyState
+        icon="videocam"
+        title="Recording pending"
+        description="The recording will be available after the meeting ends."
+      />
+    )
+  }
+  if (!meeting.recordingUrl) {
+    return (
+      <EmptyState
+        icon="videocam"
+        title="No recording available"
+        description="The host may not have started the recording."
+      />
+    )
+  }
+  if (recording.isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <LoadingState className="h-8" />
+      </div>
+    )
+  }
+  if (recording.isError || !recording.data?.recordingUrl) {
+    return (
+      <EmptyState
+        icon="videocam"
+        title="Recording not ready yet"
+        description="The recording file isn't reachable yet — it may still be processing. Try again in a minute."
+      />
+    )
+  }
   return (
-   <EmptyState
-    icon="videocam_off"
-    title="No recording"
-    description="Recording wasn't enabled for this meeting."
-   />
+    <div className="space-y-lg">
+      <EmptyState
+        icon="movie"
+        title="Recording ready"
+        description="Download or watch the meeting recording."
+      />
+      <div className="flex justify-center">
+        <Button asChild>
+          <a href={recording.data.recordingUrl} target="_blank" rel="noreferrer">
+            <span className="material-symbols-outlined text-[18px] mr-1">play_circle</span>
+            Watch recording
+          </a>
+        </Button>
+      </div>
+    </div>
   )
- }
- if (meeting.status !== "ENDED") {
-  return (
-   <EmptyState
-    icon="videocam"
-    title="Recording pending"
-    description="The recording will be available after the meeting ends."
-   />
-  )
- }
- if (!meeting.recordingUrl) {
-  return (
-   <EmptyState
-    icon="videocam"
-    title="No recording available"
-    description="The host may not have started the recording."
-   />
-  )
- }
- return (
-  <div className="space-y-lg">
-   <EmptyState
-    icon="movie"
-    title="Recording ready"
-    description="Download or watch the meeting recording."
-   />
-   <div className="flex justify-center">
-    <Button asChild>
-     <a href={meeting.recordingUrl} target="_blank" rel="noreferrer">
-      <span className="material-symbols-outlined text-[18px] mr-1">play_circle</span>
-      Watch recording
-     </a>
-    </Button>
-   </div>
-  </div>
- )
 }
 
 function AttendanceTab({ meeting }: { meeting: MeetingDetail }) {

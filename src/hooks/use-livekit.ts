@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import {
   Room,
   RoomEvent,
+  Track,
   type LocalParticipant,
+  type LocalTrackPublication,
   type Participant,
   type RemoteParticipant,
   type RoomConnectOptions,
@@ -24,8 +27,11 @@ export interface LivekitCall {
   connecting: boolean
   connected: boolean
   error: string | null
+  mediaError: string | null
   localParticipant: LocalParticipant | null
   participants: Participant[]
+  /** Live local publish state — ground truth for the control bar and tiles. */
+  trackStates: { camera: boolean; mic: boolean; screen: boolean }
   raisedHands: Record<string, boolean>
   reactions: Reaction[]
   toggleMic: () => void
@@ -35,6 +41,7 @@ export interface LivekitCall {
   sendEmoji: (emoji: string) => void
   switchCamera: (deviceId: string) => Promise<void>
   switchMic: (deviceId: string) => Promise<void>
+  clearMediaError: () => void
   disconnect: () => void
 }
 
@@ -65,6 +72,23 @@ function teardownSharedConnection(): void {
   void room.disconnect()
 }
 
+/** Settle a promise or reject with a clear message after `ms`. Clears the timer. */
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error(message)), ms)
+    promise.then(
+      (value) => {
+        window.clearTimeout(timer)
+        resolve(value)
+      },
+      (cause) => {
+        window.clearTimeout(timer)
+        reject(cause)
+      },
+    )
+  })
+}
+
 export function useLivekitCall(
   url: string | undefined,
   token: string | undefined,
@@ -74,6 +98,7 @@ export function useLivekitCall(
   const roomRef = useRef<Room | null>(null)
   const [connected, setConnected] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [mediaError, setMediaError] = useState<string | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [localParticipant, setLocalParticipant] = useState<LocalParticipant | null>(null)
   const [raisedHands, setRaisedHands] = useState<Record<string, boolean>>({})
@@ -100,13 +125,107 @@ export function useLivekitCall(
     })
   }, [])
 
+  const clearMediaError = useCallback(() => setMediaError(null), [])
+
   const preferredDevices = useRef<{ cameraId?: string; micId?: string }>({})
+  const lastKeyRef = useRef<string | null>(null)
   useEffect(() => {
     preferredDevices.current = {
       cameraId: devices?.cameraId || undefined,
       micId: devices?.micId || undefined,
     }
   }, [devices?.cameraId, devices?.micId])
+
+  const toggleMic = useCallback(() => {
+    const participant = roomRef.current?.localParticipant
+    if (!participant) return
+    // Base the intent on the live publication's mute state (same ground truth
+    // as the control bar) rather than participant.isMicrophoneEnabled, which
+    // can disagree with the actual publication after reconnects/mutes.
+    const pub = participant.getTrackPublication(Track.Source.Microphone)
+    const turningOn = !(pub && !pub.isMuted)
+    void participant
+      .setMicrophoneEnabled(
+        turningOn,
+        turningOn && preferredDevices.current.micId
+          ? { deviceId: preferredDevices.current.micId }
+          : undefined,
+      )
+      .then((publication) => {
+        if (turningOn && publication) setMediaError(null)
+        if (turningOn && !publication) {
+          // setMicrophoneEnabled resolved without a track (e.g. it waited on a
+          // stuck in-flight publish and timed out internally) — say so instead
+          // of silently doing nothing.
+          window.setTimeout(() => {
+            if (!participant.isMicrophoneEnabled && !participant.getTrackPublication(Track.Source.Microphone)) {
+              setMediaError("Microphone start timed out — try again or rejoin the meeting.")
+            }
+          }, 1500)
+        }
+      })
+      .catch((cause: unknown) => {
+        const message = cause instanceof Error ? cause.message : "Could not toggle the microphone"
+        setMediaError(message)
+        toast.error(message)
+      })
+  }, [])
+
+  const toggleCam = useCallback(() => {
+    const participant = roomRef.current?.localParticipant
+    if (!participant) return
+    // Same ground truth as the control bar: presence + not muted. Basing this
+    // on participant.isCameraEnabled caused a mute-only no-op when that flag
+    // disagreed with the actual publication state.
+    const pub = participant.getTrackPublication(Track.Source.Camera)
+    const turningOn = !(pub && !pub.isMuted)
+    void participant
+      .setCameraEnabled(
+        turningOn,
+        turningOn && preferredDevices.current.cameraId
+          ? { deviceId: preferredDevices.current.cameraId }
+          : undefined,
+      )
+      .then((publication) => {
+        if (turningOn && publication) setMediaError(null)
+        if (turningOn && !publication) {
+          window.setTimeout(() => {
+            if (!participant.isCameraEnabled && !participant.getTrackPublication(Track.Source.Camera)) {
+              setMediaError("Camera start timed out — try again or rejoin the meeting.")
+            }
+          }, 1500)
+        }
+      })
+      .catch((cause: unknown) => {
+        const message = cause instanceof Error ? cause.message : "Could not toggle the camera"
+        setMediaError(message)
+        toast.error(message)
+      })
+  }, [])
+
+  const toggleScreenShare = useCallback(() => {
+    const participant = roomRef.current?.localParticipant
+    if (!participant) return
+    const pub = participant.getTrackPublication(Track.Source.ScreenShare)
+    const turningOn = !(pub && !pub.isMuted)
+    void participant
+      .setScreenShareEnabled(turningOn)
+      .then((publication) => {
+        if (turningOn && publication) setMediaError(null)
+        if (turningOn && !publication) {
+          window.setTimeout(() => {
+            if (!participant.isScreenShareEnabled && !participant.getTrackPublication(Track.Source.ScreenShare)) {
+              setMediaError("Screen share start timed out — try again or rejoin the meeting.")
+            }
+          }, 1500)
+        }
+      })
+      .catch((cause: unknown) => {
+        const message = cause instanceof Error ? cause.message : "Could not share the screen"
+        setMediaError(message)
+        toast.error(message)
+      })
+  }, [])
 
   useEffect(() => {
     if (!url || !token || !roomName) return
@@ -116,15 +235,73 @@ export function useLivekitCall(
     }
     if (!sharedConnection) {
       sharedConnection = { key, room: new Room() }
+      console.info(`[livekit] created room for ${roomName}`)
     }
     const room = sharedConnection.room
     roomRef.current = room
 
+    if (lastKeyRef.current !== key) {
+      // A new meeting/room — drop any participant state left over from the
+      // previous connection so stale LocalParticipant objects never render.
+      lastKeyRef.current = key
+      setLocalParticipant(null)
+      setParticipants([])
+      setRaisedHands({})
+      setReactions([])
+      setMediaError(null)
+      setError(null)
+    }
+
     const onParticipant = () => refresh(room)
     const onTrack = () => bump()
+    const onLocalTrackPublished = (publication: LocalTrackPublication) => {
+      console.info(`[livekit] local track published: ${publication.source} (muted=${publication.isMuted})`)
+      bump()
+    }
+    const onMediaDevicesError = (cause: Error, kind?: MediaDeviceKind) => {
+      const label = kind === "audioinput" ? "Microphone" : "Camera"
+      const message = cause instanceof Error ? cause.message : "Unknown media device error"
+      console.warn(`[livekit] media device error (${label}):`, cause)
+      setMediaError(`${label} failed to start: ${message}`)
+      toast.error(`${label} failed to start: ${message}`)
+    }
     const onConnected = () => {
       setConnected(true)
       refresh(room)
+      console.info(
+        `[livekit] connected sid=${room.localParticipant?.sid} camPub=${Boolean(room.localParticipant?.getTrackPublication(Track.Source.Camera))} isCamEnabled=${room.localParticipant?.isCameraEnabled}`,
+      )
+      // Join with mic + camera already on, like a normal meeting app — using
+      // the devices picked in the lobby. Failures are surfaced (not silently
+      // swallowed) so the caller can see why the camera is off.
+      const local = room.localParticipant
+      if (!local) return
+      const camId = preferredDevices.current.cameraId
+      const micId = preferredDevices.current.micId
+      const enableMedia = async () => {
+        // Judge by the actual publications, not participant.isCameraEnabled —
+        // that flag can be stale-true after a previous meeting left a room
+        // mid-state, which would make us skip enabling the camera entirely.
+        const camPub = local.getTrackPublication(Track.Source.Camera)
+        const micPub = local.getTrackPublication(Track.Source.Microphone)
+        const wantCam = !(camPub && !camPub.isMuted)
+        const wantMic = !(micPub && !micPub.isMuted)
+        if (!wantCam && !wantMic) return
+        // Sequential, not concurrent: a concurrent pair of setXEnabled(true)
+        // calls can race inside LiveKit's pending-publish bookkeeping and one
+        // of them can silently no-op.
+        if (wantCam) await local.setCameraEnabled(true, camId ? { deviceId: camId } : undefined)
+        if (wantMic) await local.setMicrophoneEnabled(true, micId ? { deviceId: micId } : undefined)
+      }
+      void withTimeout(
+        enableMedia(),
+        15_000,
+        "Timed out while starting the camera and microphone — check your browser's camera/mic permission and try again.",
+      ).catch((cause: unknown) => {
+        const message = cause instanceof Error ? cause.message : "Could not start the camera or microphone"
+        console.warn("[livekit] auto-enable camera/mic failed:", cause)
+        setMediaError(message)
+      })
     }
     const onDisconnected = () => {
       setConnected(false)
@@ -169,10 +346,11 @@ export function useLivekitCall(
       .on(RoomEvent.TrackUnmuted, onTrack)
       .on(RoomEvent.TrackPublished, onTrack)
       .on(RoomEvent.TrackUnpublished, onTrack)
-      .on(RoomEvent.LocalTrackPublished, onTrack)
+      .on(RoomEvent.LocalTrackPublished, onLocalTrackPublished)
       .on(RoomEvent.LocalTrackUnpublished, onTrack)
       .on(RoomEvent.ActiveSpeakersChanged, onTrack)
       .on(RoomEvent.DataReceived, onData)
+      .on(RoomEvent.MediaDevicesError, onMediaDevicesError)
       .on(RoomEvent.Connected, onConnected)
       .on(RoomEvent.Disconnected, onDisconnected)
 
@@ -188,6 +366,11 @@ export function useLivekitCall(
       )
     })
 
+    // The room may already be connected when this effect runs (StrictMode
+    // remount, or a re-render reusing a live room) — make sure media enable
+    // still runs, not only on a fresh Connected event.
+    if (room.state === "connected") onConnected()
+
     return () => {
       room.off(RoomEvent.ParticipantConnected, onParticipant)
       room.off(RoomEvent.ParticipantDisconnected, onParticipant)
@@ -197,10 +380,11 @@ export function useLivekitCall(
       room.off(RoomEvent.TrackUnmuted, onTrack)
       room.off(RoomEvent.TrackPublished, onTrack)
       room.off(RoomEvent.TrackUnpublished, onTrack)
-      room.off(RoomEvent.LocalTrackPublished, onTrack)
+      room.off(RoomEvent.LocalTrackPublished, onLocalTrackPublished)
       room.off(RoomEvent.LocalTrackUnpublished, onTrack)
       room.off(RoomEvent.ActiveSpeakersChanged, onTrack)
       room.off(RoomEvent.DataReceived, onData)
+      room.off(RoomEvent.MediaDevicesError, onMediaDevicesError)
       room.off(RoomEvent.Connected, onConnected)
       room.off(RoomEvent.Disconnected, onDisconnected)
     }
@@ -214,36 +398,6 @@ export function useLivekitCall(
       new TextEncoder().encode(JSON.stringify(payload)),
       { reliable: true },
     )
-  }, [])
-
-  const toggleMic = useCallback(() => {
-    const participant = roomRef.current?.localParticipant
-    if (!participant) return
-    const turningOn = !participant.isMicrophoneEnabled
-    void participant.setMicrophoneEnabled(
-      turningOn,
-      turningOn && preferredDevices.current.micId
-        ? { deviceId: preferredDevices.current.micId }
-        : undefined,
-    )
-  }, [])
-
-  const toggleCam = useCallback(() => {
-    const participant = roomRef.current?.localParticipant
-    if (!participant) return
-    const turningOn = !participant.isCameraEnabled
-    void participant.setCameraEnabled(
-      turningOn,
-      turningOn && preferredDevices.current.cameraId
-        ? { deviceId: preferredDevices.current.cameraId }
-        : undefined,
-    )
-  }, [])
-
-  const toggleScreenShare = useCallback(() => {
-    const participant = roomRef.current?.localParticipant
-    if (!participant) return
-    void participant.setScreenShareEnabled(!participant.isScreenShareEnabled)
   }, [])
 
   const setHandRaised = useCallback(
@@ -274,11 +428,25 @@ export function useLivekitCall(
   )
 
   const switchCamera = useCallback(async (deviceId: string) => {
-    await roomRef.current?.localParticipant.setCameraEnabled(true, { deviceId })
+    try {
+      const publication = await roomRef.current?.localParticipant.setCameraEnabled(true, { deviceId })
+      if (publication) setMediaError(null)
+    } catch (cause: unknown) {
+      const message = cause instanceof Error ? cause.message : "Could not switch the camera"
+      setMediaError(message)
+      toast.error(message)
+    }
   }, [])
 
   const switchMic = useCallback(async (deviceId: string) => {
-    await roomRef.current?.localParticipant.setMicrophoneEnabled(true, { deviceId })
+    try {
+      const publication = await roomRef.current?.localParticipant.setMicrophoneEnabled(true, { deviceId })
+      if (publication) setMediaError(null)
+    } catch (cause: unknown) {
+      const message = cause instanceof Error ? cause.message : "Could not switch the microphone"
+      setMediaError(message)
+      toast.error(message)
+    }
   }, [])
 
   const disconnect = useCallback(() => {
@@ -287,12 +455,27 @@ export function useLivekitCall(
 
   const connecting = Boolean(url && token && roomName && !connected && !error)
 
+  // Read publication state off the localParticipant object held in state (the
+  // LiveKit object's tracks are mutated live; re-renders triggered by bump()
+  // pick up the fresh state without touching the room ref during render).
+  const trackOn = (source: Track.Source) => {
+    const pub = localParticipant?.getTrackPublication(source)
+    return Boolean(pub && !pub.isMuted)
+  }
+  const trackStates = {
+    camera: trackOn(Track.Source.Camera),
+    mic: trackOn(Track.Source.Microphone),
+    screen: trackOn(Track.Source.ScreenShare),
+  }
+
   return {
     connecting,
     connected,
     error,
+    mediaError,
     localParticipant,
     participants,
+    trackStates,
     raisedHands,
     reactions,
     toggleMic,
@@ -302,6 +485,7 @@ export function useLivekitCall(
     sendEmoji,
     switchCamera,
     switchMic,
+    clearMediaError,
     disconnect,
   }
 }
