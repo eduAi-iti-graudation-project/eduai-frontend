@@ -4,7 +4,7 @@ interface LandingConfig {
   modelParentA: string
   modelParentB: string
   modelRobot: string
-  studentClips: { idle: string; wave: string; walk: string; float: string; sit: string; think: string; celebrate: string }
+  studentClips: { wave: string; walk: string; fall: string; float: string; point: string; celebrate: string }
   teacherClips: { idle: string; write: string; sit: string }
   parentClips: { idle: string; clap: string }
 }
@@ -19,19 +19,18 @@ function clip(role: string, name: string, fallback: string): string {
 }
 
 export const landingConfig: LandingConfig = {
-  modelStudent: env("VITE_LANDING_MODEL_STUDENT", "/models/student.glb"),
+  modelStudent: env("VITE_LANDING_MODEL_STUDENT", "/models/student_2.glb"),
   modelTeacher: env("VITE_LANDING_MODEL_TEACHER", "/models/teacher.glb"),
   modelParentA: env("VITE_LANDING_MODEL_PARENT_A", "/models/parent-a.glb"),
   modelParentB: env("VITE_LANDING_MODEL_PARENT_B", "/models/parent-b.glb"),
   modelRobot: env("VITE_LANDING_MODEL_ROBOT", "/models/robot.glb"),
   studentClips: {
-    idle: clip("STUDENT", "IDLE", "Idle"),
-    wave: clip("STUDENT", "WAVE", "Wave"),
-    walk: clip("STUDENT", "WALK", "Walk"),
-    float: clip("STUDENT", "FLOAT", "t-pose"),
-    sit: clip("STUDENT", "SIT", "Sit"),
-    think: clip("STUDENT", "THINK", "Think"),
-    celebrate: clip("STUDENT", "CELEBRATE", "Celebrate"),
+    wave: clip("STUDENT", "WAVE", "waving"),
+    walk: clip("STUDENT", "WALK", "walking"),
+    fall: clip("STUDENT", "FALL", "falling"),
+    float: clip("STUDENT", "FLOAT", "tpose"),
+    point: clip("STUDENT", "POINT", "pointing"),
+    celebrate: clip("STUDENT", "CELEBRATE", "victory"),
   },
   teacherClips: {
     idle: clip("TEACHER", "IDLE", "Idle"),

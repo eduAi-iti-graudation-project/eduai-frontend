@@ -5,7 +5,7 @@ import { Band, BandOverlay } from "./BandOverlay"
 import { bandHeightVh, localProgress, scrollState } from "./progress"
 import { subscribeScroll } from "./scroll-driver"
 import { viewState, robotState } from "./view-state"
-import { PLANS } from "@/lib/plans"
+import { PLANS, useStartCheckout } from "@/lib/plans"
 
 /** Brand name — solid pink highlight (crayon-box primary). */
 function Brand({ children }: { children: React.ReactNode }) {
@@ -184,25 +184,30 @@ function DialogueBubbles() {
   )
 }
 
-const btn =
-  "inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-label-md font-label-md transition-colors"
-
 /** One plan on the pricing finale — Basic / Pro / Enterprise (the 3 paid tiers). */
 const PLAN_CARDS = PLANS.map((plan) => ({
+  id: plan.id,
   name: plan.name,
   price: plan.price,
   unit: plan.id === "enterprise" ? "" : " / month",
   period: plan.period,
   features: plan.features,
   cta: plan.cta,
-  to: "/pricing",
   featured: plan.featured,
 }))
 
-function PlanCard({ plan }: { plan: (typeof PLAN_CARDS)[number] }) {
+function PlanCard({
+  plan,
+  onSelect,
+}: {
+  plan: (typeof PLAN_CARDS)[number]
+  onSelect: (planId: (typeof PLAN_CARDS)[number]["id"]) => void
+}) {
   return (
-    <div
-      className={`flex flex-col rounded-2xl border p-lg text-left shadow-lg ${
+    <button
+      type="button"
+      onClick={() => onSelect(plan.id)}
+      className={`group flex flex-col rounded-2xl border p-lg text-left shadow-lg transition-transform hover:scale-[1.02] active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary cursor-pointer ${
         plan.featured
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-surface-container-lowest text-on-surface"
@@ -225,21 +230,22 @@ function PlanCard({ plan }: { plan: (typeof PLAN_CARDS)[number] }) {
           </li>
         ))}
       </ul>
-      <Link
-        to={plan.to}
-        className={`${btn} mt-lg ${
+      <span
+        className={`mt-lg inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-label-md font-label-md transition-colors ${
           plan.featured
-            ? "bg-white text-primary hover:bg-white/90"
-            : "bg-primary text-primary-foreground hover:bg-primary-container hover:text-on-primary-container"
+            ? "bg-white text-primary group-hover:bg-white/90"
+            : "bg-primary text-primary-foreground group-hover:bg-primary-container group-hover:text-on-primary-container"
         }`}
       >
         {plan.cta}
-      </Link>
-    </div>
+      </span>
+    </button>
   )
 }
 
 export function SectionOverlays() {
+  const startCheckout = useStartCheckout()
+
   return (
     <>
       {/* ── 1 · The Hello ── */}
@@ -351,7 +357,7 @@ export function SectionOverlays() {
             </ChapterPanel>
             <div className="pointer-events-auto grid w-full max-w-6xl grid-cols-1 gap-lg sm:grid-cols-2 lg:grid-cols-3">
               {PLAN_CARDS.map((plan) => (
-                <PlanCard key={plan.name} plan={plan} />
+                <PlanCard key={plan.name} plan={plan} onSelect={startCheckout} />
               ))}
             </div>
             <p className="pointer-events-auto flex items-center gap-sm font-label-md text-label-md text-on-surface-variant">

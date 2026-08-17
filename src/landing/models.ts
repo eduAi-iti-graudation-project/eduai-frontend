@@ -36,12 +36,11 @@ export function preloadLandingModels() {
 export function studentClips(animations: THREE.AnimationClip[]) {
   const c = landingConfig.studentClips
   return {
-    idle: findClip(animations, c.idle, landingConfig.modelStudent),
     wave: findClip(animations, c.wave, landingConfig.modelStudent),
     walk: findClip(animations, c.walk, landingConfig.modelStudent),
+    fall: findClip(animations, c.fall, landingConfig.modelStudent),
     float: findClip(animations, c.float, landingConfig.modelStudent),
-    sit: findClip(animations, c.sit, landingConfig.modelStudent),
-    think: findClip(animations, c.think, landingConfig.modelStudent),
+    point: findClip(animations, c.point, landingConfig.modelStudent),
     celebrate: findClip(animations, c.celebrate, landingConfig.modelStudent),
   }
 }

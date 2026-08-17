@@ -7,14 +7,15 @@ import { studentClips } from "../models"
 import { useClipBank, useRiggedCharacter } from "./Humanoid"
 import { bandAt, heightAt, heroState, SCENES } from "../scenes"
 
-type State = "wave" | "float" | "walk" | "idle" | "celebrate"
+type State = "wave" | "fall" | "walk" | "point" | "celebrate"
 
 /**
- * Dream-narrative student. Per scene:
- * s0 hello → wave · s1/s3/s4/s5 → t-pose float (falls + portals + the
- * school drop) · s2 → walk in · s6/s7 → stand (tests + robot talk) ·
- * s8 → celebrate. Faces the camera per scene; world Y is the shared story
- * height (falls/rises with the camera).
+ * Dream-narrative student. Per scene (student_2.glb clips):
+ * s0 hello → waving · s1 → falling (the fall) · s2 → walking in ·
+ * s3/s4 → falling (portals) · s5 → falling (school drop) ·
+ * s6/s7 → pointing at the holographic paper (solving) · s8/s9 → victory
+ * (celebration + pricing finale). Faces the camera per scene; world Y is the
+ * shared story height (falls/rises with the camera).
  */
 export function Student() {
  const { scene, animations, rootRef, mixerRef } = useRiggedCharacter(landingConfig.modelStudent)
@@ -37,17 +38,17 @@ export function Student() {
   const floating = band === 1 || band === 3 || band === 4 || band === 5
 
   let next: State
-  if (floating) next = "float"
-  else if (band === 0) next = "wave"
+  if (band === 0) next = "wave"
+  else if (band === 1) next = "fall"
   else if (band === 2) next = "walk"
-  else if (band === 8) next = "celebrate"
-  else next = "idle"
+  else if (band === 3 || band === 4) next = "fall"
+  else if (band === 5) next = "fall"
+  else if (band === 6 || band === 7) next = "point"
+  else next = "celebrate"
 
   if (next !== stateRef.current) {
    stateRef.current = next
-   if (next === "wave" || next === "float" || next === "walk") bank.fadeIn(next, 0.4)
-   else if (next === "celebrate") bank.fadeIn("celebrate", 0.5)
-   else bank.fadeIn("idle", 0.5)
+   bank.fadeIn(next, 0.4)
   }
 
   // ── world placement: story height + float bob; drift into the gate / toward the ring ──
@@ -77,7 +78,11 @@ export function Student() {
 
  return (
   <group ref={rootRef} position={[0, 0, 0]}>
-   <primitive object={scene} />
+   {/* the model is authored facing -X (left); +90° makes it face +Z so the
+       camera-facing logic in useFrame orients it correctly */}
+   <group rotation={[0, Math.PI / 2, 0]}>
+    <primitive object={scene} />
+   </group>
   </group>
  )
 }
