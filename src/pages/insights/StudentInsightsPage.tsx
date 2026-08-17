@@ -5,8 +5,8 @@ import { useStudentInsights, type InsightsInterval } from "@/hooks/use-dashboard
 import { PageHeader } from "@/components/shared/PageHeader"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
-import { InsightSectionCard } from "@/components/insights/InsightSectionCard"
-import { AgentInsightCard } from "@/components/insights/AgentInsightCard"
+import { InsightSectionsGrid } from "@/components/insights/InsightSectionsGrid"
+import { AgentInsightsTable } from "@/components/insights/AgentInsightsTable"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -76,19 +76,18 @@ export function StudentInsightsPage() {
      </div>
     </div>
    ) : data ? (
-    <div className="flex-1 p-md space-y-lg">
-     <div className="stagger-enter grid gap-4 md:grid-cols-2">
-      {data.sections.map((section) => (
-       <InsightSectionCard key={section.key} section={section} />
-      ))}
-     </div>
+<div className="flex-1 p-md space-y-lg">
+      <InsightSectionsGrid sections={data.sections} interval={interval} studentId={id} />
 
      {data.agentInsights.length > 0 && (
-      <section className="max-w-4xl mx-auto space-y-3">
-       <h2 className="font-headline-md text-headline-md text-primary px-sm">What to know</h2>
-       {data.agentInsights.map((insight) => (
-        <AgentInsightCard key={`${insight.title}-${insight.summary}`} insight={insight} />
-       ))}
+      <section className="space-y-3">
+       <div className="flex items-baseline justify-between gap-3 px-sm">
+        <h2 className="font-headline-md text-headline-md text-primary">What to know</h2>
+        <p className="font-label-sm text-label-sm text-on-surface-variant">
+         AI-generated notes · {data.agentInsights.length} insight{data.agentInsights.length !== 1 ? "s" : ""}
+        </p>
+       </div>
+       <AgentInsightsTable insights={data.agentInsights} />
       </section>
      )}
     </div>
