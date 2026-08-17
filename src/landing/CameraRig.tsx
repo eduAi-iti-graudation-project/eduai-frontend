@@ -19,51 +19,51 @@ const ease = (t: number) => t * t * (3 - 2 * t)
  * gate band reads as the landing settling after the fall.
  */
 export function CameraRig() {
-  const { camera } = useThree()
+ const { camera } = useThree()
 
-  const pos = useRef(new THREE.Vector3())
-  const look = useRef(new THREE.Vector3())
-  const from = useRef(new THREE.Vector3())
-  const to = useRef(new THREE.Vector3())
+ const pos = useRef(new THREE.Vector3())
+ const look = useRef(new THREE.Vector3())
+ const from = useRef(new THREE.Vector3())
+ const to = useRef(new THREE.Vector3())
 
-  useFrame(() => {
-    const global = scrollState.value
-    const band = bandAt(global)
+ useFrame(() => {
+  const global = scrollState.value
+  const band = bandAt(global)
 
-    if (band === 0) {
-      pos.current.copy(heroState.pos).add(SCENE_CAM_POS[0])
-      look.current.copy(heroState.pos).add(SCENE_CAM_TARGET[0])
-    } else {
-      const p = localProgress(global, band)
-      const blend = ease(Math.min(1, Math.max(0, p / 0.3)))
-      from.current.copy(heroState.pos).add(SCENE_CAM_POS[band - 1])
-      to.current.copy(heroState.pos).add(SCENE_CAM_POS[band])
-      pos.current.lerpVectors(from.current, to.current, blend)
-      from.current.copy(heroState.pos).add(SCENE_CAM_TARGET[band - 1])
-      to.current.copy(heroState.pos).add(SCENE_CAM_TARGET[band])
-      look.current.lerpVectors(from.current, to.current, blend)
-    }
+  if (band === 0) {
+   pos.current.copy(heroState.pos).add(SCENE_CAM_POS[0])
+   look.current.copy(heroState.pos).add(SCENE_CAM_TARGET[0])
+  } else {
+   const p = localProgress(global, band)
+   const blend = ease(Math.min(1, Math.max(0, p / 0.3)))
+   from.current.copy(heroState.pos).add(SCENE_CAM_POS[band - 1])
+   to.current.copy(heroState.pos).add(SCENE_CAM_POS[band])
+   pos.current.lerpVectors(from.current, to.current, blend)
+   from.current.copy(heroState.pos).add(SCENE_CAM_TARGET[band - 1])
+   to.current.copy(heroState.pos).add(SCENE_CAM_TARGET[band])
+   look.current.lerpVectors(from.current, to.current, blend)
+  }
 
-    // landing settle on the gate band: one soft dip, then recover
-    const s2 = localProgress(global, 2)
-    const t = Math.min(1, Math.max(0, s2 / 0.25))
-    if (t > 0 && t < 1) {
-      pos.current.y -= 0.5 * Math.sin(Math.PI * t) * (1 - 0.35 * t)
-    }
+  // landing settle on the gate band: one soft dip, then recover
+  const s2 = localProgress(global, 2)
+  const t = Math.min(1, Math.max(0, s2 / 0.25))
+  if (t > 0 && t < 1) {
+   pos.current.y -= 0.5 * Math.sin(Math.PI * t) * (1 - 0.35 * t)
+  }
 
-    // fall into the pricing finale: start high above the sky and swoop down
-    // through the first third of band 9 — the tiers fade in only after the drop
-    if (band === 9) {
-      const s9 = localProgress(global, 9)
-      const drop = ease(Math.min(1, Math.max(0, s9 / 0.35)))
-      pos.current.y += (1 - drop) * 1.7
-      look.current.y += (1 - drop) * 1.15
-    }
+// fall into the pricing finale: start high above the sky and swoop down
+  // through the first third of band 9 — the tiers fade in only after the drop
+  if (band === 9) {
+   const s9 = localProgress(global, 9)
+   const drop = ease(Math.min(1, Math.max(0, s9 / 0.35)))
+   pos.current.y += (1 - drop) * 1.7
+   look.current.y += (1 - drop) * 1.15
+  }
 
-    camera.position.copy(pos.current)
-    camera.lookAt(look.current)
-    viewState.camera = camera
-  }, 2)
+  camera.position.copy(pos.current)
+  camera.lookAt(look.current)
+  viewState.camera = camera
+ }, 2)
 
-  return null
+ return null
 }

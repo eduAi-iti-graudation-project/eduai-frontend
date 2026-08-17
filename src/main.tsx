@@ -9,26 +9,26 @@ import './index.css'
 import App from './App.tsx'
 
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5,
-      retry: 1,
-    },
+ defaultOptions: {
+  queries: {
+   staleTime: 1000 * 60 * 5,
+   retry: 1,
   },
+ },
 })
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BillingProvider>
-          <OperationsProvider>
-            <TooltipProvider>
-              <App />
-            </TooltipProvider>
-          </OperationsProvider>
-        </BillingProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </StrictMode>,
+ <StrictMode>
+  <QueryClientProvider client={queryClient}>
+   <AuthProvider>
+    <BillingProvider>
+     <OperationsProvider>
+      <TooltipProvider>
+       <App />
+      </TooltipProvider>
+     </OperationsProvider>
+    </BillingProvider>
+   </AuthProvider>
+  </QueryClientProvider>
+ </StrictMode>,
 )

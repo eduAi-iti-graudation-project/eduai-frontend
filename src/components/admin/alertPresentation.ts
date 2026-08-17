@@ -10,29 +10,29 @@ const ALERT_META: Record<string, AlertMeta> = {
   FAILING: {
     title: "Risk of failing",
     icon: "trending_down",
-    iconChip: "bg-[#ffdad6] text-[#93000a]",
+    iconChip: "bg-error-container text-on-error-container",
   },
   DOWNWARD_TREND: {
     title: "Declining performance",
     icon: "trending_down",
-    iconChip: "bg-[#fef3c7] text-[#78350f]",
+    iconChip: "bg-secondary-fixed text-on-secondary-fixed-variant",
   },
   CONSISTENT_STRUGGLE: {
     title: "Struggling to keep up",
     icon: "repeat",
-    iconChip: "bg-[#ffdad6] text-[#93000a]",
+    iconChip: "bg-error-container text-on-error-container",
   },
   WEAK_CRITERION: {
     title: "Weak in key skills",
     icon: "track_changes",
-    iconChip: "bg-[#dcfce7] text-[#14532d]",
+    iconChip: "bg-success-container text-on-success-container",
   },
 }
 
 const FALLBACK_META: AlertMeta = {
   title: "Flagged",
   icon: "warning",
-  iconChip: "bg-[#fef3c7] text-[#78350f]",
+  iconChip: "bg-secondary-fixed text-on-secondary-fixed-variant",
 }
 
 export function alertMeta(type: string): AlertMeta {
@@ -46,9 +46,9 @@ export function alertMeta(type: string): AlertMeta {
 }
 
 export function severityChipClass(severity: AlertListItem["severity"] | string | null | undefined): string {
-  if (severity === "HIGH") return "bg-[#ffdad6] text-[#93000a]"
-  if (severity === "MEDIUM") return "bg-[#fef3c7] text-[#78350f]"
-  return "bg-[#dde1fd] text-[#41465c]"
+  if (severity === "HIGH") return "bg-error-container text-on-error-container"
+  if (severity === "MEDIUM") return "bg-secondary-fixed text-on-secondary-fixed-variant"
+  return "bg-primary-fixed text-on-surface-variant"
 }
 
 export function severityLabel(severity: AlertListItem["severity"] | string | null | undefined): string {

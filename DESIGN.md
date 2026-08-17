@@ -1,279 +1,157 @@
 ---
-name: EduAI Playground — Crayon Box
+name: SugarScript Learning
 colors:
-  surface: '#fff8fb'
-  surface-dim: '#f0cfe0'
-  surface-bright: '#fff8fb'
+  surface: '#faf9f8'
+  surface-dim: '#dadad9'
+  surface-bright: '#faf9f8'
   surface-container-lowest: '#ffffff'
-  surface-container-low: '#fdf2f8'
-  surface-container: '#fbe7f2'
-  surface-container-high: '#f9dceb'
-  surface-container-highest: '#f6d1e4'
-  on-surface: '#35122b'
-  on-surface-variant: '#7c4a63'
-  inverse-surface: '#4a0d3f'
-  inverse-on-surface: '#fdeef6'
-  outline: '#96707e'
-  outline-variant: '#d8b6c8'
-  surface-tint: '#db2777'
-  primary: '#db2777'
+  surface-container-low: '#f4f3f2'
+  surface-container: '#eeeeed'
+  surface-container-high: '#e9e8e7'
+  surface-container-highest: '#e3e2e1'
+  on-surface: '#1a1c1c'
+  on-surface-variant: '#544249'
+  inverse-surface: '#2f3130'
+  inverse-on-surface: '#f1f0f0'
+  outline: '#87717a'
+  outline-variant: '#dac0c9'
+  surface-tint: '#a43073'
+  primary: '#a43073'
   on-primary: '#ffffff'
-  primary-container: '#fce7f3'
-  on-primary-container: '#9d174d'
-  inverse-primary: '#f9a8d4'
-  secondary: '#0284c7'
+  primary-container: '#f472b6'
+  on-primary-container: '#6d0047'
+  inverse-primary: '#ffafd3'
+  secondary: '#00668a'
   on-secondary: '#ffffff'
-  secondary-container: '#e0f2fe'
-  on-secondary-container: '#075985'
-  success: '#16a34a'
-  on-success: '#ffffff'
-  success-container: '#dcfce7'
-  on-success-container: '#14532d'
-  warning: '#d97706'
-  on-warning: '#ffffff'
-  warning-container: '#fef3c7'
-  on-warning-container: '#78350f'
-  error: '#e11d48'
+  secondary-container: '#40c2fd'
+  on-secondary-container: '#004d6a'
+  tertiary: '#006c4b'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#00b580'
+  on-tertiary-container: '#003f2a'
+  error: '#ba1a1a'
   on-error: '#ffffff'
-  error-container: '#ffe4e6'
-  on-error-container: '#9f1239'
-  primary-fixed: '#fce7f3'
-  primary-fixed-dim: '#f9a8d4'
-  on-primary-fixed: '#5b0d35'
-  on-primary-fixed-variant: '#a11057'
-  secondary-fixed: '#e0f2fe'
-  secondary-fixed-dim: '#bae6fd'
-  on-secondary-fixed: '#082f49'
-  on-secondary-fixed-variant: '#075985'
-  background: '#fff8fb'
-  on-background: '#35122b'
-  surface-variant: '#f6d1e4'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#ffd8e7'
+  primary-fixed-dim: '#ffafd3'
+  on-primary-fixed: '#3d0026'
+  on-primary-fixed-variant: '#85145a'
+  secondary-fixed: '#c4e7ff'
+  secondary-fixed-dim: '#7bd0ff'
+  on-secondary-fixed: '#001e2c'
+  on-secondary-fixed-variant: '#004c69'
+  tertiary-fixed: '#68fcbf'
+  tertiary-fixed-dim: '#45dfa4'
+  on-tertiary-fixed: '#002114'
+  on-tertiary-fixed-variant: '#005137'
+  background: '#faf9f8'
+  on-background: '#1a1c1c'
+  surface-variant: '#e3e2e1'
 typography:
-  headline-xl:
+  display-lg:
     fontFamily: Quicksand
-    fontSize: 36px
+    fontSize: 48px
     fontWeight: '700'
-    lineHeight: 44px
-    letterSpacing: -0.01em
-  headline-lg:
+    lineHeight: 56px
+    letterSpacing: -0.02em
+  display-lg-mobile:
     fontFamily: Quicksand
-    fontSize: 24px
+    fontSize: 32px
     fontWeight: '700'
-    lineHeight: 32px
+    lineHeight: 40px
     letterSpacing: -0.01em
   headline-md:
     fontFamily: Quicksand
-    fontSize: 20px
+    fontSize: 24px
     fontWeight: '600'
+    lineHeight: 32px
+  body-lg:
+    fontFamily: Quicksand
+    fontSize: 18px
+    fontWeight: '500'
     lineHeight: 28px
-  headline-sm:
+  body-md:
     fontFamily: Quicksand
     fontSize: 16px
-    fontWeight: '600'
+    fontWeight: '500'
     lineHeight: 24px
-  body-lg:
-    fontFamily: Inter
-    fontSize: 16px
-    fontWeight: '400'
-    lineHeight: 24px
-  body-md:
-    fontFamily: Inter
-    fontSize: 14px
-    fontWeight: '400'
-    lineHeight: 20px
-  body-sm:
-    fontFamily: Inter
-    fontSize: 13px
-    fontWeight: '400'
-    lineHeight: 18px
-  body-xs:
-    fontFamily: Inter
-    fontSize: 12px
-    fontWeight: '400'
-    lineHeight: 16px
-  number-md:
-    fontFamily: Inter
-    fontSize: 22px
-    fontWeight: '700'
-    lineHeight: 28px
-    letterSpacing: -0.01em
-  number-lg:
-    fontFamily: Inter
-    fontSize: 32px
-    fontWeight: '700'
-    lineHeight: 36px
-    letterSpacing: -0.02em
-  label-md:
-    fontFamily: Inter
-    fontSize: 12px
-    fontWeight: '600'
-    lineHeight: 16px
-    letterSpacing: 0.02em
   label-sm:
-    fontFamily: Inter
-    fontSize: 11px
-    fontWeight: '500'
-    lineHeight: 14px
-    letterSpacing: 0.01em
-  mono-md:
-    fontFamily: 'JetBrains Mono'
-    fontSize: 13px
-    fontWeight: '500'
-    lineHeight: 18px
-fixed-layout:
-  sidebar-width: 256px
-  sidebar-bg: '#4a0d3f'
-  topbar-height: 64px
-  content-max-width: 1600px
-  page-margin: 24px
-  gutter: 16px
-  card-padding: 20px
-  table-row-height: 44px
-  table-header-height: 36px
-spacing:
-  stack-xs: 2px
-  stack-sm: 4px
-  stack-md: 8px
-  stack-lg: 12px
-  stack-lg2: 16px
-  stack-xl: 24px
-  stack-2xl: 32px
+    fontFamily: Quicksand
+    fontSize: 14px
+    fontWeight: '600'
+    lineHeight: 20px
+    letterSpacing: 0.02em
 rounded:
-  sm: 0.375rem
-  DEFAULT: 0.5rem
-  md: 0.625rem
-  lg: 0.75rem
-  xl: 1rem
+  sm: 0.5rem
+  DEFAULT: 1rem
+  md: 1.5rem
+  lg: 2rem
+  xl: 3rem
   full: 9999px
-elevation:
-  card: '0 1px 2px rgba(53,18,43,0.04), 0 6px 18px rgba(219,39,119,0.08)'
-  hover: '0 2px 4px rgba(53,18,43,0.06), 0 10px 28px rgba(219,39,119,0.13)'
-  floating: '0 4px 12px rgba(53,18,43,0.08), 0 16px 40px rgba(219,39,119,0.18)'
+spacing:
+  unit: 8px
+  container-max: 1200px
+  gutter: 24px
+  margin-mobile: 20px
+  margin-desktop: 40px
 ---
 
-# EduAI Playground — Crayon Box Design System
+## Brand & Style
 
-A **warm, friendly, colorful** school app for every role — students, teachers,
-guardians, and admins. The aesthetic is "Crayon Box": a fresh page of
-school supplies. A bold magenta-pink primary (`#db2777`) partners with a
-sky-blue secondary (`#0284c7`) for a cheerful two-tone base, while the status
-colors, chips, and charts borrow from a full crayon box (sky, sunshine,
-mint, coral, violet). Surfaces stay clean and warm-white so dense data stays
-legible — color lives in the stickers: chips, icon tiles, buttons, and charts.
-Body copy and tabular numbers remain in Inter.
+The design system is built on a foundation of **Creative Pastel** aesthetics, specifically tailored to evoke an encouraging, kind, and creative emotional response. The personality is optimistic and playful, reducing the friction of learning through a gentle visual language.
 
-## 1. Brand & Mood
-- **Scale & Sentiment**: approachable, encouraging, alive — like a favorite
-  classroom: colorful but organized. Rounded shapes, soft colored shadows,
-  sticker-like chips, warm pastel tints. Playful, never childish.
-- **Reference energy**: modern edtech (Duolingo polish, ClassDojo warmth) with
-  the density of a real school-ops tool. Think "fresh notebooks + full crayon
-  box on a clean desk".
-- **Persona**: a student who checks grades without dread, a teacher who scans
-  their day in one glance, a guardian who feels reassured.
+The style blends **Minimalism** with **Tactile** elements. It prioritizes heavy whitespace and a restricted, soft palette to maintain focus, while using "squishy" pill-shaped elements and soft, organic depth to make the interface feel approachable and physically friendly. It avoids sharp edges and aggressive transitions in favor of a fluid, safe-feeling environment.
 
-## 2. Color Strategy
-- **Foundation**: clean warm-white `#fff8fb` pages, pure-white cards separated by
-  visible `1px` blush-pink outlines (`#d8b6c8`) and gentle magenta-tinted shadows.
-  The page stays calm — the crayons do the talking.
-- **Two-tone brand base**: magenta-pink primary `#db2777` + sky-blue secondary
-  `#0284c7`. Primary drives buttons, active nav, links, focus rings, selected
-  rows. Secondary appears in secondary actions, information, and curriculum
-  surfaces — so the app never reads as all-pink.
-- **Sidebar / dark chrome**: deep plum `#4a0d3f`. Active nav = magenta
-  `#db2777` pill with white text OR left 3px rail + `rgba(255,255,255,0.08)` tint.
-- **Crayon status containers** (fill + ink pairs — use together, never tone-on-tone):
-  - Pink `#fce7f3` / `#9d174d` — the "AI / insight" family
-  - Sky `#e0f2fe` / `#075985` — information & curriculum (secondary)
-  - Mint `#dcfce7` / `#14532d` — success, positive trends
-  - Amber `#fef3c7` / `#78350f` — warnings, in-progress
-  - Rose `#ffe4e6` / `#9f1239` — errors, at-risk
-- **Crayon box** (charts & data-viz, always label directly):
-  `#db2777, #0ea5e9, #f59e0b, #10b981, #8b5cf6, #f43f5e, #38bdf8, #f97316` —
-  magenta, sky, sunshine, mint, violet, coral, light-sky, orange.
-- **Never** use color alone when it is the only signal — add labels, icons, or
-  value text.
+## Colors
 
-## 3. Typography
-- **Quicksand** for all headlines — the playful, rounded display face already
-  loaded in the app (weights 400–700). Use 600/700, tight tracking.
-- **Inter** for everything else: body copy, tables, inputs, labels, tabular
-  numbers. Dense screens stay scannable.
-- Hierarchy:
-  - Page title: `36px/700` Quicksand.
-  - Card title: `14px/600` Inter with a small gray kicker when needed.
-  - Stat number: `22px/700` tabular; large hero numbers `32px/700`.
-  - Body: `14px` default; `13px` secondary metadata; `12px` table subtitles.
-- Metric numbers use `font-variant-numeric: tabular-nums` to avoid jitter.
+The color palette is designed to be soothing yet vibrant enough to maintain engagement. 
 
-## 4. Density & Layout System
-- **Base grid**: 8px. Page gutter 24px, inter-card 16px, card padding 20px.
-- **Content width**: max `1600px` centered.
-- **Tables**: row height 44px (dense 40px), header 36px with `11px` uppercase
-  gray labels, horizontal 1px dividers, hover wash `#f6f2ff`, numeric columns
-  right-aligned with tabular nums.
-- **Avatar**: `32px` circle with initial (magenta on `#fce7f3`), `44px` on profile
-  heads.
-- **Structure: lines & separators (anchor, don't float)**: structure comes from
-  lines, not extra shadow. Every card carries a visible `1px` outline (`#d8b6c8`).
-  Stacked lists use hairline `divide-y` dividers between rows; section headers get
-  a `1px` bottom rule (header bar separated from body); connected stat rows use
-  `divide-x` vertical separators instead of separate floating cards; tables always
-  show clear row lines and a header rule. Borders and dividers share the same
-  `#d8b6c8` line token so panels read as anchored, never floating.
+- **Primary (Soft Pink):** Used for main actions, progress indicators, and celebratory moments. It represents the "heart" of the learning experience.
+- **Secondary (Sky Blue):** Used for informational accents, secondary navigation, and calm interactions.
+- **Tertiary (Mint Green):** Reserved for success states, "correct" feedback, and growth-related metaphors.
+- **Neutral (Off-White):** A soft `#FDFCFB` background replaces pure white to reduce eye strain and provide a warmer, "paper-like" feel for the pastel elements to sit upon.
 
-## 5. Components
-- **Card**: white, `rounded-2xl`, visible `1px` blush-pink outline (`#d8b6c8`) plus
-  soft magenta-tinted elevation (`0 6px 18px rgba(219,39,119,0.08)`). Panels are
-  anchored by their outline, not floating. Hover lifts 1px with a warmer shadow.
-- **Button**: `rounded-xl`, height 40px, `700` weight. Primary = magenta-pink
-  `#db2777`; secondary = sky blue `#0284c7`; outline = 1px blush-pink border;
-  ghost for quiet actions.
-- **Input / Select / Textarea**: `rounded-xl`, 1px blush-pink border, magenta focus
-  ring (`#ec4899`, 2px + offset).
-- **Sticker chip / StatusBadge**: pill-shaped (`rounded-full`), 11px uppercase
-  label, crayon fill + ink pairs from §2. Never bordered — they read as
-  stickers stuck on the page, not bordered tags.
-- **Icon tile**: rounded-squircle (28px, `rounded-xl`), crayon-tinted bg + ink
-  icon — the playful avatar of each stat card. Magenta for primary stats, sky
-  for info, mint for positive, amber for in-progress, rose for at-risk.
-- **Insight/AI card**: header (AI icon, "AI", title), 2–3 lines of analysis,
-  soft gradient border-left `2px` magenta/amber, footer "Ask AI" affordance.
-  Use hedged language: "Likely", "Trend suggests", "Review".
-- **Callout / alert banner**: left 3px accent rail, crayon container bg, title +
-  message + action.
-- **Empty/Error**: centered 120px doodle-style glyph + 16px Quicksand title +
-  13px Inter description + primary ghost action. Doodles are simple line
-  drawings (book, pencil, magnifier) — hand-drawn warmth without animation.
-- **Highlighter accent**: key headlines get a 2px warm underline
-  (`rgba(245,158,11,0.35)`) — like a yellow highlighter stroke, sparingly.
+Text should primarily use a deep charcoal gray rather than pure black to maintain the gentle contrast levels of the system.
 
-## 6. Role surfaces
-- **Dashboard**: playful stat cards with crayon icon tiles (squircle 28px,
-  tinted bg), delta pill (▲/▼), mini sparkline; the "What to watch" AI
-  narrative card in pink. Alternate icon-tile hues across the stat row so the
-  board reads like a row of crayons.
-- **People/roster**: two-pane master/detail. Identity card → key stats → grades
-  by class → attendance drill → alerts → AI brief.
-- **AI Assistant**: three-column (entity picker / conversation / composer),
-  replies as rounded cards, structured payloads in bordered blocks.
-- Every entity surface ends with an **"Ask AI" affordance**.
+## Typography
 
-## 7. Charts & Data-viz
-- Prefer SVG built-ins; 8px stroke; 12px labels; grey grid (no vertical lines).
-- Crayon box colors from §2, drawn in series order. Line/area for trends, bar
-  for comparisons, donut for parts-of-whole, radar for skill gaps. Include
-  min/max value labels on line endpoints.
-- Interactive tooltips with name + value + delta.
+This design system uses **Quicksand** exclusively across all levels to reinforce the rounded, friendly personality. 
 
-## 8. Navigation & Shell
-- Sidebar groups: **Overview** (Dashboard, Insights), **People**, **Academic**,
-  **Operations**. Active = magenta tint + primary text + 3px magenta rail.
-- Topbar: breadcrumb/title left, search center, notification bell + avatar right.
-- No clutter: hide secondary items behind "More".
+- **Headlines:** Use heavier weights (Bold/SemiBold) with slightly tighter letter spacing to create a sense of "gravity" and playfulness.
+- **Body Text:** Set at Medium weight. Quicksand's naturally large x-height ensures legibility even at smaller sizes, but we prioritize generous line heights (1.5x or greater) to keep the layout feeling airy.
+- **Mobile Scaling:** Large display titles scale down aggressively on mobile to prevent awkward line breaks, ensuring the "softness" of the layout is preserved on small screens.
 
-## 9. Motion & Interactions
-- 120–200ms ease transitions on hover/focus; playful micro-bounces for badges
-  and confirmation states (scale 1.04 → 1 on success).
-- Sparklines draw on mount (200ms). Card hover: lift 1px + shadow warm-up 0.2s.
-- Respect `prefers-reduced-motion`.
+## Layout & Spacing
+
+The layout follows a **fluid grid** model with a "bubbly" spacing rhythm. Elements are spaced generously to avoid a cluttered or "taxing" look.
+
+- **Grid:** A 12-column system is used for desktop, 6 for tablet, and 2 for mobile. 
+- **Rhythm:** Spacing follows an 8px base unit. Internal padding within cards and containers should lean toward the larger end (e.g., 32px or 40px) to maintain the airy, low-density aesthetic.
+- **Safe Areas:** Large outer margins ensure the content feels centered and important, like a focused workspace or an open book.
+
+## Elevation & Depth
+
+This design system uses **Ambient Shadows** and **Tonal Layers** to create a soft, tactile feel.
+
+- **Shadows:** Avoid harsh, black shadows. Use extremely diffused, high-blur shadows tinted with a hint of the primary or secondary color (e.g., a soft pink-tinted shadow for a pink button). This creates a "glow" effect rather than a traditional drop shadow.
+- **Layers:** Use subtle shifts in background color (e.g., from Off-White to a very light Sky Blue) to define different sections without the need for hard lines.
+- **Interaction:** On hover or active states, elements should appear to "squish" (slight scale down) or "float" higher (increased shadow blur and spread).
+
+## Shapes
+
+The shape language is fundamentally **Pill-shaped** and **Organic**.
+
+- **Small Elements:** Buttons, chips, and tags must use full 999px (pill) rounding.
+- **Large Elements:** Cards and containers use a consistent `rounded-xl` setting (24px to 32px) to ensure they feel soft but structured.
+- **Organic Accents:** Use "blob" shapes as background decorations. These should be asymmetrical and hand-drawn in appearance, utilizing the pastel palette at 10-20% opacity.
+
+## Components
+
+- **Buttons:** Large, pill-shaped, and bouncy. Primary buttons use Soft Pink with white text. Secondary buttons use a thick 2px Sky Blue border with Sky Blue text.
+- **Cards:** 24px corner radius, white background, and a soft primary-tinted ambient shadow. No borders.
+- **Input Fields:** Pill-shaped with a soft Sky Blue border that thickens slightly on focus. Placeholder text is a light gray-blue.
+- **Chips/Badges:** Full pill rounding. Use Tertiary (Mint Green) for progress-related badges or "lesson complete" indicators.
+- **Lists:** Items are housed in individual soft-cornered containers rather than a single list with dividers. Each item should feel like its own "module."
+- **Progress Bars:** Thick (12px height), fully rounded tracks. The unfilled portion should be a very pale version of the filled color, never gray.
+- **Checkboxes/Radios:** Oversized and circular. When selected, they should "pop" with a scale-up animation and fill with the Primary color.

@@ -13,11 +13,11 @@ import { EffectComposer, ChromaticAberration, Noise, Vignette } from "@react-thr
  *   · Vignette — darkens frame corners, keeps the eye on the story center
  */
 export function PostFX() {
-  return (
-    <EffectComposer multisampling={0}>
-      <ChromaticAberration offset={new THREE.Vector2(0.0006, 0.0006)} />
-      <Noise premultiply blendFunction={BlendFunction.OVERLAY} opacity={0.28} />
-      <Vignette eskil={false} offset={0.28} darkness={0.5} />
-    </EffectComposer>
-  )
+ return (
+  <EffectComposer multisampling={0}>
+   <ChromaticAberration offset={new THREE.Vector2(0.0006, 0.0006)} />
+   <Noise premultiply blendFunction={BlendFunction.OVERLAY} opacity={0.28} />
+   <Vignette eskil={false} offset={0.28} darkness={0.5} />
+  </EffectComposer>
+ )
 }

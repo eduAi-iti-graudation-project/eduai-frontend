@@ -36,8 +36,8 @@ function ReviewFlagsPanel({
   isTemplate: boolean
 }) {
   return (
-    <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-      <p className="font-label-lg text-label-lg text-red-700 flex items-center gap-2">
+    <div className="rounded-lg border border-danger/30 bg-danger/10 p-4">
+      <p className="font-label-lg text-label-lg text-danger flex items-center gap-2">
         <span className="material-symbols-outlined text-[18px]">shield_moon</span>
         {isTemplate
           ? "The AI generation pipeline failed"
@@ -45,15 +45,15 @@ function ReviewFlagsPanel({
       </p>
       <ul className="mt-2 space-y-1">
         {flags.map((flag, index) => (
-          <li key={index} className="font-body-sm text-body-sm text-red-600 list-disc ml-5">
+          <li key={index} className="font-body-sm text-body-sm text-danger list-disc ml-5">
             {flag}
           </li>
         ))}
       </ul>
       {reasoning ? (
-        <p className="font-body-sm text-body-sm text-red-500 mt-2">{reasoning}</p>
+        <p className="font-body-sm text-body-sm text-danger mt-2">{reasoning}</p>
       ) : null}
-      <p className="font-body-sm text-body-sm text-red-500 mt-3">
+      <p className="font-body-sm text-body-sm text-danger mt-3">
         {isTemplate
           ? "The lab content was never built. You can reject it, refine it with change requests, or regenerate it fresh."
           : "Flagged code is never shown to students. You can refine it with change requests, regenerate it fresh, or verify the flagged points yourself and publish it anyway."}
@@ -290,7 +290,7 @@ export function LabDetailPage() {
           )}
           <Button
             variant="ghost"
-            className="text-red-600 hover:text-red-700"
+            className="text-danger hover:text-danger/80"
             onClick={() => setConfirmDelete(true)}
             disabled={removeLab.isPending}
           >

@@ -1,8 +1,7 @@
 import { useState } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useSearchParams, Link } from "react-router-dom"
 import { useClassDetail } from "@/hooks/use-classes"
 import { useImportAttendance } from "@/hooks/use-attendance"
-import { BackLink } from "@/components/shared/BackLink"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
@@ -11,125 +10,128 @@ import { Input } from "@/components/ui/input"
 type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED"
 
 const STATUS_OPTIONS: { value: AttendanceStatus; label: string; color: string }[] = [
-  { value: "PRESENT", label: "Present", color: "bg-green-100 text-green-700 border-green-300" },
-  { value: "ABSENT", label: "Absent", color: "bg-accent text-foreground border-accent" },
-  { value: "LATE", label: "Late", color: "bg-surface-container-high text-on-surface border-surface-container-high" },
-  { value: "EXCUSED", label: "Excused", color: "bg-gray-100 text-gray-700 border-gray-300" },
+ { value: "PRESENT", label: "Present", color: "bg-success/15 text-success border-success/40" },
+ { value: "ABSENT", label: "Absent", color: "bg-accent text-foreground border-accent" },
+ { value: "LATE", label: "Late", color: "bg-surface-container-high text-on-surface border-surface-container-high" },
+ { value: "EXCUSED", label: "Excused", color: "bg-surface-container-low text-on-surface-variant border-outline-variant" },
 ]
 
 export function AttendanceImportPage() {
-  const [searchParams] = useSearchParams()
-  const classIdParam = searchParams.get("classId") ?? ""
-  const [selectedClassId, setSelectedClassId] = useState(classIdParam)
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0])
+ const [searchParams] = useSearchParams()
+ const classIdParam = searchParams.get("classId") ?? ""
+ const [selectedClassId, setSelectedClassId] = useState(classIdParam)
+ const [date, setDate] = useState(new Date().toISOString().split("T")[0])
 
-  const actualClassId = classIdParam || selectedClassId
-  const { detail, isLoading } = useClassDetail(actualClassId)
-  const importAttendance = useImportAttendance()
+ const actualClassId = classIdParam || selectedClassId
+ const { detail, isLoading } = useClassDetail(actualClassId)
+ const importAttendance = useImportAttendance()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const students = detail.data ? (detail.data as any).enrollments?.map((e: any) => e.student) ?? [] : []
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ const students = detail.data ? (detail.data as any).enrollments?.map((e: any) => e.student) ?? [] : []
 
-  const [records, setRecords] = useState<Record<string, AttendanceStatus>>({})
+ const [records, setRecords] = useState<Record<string, AttendanceStatus>>({})
 
-  const setStatus = (studentId: string, status: AttendanceStatus) => {
-    setRecords((prev) => ({ ...prev, [studentId]: status }))
-  }
+ const setStatus = (studentId: string, status: AttendanceStatus) => {
+  setRecords((prev) => ({ ...prev, [studentId]: status }))
+ }
 
-  const handleSubmit = async () => {
-    const entries = Object.entries(records)
-    if (entries.length === 0) return
+ const handleSubmit = async () => {
+  const entries = Object.entries(records)
+  if (entries.length === 0) return
 
-    const payload = entries.map(([studentId, status]) => ({
-      studentId,
-      classId: actualClassId,
-      date,
-      status,
-    }))
+  const payload = entries.map(([studentId, status]) => ({
+   studentId,
+   classId: actualClassId,
+   date,
+   status,
+  }))
 
-    await importAttendance.mutateAsync(payload)
-    setRecords({})
-  }
+  await importAttendance.mutateAsync(payload)
+  setRecords({})
+ }
 
-  const selectedCount = Object.keys(records).length
+ const selectedCount = Object.keys(records).length
 
-  return (
-    <div className="flex-1 p-xl max-w-4xl mx-auto w-full">
-      <BackLink to={classIdParam ? `/classes/${classIdParam}` : "/classes"} label="Back to Class" className="mb-md" />
+ return (
+  <div className="flex-1 p-xl max-w-4xl mx-auto w-full">
+   <Link to={classIdParam ? `/classes/${classIdParam}` : "/classes"} className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors mb-md">
+    <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+    Back to Class
+   </Link>
 
-      <h1 className="font-headline-xl text-headline-xl text-on-surface mb-xl border-b border-border pb-3">Import Attendance</h1>
+   <h1 className="font-headline-xl text-headline-xl text-primary mb-xl">Import Attendance</h1>
 
-      <div className="bg-surface-container-lowest rounded-lg p-xl border border-outline-variant mb-xl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-md mb-lg">
-          {!classIdParam && (
-            <div>
-              <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Class</label>
-              <Input
-                value={selectedClassId}
-                onChange={(e) => setSelectedClassId(e.target.value)}
-                placeholder="Class ID..."
-                className="w-full h-auto rounded-lg border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
-              />
-            </div>
-          )}
-          <div>
-            <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Date</label>
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full h-auto rounded-lg border border-outline-variant bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
-            />
-          </div>
-        </div>
-
-        {!actualClassId ? (
-          <EmptyState icon="calendar_month" title="Select a class" description="Choose a class to mark attendance." />
-        ) : isLoading ? (
-          <LoadingState className="py-lg" />
-        ) : students.length === 0 ? (
-          <EmptyState icon="group" title="No students enrolled" description="Add students to the class before importing attendance." />
-        ) : (
-          <>
-            <p className="font-label-md text-label-md text-primary mb-md">{students.length} students</p>
-            <div className="space-y-sm max-h-[500px] overflow-y-auto">
-              {students.map((s: { id: string; name: string }) => (
-                <div key={s.id} className="flex items-center justify-between p-sm rounded-lg bg-surface-container hover:bg-surface-container-low transition-colors">
-                  <span className="font-label-md text-label-md text-on-surface">{s.name}</span>
-                  <div className="flex gap-1">
-                    {STATUS_OPTIONS.map((opt) => (
-                      <Button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => setStatus(s.id, opt.value)}
-                        className={`px-3 py-1 h-auto rounded-lg font-label-sm text-label-sm border transition-all ${
-                          records[s.id] === opt.value
-                            ? `${opt.color} border-2 font-semibold`
-                            : "border-outline-variant text-on-surface-variant hover:border-primary-container"
-                        }`}
-                      >
-                        {opt.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-between mt-lg pt-lg border-t border-outline-variant">
-              <span className="font-label-md text-label-md text-on-surface-variant">{selectedCount} student{selectedCount !== 1 ? "s" : ""} marked</span>
-              <Button
-                type="button"
-                onClick={handleSubmit}
-                disabled={selectedCount === 0 || importAttendance.isPending}
-                className="px-lg h-auto py-sm bg-primary text-primary-foreground font-label-md text-label-md rounded-lg nudge-hover disabled:opacity-50"
-              >
-                {importAttendance.isPending ? "Importing..." : `Import Attendance (${selectedCount})`}
-              </Button>
-            </div>
-          </>
-        )}
+   <div className="bg-surface-container-lowest rounded-lg p-xl mb-xl">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-md mb-lg">
+     {!classIdParam && (
+      <div>
+       <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Class</label>
+       <Input
+        value={selectedClassId}
+        onChange={(e) => setSelectedClassId(e.target.value)}
+        placeholder="Class ID..."
+        className="w-full h-auto rounded-lg bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
+       />
       </div>
+     )}
+     <div>
+      <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Date</label>
+      <Input
+       type="date"
+       value={date}
+       onChange={(e) => setDate(e.target.value)}
+       className="w-full h-auto rounded-lg bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
+      />
+     </div>
     </div>
-  )
+
+    {!actualClassId ? (
+     <EmptyState icon="calendar_month" title="Select a class" description="Choose a class to mark attendance." />
+    ) : isLoading ? (
+     <LoadingState className="py-lg" />
+    ) : students.length === 0 ? (
+     <EmptyState icon="group" title="No students enrolled" description="Add students to the class before importing attendance." />
+    ) : (
+     <>
+      <p className="font-label-md text-label-md text-primary mb-md">{students.length} students</p>
+      <div className="space-y-sm max-h-[500px] overflow-y-auto">
+       {students.map((s: { id: string; name: string }) => (
+        <div key={s.id} className="flex items-center justify-between p-sm rounded-lg bg-surface-container hover:bg-surface-container-low transition-colors">
+         <span className="font-label-md text-label-md text-on-surface">{s.name}</span>
+         <div className="flex gap-1">
+          {STATUS_OPTIONS.map((opt) => (
+           <Button
+            key={opt.value}
+            type="button"
+            onClick={() => setStatus(s.id, opt.value)}
+            className={`px-3 py-1 h-auto rounded-lg font-label-sm text-label-sm border transition-all ${
+             records[s.id] === opt.value
+              ? `${opt.color} border-2 font-semibold`
+              : "border-outline-variant text-on-surface-variant hover:border-primary-container"
+            }`}
+           >
+            {opt.label}
+           </Button>
+          ))}
+         </div>
+        </div>
+       ))}
+      </div>
+
+      <div className="flex items-center justify-between mt-lg pt-lg border-t border-outline-variant">
+       <span className="font-label-md text-label-md text-on-surface-variant">{selectedCount} student{selectedCount !== 1 ? "s" : ""} marked</span>
+       <Button
+        type="button"
+        onClick={handleSubmit}
+        disabled={selectedCount === 0 || importAttendance.isPending}
+        className="px-lg h-auto py-sm bg-primary text-primary-foreground font-label-md text-label-md rounded-lg nudge-hover disabled:opacity-50"
+       >
+        {importAttendance.isPending ? "Importing..." : `Import Attendance (${selectedCount})`}
+       </Button>
+      </div>
+     </>
+    )}
+   </div>
+  </div>
+ )
 }

@@ -301,13 +301,13 @@ export function LabsPage() {
                     </p>
                   </div>
                   {lab.status === "PENDING_TEACHER_REVIEW" && lab.reviewApproved && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 px-2 py-0.5 font-label-sm text-label-sm">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-success/10 text-success px-2 py-0.5 font-label-sm text-label-sm">
                       <span className="material-symbols-outlined text-[14px]">verified</span>
                       AI-approved
                     </span>
                   )}
                   {lab.status === "AI_REVIEW_FAILED" && lab.reviewFlags && lab.reviewFlags.flags.length > 0 && (
-                    <span className="font-label-sm text-label-sm text-red-600">{lab.reviewFlags.flags.length} flag(s)</span>
+                    <span className="font-label-sm text-label-sm text-danger">{lab.reviewFlags.flags.length} flag(s)</span>
                   )}
                   <LabStatusChip status={lab.status} />
                   <span className="material-symbols-outlined text-on-surface-variant text-[18px]">chevron_right</span>
@@ -316,7 +316,7 @@ export function LabsPage() {
                   type="button"
                   onClick={() => setDeleteTarget(lab)}
                   aria-label={`Delete lab ${lab.topic}`}
-                  className="flex items-center px-3 text-on-surface-variant hover:text-red-600 transition-colors cursor-pointer"
+                  className="flex items-center px-3 text-on-surface-variant hover:text-danger transition-colors cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">delete</span>
                 </button>

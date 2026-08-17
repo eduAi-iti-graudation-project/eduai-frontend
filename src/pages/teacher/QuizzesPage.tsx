@@ -216,14 +216,14 @@ export function QuizzesPage() {
                 setGenTargets([])
                 setGeneratorOpen(true)
               }}
-              className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md nudge-hover inline-flex items-center gap-1 disabled:opacity-50"
+              className="bg-primary text-primary-foreground px-md h-auto py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
               AI Generate
             </Button>
             <Button
               asChild
-              className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md nudge-hover inline-flex items-center gap-1"
+              className="bg-primary text-primary-foreground px-md h-auto py-sm rounded-full font-label-md nudge-hover inline-flex items-center gap-1"
             >
               <Link to="/quizzes/new">
                 <span className="material-symbols-outlined text-[18px]">add</span>
@@ -240,12 +240,12 @@ export function QuizzesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search quizzes…"
-            className="w-auto min-w-[200px] h-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus"
+            className="w-auto min-w-[200px] h-auto rounded-full border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus"
           />
           <div className="flex flex-col gap-1">
             <label className="font-label-sm text-label-sm text-on-surface-variant">Grade</label>
             <Select value={gradeFilter} onValueChange={(v) => { setGradeFilter(v === ALL ? "" : v); setCourseFilter(""); setSectionFilter("") }}>
-              <SelectTrigger aria-label="Grade" className="w-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
+              <SelectTrigger aria-label="Grade" className="w-auto rounded-full border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
                 <SelectValue placeholder="All grades" />
               </SelectTrigger>
               <SelectContent>
@@ -259,7 +259,7 @@ export function QuizzesPage() {
           <div className="flex flex-col gap-1">
             <label className="font-label-sm text-label-sm text-on-surface-variant">Course</label>
             <Select value={courseFilter} onValueChange={(v) => { setCourseFilter(v === ALL ? "" : v); setSectionFilter("") }} disabled={!gradeFilter}>
-              <SelectTrigger aria-label="Course" className="w-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-50">
+              <SelectTrigger aria-label="Course" className="w-auto rounded-full border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-50">
                 <SelectValue placeholder="All courses" />
               </SelectTrigger>
               <SelectContent>
@@ -273,7 +273,7 @@ export function QuizzesPage() {
           <div className="flex flex-col gap-1">
             <label className="font-label-sm text-label-sm text-on-surface-variant">Section</label>
             <Select value={sectionFilter} onValueChange={(v) => setSectionFilter(v === ALL ? "" : v)} disabled={!courseFilter}>
-              <SelectTrigger aria-label="Section" className="w-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-50">
+              <SelectTrigger aria-label="Section" className="w-auto rounded-full border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-50">
                 <SelectValue placeholder="All sections" />
               </SelectTrigger>
               <SelectContent>
@@ -285,7 +285,7 @@ export function QuizzesPage() {
             </Select>
           </div>
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as QuizStatus | typeof ALL)}>
-            <SelectTrigger className="w-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
+            <SelectTrigger className="w-auto rounded-full border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>
@@ -329,14 +329,14 @@ export function QuizzesPage() {
               <div className="flex gap-md justify-center">
                 <Button
                   asChild
-                  className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md hover:opacity-90 transition-all"
+                  className="bg-primary text-primary-foreground px-md h-auto py-sm rounded-full font-label-md hover:opacity-90 transition-all"
                 >
                   <Link to="/quizzes/new">Create a quiz</Link>
                 </Button>
                 <Button
                   type="button"
                   onClick={() => setGeneratorOpen(true)}
-                  className="bg-primary text-white! px-md h-auto py-sm rounded-md font-label-md hover:opacity-90 transition-all"
+                  className="bg-primary text-primary-foreground px-md h-auto py-sm rounded-full font-label-md hover:opacity-90 transition-all"
                 >
                   Generate with AI
                 </Button>
@@ -414,21 +414,21 @@ export function QuizzesPage() {
                         <>
                           <Button
                             asChild
-                            className="bg-primary text-white! px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover"
+                            className="bg-primary text-primary-foreground px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
                           >
                             <Link to={`/quizzes/${quiz.id}`}>Edit</Link>
                           </Button>
                           <Button
                             type="button"
                             onClick={() => setPublishTarget(quiz)}
-                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover"
+                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
                           >
                             Publish
                           </Button>
                           <Button
                             type="button"
                             onClick={() => setDeleteTarget(quiz)}
-                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
+                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
                           >
                             Delete
                           </Button>
@@ -438,21 +438,21 @@ export function QuizzesPage() {
                         <>
                           <Button
                             asChild
-                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover"
+                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
                           >
                             <Link to={`/quizzes/${quiz.id}/attempts`}>View attempts</Link>
                           </Button>
                           <Button
                             type="button"
                             onClick={() => { setAssignTarget(quiz); setAssignTargets([]) }}
-                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover"
+                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
                           >
                             Reassign
                           </Button>
                           <Button
                             type="button"
                             onClick={() => setCloseTarget(quiz)}
-                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
+                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
                           >
                             Close
                           </Button>
@@ -462,14 +462,14 @@ export function QuizzesPage() {
                         <>
                           <Button
                             asChild
-                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover"
+                            className="border border-primary text-primary bg-transparent px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover"
                           >
                             <Link to={`/quizzes/${quiz.id}/attempts`}>View attempts</Link>
                           </Button>
                           <Button
                             type="button"
                             onClick={() => setDeleteTarget(quiz)}
-                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-md font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
+                            className="border border-outline-variant text-on-surface bg-surface-container-lowest px-4 h-auto py-1.5 rounded-full font-label-md text-label-sm nudge-hover hover:bg-surface-container-high"
                           >
                             Delete
                           </Button>
@@ -516,7 +516,7 @@ export function QuizzesPage() {
           >
             <SelectTrigger
               aria-label="Scope"
-              className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 mb-md"
+              className="w-full rounded-full border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 mb-md"
             >
               <SelectValue placeholder={genCourseId ? "Pick a scope…" : "Pick a class first…"} />
             </SelectTrigger>
@@ -563,7 +563,7 @@ export function QuizzesPage() {
                 key={type}
                 type="button"
                 onClick={() => toggleType(type)}
-                className={`flex items-center gap-2 px-3 py-2 h-auto rounded-md border text-sm font-label-md transition-all ${
+                className={`flex items-center gap-2 px-3 py-2 h-auto rounded-full border text-sm font-label-md transition-all ${
                   genTypes.includes(type)
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-outline-variant bg-surface text-on-surface-variant"
@@ -583,7 +583,7 @@ export function QuizzesPage() {
             onValueChange={(v) => setGenDifficulty(v as QuizDifficulty)}
             disabled={generateQuiz.isPending}
           >
-            <SelectTrigger aria-label="Difficulty" className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 mb-md">
+            <SelectTrigger aria-label="Difficulty" className="w-full rounded-full border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus disabled:opacity-60 mb-md">
               <SelectValue placeholder="Difficulty" />
             </SelectTrigger>
             <SelectContent>
@@ -603,7 +603,7 @@ export function QuizzesPage() {
             onChange={(e) => setGenTimeLimit(Number(e.target.value))}
             placeholder="e.g. 15"
             aria-label="Time limit"
-            className="w-full h-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-md"
+            className="w-full h-auto rounded-full border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-md"
           />
 
           <label className="block font-label-sm text-label-sm text-on-surface-variant mb-1">
@@ -616,7 +616,7 @@ export function QuizzesPage() {
             aria-label="Closes at"
             min={new Date().toISOString().slice(0, 16)}
             onChange={(e) => setGenClosesAt(e.target.value)}
-            className="w-full h-auto rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-lg"
+            className="w-full h-auto rounded-full border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface form-input-focus mb-lg"
           />
 
           <div className="flex gap-md">
@@ -624,7 +624,7 @@ export function QuizzesPage() {
               type="button"
               onClick={() => setGeneratorOpen(false)}
               disabled={generateQuiz.isPending}
-              className="flex-1 h-auto py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-md disabled:opacity-50"
+              className="flex-1 h-auto py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full disabled:opacity-50"
             >
               Cancel
             </Button>
@@ -632,7 +632,7 @@ export function QuizzesPage() {
               type="button"
               onClick={runGenerate}
               disabled={generateQuiz.isPending || genTargets.length === 0 || !genUnit || !genTimeLimit || !genClosesAt || genTypes.length === 0}
-              className="flex-1 h-auto py-sm bg-primary text-white! font-label-md text-label-md rounded-md disabled:opacity-50 active:scale-95 transition-all"
+              className="flex-1 h-auto py-sm bg-primary text-primary-foreground font-label-md text-label-md rounded-full disabled:opacity-50 active:scale-95 transition-all"
             >
               {generateQuiz.isPending ? "AI is writing your quiz…" : "Generate"}
             </Button>
@@ -668,7 +668,7 @@ export function QuizzesPage() {
               type="button"
               onClick={() => { setAssignTarget(null); setAssignTargets([]) }}
               disabled={assignQuiz.isPending}
-              className="flex-1 h-auto py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-md disabled:opacity-50"
+              className="flex-1 h-auto py-sm bg-surface-container text-on-surface-variant font-label-md text-label-md rounded-full disabled:opacity-50"
             >
               Cancel
             </Button>
@@ -676,7 +676,7 @@ export function QuizzesPage() {
               type="button"
               onClick={runAssign}
               disabled={assignQuiz.isPending || assignTargets.length === 0}
-              className="flex-1 h-auto py-sm bg-primary text-white! font-label-md text-label-md rounded-md disabled:opacity-50 active:scale-95 transition-all"
+              className="flex-1 h-auto py-sm bg-primary text-primary-foreground font-label-md text-label-md rounded-full disabled:opacity-50 active:scale-95 transition-all"
             >
               {assignQuiz.isPending ? "Assigning…" : "Assign to sections"}
             </Button>

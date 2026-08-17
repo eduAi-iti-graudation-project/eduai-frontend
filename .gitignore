@@ -6,13 +6,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
+.opencode
 node_modules
 dist
 dist-ssr
 *.local
 .stitch
-
+.claude
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -77,7 +77,7 @@ const components: Components = {
     const data = (node?.data ?? {}) as Record<string, unknown>
     if (data.pct === true) {
       return (
-        <span className="rounded-[4px] bg-primary/12 px-1.5 py-0.5 font-semibold text-primary whitespace-nowrap">
+        <span className="rounded-full bg-primary/12 px-1.5 py-0.5 font-semibold text-primary whitespace-nowrap">
           {children}
         </span>
       )
@@ -92,9 +92,9 @@ const components: Components = {
   em: ({ children }) => <em className="italic text-on-surface-variant">{children}</em>,
   del: ({ children }) => <del className="line-through text-on-surface-variant">{children}</del>,
   p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
-  h1: ({ children }) => <h1 className="font-headline-md text-headline-md text-on-surface mb-2 mt-1">{children}</h1>,
-  h2: ({ children }) => <h2 className="font-headline-sm text-headline-sm text-on-surface mb-2 mt-1">{children}</h2>,
-  h3: ({ children }) => <h3 className="font-label-md text-label-md text-on-surface font-semibold mb-1 mt-1">{children}</h3>,
+  h1: ({ children }) => <h1 className="font-headline-md text-headline-md text-primary mb-2 mt-1">{children}</h1>,
+  h2: ({ children }) => <h2 className="font-headline-sm text-headline-sm text-primary mb-2 mt-1">{children}</h2>,
+  h3: ({ children }) => <h3 className="font-label-md text-label-md text-primary font-semibold mb-1 mt-1">{children}</h3>,
   ul: ({ children }) => <ul className="my-2 mb-3 space-y-1.5 pl-4 [&_li::marker]:text-primary [&_li::marker]:font-bold">{children}</ul>,
   ol: ({ children }) => (
     <ol className="my-2 mb-3 space-y-1.5 pl-4 [&_li::marker]:text-primary [&_li::marker]:font-semibold">{children}</ol>
@@ -106,13 +106,13 @@ const components: Components = {
     </blockquote>
   ),
   pre: ({ children }) => (
-    <pre className="my-2 overflow-x-auto rounded-md bg-[#151a2e] p-3 text-[13px] leading-relaxed text-slate-100">{children}</pre>
+    <pre className="my-2 overflow-x-auto rounded-md bg-surface-container-high p-3 text-[13px] leading-relaxed text-on-surface">{children}</pre>
   ),
   code: ({ className, children }) =>
     className ? (
       <code className={cn("font-code-sm", className)}>{children}</code>
     ) : (
-      <code className="rounded-[4px] bg-surface-container-high px-1.5 py-0.5 font-code-sm text-[13px] text-on-surface">
+      <code className="rounded-sm bg-surface-container-high px-1.5 py-0.5 font-code-sm text-[13px] text-on-surface">
         {children}
       </code>
     ),
