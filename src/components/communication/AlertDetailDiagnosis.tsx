@@ -11,32 +11,44 @@ interface AlertDetailDiagnosisProps {
 }
 
 export function AlertDetailDiagnosis({ diagnosis }: AlertDetailDiagnosisProps) {
- if (!diagnosis.summary && !diagnosis.classContext) return null
+  const summary = diagnosis.reason ?? diagnosis.summary
+  const classContext = diagnosis.classContext ?? classStatsText(diagnosis.classStats)
+  if (!summary && !classContext) return null
 
- const sev = diagnosis.severity ? severityConfig[diagnosis.severity] : null
+  const sev = diagnosis.severity ? severityConfig[diagnosis.severity] : null
 
- return (
-  <div className="rounded-lg bg-surface-container-lowest border border-border p-md">
-   <div className="flex items-center gap-2 mb-3">
-    <div className="w-8 h-8 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
-     <span className="material-symbols-outlined text-[18px] text-primary">psychology</span>
+  return (
+   <div className="rounded-lg bg-surface-container-lowest border border-border p-md">
+    <div className="flex items-center gap-2 mb-3">
+     <div className="w-8 h-8 rounded-lg bg-primary-fixed/20 flex items-center justify-center">
+      <span className="material-symbols-outlined text-[18px] text-primary">psychology</span>
+     </div>
+     <h3 className="font-headline-md text-headline-md text-primary">Diagnosis</h3>
+     {sev && (
+      <span className={`font-label-sm text-label-sm px-2 py-0.5 rounded-lg ${sev.class}`}>
+       {sev.icon === "error" && "⨯ "}{sev.icon === "warning" && "△ "}{sev.icon === "info" && "◯ "}{sev.label}
+      </span>
+     )}
     </div>
-    <h3 className="font-headline-md text-headline-md text-primary">Diagnosis</h3>
-    {sev && (
-     <span className={`font-label-sm text-label-sm px-2 py-0.5 rounded-lg ${sev.class}`}>
-      {sev.icon === "error" && "⨯ "}{sev.icon === "warning" && "△ "}{sev.icon === "info" && "◯ "}{sev.label}
-     </span>
+
+    {summary && (
+     <p className="font-body-md text-body-md text-on-surface mb-2">{summary}</p>
+    )}
+    {classContext && (
+     <p className="font-body-sm text-body-sm text-on-surface-variant bg-surface-container-low rounded-lg p-3">
+      {classContext}
+     </p>
     )}
    </div>
+  )
+}
 
-   {diagnosis.summary && (
-    <p className="font-body-md text-body-md text-on-surface mb-2">{diagnosis.summary}</p>
-   )}
-   {diagnosis.classContext && (
-    <p className="font-body-sm text-body-sm text-on-surface-variant bg-surface-container-low rounded-lg p-3">
-     {diagnosis.classContext}
-    </p>
-   )}
-  </div>
- )
+function classStatsText(stats: DiagnosisPayload["classStats"]): string | null {
+  if (!stats) return null
+  const parts: string[] = []
+  if (typeof stats.studentCount === "number") parts.push(`${stats.studentCount} students`)
+  if (typeof stats.classAvgPct === "number") parts.push(`class avg ${stats.classAvgPct}%`)
+  if (typeof stats.droppingCount === "number") parts.push(`${stats.droppingCount} dropping`)
+  if (typeof stats.belowAverageCount === "number") parts.push(`${stats.belowAverageCount} below average`)
+  return parts.length ? parts.join(" · ") : null
 }

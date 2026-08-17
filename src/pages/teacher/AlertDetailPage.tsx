@@ -12,8 +12,22 @@ import * as api from "@/lib/api"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
-export function AlertDetailPage() {
- const { alertId } = useParams<{ alertId: string }>()
+function issueLabel(diagnosis: api.DiagnosisPayload): string {
+  const attribution =
+    diagnosis.attribution ??
+    (diagnosis.issueType === "CLASS_ISSUE"
+      ? "CLASS"
+      : diagnosis.issueType === "BOTH"
+       ? "BOTH"
+       : diagnosis.issueType === "STUDENT_ISSUE"
+        ? "STUDENT"
+        : null)
+  if (attribution === "CLASS") return "Class issue"
+  if (attribution === "BOTH") return "Student and class issue"
+  return "Student issue"
+}
+
+export function AlertDetailPage() { const { alertId } = useParams<{ alertId: string }>()
  const navigate = useNavigate()
  const queryClient = useQueryClient()
  const { data: detail, isLoading, isError, error } = useAlertDetail(alertId ?? "")
@@ -69,9 +83,7 @@ export function AlertDetailPage() {
       <span className="material-symbols-outlined text-[20px] text-on-surface-variant">person</span>
       <h1 className="font-headline-xl text-headline-xl text-primary">Alert Detail</h1>
      </div>
-     <p className="font-body-lg text-body-lg text-on-surface-variant">
-      {detail.diagnosis.issueType?.replace(/_/g, " ") ?? "Student"} issue
-     </p>
+     <p className="font-body-lg text-body-lg text-on-surface-variant">{issueLabel(detail.diagnosis)}</p>
     </div>
 
     <div className="flex items-center gap-2">

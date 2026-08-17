@@ -18,8 +18,33 @@ const STATUS_META: Record<string, { label: string; icon: string }> = {
  RESOLVED: { label: "Resolved", icon: "check_circle" },
 }
 
+const SEVERITY_META: Record<string, { label: string; icon: string; active: string; idle: string; iconClass: string }> = {
+ HIGH: {
+  label: "High priority",
+  icon: "error",
+  active: "border-error-container bg-error-container text-on-error-container",
+  idle: "border-outline-variant bg-surface-container-lowest hover:border-error-container",
+  iconClass: "text-on-error-container",
+ },
+ MEDIUM: {
+  label: "Medium",
+  icon: "warning",
+  active: "border-primary bg-primary-container text-on-primary-container",
+  idle: "border-outline-variant bg-surface-container-lowest hover:border-primary",
+  iconClass: "text-on-primary-container",
+ },
+ LOW: {
+  label: "Low",
+  icon: "info",
+  active: "border-outline bg-surface-container-high text-on-surface",
+  idle: "border-outline-variant bg-surface-container-lowest hover:border-outline",
+  iconClass: "text-on-surface",
+ },
+}
+
 export function AlertsPage() {
  const [statusFilter, setStatusFilter] = useState<string>("")
+ const [severityFilter, setSeverityFilter] = useState<string>("")
  const { alerts, isLoading, resolve } = useAlerts(statusFilter || undefined)
 
  const counts = useMemo(() => {
@@ -29,6 +54,17 @@ export function AlertsPage() {
   }
   return acc
  }, [alerts])
+
+ const severityCounts = useMemo(() => {
+  const acc: Record<string, number> = { HIGH: 0, MEDIUM: 0, LOW: 0 }
+  for (const a of alerts) {
+   if (acc[a.severity] !== undefined) acc[a.severity] += 1
+  }
+  return acc
+ }, [alerts])
+
+ const visibleAlerts = severityFilter ? alerts.filter((a) => a.severity === severityFilter) : alerts
+ const hasFilter = statusFilter !== "" || severityFilter !== ""
 
  return (
   <div className="flex flex-col min-h-full">
@@ -54,7 +90,7 @@ export function AlertsPage() {
    />
 
    {!isLoading && alerts.length > 0 && (
-    <div className="px-6 pb-4">
+    <div className="px-6 pb-4 space-y-4">
      <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
       {Object.entries(STATUS_META).map(([status, meta]) => (
        <button
@@ -79,25 +115,50 @@ export function AlertsPage() {
        </button>
       ))}
      </div>
+
+     <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
+      {Object.entries(SEVERITY_META).map(([severity, meta]) => {
+       const active = severityFilter === severity
+       return (
+        <button
+         key={severity}
+         type="button"
+         onClick={() => setSeverityFilter(active ? "" : severity)}
+         className={`text-left rounded-lg border p-md transition-colors ${active ? meta.active : meta.idle}`}
+        >
+         <div className="flex items-center gap-2 mb-2">
+          <span className={`material-symbols-outlined text-[18px] ${active ? meta.iconClass : "text-on-surface-variant"}`}>
+           {meta.icon}
+          </span>
+          <span className={`font-label-md text-label-md ${active ? meta.iconClass : "text-on-surface-variant"}`}>
+           {meta.label}
+          </span>
+         </div>
+         <p className="font-headline-lg text-headline-lg text-on-surface">{severityCounts[severity]}</p>
+        </button>
+       )
+      })}
+     </div>
     </div>
    )}
 
    <div className="flex-1 p-md">
     {isLoading ? (
      <LoadingState label="Loading alerts..." />
-    ) : alerts.length === 0 ? (
+    ) : visibleAlerts.length === 0 ? (
      <div className="flex items-center justify-center h-full">
-      <EmptyState icon="notifications" title="All clear" description="No alerts to show right now." />
+      <EmptyState
+       icon="notifications"
+       title={hasFilter ? "No matching alerts" : "All clear"}
+       description={hasFilter ? "Try clearing the status or priority filters." : "No alerts to show right now."}
+      />
      </div>
     ) : (
      <div className="space-y-3 max-w-4xl mx-auto">
-      {alerts.map((alert) => (
+      {visibleAlerts.map((alert) => (
        <AlertCard
         key={alert.id}
-        type={alert.type}
-        reason={alert.reason}
-        status={alert.status}
-        createdAt={alert.createdAt}
+        alert={alert}
         onResolve={alert.status !== "RESOLVED" ? () => resolve.mutate({ id: alert.id, status: "RESOLVED" }) : undefined}
        />
       ))}
