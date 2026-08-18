@@ -44,7 +44,7 @@ function isTrackLive(track: TrackPublication["track"] | undefined): boolean {
  */
 function pickVideoPublication(
   participant: Participant,
-  isLocal?: boolean,
+  _isLocal?: boolean,
 ): TrackPublication | undefined {
   const publications = participant.getTrackPublications()
 
@@ -126,7 +126,7 @@ export function ParticipantTile({
     const el = track.attach()
     el.className = "w-full h-full object-cover"
     el.autoplay = true
-    el.playsInline = true
+    ;(el as HTMLVideoElement).playsInline = true
     container.appendChild(el)
 
     const onFrame = () => setVersion((v) => v + 1)

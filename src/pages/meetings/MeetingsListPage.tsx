@@ -72,7 +72,7 @@ export function MeetingsListPage() {
 
  const meetings = data?.meetings ?? []
  const live = meetings.filter((m) => m.status === "LIVE")
- const shown = scope === "upcoming" ? meetings.filter((m) => m.status !== "ENDED" && m.status !== "CANCELED" && m.status !== "LIVE") : meetings.filter((m) => m.status === "ENDED" || m.status === "CANCELED")
+ const shown = scope === "upcoming" ? meetings.filter((m) => m.status !== "LIVE") : meetings
 
  return (
   <div className="p-xl max-w-3xl mx-auto w-full">

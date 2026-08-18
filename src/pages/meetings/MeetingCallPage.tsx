@@ -246,7 +246,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
     {(chatOpen || transcriptOpen) && (
      <aside className="w-[22rem] border-l border-white/5 hidden md:flex flex-col bg-surface-container-lowest">
       {chatOpen && <ChatPanel meetingId={meeting.id} className="flex-1 min-h-0" />}
-      {transcriptOpen && <TranscriptPanel meetingId={meeting.id} className="flex-1 min-h-0" />}
+      {transcriptOpen && <TranscriptPanel meetingId={meeting.id} liveSegments={call.liveTranscripts} className="flex-1 min-h-0" />}
      </aside>
     )}
    </div>

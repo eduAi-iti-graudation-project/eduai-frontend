@@ -17,6 +17,7 @@ function makeCall(overrides: Partial<LivekitCall> = {}): LivekitCall {
     trackStates: { camera: true, mic: true, screen: false },
     raisedHands: {},
     reactions: [],
+    liveTranscripts: [],
     toggleMic: vi.fn(),
     toggleCam: vi.fn(),
     toggleScreenShare: vi.fn(),

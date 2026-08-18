@@ -91,17 +91,19 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
     )
   }
   return (
-    <div className="space-y-lg">
-      <EmptyState
-        icon="movie"
-        title="Recording ready"
-        description="Download or watch the meeting recording."
-      />
-      <div className="flex justify-center">
-        <Button asChild>
-          <a href={recording.data.recordingUrl} target="_blank" rel="noreferrer">
-            <span className="material-symbols-outlined text-[18px] mr-1">play_circle</span>
-            Watch recording
+    <div className="space-y-md">
+      <div className="rounded-xl overflow-hidden bg-black shadow-lg">
+        <video
+          src={recording.data.recordingUrl}
+          controls
+          className="w-full max-h-[420px] aspect-video object-contain"
+        />
+      </div>
+      <div className="flex justify-end">
+        <Button asChild variant="outline">
+          <a href={recording.data.recordingUrl} download target="_blank" rel="noreferrer">
+            <span className="material-symbols-outlined text-[18px] mr-1">download</span>
+            Download recording
           </a>
         </Button>
       </div>
@@ -201,7 +203,7 @@ export function MeetingDetailPage() {
        }
       />
      </div>
-     {canJoin && (
+     {canJoin ? (
       <div className="flex justify-end gap-3 pt-2">
        <Button asChild>
         <Link to={`${basePath}/${meeting.id}/call`}>
@@ -210,12 +212,16 @@ export function MeetingDetailPage() {
         </Link>
        </Button>
       </div>
-     )}
-     {!canJoin && (
+     ) : meeting.status === "ENDED" ? (
+      <p className="font-body-sm text-body-sm text-on-surface-variant text-right flex items-center justify-end gap-1">
+       <span className="material-symbols-outlined text-[16px]">check_circle</span>
+       This meeting has ended.
+      </p>
+     ) : !meeting.canJoin ? (
       <p className="font-body-sm text-body-sm text-on-surface-variant text-right">
        You don't have access to this meeting.
       </p>
-     )}
+     ) : null}
     </CardContent>
    </Card>
 
