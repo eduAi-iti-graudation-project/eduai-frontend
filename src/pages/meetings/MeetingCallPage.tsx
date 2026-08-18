@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, useNavigate, useParams } from "react-router-dom"
+import { toast } from "sonner"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { useAuth } from "@/providers/use-auth"
@@ -18,6 +19,7 @@ import { ChatPanel } from "@/components/meetings/ChatPanel"
 import { TranscriptPanel } from "@/components/meetings/TranscriptPanel"
 import { cn } from "@/lib/utils"
 import * as api from "@/lib/api"
+import { setLocalRecording } from "@/lib/local-recording-cache"
 import type { Participant } from "livekit-client"
 
 interface JoinSession {
@@ -55,6 +57,10 @@ const [session, setSession] = useState<JoinSession | null>(null)
   const [chatOpen, setChatOpen] = useState(true)
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const [speechLang, setSpeechLang] = useState<"ar-EG" | "en-US">("ar-EG")
+  const [isLocalRecording, setIsLocalRecording] = useState(false)
+  const localRecorderRef = useRef<MediaRecorder | null>(null)
+  const localChunksRef = useRef<Blob[]>([])
+  const localDisplayStreamRef = useRef<MediaStream | null>(null)
   const queryClient = useQueryClient()
 
   // React Router reuses this component across /meetings/:id/call navigations,
@@ -102,34 +108,129 @@ const [session, setSession] = useState<JoinSession | null>(null)
   }
  }
 
- const handleRecord = () => {
+ const handleStartLocalRecording = async () => {
+  if (!meeting || isLocalRecording) return
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: true,
+    })
+    localDisplayStreamRef.current = stream
+
+    const audioTracks: MediaStreamTrack[] = []
+    const micPub = call.localParticipant?.getTrackPublication("microphone" as any)
+    if (micPub && !micPub.isMuted) {
+      const micTrack = (micPub as any).track?.mediaStreamTrack
+      if (micTrack) audioTracks.push(micTrack.clone())
+    }
+    call.participants.forEach((p) => {
+      p.audioTrackPublications.forEach((pub) => {
+        if (!pub.isMuted) {
+          const track = (pub as any).track?.mediaStreamTrack
+          if (track) audioTracks.push(track.clone())
+        }
+      })
+    })
+
+    const combinedStream = new MediaStream([
+      ...stream.getVideoTracks(),
+      ...stream.getAudioTracks(),
+      ...audioTracks,
+    ])
+
+    const mimeTypes = [
+      "video/webm;codecs=vp9,opus",
+      "video/webm;codecs=vp8,opus",
+      "video/webm",
+    ]
+    const mimeType = mimeTypes.find((m) => MediaRecorder.isTypeSupported(m)) || "video/webm"
+
+    localChunksRef.current = []
+    const recorder = new MediaRecorder(combinedStream, { mimeType })
+    recorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) localChunksRef.current.push(e.data)
+    }
+    recorder.onstop = () => {
+      const blob = new Blob(localChunksRef.current, { type: mimeType })
+      if (blob.size > 1000 && meeting?.id) {
+        const cached = setLocalRecording(meeting.id, blob)
+        toast.success(`Recording saved locally (${(cached.sizeBytes / 1024 / 1024).toFixed(1)} MB)`)
+      }
+      localDisplayStreamRef.current?.getTracks().forEach((t) => t.stop())
+      localDisplayStreamRef.current = null
+    }
+    recorder.start(1000)
+    localRecorderRef.current = recorder
+    setIsLocalRecording(true)
+    toast.success("Local recording started")
+  } catch (err: any) {
+    console.warn("[local-recording] start failed:", err)
+    toast.error(`Couldn't start local recording: ${err?.message ?? "Permission denied"}`)
+  }
+ }
+
+ const handleStopLocalRecording = () => {
+  if (localRecorderRef.current && localRecorderRef.current.state !== "inactive") {
+    try { localRecorderRef.current.stop() } catch {}
+  }
+  localRecorderRef.current = null
+  setIsLocalRecording(false)
+ }
+
+ const handleRecord = async () => {
   if (!meeting || recording.isPending) return
-  recording.mutate({ id: meeting.id, enabled: !meeting.recordingEnabled })
+  const wantRecording = !meeting.recordingEnabled
+  try {
+    if (wantRecording && !isLocalRecording) {
+      await handleStartLocalRecording()
+    } else if (!wantRecording && isLocalRecording) {
+      handleStopLocalRecording()
+    }
+    recording.mutate({ id: meeting.id, enabled: wantRecording })
+  } catch {
+    // local start may throw, still attempt server toggle if that's separate
+  }
  }
 
   // Real-time continuous auto-save for transcript segments
   const lastSavedCountRef = useRef(0)
+  const pendingSaveRef = useRef<Promise<any> | null>(null)
   useEffect(() => {
     if (!meeting?.id || call.liveTranscripts.length === 0) return
     if (call.liveTranscripts.length === lastSavedCountRef.current) return
     const newSegments = call.liveTranscripts.slice(lastSavedCountRef.current)
     lastSavedCountRef.current = call.liveTranscripts.length
 
-    void api.saveMeetingTranscript(
-      meeting.id,
-      newSegments.map((s) => ({
-        startMs: s.timestampMs,
-        text: `${s.speakerName}: ${s.text}`,
-      })),
-    ).then(() => {
-      void queryClient.invalidateQueries({ queryKey: ["meetings", meeting.id, "transcript"] })
-    }).catch((err) => {
-      console.warn("[transcript] background auto-save failed:", err)
-    })
+    const run = async () => {
+      if (pendingSaveRef.current) {
+        try { await pendingSaveRef.current } catch {}
+      }
+      pendingSaveRef.current = api.saveMeetingTranscript(
+        meeting.id,
+        newSegments.map((s) => ({
+          startMs: s.timestampMs,
+          text: `${s.speakerName}: ${s.text}`,
+        })),
+        false,
+      )
+      try {
+        await pendingSaveRef.current
+        void queryClient.invalidateQueries({ queryKey: ["meetings", meeting.id, "transcript"] })
+      } catch (err) {
+        console.warn("[transcript] background auto-save failed:", err)
+        lastSavedCountRef.current = Math.max(0, lastSavedCountRef.current - newSegments.length)
+      } finally {
+        pendingSaveRef.current = null
+      }
+    }
+    void run()
   }, [meeting?.id, call.liveTranscripts, queryClient])
 
   const saveTranscripts = async () => {
     if (!meeting || call.liveTranscripts.length === 0) return
+    if (pendingSaveRef.current) {
+      try { await pendingSaveRef.current } catch {}
+    }
     try {
       await api.saveMeetingTranscript(
         meeting.id,
@@ -137,7 +238,9 @@ const [session, setSession] = useState<JoinSession | null>(null)
           startMs: s.timestampMs,
           text: `${s.speakerName}: ${s.text}`,
         })),
+        true,
       )
+      lastSavedCountRef.current = call.liveTranscripts.length
       void queryClient.invalidateQueries({ queryKey: ["meetings", meeting.id, "transcript"] })
     } catch (err) {
       console.warn("[transcript] failed to save:", err)
@@ -145,6 +248,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
   }
 
   const handleLeave = async () => {
+    if (isLocalRecording) handleStopLocalRecording()
     await saveTranscripts()
     call.disconnect()
     navigate(`${basePath}/${id}`, { replace: true })
@@ -152,6 +256,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
 
   const handleEnd = async () => {
     if (!meeting) return
+    if (isLocalRecording) handleStopLocalRecording()
     await saveTranscripts()
     call.disconnect()
     try {
@@ -276,8 +381,8 @@ const [session, setSession] = useState<JoinSession | null>(null)
      <ControlBar
       call={call}
       isHost={meeting.isHost}
-      recordingEnabled={meeting.recordingEnabled}
-      recordingIndicator={meeting.recordingEnabled && call.connected}
+      recordingEnabled={meeting.recordingEnabled || isLocalRecording}
+      recordingIndicator={(meeting.recordingEnabled || isLocalRecording) && call.connected}
       chatOpen={chatOpen}
       transcriptOpen={transcriptOpen}
       onToggleChat={() => setChatOpen((v) => !v)}

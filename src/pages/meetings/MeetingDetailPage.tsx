@@ -1,6 +1,7 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/EmptyState"
@@ -14,6 +15,12 @@ import { TranscriptPanel } from "@/components/meetings/TranscriptPanel"
 import { StruggleSignalsPanel } from "@/components/meetings/StruggleSignalsPanel"
 import { cn } from "@/lib/utils"
 import * as api from "@/lib/api"
+import {
+  getLocalRecording,
+  clearLocalRecording,
+  localRecordingAsFile,
+  type CachedLocalRecording,
+} from "@/lib/local-recording-cache"
 import type { MeetingDetail } from "@/lib/api"
 
 function formatDate(iso: string): string {
@@ -42,6 +49,24 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const uploadRecording = useUploadMeetingRecording()
 
+  const [cached, setCached] = useState<CachedLocalRecording | undefined>(undefined)
+  const [pickedFile, setPickedFile] = useState<File | undefined>(undefined)
+  const [pickedPreviewUrl, setPickedPreviewUrl] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    if (!id) return
+    const rec = getLocalRecording(id)
+    if (rec) setCached(rec)
+  }, [id])
+
+  useEffect(() => {
+    return () => {
+      if (pickedPreviewUrl) {
+        try { URL.revokeObjectURL(pickedPreviewUrl) } catch {}
+      }
+    }
+  }, [pickedPreviewUrl])
+
   const recording = useQuery({
     queryKey: ["meetings", id, "recording"],
     queryFn: () => api.getMeetingRecording(id as string),
@@ -52,8 +77,64 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !id) return
-    uploadRecording.mutate({ id, file })
+    if (pickedPreviewUrl) {
+      try { URL.revokeObjectURL(pickedPreviewUrl) } catch {}
+    }
+    const url = URL.createObjectURL(file)
+    setPickedFile(file)
+    setPickedPreviewUrl(url)
   }
+
+  const handleUploadCached = async () => {
+    if (!id || !cached) return
+    const file = localRecordingAsFile(cached)
+    uploadRecording.mutate({ id, file }, {
+      onSuccess: () => {
+        toast.success("Recording uploaded to storage")
+        clearLocalRecording(id)
+        setCached(undefined)
+      },
+      onError: (err: any) => {
+        toast.error(`Upload failed: ${err?.message ?? "Unknown error"}`)
+      },
+    })
+  }
+
+  const handleUploadPicked = async () => {
+    if (!id || !pickedFile) return
+    uploadRecording.mutate({ id, file: pickedFile }, {
+      onSuccess: () => {
+        toast.success("Recording uploaded to storage")
+        if (pickedPreviewUrl) {
+          try { URL.revokeObjectURL(pickedPreviewUrl) } catch {}
+        }
+        setPickedFile(undefined)
+        setPickedPreviewUrl(undefined)
+      },
+      onError: (err: any) => {
+        toast.error(`Upload failed: ${err?.message ?? "Unknown error"}`)
+      },
+    })
+  }
+
+  const handleDiscardCached = () => {
+    if (!id) return
+    clearLocalRecording(id)
+    setCached(undefined)
+    toast.info("Local recording discarded")
+  }
+
+  const handleDiscardPicked = () => {
+    if (pickedPreviewUrl) {
+      try { URL.revokeObjectURL(pickedPreviewUrl) } catch {}
+    }
+    setPickedFile(undefined)
+    setPickedPreviewUrl(undefined)
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  const hasLocalPreview = (!!cached || !!pickedPreviewUrl)
+  const localPreviewSrc = cached ? cached.objectUrl : pickedPreviewUrl
 
   if (meeting.status !== "ENDED") {
     return (
@@ -65,6 +146,73 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
     )
   }
 
+  if (!meeting.recordingUrl && hasLocalPreview) {
+    return (
+      <div className="space-y-md">
+        <div className="rounded-xl overflow-hidden bg-black shadow-lg">
+          <video
+            src={localPreviewSrc}
+            controls
+            className="w-full max-h-[420px] aspect-video object-contain"
+          />
+        </div>
+        <div className="space-y-2">
+          {cached && (
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <span className="material-symbols-outlined text-[18px] mr-1 align-middle">save</span>
+              Locally recorded file: <strong>{cached.fileName}</strong>{" "}
+              ({(cached.sizeBytes / 1024 / 1024).toFixed(1)} MB) · recorded{" "}
+              {new Date(cached.recordedAt).toLocaleString()}
+            </p>
+          )}
+          {pickedFile && (
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <span className="material-symbols-outlined text-[18px] mr-1 align-middle">description</span>
+              Picked file: <strong>{pickedFile.name}</strong>{" "}
+              ({(pickedFile.size / 1024 / 1024).toFixed(1)} MB)
+            </p>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2 justify-between items-center">
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              disabled={uploadRecording.isPending}
+              onClick={cached ? handleUploadCached : handleUploadPicked}
+            >
+              <span className="material-symbols-outlined text-[18px] mr-1.5">upload</span>
+              {uploadRecording.isPending ? "Uploading to storage..." : "Upload to Storage"}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/mp4,video/webm"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={uploadRecording.isPending}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <span className="material-symbols-outlined text-[18px] mr-1.5">folder_open</span>
+              Pick Different File
+            </Button>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={uploadRecording.isPending}
+            onClick={cached ? handleDiscardCached : handleDiscardPicked}
+          >
+            <span className="material-symbols-outlined text-[18px] mr-1">close</span>
+            Discard
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   if (!meeting.recordingUrl) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 border border-dashed border-border rounded-xl text-center space-y-4">
@@ -72,7 +220,7 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
         <div>
           <h3 className="font-label-lg text-label-lg text-on-surface mb-1">No recording video file available</h3>
           <p className="font-body-sm text-body-sm text-on-surface-variant max-w-md">
-            You can upload a recorded video file (MP4 or WebM) for participants to view anytime.
+            Pick a recorded video file (MP4 or WebM). You will see a preview before uploading it to storage.
           </p>
         </div>
         {(meeting.isHost || true) && (
@@ -88,8 +236,8 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
               disabled={uploadRecording.isPending}
               onClick={() => fileInputRef.current?.click()}
             >
-              <span className="material-symbols-outlined text-[18px] mr-1.5">upload</span>
-              {uploadRecording.isPending ? "Uploading video..." : "Upload Recording Video"}
+              <span className="material-symbols-outlined text-[18px] mr-1.5">video_library</span>
+              Pick Recording Video
             </Button>
           </div>
         )}
@@ -124,27 +272,40 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
           className="w-full max-h-[420px] aspect-video object-contain"
         />
       </div>
-      <div className="flex justify-between items-center">
-        {meeting.isHost && (
-          <div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="video/mp4,video/webm"
-              onChange={handleFileChange}
-              className="hidden"
-            />
+      <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {hasLocalPreview && (
             <Button
-              variant="outline"
               size="sm"
+              variant="secondary"
               disabled={uploadRecording.isPending}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={cached ? handleUploadCached : handleUploadPicked}
             >
-              <span className="material-symbols-outlined text-[18px] mr-1.5">upload</span>
-              {uploadRecording.isPending ? "Replacing..." : "Replace Video"}
+              <span className="material-symbols-outlined text-[18px] mr-1">upgrade</span>
+              Replace with Local ({cached ? (cached.sizeBytes/1024/1024).toFixed(1)+" MB" : pickedFile ? (pickedFile.size/1024/1024).toFixed(1)+" MB" : "file"})
             </Button>
-          </div>
-        )}
+          )}
+          {meeting.isHost && (
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="video/mp4,video/webm"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={uploadRecording.isPending}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <span className="material-symbols-outlined text-[18px] mr-1.5">upload</span>
+                {uploadRecording.isPending ? "Replacing..." : "Replace Video"}
+              </Button>
+            </div>
+          )}
+        </div>
         <Button asChild variant="outline">
           <a href={recording.data.recordingUrl} download target="_blank" rel="noreferrer">
             <span className="material-symbols-outlined text-[18px] mr-1">download</span>
