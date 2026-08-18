@@ -104,6 +104,7 @@ export function useLivekitCall(
   token: string | undefined,
   roomName: string | undefined,
   devices?: { cameraId?: string; micId?: string },
+  speechLang?: "auto" | "ar-EG" | "en-US",
 ): LivekitCall {
   const roomRef = useRef<Room | null>(null)
   const [connected, setConnected] = useState(false)
@@ -490,12 +491,18 @@ export function useLivekitCall(
 
     if (!SpeechRecognition) return
 
+    // Resolve the actual BCP-47 language tag to pass to the API
+    const resolvedLang = (() => {
+      if (!speechLang || speechLang === "auto") return navigator.language || "en-US"
+      return speechLang
+    })()
+
     let recognition: any = null
     try {
       recognition = new SpeechRecognition()
       recognition.continuous = true
-      recognition.interimResults = false
-      recognition.lang = navigator.language?.startsWith("ar") ? navigator.language : "ar-EG"
+      recognition.interimResults = true // Show intermediate results for better UX
+      recognition.lang = resolvedLang
 
       recognition.onresult = (event: any) => {
         for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -521,6 +528,18 @@ export function useLivekitCall(
         }
       }
 
+      recognition.onerror = (ev: any) => {
+        // "no-speech" is normal in quiet periods — just restart
+        if (ev.error === "no-speech" || ev.error === "audio-capture") return
+        console.warn(`[speech] recognition error: ${ev.error as string}`)
+      }
+
+      // Auto-restart when the session ends (browser stops after ~60s of silence)
+      recognition.onend = () => {
+        if (recognition._stopped) return
+        try { recognition.start() } catch { /* already restarting */ }
+      }
+
       recognition.start()
     } catch {
       // SpeechRecognition already active or unavailable
@@ -528,6 +547,7 @@ export function useLivekitCall(
 
     return () => {
       if (recognition) {
+        recognition._stopped = true
         try {
           recognition.stop()
         } catch {
@@ -535,7 +555,7 @@ export function useLivekitCall(
         }
       }
     }
-  }, [connected, trackStates.mic, publish])
+  }, [connected, trackStates.mic, publish, speechLang])
 
   return {
     connecting,

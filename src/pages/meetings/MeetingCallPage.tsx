@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
@@ -53,6 +54,8 @@ const [session, setSession] = useState<JoinSession | null>(null)
   const [joining, setJoining] = useState(false)
   const [chatOpen, setChatOpen] = useState(true)
   const [transcriptOpen, setTranscriptOpen] = useState(false)
+  const [speechLang, setSpeechLang] = useState<"auto" | "ar-EG" | "en-US">("auto")
+  const queryClient = useQueryClient()
 
   // React Router reuses this component across /meetings/:id/call navigations,
   // so a session from a previous meeting would otherwise bleed into the next
@@ -62,6 +65,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
    setPrevId(id)
    setSession(null)
    setJoining(false)
+   queryClient.resetQueries({ queryKey: ["meetings", id] })
   }
 
  const call = useLivekitCall(
@@ -74,6 +78,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
      micId: session.micId && session.micId !== "default" ? session.micId : undefined,
     }
    : undefined,
+   speechLang,
  )
 
   const participants = useMemo<Participant[]>(() => {
@@ -112,8 +117,10 @@ const [session, setSession] = useState<JoinSession | null>(null)
           text: `${s.speakerName}: ${s.text}`,
         })),
       )
-    } catch {
-      // non-blocking
+      // Invalidate so transcript tab in detail page re-fetches immediately
+      void queryClient.invalidateQueries({ queryKey: ["meetings", meeting.id, "transcript"] })
+    } catch (err) {
+      console.warn("[transcript] failed to save:", err)
     }
   }
 
@@ -264,7 +271,15 @@ const [session, setSession] = useState<JoinSession | null>(null)
     {(chatOpen || transcriptOpen) && (
      <aside className="w-[22rem] border-l border-white/5 hidden md:flex flex-col bg-surface-container-lowest">
       {chatOpen && <ChatPanel meetingId={meeting.id} className="flex-1 min-h-0" />}
-      {transcriptOpen && <TranscriptPanel meetingId={meeting.id} liveSegments={call.liveTranscripts} className="flex-1 min-h-0" />}
+      {transcriptOpen && (
+        <TranscriptPanel
+          meetingId={meeting.id}
+          liveSegments={call.liveTranscripts}
+          speechLang={speechLang}
+          onLangChange={setSpeechLang}
+          className="flex-1 min-h-0"
+        />
+      )}
      </aside>
     )}
    </div>

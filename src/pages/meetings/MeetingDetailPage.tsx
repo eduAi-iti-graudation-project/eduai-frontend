@@ -52,27 +52,33 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
     return (
       <EmptyState
         icon="videocam_off"
-        title="No recording"
-        description="Recording wasn't enabled for this meeting."
+        title="Recording was not enabled"
+        description="The host did not enable recording for this meeting."
       />
     )
   }
   if (meeting.status !== "ENDED") {
     return (
       <EmptyState
-        icon="videocam"
-        title="Recording pending"
-        description="The recording will be available after the meeting ends."
+        icon="fiber_manual_record"
+        title="Recording in progress"
+        description="The recording will be available here after the meeting ends."
       />
     )
   }
   if (!meeting.recordingUrl) {
     return (
-      <EmptyState
-        icon="videocam"
-        title="No recording available"
-        description="The host may not have started the recording."
-      />
+      <div className="py-lg text-center space-y-3 px-lg">
+        <span className="material-symbols-outlined text-[40px] text-on-surface-variant block">cloud_off</span>
+        <p className="font-label-lg text-label-lg text-on-surface">Recording not saved</p>
+        <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm mx-auto">
+          The recording button was pressed during the meeting, but the file could not be saved.
+          This usually means the server is running without cloud storage (LiveKit Egress + S3) configured.
+        </p>
+        <p className="font-body-sm text-body-sm text-primary/80">
+          To enable recordings, set <code className="bg-surface-container px-1 rounded text-xs">SUPABASE_STORAGE_S3_*</code> and <code className="bg-surface-container px-1 rounded text-xs">SUPABASE_MEETINGS_BUCKET</code> in the backend <code className="bg-surface-container px-1 rounded text-xs">.env</code>.
+        </p>
+      </div>
     )
   }
   if (recording.isLoading) {
