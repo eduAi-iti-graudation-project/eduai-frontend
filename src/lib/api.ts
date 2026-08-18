@@ -3887,6 +3887,15 @@ export async function dismissStruggleSignal(
   return res.data
 }
 
+export async function triggerStruggleSignalExtraction(
+  meetingId: string,
+): Promise<{ status: string }> {
+  const res = await api.post<{ status: string }>(
+    `/meetings/${meetingId}/struggle-signals/extract`,
+  )
+  return res.data
+}
+
 // ── Student CSV migration ─────────────────────────────────────────
 
 export type MigrateField =
