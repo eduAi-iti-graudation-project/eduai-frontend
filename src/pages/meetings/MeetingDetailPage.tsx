@@ -16,7 +16,9 @@ import { StruggleSignalsPanel } from "@/components/meetings/StruggleSignalsPanel
 import { cn } from "@/lib/utils"
 import * as api from "@/lib/api"
 import {
-  getLocalRecording,
+  getLocalRecordingAsync,
+  getLocalRecordingSync,
+  subscribeLocalRecordings,
   clearLocalRecording,
   localRecordingAsFile,
   type CachedLocalRecording,
@@ -55,8 +57,26 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
 
   useEffect(() => {
     if (!id) return
-    const rec = getLocalRecording(id)
-    if (rec) setCached(rec)
+    let active = true
+    const check = async () => {
+      const syncRec = getLocalRecordingSync(id)
+      if (syncRec && active) {
+        setCached(syncRec)
+        return
+      }
+      const asyncRec = await getLocalRecordingAsync(id)
+      if (active && asyncRec) {
+        setCached(asyncRec)
+      }
+    }
+    void check()
+    const unsubscribe = subscribeLocalRecordings(() => {
+      void check()
+    })
+    return () => {
+      active = false
+      unsubscribe()
+    }
   }, [id])
 
   useEffect(() => {
@@ -179,9 +199,17 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
               disabled={uploadRecording.isPending}
               onClick={cached ? handleUploadCached : handleUploadPicked}
             >
-              <span className="material-symbols-outlined text-[18px] mr-1.5">upload</span>
-              {uploadRecording.isPending ? "Uploading to storage..." : "Upload to Storage"}
+              <span className="material-symbols-outlined text-[18px] mr-1.5">cloud_upload</span>
+              {uploadRecording.isPending ? "Uploading to cloud..." : "Upload Recording to Cloud"}
             </Button>
+            {cached && (
+              <Button asChild variant="outline" size="sm">
+                <a href={cached.objectUrl} download={cached.fileName}>
+                  <span className="material-symbols-outlined text-[18px] mr-1.5">download</span>
+                  Download Copy
+                </a>
+              </Button>
+            )}
             <input
               ref={fileInputRef}
               type="file"

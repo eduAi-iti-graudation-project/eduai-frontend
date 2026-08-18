@@ -19,7 +19,7 @@ import { ChatPanel } from "@/components/meetings/ChatPanel"
 import { TranscriptPanel } from "@/components/meetings/TranscriptPanel"
 import { cn } from "@/lib/utils"
 import * as api from "@/lib/api"
-import { setLocalRecording } from "@/lib/local-recording-cache"
+import { saveLocalRecording } from "@/lib/local-recording-cache"
 import type { Participant } from "livekit-client"
 
 interface JoinSession {
@@ -150,10 +150,10 @@ const [session, setSession] = useState<JoinSession | null>(null)
     recorder.ondataavailable = (e) => {
       if (e.data && e.data.size > 0) localChunksRef.current.push(e.data)
     }
-    recorder.onstop = () => {
+    recorder.onstop = async () => {
       const blob = new Blob(localChunksRef.current, { type: mimeType })
       if (blob.size > 1000 && meeting?.id) {
-        const cached = setLocalRecording(meeting.id, blob)
+        const cached = await saveLocalRecording(meeting.id, blob)
         toast.success(`Recording saved locally (${(cached.sizeBytes / 1024 / 1024).toFixed(1)} MB)`)
       }
       localDisplayStreamRef.current?.getTracks().forEach((t) => t.stop())
@@ -169,12 +169,32 @@ const [session, setSession] = useState<JoinSession | null>(null)
   }
  }
 
- const handleStopLocalRecording = () => {
-  if (localRecorderRef.current && localRecorderRef.current.state !== "inactive") {
-    try { localRecorderRef.current.stop() } catch {}
-  }
-  localRecorderRef.current = null
-  setIsLocalRecording(false)
+ const handleStopLocalRecording = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const recorder = localRecorderRef.current
+    if (!recorder || recorder.state === "inactive") {
+      localRecorderRef.current = null
+      setIsLocalRecording(false)
+      resolve()
+      return
+    }
+    const origOnStop = recorder.onstop
+    recorder.onstop = async (e) => {
+      if (origOnStop) {
+        try { await (origOnStop as any).call(recorder, e) } catch {}
+      }
+      localRecorderRef.current = null
+      setIsLocalRecording(false)
+      resolve()
+    }
+    try {
+      recorder.stop()
+    } catch {
+      localRecorderRef.current = null
+      setIsLocalRecording(false)
+      resolve()
+    }
+  })
  }
 
  const handleRecord = async () => {
@@ -248,7 +268,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
   }
 
   const handleLeave = async () => {
-    if (isLocalRecording) handleStopLocalRecording()
+    if (isLocalRecording) await handleStopLocalRecording()
     await saveTranscripts()
     call.disconnect()
     navigate(`${basePath}/${id}`, { replace: true })
@@ -256,7 +276,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
 
   const handleEnd = async () => {
     if (!meeting) return
-    if (isLocalRecording) handleStopLocalRecording()
+    if (isLocalRecording) await handleStopLocalRecording()
     await saveTranscripts()
     call.disconnect()
     try {
