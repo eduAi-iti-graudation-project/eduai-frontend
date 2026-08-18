@@ -111,7 +111,9 @@ export function ScheduleMeetingPage() {
 
       {type === "CLASS" && (
        <div className="space-y-2">
-        <Label htmlFor="offering">Class offering</Label>
+        <Label htmlFor="offering">
+         Class offering <span className="text-danger">*</span>
+        </Label>
         {offeringsQuery.isLoading ? (
          <LoadingState className="py-sm" />
         ) : offeringsQuery.isError ? (
@@ -122,18 +124,23 @@ export function ScheduleMeetingPage() {
           className="py-sm"
          />
         ) : (
-         <Select value={courseOfferingId} onValueChange={setCourseOfferingId}>
-          <SelectTrigger id="offering" className="w-full">
-           <SelectValue placeholder="Select a class" />
-          </SelectTrigger>
-          <SelectContent>
-           {offerings.map((offering) => (
-            <SelectItem key={offering.id} value={offering.id}>
-             {offering.course.name} · {offering.section.name}
-            </SelectItem>
-           ))}
-          </SelectContent>
-         </Select>
+         <>
+          <Select value={courseOfferingId} onValueChange={setCourseOfferingId} required>
+           <SelectTrigger id="offering" className="w-full">
+            <SelectValue placeholder="Select a class" />
+           </SelectTrigger>
+           <SelectContent>
+            {offerings.map((offering) => (
+             <SelectItem key={offering.id} value={offering.id}>
+              {offering.course.name} · {offering.section.name}
+             </SelectItem>
+            ))}
+           </SelectContent>
+          </Select>
+          <p className="font-body-sm text-body-sm text-on-surface-variant text-xs">
+           Only students enrolled in this section will be able to see and join this meeting.
+          </p>
+         </>
         )}
        </div>
       )}
