@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { LoadingState } from "@/components/shared/LoadingState"
@@ -54,7 +54,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
   const [joining, setJoining] = useState(false)
   const [chatOpen, setChatOpen] = useState(true)
   const [transcriptOpen, setTranscriptOpen] = useState(false)
-  const [speechLang, setSpeechLang] = useState<"auto" | "ar-EG" | "en-US">("auto")
+  const [speechLang, setSpeechLang] = useState<"ar-EG" | "en-US">("ar-EG")
   const queryClient = useQueryClient()
 
   // React Router reuses this component across /meetings/:id/call navigations,
@@ -107,6 +107,27 @@ const [session, setSession] = useState<JoinSession | null>(null)
   recording.mutate({ id: meeting.id, enabled: !meeting.recordingEnabled })
  }
 
+  // Real-time continuous auto-save for transcript segments
+  const lastSavedCountRef = useRef(0)
+  useEffect(() => {
+    if (!meeting?.id || call.liveTranscripts.length === 0) return
+    if (call.liveTranscripts.length === lastSavedCountRef.current) return
+    const newSegments = call.liveTranscripts.slice(lastSavedCountRef.current)
+    lastSavedCountRef.current = call.liveTranscripts.length
+
+    void api.saveMeetingTranscript(
+      meeting.id,
+      newSegments.map((s) => ({
+        startMs: s.timestampMs,
+        text: `${s.speakerName}: ${s.text}`,
+      })),
+    ).then(() => {
+      void queryClient.invalidateQueries({ queryKey: ["meetings", meeting.id, "transcript"] })
+    }).catch((err) => {
+      console.warn("[transcript] background auto-save failed:", err)
+    })
+  }, [meeting?.id, call.liveTranscripts, queryClient])
+
   const saveTranscripts = async () => {
     if (!meeting || call.liveTranscripts.length === 0) return
     try {
@@ -117,7 +138,6 @@ const [session, setSession] = useState<JoinSession | null>(null)
           text: `${s.speakerName}: ${s.text}`,
         })),
       )
-      // Invalidate so transcript tab in detail page re-fetches immediately
       void queryClient.invalidateQueries({ queryKey: ["meetings", meeting.id, "transcript"] })
     } catch (err) {
       console.warn("[transcript] failed to save:", err)

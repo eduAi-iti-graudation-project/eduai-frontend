@@ -18,31 +18,36 @@ function formatLiveTime(timestampMs: number): string {
 const statusMessages: Record<string, string> = {
   PENDING: "No transcript available yet — speak during the meeting to generate one.",
   PROCESSING: "Transcribing the recording… this usually takes a minute or two.",
-  FAILED: "The transcript could not be generated. The recording is still available.",
+  FAILED: "The transcript could not be generated.",
 }
 
-const LANG_OPTIONS: { value: "auto" | "ar-EG" | "en-US"; label: string; flag: string }[] = [
-  { value: "auto", label: "Auto", flag: "🌐" },
-  { value: "ar-EG", label: "عربي", flag: "🇪🇬" },
-  { value: "en-US", label: "English", flag: "🇺🇸" },
+const LANG_OPTIONS: { value: "ar-EG" | "en-US"; label: string }[] = [
+  { value: "ar-EG", label: "عربي" },
+  { value: "en-US", label: "English" },
 ]
 
 interface TranscriptPanelProps {
   meetingId: string
   liveSegments?: LiveTranscriptSegment[]
-  speechLang?: "auto" | "ar-EG" | "en-US"
-  onLangChange?: (lang: "auto" | "ar-EG" | "en-US") => void
+  speechLang?: "ar-EG" | "en-US"
+  onLangChange?: (lang: "ar-EG" | "en-US") => void
   className?: string
 }
 
-export function TranscriptPanel({ meetingId, liveSegments, speechLang = "auto", onLangChange, className }: TranscriptPanelProps) {
+export function TranscriptPanel({
+  meetingId,
+  liveSegments,
+  speechLang = "ar-EG",
+  onLangChange,
+  className,
+}: TranscriptPanelProps) {
   const { data, isLoading } = useMeetingTranscript(meetingId)
-  const status = data?.status ?? "PENDING"
   const dbSegments = data?.segments ?? []
+  const hasDB = dbSegments.length > 0
+  const status = hasDB ? "READY" : (data?.status ?? "PENDING")
 
   const isLive = Boolean(liveSegments) // panel is open during a live call
   const hasLiveSegments = Boolean(liveSegments && liveSegments.length > 0)
-  const hasDB = dbSegments.length > 0
 
   return (
     <div className={cn("flex flex-col h-full bg-surface-container-lowest", className)}>
@@ -53,7 +58,7 @@ export function TranscriptPanel({ meetingId, liveSegments, speechLang = "auto", 
           <h2 className="font-label-lg text-label-lg text-primary">Transcript</h2>
         </div>
         <div className="flex items-center gap-2">
-          {isLive && hasLiveSegments && (
+          {isLive && (
             <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               LIVE
@@ -61,23 +66,22 @@ export function TranscriptPanel({ meetingId, liveSegments, speechLang = "auto", 
           )}
           {!isLive && <TranscriptStatusBadge status={status} />}
 
-          {/* Language selector — only shown during live call */}
+          {/* Language selector — 2 options: عربي & English */}
           {isLive && onLangChange && (
-            <div className="flex items-center gap-0.5 bg-surface-container-high rounded-full px-1 py-0.5">
+            <div className="flex items-center gap-1 bg-surface-container-high rounded-full p-0.5">
               {LANG_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
-                  title={`Recognize speech in ${opt.label}`}
                   onClick={() => onLangChange(opt.value)}
                   className={cn(
-                    "px-2 py-0.5 rounded-full text-[11px] font-semibold transition-colors",
+                    "px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors",
                     speechLang === opt.value
-                      ? "bg-primary text-white"
-                      : "text-on-surface-variant hover:bg-surface-variant",
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-on-surface-variant hover:text-on-surface",
                   )}
                 >
-                  {opt.flag} {opt.label}
+                  {opt.label}
                 </button>
               ))}
             </div>
@@ -88,7 +92,7 @@ export function TranscriptPanel({ meetingId, liveSegments, speechLang = "auto", 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-md space-y-3">
-          {isLoading && !hasLiveSegments && (
+          {isLoading && !hasLiveSegments && !hasDB && (
             <p className="font-body-sm text-body-sm text-on-surface-variant">Loading…</p>
           )}
 
@@ -102,7 +106,7 @@ export function TranscriptPanel({ meetingId, liveSegments, speechLang = "auto", 
               </p>
               {isLive && (
                 <p className="font-body-sm text-body-sm text-on-surface-variant/70 mt-2 px-md">
-                  Make sure your microphone is on and you&apos;ve selected the correct language above.
+                  تأكد من فتح الميكروفون واختيار اللغة المناسبة أعلاه أثناء الحديث.
                 </p>
               )}
             </div>

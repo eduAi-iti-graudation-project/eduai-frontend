@@ -104,7 +104,7 @@ export function useLivekitCall(
   token: string | undefined,
   roomName: string | undefined,
   devices?: { cameraId?: string; micId?: string },
-  speechLang?: "auto" | "ar-EG" | "en-US",
+  speechLang?: "ar-EG" | "en-US",
 ): LivekitCall {
   const roomRef = useRef<Room | null>(null)
   const [connected, setConnected] = useState(false)
@@ -491,11 +491,8 @@ export function useLivekitCall(
 
     if (!SpeechRecognition) return
 
-    // Resolve the actual BCP-47 language tag to pass to the API
-    const resolvedLang = (() => {
-      if (!speechLang || speechLang === "auto") return navigator.language || "en-US"
-      return speechLang
-    })()
+    // Resolve the actual BCP-47 language tag (default ar-EG)
+    const resolvedLang = speechLang || "ar-EG"
 
     let recognition: any = null
     try {
