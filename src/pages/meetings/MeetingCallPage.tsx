@@ -61,6 +61,8 @@ const [session, setSession] = useState<JoinSession | null>(null)
   const localRecorderRef = useRef<MediaRecorder | null>(null)
   const localChunksRef = useRef<Blob[]>([])
   const localDisplayStreamRef = useRef<MediaStream | null>(null)
+  const videoContainerRef = useRef<HTMLDivElement>(null)
+  const canvasStopRef = useRef<(() => void) | null>(null)
   const queryClient = useQueryClient()
 
   // React Router reuses this component across /meetings/:id/call navigations,
@@ -111,11 +113,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
  const handleStartLocalRecording = async () => {
   if (!meeting || isLocalRecording) return
   try {
-    const stream = await navigator.mediaDevices.getDisplayMedia({
-      video: true,
-      audio: true,
-    })
-    localDisplayStreamRef.current = stream
+    const containerEl = videoContainerRef.current || document.body
 
     const audioTracks: MediaStreamTrack[] = []
     const micPub = call.localParticipant?.getTrackPublication("microphone" as any)
@@ -132,11 +130,70 @@ const [session, setSession] = useState<JoinSession | null>(null)
       })
     })
 
+    document.querySelectorAll<HTMLMediaElement>("audio, video").forEach((el) => {
+      if (el.srcObject instanceof MediaStream) {
+        el.srcObject.getAudioTracks().forEach((track) => {
+          if (track.enabled && !audioTracks.some((t) => t.id === track.id)) {
+            audioTracks.push(track.clone())
+          }
+        })
+      }
+    })
+
+    const canvas = document.createElement("canvas")
+    canvas.width = 1280
+    canvas.height = 720
+    const ctx = canvas.getContext("2d")!
+
+    let animId: number | null = null
+
+    const drawFrame = () => {
+      ctx.fillStyle = "#0f172a"
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      const videos = Array.from(containerEl.querySelectorAll<HTMLVideoElement>("video")).filter(
+        (v) => v.readyState >= 2 && !v.paused && v.videoWidth > 0,
+      )
+
+      if (videos.length === 0) {
+        ctx.fillStyle = "#ffffff"
+        ctx.font = "bold 32px sans-serif"
+        ctx.textAlign = "center"
+        ctx.fillText("Meeting Recording", canvas.width / 2, canvas.height / 2 - 20)
+        ctx.fillStyle = "#94a3b8"
+        ctx.font = "20px sans-serif"
+        ctx.fillText(meeting.title || "EduAI Meeting", canvas.width / 2, canvas.height / 2 + 20)
+      } else if (videos.length === 1) {
+        ctx.drawImage(videos[0], 0, 0, canvas.width, canvas.height)
+      } else {
+        const cols = videos.length > 2 ? 2 : videos.length
+        const rows = Math.ceil(videos.length / cols)
+        const cellW = canvas.width / cols
+        const cellH = canvas.height / rows
+
+        videos.forEach((v, idx) => {
+          const col = idx % cols
+          const row = Math.floor(idx / cols)
+          const x = col * cellW
+          const y = row * cellH
+          ctx.drawImage(v, x, y, cellW, cellH)
+        })
+      }
+
+      animId = requestAnimationFrame(drawFrame)
+    }
+
+    animId = requestAnimationFrame(drawFrame)
+    canvasStopRef.current = () => {
+      if (animId !== null) cancelAnimationFrame(animId)
+    }
+
+    const canvasStream = canvas.captureStream(30)
     const combinedStream = new MediaStream([
-      ...stream.getVideoTracks(),
-      ...stream.getAudioTracks(),
+      ...canvasStream.getVideoTracks(),
       ...audioTracks,
     ])
+    localDisplayStreamRef.current = combinedStream
 
     const mimeTypes = [
       "video/webm;codecs=vp9,opus",
@@ -151,10 +208,14 @@ const [session, setSession] = useState<JoinSession | null>(null)
       if (e.data && e.data.size > 0) localChunksRef.current.push(e.data)
     }
     recorder.onstop = async () => {
+      if (canvasStopRef.current) {
+        canvasStopRef.current()
+        canvasStopRef.current = null
+      }
       const blob = new Blob(localChunksRef.current, { type: mimeType })
       if (blob.size > 1000 && meeting?.id) {
         const cached = await saveLocalRecording(meeting.id, blob)
-        toast.success(`Recording saved locally (${(cached.sizeBytes / 1024 / 1024).toFixed(1)} MB)`)
+        toast.success(`Meeting recording saved (${(cached.sizeBytes / 1024 / 1024).toFixed(1)} MB)`)
       }
       localDisplayStreamRef.current?.getTracks().forEach((t) => t.stop())
       localDisplayStreamRef.current = null
@@ -162,10 +223,10 @@ const [session, setSession] = useState<JoinSession | null>(null)
     recorder.start(1000)
     localRecorderRef.current = recorder
     setIsLocalRecording(true)
-    toast.success("Local recording started")
+    toast.success("Meeting recording started")
   } catch (err: any) {
     console.warn("[local-recording] start failed:", err)
-    toast.error(`Couldn't start local recording: ${err?.message ?? "Permission denied"}`)
+    toast.error(`Couldn't start meeting recording: ${err?.message ?? "Failed"}`)
   }
  }
 
@@ -372,7 +433,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
 
    <div className="flex-1 flex overflow-hidden">
     <main className="flex-1 flex flex-col min-w-0">
-     <div className="flex-1 p-md overflow-y-auto">
+      <div ref={videoContainerRef} className="flex-1 p-md overflow-y-auto">
       {call.error ? (
        <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
         <span className="material-symbols-outlined text-[48px] text-danger">error_outline</span>
