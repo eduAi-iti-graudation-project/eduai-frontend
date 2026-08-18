@@ -153,6 +153,38 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
+  const handleDownloadLocal = () => {
+    if (!cached) return
+    const file = localRecordingAsFile(cached)
+    const url = URL.createObjectURL(file)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = cached.fileName
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+
+  const handleDownloadCloud = async () => {
+    if (!recording.data?.recordingUrl) return
+    try {
+      const res = await fetch(recording.data.recordingUrl)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      const ext = blob.type.includes("mp4") ? "mp4" : "webm"
+      a.download = `meeting-recording-${id?.slice(0, 8)}.${ext}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch {
+      window.open(recording.data.recordingUrl, "_blank")
+    }
+  }
+
   const hasLocalPreview = (!!cached || !!pickedPreviewUrl)
   const localPreviewSrc = cached ? cached.objectUrl : pickedPreviewUrl
 
@@ -203,11 +235,9 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
               {uploadRecording.isPending ? "Uploading to cloud..." : "Upload Recording to Cloud"}
             </Button>
             {cached && (
-              <Button asChild variant="outline" size="sm">
-                <a href={cached.objectUrl} download={cached.fileName}>
-                  <span className="material-symbols-outlined text-[18px] mr-1.5">download</span>
-                  Download Copy
-                </a>
+              <Button variant="outline" size="sm" onClick={handleDownloadLocal}>
+                <span className="material-symbols-outlined text-[18px] mr-1.5">download</span>
+                Download Copy
               </Button>
             )}
             <input
@@ -334,11 +364,9 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
             </div>
           )}
         </div>
-        <Button asChild variant="outline">
-          <a href={recording.data.recordingUrl} download target="_blank" rel="noreferrer">
-            <span className="material-symbols-outlined text-[18px] mr-1">download</span>
-            Download recording
-          </a>
+        <Button variant="outline" onClick={handleDownloadCloud}>
+          <span className="material-symbols-outlined text-[18px] mr-1">download</span>
+          Download recording
         </Button>
       </div>
     </div>
