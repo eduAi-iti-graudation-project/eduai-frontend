@@ -221,7 +221,7 @@ export interface ChatResponse {
 
 export interface ImportAttendanceRecord {
   studentId: string
-  classId: string
+  courseOfferingId: string
   date: string
   status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED"
 }
@@ -1563,19 +1563,172 @@ export async function deleteMaterial(id: string): Promise<void> {
 
 // ── Attendance ────────────────────────────────────────────────────
 
-export async function importAttendance(records: ImportAttendanceRecord[]): Promise<components["schemas"]["AttendanceResponseDto"][]> {
-  const res = await api.post<components["schemas"]["AttendanceResponseDto"][]>("/attendance/import", { records })
+export type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED"
+
+export interface AttendanceRecord {
+  id: string
+  studentId: string
+  sectionId: string
+  courseOfferingId: string | null
+  date: string
+  status: AttendanceStatus
+  createdAt: string
+  updatedAt: string
+  student?: { id: string; name: string }
+  section?: { id: string; name: string; gradeLevel?: { id: string; level: number; name?: string | null } }
+  courseOffering?: { id: string; course?: { id: string; name: string } }
+}
+
+export interface AttendanceSession {
+  id: string
+  courseOfferingId: string
+  teacherId: string
+  date: string
+  token: string
+  status: "OPEN" | "CLOSED" | "EXPIRED"
+  openedAt: string
+  expiresAt: string
+  closedAt: string | null
+  courseName?: string
+  sectionName?: string
+}
+
+export interface CheckInResult {
+  alreadyCheckedIn: boolean
+  status: AttendanceStatus
+  date: string
+  courseName: string
+  sectionName: string
+  teacherName: string
+}
+
+export interface TeacherAttendanceRecord {
+  id: string
+  teacherId: string
+  courseOfferingId: string
+  date: string
+  status: AttendanceStatus
+  source: "SELF" | "ADMIN"
+  sessionId: string | null
+  checkedInAt: string
+  createdAt: string
+  updatedAt: string
+  teacher?: { id: string; name: string }
+  courseOffering?: { id: string; course?: { id: string; name: string }; section?: { id: string; name: string } }
+}
+
+export type FineStatus = "PAID" | "PARTIAL" | "POSTPONED" | "UNPAID"
+export type FineType = "ATTENDANCE" | "LATE" | "OTHER"
+
+export interface TeacherFine {
+  id: string
+  teacherId: string
+  amount: number | string
+  reason: string
+  type: FineType
+  status: FineStatus
+  amountPaid: number | string | null
+  dueDate: string | null
+  issuedById: string
+  paidAt: string | null
+  createdAt: string
+  updatedAt: string
+  issuedBy?: { id: string; name: string }
+}
+
+export interface TeacherFineInput {
+  amount: number
+  reason: string
+  type?: FineType
+  status?: FineStatus
+  amountPaid?: number
+  dueDate?: string
+}
+
+export interface TeacherAttendanceLedgerQuery {
+  teacherId?: string
+  from?: string
+  to?: string
+  status?: AttendanceStatus
+}
+
+export async function importAttendance(records: ImportAttendanceRecord[]): Promise<AttendanceRecord[]> {
+  const res = await api.post<AttendanceRecord[]>("/attendance/import", { records })
   return res.data
 }
 
-export async function getStudentAttendance(studentId: string): Promise<components["schemas"]["AttendanceResponseDto"][]> {
-  const res = await api.get<components["schemas"]["AttendanceResponseDto"][]>(`/students/${studentId}/attendance`)
+export async function getStudentAttendance(studentId: string): Promise<AttendanceRecord[]> {
+  const res = await api.get<AttendanceRecord[]>(`/students/${studentId}/attendance`)
   return res.data
 }
 
-export async function getClassAttendance(classId: string): Promise<components["schemas"]["AttendanceResponseDto"][]> {
-  const res = await api.get<components["schemas"]["AttendanceResponseDto"][]>(`/classes/${classId}/attendance`)
+export async function getClassAttendance(classId: string): Promise<AttendanceRecord[]> {
+  const res = await api.get<AttendanceRecord[]>(`/classes/${classId}/attendance`)
   return res.data
+}
+
+export async function getOfferingAttendance(offeringId: string): Promise<AttendanceRecord[]> {
+  const res = await api.get<AttendanceRecord[]>(`/offerings/${offeringId}/attendance`)
+  return res.data
+}
+
+export async function openAttendanceSession(courseOfferingId: string): Promise<AttendanceSession> {
+  const res = await api.post<AttendanceSession>("/attendance/sessions", { courseOfferingId })
+  return res.data
+}
+
+export async function getAttendanceSession(id: string): Promise<AttendanceSession> {
+  const res = await api.get<AttendanceSession>(`/attendance/sessions/${id}`)
+  return res.data
+}
+
+export async function closeAttendanceSession(id: string): Promise<AttendanceSession> {
+  const res = await api.post<AttendanceSession>(`/attendance/sessions/${id}/close`)
+  return res.data
+}
+
+export async function checkInAttendance(token: string): Promise<CheckInResult> {
+  const res = await api.post<CheckInResult>("/attendance/check-in", { token })
+  return res.data
+}
+
+export async function getMyTeacherAttendance(): Promise<TeacherAttendanceRecord[]> {
+  const res = await api.get<TeacherAttendanceRecord[]>("/attendance/teacher/my")
+  return res.data
+}
+
+export async function getMyTeacherFines(): Promise<TeacherFine[]> {
+  const res = await api.get<TeacherFine[]>("/attendance/teacher/my-fines")
+  return res.data
+}
+
+export async function getTeacherAttendanceLedger(query: TeacherAttendanceLedgerQuery = {}): Promise<TeacherAttendanceRecord[]> {
+  const res = await api.get<TeacherAttendanceRecord[]>("/attendance/teachers", { params: query })
+  return res.data
+}
+
+export async function getTeacherAttendanceById(teacherId: string): Promise<TeacherAttendanceRecord[]> {
+  const res = await api.get<TeacherAttendanceRecord[]>(`/teachers/${teacherId}/attendance`)
+  return res.data
+}
+
+export async function getTeacherFines(teacherId: string): Promise<TeacherFine[]> {
+  const res = await api.get<TeacherFine[]>(`/teachers/${teacherId}/fines`)
+  return res.data
+}
+
+export async function createTeacherFine(teacherId: string, payload: TeacherFineInput): Promise<TeacherFine> {
+  const res = await api.post<TeacherFine>(`/teachers/${teacherId}/fines`, payload)
+  return res.data
+}
+
+export async function updateTeacherFine(fineId: string, payload: Partial<TeacherFineInput>): Promise<TeacherFine> {
+  const res = await api.patch<TeacherFine>(`/fines/${fineId}`, payload)
+  return res.data
+}
+
+export async function deleteTeacherFine(fineId: string): Promise<void> {
+  await api.delete(`/fines/${fineId}`)
 }
 
 // ── Student Grades ────────────────────────────────────────────────

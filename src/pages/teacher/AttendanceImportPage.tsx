@@ -1,11 +1,11 @@
-import { useState } from "react"
-import { useSearchParams, Link } from "react-router-dom"
+import { useMemo, useState } from "react"
+import { Link } from "react-router-dom"
 import { useClassDetail } from "@/hooks/use-classes"
 import { useImportAttendance } from "@/hooks/use-attendance"
+import { useTeacherOfferings } from "@/hooks/use-labs"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 
 type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED"
 
@@ -17,13 +17,16 @@ const STATUS_OPTIONS: { value: AttendanceStatus; label: string; color: string }[
 ]
 
 export function AttendanceImportPage() {
- const [searchParams] = useSearchParams()
- const classIdParam = searchParams.get("classId") ?? ""
- const [selectedClassId, setSelectedClassId] = useState(classIdParam)
+ const [selectedOfferingId, setSelectedOfferingId] = useState("")
  const [date, setDate] = useState(new Date().toISOString().split("T")[0])
 
- const actualClassId = classIdParam || selectedClassId
- const { detail, isLoading } = useClassDetail(actualClassId)
+ const offerings = useTeacherOfferings()
+ const selectedOffering = useMemo(
+  () => offerings.data?.find((o) => o.id === selectedOfferingId) ?? null,
+  [offerings.data, selectedOfferingId],
+ )
+ const sectionId = selectedOffering?.section.id ?? ""
+ const { detail, isLoading } = useClassDetail(sectionId)
  const importAttendance = useImportAttendance()
 
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,11 +40,11 @@ export function AttendanceImportPage() {
 
  const handleSubmit = async () => {
   const entries = Object.entries(records)
-  if (entries.length === 0) return
+  if (entries.length === 0 || !selectedOffering) return
 
   const payload = entries.map(([studentId, status]) => ({
    studentId,
-   classId: actualClassId,
+   courseOfferingId: selectedOffering.id,
    date,
    status,
   }))
@@ -54,29 +57,40 @@ export function AttendanceImportPage() {
 
  return (
   <div className="flex-1 p-xl max-w-4xl mx-auto w-full">
-   <Link to={classIdParam ? `/classes/${classIdParam}` : "/classes"} className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors mb-md">
+   <Link to="/attendance" className="inline-flex items-center gap-xs text-on-surface-variant font-label-md hover:text-primary transition-colors mb-md">
     <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-    Back to Class
+    Back to Attendance
    </Link>
 
    <h1 className="font-headline-xl text-headline-xl text-primary mb-xl">Import Attendance</h1>
 
    <div className="bg-surface-container-lowest rounded-lg p-xl mb-xl">
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-md mb-lg">
-     {!classIdParam && (
-      <div>
-       <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Class</label>
-       <Input
-        value={selectedClassId}
-        onChange={(e) => setSelectedClassId(e.target.value)}
-        placeholder="Class ID..."
+     <div>
+      <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Course offering</label>
+      {offerings.isLoading ? (
+       <LoadingState className="py-sm" />
+      ) : (
+       <select
+        value={selectedOfferingId}
+        onChange={(e) => {
+         setSelectedOfferingId(e.target.value)
+         setRecords({})
+        }}
         className="w-full h-auto rounded-lg bg-surface px-4 py-2 font-body-md text-body-md text-on-surface form-input-focus"
-       />
-      </div>
-     )}
+       >
+        <option value="">Select a course offering...</option>
+        {offerings.data?.map((o) => (
+         <option key={o.id} value={o.id}>
+          {o.course.name} · {o.section.name}
+         </option>
+        ))}
+       </select>
+      )}
+     </div>
      <div>
       <label className="font-label-md text-label-md text-on-surface-variant block mb-sm">Date</label>
-      <Input
+      <input
        type="date"
        value={date}
        onChange={(e) => setDate(e.target.value)}
@@ -85,12 +99,12 @@ export function AttendanceImportPage() {
      </div>
     </div>
 
-    {!actualClassId ? (
-     <EmptyState icon="calendar_month" title="Select a class" description="Choose a class to mark attendance." />
+    {!selectedOfferingId ? (
+     <EmptyState icon="calendar_month" title="Select a course offering" description="Choose the offering you want to mark attendance for." />
     ) : isLoading ? (
      <LoadingState className="py-lg" />
     ) : students.length === 0 ? (
-     <EmptyState icon="group" title="No students enrolled" description="Add students to the class before importing attendance." />
+     <EmptyState icon="group" title="No students enrolled" description="Add students to this section before importing attendance." />
     ) : (
      <>
       <p className="font-label-md text-label-md text-primary mb-md">{students.length} students</p>

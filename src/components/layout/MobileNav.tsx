@@ -18,6 +18,7 @@ export function MobileNav() {
  const items: NavItem[] = [
   { icon: "home", label: "Home", id: "home", href: "/dashboard", prefixes: ["/dashboard"] },
   { icon: "school", label: "Sections", id: "classes", href: "/classes", prefixes: ["/classes"] },
+  { icon: "how_to_reg", label: "Attendance", id: "attendance", href: "/attendance", prefixes: ["/attendance"] },
   { icon: "chat_bubble", label: "Messages", id: "chat", href: "/chat", prefixes: ["/chat"] },
   { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/alerts", prefixes: ["/alerts"] },
   { icon: "monitoring", label: "Insights", id: "insights", href: "/insights", prefixes: ["/insights"] },
@@ -36,6 +37,7 @@ const adminItems: NavItem[] = [
   { icon: "home", label: "Home", id: "home", href: "/admin", prefixes: ["/admin"] },
   { icon: "person", label: "Students", id: "students", href: "/admin/students", prefixes: ["/admin/students"] },
   { icon: "school", label: "Teachers", id: "teachers", href: "/admin/teachers", prefixes: ["/admin/teachers"] },
+  { icon: "how_to_reg", label: "Attendance", id: "attendance", href: "/admin/attendance", prefixes: ["/admin/attendance"] },
   { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/admin/alerts", prefixes: ["/admin/alerts"] },
   { icon: "chat_bubble", label: "Messages", id: "chat", href: "/admin/chat", prefixes: ["/admin/chat"] },
   { icon: "campaign", label: "Broadcast", id: "broadcasts", href: "/admin/broadcasts", prefixes: ["/admin/broadcasts"] },

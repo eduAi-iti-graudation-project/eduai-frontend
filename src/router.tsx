@@ -34,6 +34,9 @@ import { SupportPage } from "./pages/teacher/SupportPage"
 import { NotificationsListPage } from "./pages/teacher/NotificationsListPage"
 import { StudentDetailPage } from "./pages/teacher/StudentDetailPage"
 import { AttendanceImportPage } from "./pages/teacher/AttendanceImportPage"
+import { TeacherAttendancePage } from "./pages/teacher/TeacherAttendancePage"
+import { StudentCheckInPage } from "./pages/student/StudentCheckInPage"
+import { AdminAttendancePage } from "./pages/admin/AdminAttendancePage"
 import { ReportsPage } from "./pages/ReportsPage"
 import { StudentDashboardPage } from "./pages/student/StudentDashboardPage"
 import { StudentTimetablePage } from "./pages/student/StudentTimetablePage"
@@ -127,6 +130,7 @@ export const TEACHER_ROUTES = [
   { path: "/assistant", element: <AssistantPage /> },
   { path: "/notifications", element: <NotificationsListPage /> },
   { path: "/reports", element: <ReportsPage /> },
+  { path: "/attendance", element: <TeacherAttendancePage /> },
   { path: "/attendance/import", element: <AttendanceImportPage /> },
   { path: "/meetings", element: <MeetingsListPage /> },
   { path: "/meetings/new", element: <ScheduleMeetingPage /> },
@@ -147,6 +151,7 @@ export const STUDENT_ROUTES = [
   { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
   { path: "/student/grades", element: <MyGradesPage /> },
   { path: "/student/attendance", element: <MyAttendancePage /> },
+  { path: "/student/check-in", element: <StudentCheckInPage /> },
   { path: "/student/homework-help", element: <HomeworkHelpPage /> },
   { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },
   { path: "/student/study-lab", element: <StudyLabPage /> },
@@ -206,6 +211,7 @@ export function adminRoutes() {
     element: <AdminRoute><AdminLayout /></AdminRoute>,
     children: [
       { index: true, element: <AdminDashboardPage /> },
+      { path: "attendance", element: <AdminAttendancePage /> },
       { path: "timetable", element: <AdminTimetablePage /> },
       { path: "assistant", element: <AdminAssistantPage /> },
       { path: "alerts", element: <AdminAlertsPage /> },

@@ -21,9 +21,10 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
  {
   label: "Teaching",
   items: [
-   { icon: "account_tree", label: "Grades & Levels", id: "grades", href: "/grades" },
-   { icon: "school", label: "Sections", id: "classes", href: "/classes" },
-   { icon: "assignment", label: "Assignments", id: "assignments", href: "/assignments" },
+    { icon: "account_tree", label: "Grades & Levels", id: "grades", href: "/grades" },
+    { icon: "school", label: "Sections", id: "classes", href: "/classes" },
+    { icon: "how_to_reg", label: "Attendance", id: "attendance", href: "/attendance" },
+    { icon: "assignment", label: "Assignments", id: "assignments", href: "/assignments" },
    { icon: "assignment_turned_in", label: "Rubrics", id: "rubrics", href: "/rubrics" },
    { icon: "list_alt", label: "Submissions", id: "submissions", href: "/submissions" },
    { icon: "quiz", label: "Quizzes", id: "quizzes", href: "/quizzes" },
@@ -76,6 +77,7 @@ export function Sidebar() {
  const activeItem = path === "/dashboard" ? "dashboard"
   : path.startsWith("/timetable") ? "timetable"
   : path.startsWith("/classes") ? "classes"
+  : path.startsWith("/attendance") ? "attendance"
   : path.startsWith("/assignments") ? "assignments"
   : path.startsWith("/rubrics") ? "rubrics"
   : path.startsWith("/submissions") ? "submissions"
