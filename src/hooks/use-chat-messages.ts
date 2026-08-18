@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as api from "@/lib/api"
 import { useChatSocket } from "./use-chat-socket"
+import { chatThreadsQueryKey } from "./use-chat-threads"
 
 export function chatMessagesQueryKey(threadId: string) {
   return ["chat-threads", threadId, "messages"] as const
@@ -55,12 +56,15 @@ export function useChatMessages(threadId: string | undefined, myId: string | und
   })
   const baselineItems = baseline.data?.items ?? []
 
+  const queryClient = useQueryClient()
+
   const markRead = useMutation({
     mutationFn: () => {
       if (!threadId) return Promise.resolve()
       return api.markThreadRead(threadId)
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: chatThreadsQueryKey() })
       if (myIdRef.current) {
         setMessages((prev) => markCounterpartyRead(prev, myIdRef.current as string, new Date().toISOString()))
       }
