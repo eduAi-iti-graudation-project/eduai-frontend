@@ -139,15 +139,29 @@ export function StruggleSignalsPanel({
 
  return (
   <div className={cn("bg-surface-container-lowest h-[26rem] overflow-y-auto", className)}>
-   {isLoading && <LoadingState />}
-   {isError && (
-    <ErrorState
-     title="Failed to load follow-up suggestions"
-     message={error?.message ?? "Something went wrong"}
-     onRetry={() => refetch()}
-    />
-   )}
-   {!isLoading && !isError && (
+    {extract.isPending && (
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center space-y-3">
+        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+          <span className="material-symbols-outlined text-[32px] text-primary animate-spin">psychology</span>
+        </div>
+        <div>
+          <h3 className="font-label-lg text-label-lg text-on-surface">Analyzing transcript with AI...</h3>
+          <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm mt-1">
+            Scanning transcript lines to extract educational concepts and questions.
+          </p>
+        </div>
+      </div>
+    )}
+
+    {!extract.isPending && isLoading && <LoadingState />}
+    {!extract.isPending && isError && (
+      <ErrorState
+        title="Failed to load follow-up suggestions"
+        message={error?.message ?? "Something went wrong"}
+        onRetry={() => refetch()}
+      />
+    )}
+   {!extract.isPending && !isLoading && !isError && (
     <div className="p-md space-y-4">
      <div>
       <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
