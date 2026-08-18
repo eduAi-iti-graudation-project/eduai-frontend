@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { useAuth } from "@/providers/use-auth"
-import { useMeeting } from "@/hooks/use-meetings"
+import { useMeeting, useUploadMeetingRecording } from "@/hooks/use-meetings"
 import { MeetingStatusBadge, TranscriptStatusBadge } from "@/components/meetings/MeetingStatusBadge"
 import { TranscriptPanel } from "@/components/meetings/TranscriptPanel"
 import { StruggleSignalsPanel } from "@/components/meetings/StruggleSignalsPanel"
@@ -39,8 +39,9 @@ function MetaRow({ icon, label, value }: { icon: string; label: string; value: R
 
 function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
   const { id } = useParams<{ id: string }>()
-  // `meeting.recordingUrl` is the raw storage key — the playable URL is a
-  // short-lived signed link from GET /meetings/:id/recording.
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const uploadRecording = useUploadMeetingRecording()
+
   const recording = useQuery({
     queryKey: ["meetings", id, "recording"],
     queryFn: () => api.getMeetingRecording(id as string),
@@ -48,15 +49,12 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
     staleTime: 5 * 60 * 1000,
   })
 
-  if (!meeting.recordingEnabled) {
-    return (
-      <EmptyState
-        icon="videocam_off"
-        title="Recording was not enabled"
-        description="The host did not enable recording for this meeting."
-      />
-    )
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !id) return
+    uploadRecording.mutate({ id, file })
   }
+
   if (meeting.status !== "ENDED") {
     return (
       <EmptyState
@@ -66,15 +64,39 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
       />
     )
   }
+
   if (!meeting.recordingUrl) {
     return (
-      <EmptyState
-        icon="videocam_off"
-        title="تسجيل الفيديو غير متاح / Recording not saved"
-        description="تم التعبير عن طلب التسجيل أثناء الاجتماع، ولكن حفظ ملف الفيديو يتطلب تفعيل خدمة التخزين السحابي (LiveKit Egress + S3) على السيرفر."
-      />
+      <div className="flex flex-col items-center justify-center py-12 px-4 border border-dashed border-border rounded-xl text-center space-y-4">
+        <span className="material-symbols-outlined text-[48px] text-on-surface-variant">videocam_off</span>
+        <div>
+          <h3 className="font-label-lg text-label-lg text-on-surface mb-1">No recording video file available</h3>
+          <p className="font-body-sm text-body-sm text-on-surface-variant max-w-md">
+            You can upload a recorded video file (MP4 or WebM) for participants to view anytime.
+          </p>
+        </div>
+        {(meeting.isHost || true) && (
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/mp4,video/webm"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <Button
+              disabled={uploadRecording.isPending}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <span className="material-symbols-outlined text-[18px] mr-1.5">upload</span>
+              {uploadRecording.isPending ? "Uploading video..." : "Upload Recording Video"}
+            </Button>
+          </div>
+        )}
+      </div>
     )
   }
+
   if (recording.isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -82,6 +104,7 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
       </div>
     )
   }
+
   if (recording.isError || !recording.data?.recordingUrl) {
     return (
       <EmptyState
@@ -91,6 +114,7 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
       />
     )
   }
+
   return (
     <div className="space-y-md">
       <div className="rounded-xl overflow-hidden bg-black shadow-lg">
@@ -100,7 +124,27 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
           className="w-full max-h-[420px] aspect-video object-contain"
         />
       </div>
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center">
+        {meeting.isHost && (
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/mp4,video/webm"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={uploadRecording.isPending}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <span className="material-symbols-outlined text-[18px] mr-1.5">upload</span>
+              {uploadRecording.isPending ? "Replacing..." : "Replace Video"}
+            </Button>
+          </div>
+        )}
         <Button asChild variant="outline">
           <a href={recording.data.recordingUrl} download target="_blank" rel="noreferrer">
             <span className="material-symbols-outlined text-[18px] mr-1">download</span>

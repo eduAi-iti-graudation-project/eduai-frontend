@@ -106,7 +106,7 @@ export function TranscriptPanel({
               </p>
               {isLive && (
                 <p className="font-body-sm text-body-sm text-on-surface-variant/70 mt-2 px-md">
-                  تأكد من فتح الميكروفون واختيار اللغة المناسبة أعلاه أثناء الحديث.
+                  Ensure your microphone is enabled and select your preferred speech language above while speaking.
                 </p>
               )}
             </div>

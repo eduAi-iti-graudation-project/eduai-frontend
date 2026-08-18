@@ -3827,6 +3827,15 @@ export async function getMeetingRecording(id: string): Promise<{ recordingUrl: s
   return res.data
 }
 
+export async function uploadMeetingRecording(id: string, file: File): Promise<MeetingDetail> {
+  const formData = new FormData()
+  formData.append("file", file)
+  const res = await api.post<MeetingDetail>(`/meetings/${id}/recording/upload`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  })
+  return res.data
+}
+
 export async function getMeetingMessages(id: string): Promise<{ messages: MeetingMessage[] }> {
   const res = await api.get<{ messages: MeetingMessage[] }>(`/meetings/${id}/messages`)
   return res.data
