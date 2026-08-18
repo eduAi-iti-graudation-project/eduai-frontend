@@ -1495,6 +1495,18 @@ export async function downloadReportHtml(id: string): Promise<void> {
   setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
 }
 
+export async function uploadOrgLogo(file: File): Promise<{ logoUrl: string }> {
+  const form = new FormData()
+  form.append("photo", file)
+  const res = await api.post<{ logoUrl: string }>("/organizations/me/logo", form)
+  return res.data
+}
+
+/** URL of a school logo (public endpoint, works without auth for reports). */
+export function orgLogoUrl(organizationId: string): string {
+  return `${API_URL}/organizations/${organizationId}/logo`
+}
+
 // ── Materials ─────────────────────────────────────────────────────
 
 export async function getMaterials(classId: string): Promise<Material[]> {
@@ -2960,6 +2972,7 @@ export interface Organization {
   subscriptionTier: SubscriptionTier
   seatLimit: number | null
   userCount: number
+  logoUrl?: string | null
 }
 
 export interface CheckoutSession {
