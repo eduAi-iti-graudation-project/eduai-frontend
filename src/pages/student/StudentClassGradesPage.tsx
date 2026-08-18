@@ -7,6 +7,14 @@ import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 type Tab = "overview" | "assignments" | "materials"
 
@@ -167,13 +175,13 @@ export function StudentClassGradesPage() {
 
    {tab === "overview" && (
     <div className="space-y-6">
-     {cls.description && (
-      <div className="rounded-lg bg-surface-container-lowest p-md ">
-       <p className="font-body-md text-body-md text-on-surface-variant">{cls.description}</p>
-      </div>
-     )}
+{cls.description && (
+       <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-md ">
+        <p className="font-body-md text-body-md text-on-surface-variant">{cls.description}</p>
+       </div>
+      )}
 
-     <div className="rounded-lg bg-surface-container-lowest p-md ">
+     <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-md ">
       <div className="flex items-center justify-between mb-3">
        <h2 className="font-headline-md text-headline-md text-primary">Assignments</h2>
        <Button asChild variant="outline" className="rounded-lg shrink-0">
@@ -201,7 +209,7 @@ export function StudentClassGradesPage() {
       )}
      </div>
 
-     <div className="rounded-lg bg-surface-container-lowest p-md ">
+     <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-md ">
       <div className="flex items-center justify-between mb-3">
        <h2 className="font-headline-md text-headline-md text-primary">Materials</h2>
        <Button asChild variant="outline" className="rounded-lg shrink-0">
@@ -233,7 +241,7 @@ export function StudentClassGradesPage() {
       )}
      </div>
 
-     <div className="rounded-lg bg-surface-container-lowest p-md ">
+     <div className="rounded-lg bg-surface-container-lowest border border-outline-variant p-md ">
       <div className="flex items-center justify-between mb-2">
        <h2 className="font-headline-md text-headline-md text-primary">Quizzes</h2>
        <Link to="/student/quizzes" className="font-label-sm text-label-sm text-primary hover:underline">
@@ -254,37 +262,65 @@ export function StudentClassGradesPage() {
      {cls.assignments.length === 0 ? (
       <EmptyState icon="assignment" title="No assignments yet" description="This course doesn't have any assignments yet." />
      ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-       {cls.assignments.map((assignment) => {
-        const sub = submissionByAssignment.get(assignment.id)
-        const assignmentGrades = gradesByAssignment.get(assignment.id) ?? []
-        const totalEarned = assignmentGrades.reduce((s, g) => s + g.pointsAwarded, 0)
-        return (
-         <Link
-          key={assignment.id}
-          to={`/student/classes/${classId}/assignments/${assignment.id}`}
-          className="block rounded-lg bg-surface-container-lowest p-md hover:border-primary/40 hover:shadow-card-hover transition-all"
-         >
-          <div className="flex items-start justify-between gap-3 mb-2">
-           <div className="flex-1 min-w-0">
-            <h3 className="font-headline-md text-headline-md text-primary truncate">{assignment.title}</h3>
-            <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 flex items-center gap-2">
-             <span className="material-symbols-outlined text-[15px]">schedule</span>
-             Due {new Date(assignment.dueDate).toLocaleDateString()} · {assignment.totalPoints} pts
-            </p>
-           </div>
-           {assignmentGrades.length > 0 ? (
-            <div className="text-right shrink-0">
-             <p className="font-headline-md text-headline-md text-on-surface">{totalEarned}</p>
-             <p className="font-label-sm text-label-sm text-on-surface-variant">/ {assignment.totalPoints} pts</p>
-            </div>
-           ) : (
-            <StatusChip status={sub?.status} />
-           )}
-          </div>
-         </Link>
-        )
-       })}
+      <div className="rounded-lg bg-surface-container-lowest border border-outline-variant overflow-hidden shadow-sm">
+       <Table>
+        <TableHeader>
+         <TableRow className="bg-surface-container-low hover:bg-surface-container-low">
+          <TableHead className="pl-5">Assignment</TableHead>
+          <TableHead>Due date</TableHead>
+          <TableHead className="text-right">Points</TableHead>
+          <TableHead className="pr-5 text-right">Status</TableHead>
+         </TableRow>
+        </TableHeader>
+        <TableBody>
+         {cls.assignments.map((assignment) => {
+          const sub = submissionByAssignment.get(assignment.id)
+          const assignmentGrades = gradesByAssignment.get(assignment.id) ?? []
+          const totalEarned = assignmentGrades.reduce((s, g) => s + g.pointsAwarded, 0)
+          return (
+           <TableRow key={assignment.id}>
+            <TableCell className="pl-5 py-3">
+             <Link to={`/student/classes/${classId}/assignments/${assignment.id}`} className="group flex items-center gap-3 cursor-pointer">
+              <div className="w-9 h-9 rounded-md bg-primary-container flex items-center justify-center shrink-0">
+               <span className="material-symbols-outlined text-[20px] text-on-primary-container">assignment</span>
+              </div>
+              <div className="min-w-0">
+               <p className="font-body-lg text-body-lg text-on-surface truncate group-hover:text-primary transition-colors">
+                {assignment.title}
+               </p>
+               <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-1">
+                {assignment.description}
+               </p>
+              </div>
+              <span className="ml-auto material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary transition-colors shrink-0">
+               chevron_right
+              </span>
+             </Link>
+            </TableCell>
+            <TableCell>
+             <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant">
+              <span className="material-symbols-outlined text-[14px]">schedule</span>
+              Due {new Date(assignment.dueDate).toLocaleDateString()}
+             </span>
+            </TableCell>
+            <TableCell className="text-right font-body-md text-body-md text-on-surface tabular-nums">
+             {assignment.totalPoints} pts
+            </TableCell>
+            <TableCell className="pr-5 text-right">
+             {assignmentGrades.length > 0 ? (
+              <span className="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface tabular-nums">
+               <span className="text-primary font-semibold">{totalEarned}</span>
+               / {assignment.totalPoints} pts
+              </span>
+             ) : (
+              <StatusChip status={sub?.status} />
+             )}
+            </TableCell>
+           </TableRow>
+          )
+         })}
+        </TableBody>
+       </Table>
       </div>
      )}
     </>

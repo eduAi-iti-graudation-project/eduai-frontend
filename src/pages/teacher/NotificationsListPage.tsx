@@ -57,7 +57,7 @@ export function NotificationsListPage() {
  }
 
  return (
-  <div className="p-xl max-w-3xl mx-auto">
+  <div className="flex-1 p-xl w-full">
    <header className="flex items-center justify-between gap-3 mb-lg">
     <div>
      <h1 className="font-headline-xl text-headline-xl text-primary mb-1">Notifications</h1>
