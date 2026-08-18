@@ -68,17 +68,11 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
   }
   if (!meeting.recordingUrl) {
     return (
-      <div className="py-lg text-center space-y-3 px-lg">
-        <span className="material-symbols-outlined text-[40px] text-on-surface-variant block">cloud_off</span>
-        <p className="font-label-lg text-label-lg text-on-surface">Recording not saved</p>
-        <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm mx-auto">
-          The recording button was pressed during the meeting, but the file could not be saved.
-          This usually means the server is running without cloud storage (LiveKit Egress + S3) configured.
-        </p>
-        <p className="font-body-sm text-body-sm text-primary/80">
-          To enable recordings, set <code className="bg-surface-container px-1 rounded text-xs">SUPABASE_STORAGE_S3_*</code> and <code className="bg-surface-container px-1 rounded text-xs">SUPABASE_MEETINGS_BUCKET</code> in the backend <code className="bg-surface-container px-1 rounded text-xs">.env</code>.
-        </p>
-      </div>
+      <EmptyState
+        icon="videocam_off"
+        title="تسجيل الفيديو غير متاح / Recording not saved"
+        description="تم التعبير عن طلب التسجيل أثناء الاجتماع، ولكن حفظ ملف الفيديو يتطلب تفعيل خدمة التخزين السحابي (LiveKit Egress + S3) على السيرفر."
+      />
     )
   }
   if (recording.isLoading) {
