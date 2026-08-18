@@ -3854,8 +3854,9 @@ export async function getMeetingTranscript(id: string): Promise<MeetingTranscrip
 export async function saveMeetingTranscript(
   id: string,
   segments: { startMs: number; text: string }[],
+  replace = false,
 ): Promise<{ status: string }> {
-  const res = await api.post<{ status: string }>(`/meetings/${id}/transcript`, { segments })
+  const res = await api.post<{ status: string }>(`/meetings/${id}/transcript`, { segments, replace })
   return res.data
 }
 
