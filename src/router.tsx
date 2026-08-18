@@ -58,6 +58,7 @@ import { QuizAttemptsListPage } from "./pages/teacher/QuizAttemptsListPage"
 import { QuizAttemptDetailPage } from "./pages/teacher/QuizAttemptDetailPage"
 import { MyGradesPage } from "./pages/student/MyGradesPage"
 import { MyAttendancePage } from "./pages/student/MyAttendancePage"
+import { StudentAlertsPage } from "./pages/student/StudentAlertsPage"
 import { StudentLabsPage } from "./pages/student/StudentLabsPage"
 import { StudentLabDetailPage } from "./pages/student/StudentLabDetailPage"
 import { LabsPage } from "./pages/teacher/LabsPage"
@@ -151,6 +152,7 @@ export const STUDENT_ROUTES = [
   { path: "/student/submissions/:id", element: <SubmissionStatusPage /> },
   { path: "/student/grades", element: <MyGradesPage /> },
   { path: "/student/attendance", element: <MyAttendancePage /> },
+  { path: "/student/alerts", element: <StudentAlertsPage /> },
   { path: "/student/check-in", element: <StudentCheckInPage /> },
   { path: "/student/homework-help", element: <HomeworkHelpPage /> },
   { path: "/student/homework-help/history", element: <HomeworkHelpHistoryPage /> },

@@ -18,6 +18,7 @@ const navItems = [
  { icon: "calendar_today", label: "Attendance", id: "attendance", href: "/student/attendance" },
  { icon: "video_camera_front", label: "Meetings", id: "meetings", href: "/student/meetings" },
  { icon: "notifications", label: "Notifications", id: "notifications", href: "/student/notifications" },
+ { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/student/alerts" },
 ]
 
 const bottomItems = [
@@ -43,6 +44,7 @@ export function StudentLayout() {
   : path.startsWith("/student/labs") ? "labs"
   : path.startsWith("/student/quizzes") ? "quizzes"
   : path.startsWith("/student/notifications") ? "notifications"
+  : path.startsWith("/student/alerts") ? "alerts"
   : path.startsWith("/student/settings") ? "settings"
   : "dashboard"
 

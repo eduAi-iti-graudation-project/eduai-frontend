@@ -552,6 +552,25 @@ export async function getGuardianAlerts(): Promise<GuardianAlertSummary[]> {
   return res.data
 }
 
+export interface StudentAlertSummary {
+  id: string
+  type: string
+  reason: string
+  status: string
+  studentId: string
+  createdAt: string
+  studentName: string
+  className: string | null
+  grade: { id: string; level: string; name: string } | null
+  teacherName: string | null
+  severity: string | null
+}
+
+export async function getStudentAlerts(): Promise<StudentAlertSummary[]> {
+  const res = await api.get<StudentAlertSummary[]>("/alerts/student")
+  return res.data
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────
 
 export async function getDashboard(): Promise<DashboardOverview> {
