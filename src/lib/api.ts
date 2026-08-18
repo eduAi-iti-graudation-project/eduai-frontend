@@ -3842,6 +3842,14 @@ export async function getMeetingTranscript(id: string): Promise<MeetingTranscrip
   return res.data
 }
 
+export async function saveMeetingTranscript(
+  id: string,
+  segments: { startMs: number; text: string }[],
+): Promise<{ status: string }> {
+  const res = await api.post<{ status: string }>(`/meetings/${id}/transcript`, { segments })
+  return res.data
+}
+
 export async function getStruggleSignalsForMeeting(
   meetingId: string,
 ): Promise<StruggleSignalsForMeeting> {

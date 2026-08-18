@@ -495,7 +495,7 @@ export function useLivekitCall(
       recognition = new SpeechRecognition()
       recognition.continuous = true
       recognition.interimResults = false
-      recognition.lang = navigator.language || "en-US"
+      recognition.lang = navigator.language?.startsWith("ar") ? navigator.language : "ar-EG"
 
       recognition.onresult = (event: any) => {
         for (let i = event.resultIndex; i < event.results.length; ++i) {

@@ -12,6 +12,7 @@ import { useMeeting } from "@/hooks/use-meetings"
 import { MeetingStatusBadge, TranscriptStatusBadge } from "@/components/meetings/MeetingStatusBadge"
 import { TranscriptPanel } from "@/components/meetings/TranscriptPanel"
 import { StruggleSignalsPanel } from "@/components/meetings/StruggleSignalsPanel"
+import { cn } from "@/lib/utils"
 import * as api from "@/lib/api"
 import type { MeetingDetail } from "@/lib/api"
 
@@ -112,35 +113,73 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
 }
 
 function AttendanceTab({ meeting }: { meeting: MeetingDetail }) {
- return (
-  <div className="overflow-x-auto">
-   <table className="w-full text-left">
-    <thead>
-     <tr className="border-b border-border">
-      <th className="py-2 pr-4 font-label-sm text-label-sm text-on-surface-variant">Participant</th>
-      <th className="py-2 pr-4 font-label-sm text-label-sm text-on-surface-variant">Joined</th>
-      <th className="py-2 font-label-sm text-label-sm text-on-surface-variant">Left</th>
-     </tr>
-    </thead>
-    <tbody>
-     {meeting.participants.map((p) => {
-      const record = meeting.attendance.find((a) => a.userId === p.userId)
-      return (
-       <tr key={p.userId} className="border-b border-border/60 last:border-0">
-        <td className="py-2 pr-4 font-body-md text-body-md text-on-surface">{p.name}</td>
-        <td className="py-2 pr-4 font-body-md text-body-md text-on-surface-variant tabular-nums">
-         {record ? formatTime(record.joinedAt) : "—"}
-        </td>
-        <td className="py-2 font-body-md text-body-md text-on-surface-variant tabular-nums">
-         {record?.leftAt ? formatTime(record.leftAt) : "—"}
-        </td>
-       </tr>
-      )
-     })}
-    </tbody>
-   </table>
-  </div>
- )
+  const map = new Map<string, { name: string; joinedAt?: string | null; leftAt?: string | null }>()
+
+  meeting.participants.forEach((p) => {
+    map.set(p.userId, { name: p.name, joinedAt: null, leftAt: null })
+  })
+
+  meeting.attendance.forEach((a) => {
+    map.set(a.userId, {
+      name: a.name || map.get(a.userId)?.name || "Participant",
+      joinedAt: a.joinedAt,
+      leftAt: a.leftAt,
+    })
+  })
+
+  const rows = Array.from(map.entries()).map(([userId, data]) => ({ userId, ...data }))
+
+  if (rows.length === 0) {
+    return (
+      <EmptyState
+        icon="groups"
+        title="No attendance records"
+        description="Attendance records will appear once participants join the meeting."
+      />
+    )
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-left">
+        <thead>
+          <tr className="border-b border-border">
+            <th className="py-2.5 pr-4 font-label-sm text-label-sm text-on-surface-variant">Participant</th>
+            <th className="py-2.5 pr-4 font-label-sm text-label-sm text-on-surface-variant">Joined at</th>
+            <th className="py-2.5 pr-4 font-label-sm text-label-sm text-on-surface-variant">Left at</th>
+            <th className="py-2.5 font-label-sm text-label-sm text-on-surface-variant">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.userId} className="border-b border-border/60 last:border-0">
+              <td className="py-3 pr-4 font-body-md text-body-md text-on-surface font-medium">{row.name}</td>
+              <td className="py-3 pr-4 font-body-md text-body-md text-on-surface-variant tabular-nums">
+                {row.joinedAt ? formatTime(row.joinedAt) : "—"}
+              </td>
+              <td className="py-3 pr-4 font-body-md text-body-md text-on-surface-variant tabular-nums">
+                {row.leftAt ? formatTime(row.leftAt) : row.joinedAt ? "Present" : "—"}
+              </td>
+              <td className="py-3 font-body-md text-body-md">
+                <span
+                  className={cn(
+                    "px-2.5 py-0.5 rounded-full text-xs font-semibold",
+                    row.leftAt
+                      ? "bg-surface-variant text-on-surface-variant"
+                      : row.joinedAt
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-amber-100 text-amber-700",
+                  )}
+                >
+                  {row.leftAt ? "Attended" : row.joinedAt ? "Active" : "Not joined"}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
 }
 
 function formatTime(iso: string): string {

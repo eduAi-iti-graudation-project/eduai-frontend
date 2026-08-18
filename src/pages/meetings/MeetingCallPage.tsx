@@ -16,6 +16,7 @@ import { ControlBar } from "@/components/meetings/ControlBar"
 import { ChatPanel } from "@/components/meetings/ChatPanel"
 import { TranscriptPanel } from "@/components/meetings/TranscriptPanel"
 import { cn } from "@/lib/utils"
+import * as api from "@/lib/api"
 import type { Participant } from "livekit-client"
 
 interface JoinSession {
@@ -101,21 +102,38 @@ const [session, setSession] = useState<JoinSession | null>(null)
   recording.mutate({ id: meeting.id, enabled: !meeting.recordingEnabled })
  }
 
- const handleLeave = async () => {
-  call.disconnect()
-  navigate(`${basePath}/${id}`, { replace: true })
- }
-
- const handleEnd = async () => {
-  if (!meeting) return
-  call.disconnect()
-  try {
-   await end.mutateAsync(meeting.id)
-  } catch {
-   // still navigate away
+  const saveTranscripts = async () => {
+    if (!meeting || call.liveTranscripts.length === 0) return
+    try {
+      await api.saveMeetingTranscript(
+        meeting.id,
+        call.liveTranscripts.map((s) => ({
+          startMs: s.timestampMs,
+          text: `${s.speakerName}: ${s.text}`,
+        })),
+      )
+    } catch {
+      // non-blocking
+    }
   }
-  navigate(`${basePath}/${id}`, { replace: true })
- }
+
+  const handleLeave = async () => {
+    await saveTranscripts()
+    call.disconnect()
+    navigate(`${basePath}/${id}`, { replace: true })
+  }
+
+  const handleEnd = async () => {
+    if (!meeting) return
+    await saveTranscripts()
+    call.disconnect()
+    try {
+      await end.mutateAsync(meeting.id)
+    } catch {
+      // still navigate away
+    }
+    navigate(`${basePath}/${id}`, { replace: true })
+  }
 
  if (isLoading) return <LoadingState className="flex-1" />
  if (isError) {
