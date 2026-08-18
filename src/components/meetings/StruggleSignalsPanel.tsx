@@ -126,9 +126,9 @@ export function StruggleSignalsPanel({
 
  const extract = useMutation({
   mutationFn: () => api.triggerStruggleSignalExtraction(meetingId),
-  onSuccess: () => {
+  onSuccess: (res: any) => {
     toast.success("AI analysis completed", {
-      description: "Checked transcript for student confusion signals.",
+      description: res?.count ? `Found ${res.count} follow-up suggestions!` : "Checked transcript for confusion signals.",
     })
     refresh()
   },
