@@ -1453,6 +1453,48 @@ export async function getReport(id: string): Promise<components["schemas"]["Repo
   return res.data
 }
 
+/** URL of the standalone, print-ready HTML version of a report. */
+export function reportHtmlUrl(id: string, download = false): string {
+  const params = new URLSearchParams()
+  if (download) params.set("download", "true")
+  const qs = params.toString()
+  return `${API_URL}/reports/${id}/html${qs ? `?${qs}` : ""}`
+}
+
+/** Fetch a report's HTML document with the authenticated client (Blob). */
+export async function fetchReportHtml(
+  id: string,
+  download = false,
+): Promise<{ blob: Blob; filename: string }> {
+  const url = `${API_URL}/reports/${id}/html${download ? "?download=true" : ""}`
+  const res = await api.get<Blob>(url, { responseType: "blob" })
+  const disposition = res.headers["content-disposition"] as string | undefined
+  const match = disposition?.match(/filename="?([^";]+)"?/)
+  const filename = match?.[1] ?? `report-${id}.html`
+  return { blob: res.data, filename }
+}
+
+/** Open the print-ready HTML report in a new tab (auth preserved via Blob). */
+export async function openReportHtml(id: string): Promise<void> {
+  const { blob } = await fetchReportHtml(id)
+  const objectUrl = URL.createObjectURL(blob)
+  window.open(objectUrl, "_blank", "noopener")
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+}
+
+/** Download the report as an .html file (auth preserved via Blob). */
+export async function downloadReportHtml(id: string): Promise<void> {
+  const { blob, filename } = await fetchReportHtml(id, true)
+  const objectUrl = URL.createObjectURL(blob)
+  const anchor = document.createElement("a")
+  anchor.href = objectUrl
+  anchor.download = filename
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+}
+
 // ── Materials ─────────────────────────────────────────────────────
 
 export async function getMaterials(classId: string): Promise<Material[]> {

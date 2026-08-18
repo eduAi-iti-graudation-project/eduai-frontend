@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { renderReportSection } from "@/lib/report-sections"
+import { openReportHtml } from "@/lib/api"
+import { Button } from "@/components/ui/button"
 import { RichText } from "@/components/shared/RichText"
 
 const attendanceStatusClasses: Record<string, string> = {
@@ -129,9 +131,21 @@ export function StudentDetailPage() {
       <div className="space-y-sm">
        {reports.map((r) => (
         <div key={r.id} className="p-md rounded-lg bg-surface-container hover:bg-surface-container-low transition-colors">
-         <div className="flex items-center justify-between mb-sm">
+         <div className="flex items-center justify-between mb-sm gap-sm">
           <p className="font-label-md text-label-md text-on-surface">Report</p>
-          <span className="font-label-sm text-label-sm text-on-surface-variant">{new Date(r.createdAt).toLocaleDateString()}</span>
+          <span className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-sm">
+           {new Date(r.createdAt).toLocaleDateString()}
+            <Button
+             type="button"
+             variant="outline"
+             onClick={() => openReportHtml(r.id)}
+             className="h-auto px-sm py-xs rounded-lg font-label-sm text-label-sm gap-1"
+             title="Open the print-ready report document"
+            >
+             <span className="material-symbols-outlined text-body-md">open_in_new</span>
+             Open report
+            </Button>
+          </span>
          </div>
 {(
           [

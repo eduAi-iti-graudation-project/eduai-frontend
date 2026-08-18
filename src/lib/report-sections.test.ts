@@ -15,8 +15,14 @@ describe("renderReportSection", () => {
     expect(renderReportSection("   ")).toBe("No content available.")
   })
 
-  it("pretty-prints structured sections as JSON", () => {
+  it("renders structured sections as readable markdown", () => {
     const content = { message: "Improving", homeSupport: ["Read more"] }
-    expect(renderReportSection(content)).toBe(JSON.stringify(content, null, 2))
+    expect(renderReportSection(content)).toBe(
+      "- **Message:** Improving\n- **Home Support:**\n  - Read more",
+    )
+  })
+
+  it("renders top-level arrays as bullet lists", () => {
+    expect(renderReportSection(["One", "Two"])).toBe("- One\n- Two")
   })
 })

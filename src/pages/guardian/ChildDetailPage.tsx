@@ -9,6 +9,7 @@ import { BackLink } from "@/components/shared/BackLink"
 import { RichText } from "@/components/shared/RichText"
 import { Button } from "@/components/ui/button"
 import { renderReportSection } from "@/lib/report-sections"
+import { openReportHtml } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
 import { WeeklyTimetableGrid } from "@/components/timetable/WeeklyTimetableGrid"
 import { computeChildSummary } from "@/lib/child-stats"
@@ -185,7 +186,7 @@ export function ChildDetailPage() {
                   </Badge>
                 </div>
                 {g.aiFeedback && (
-                  <p className="font-body-md text-body-md text-on-surface-variant">{g.aiFeedback}</p>
+                  <RichText text={g.aiFeedback} className="text-body-md text-on-surface mt-2" />
                 )}
               </div>
             ))
@@ -256,9 +257,21 @@ export function ChildDetailPage() {
           ) : (
             reports.data.map((r) => (
               <div key={r.id} className="rounded-lg bg-surface-container-lowest p-md border border-outline-variant">
-                <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">
-                  {new Date(r.createdAt).toLocaleDateString()}
-                </p>
+                <div className="flex items-center justify-between gap-sm mb-2">
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">
+                    {new Date(r.createdAt).toLocaleDateString()}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => openReportHtml(r.id)}
+                    className="h-auto px-sm py-xs rounded-lg font-label-sm text-label-sm gap-1"
+                    title="Open the print-ready report document"
+                  >
+                    <span className="material-symbols-outlined text-body-md">open_in_new</span>
+                    Open report
+                  </Button>
+                </div>
                 <RichText text={renderReportSection(r.parentSection)} className="text-on-surface" />
               </div>
             ))
