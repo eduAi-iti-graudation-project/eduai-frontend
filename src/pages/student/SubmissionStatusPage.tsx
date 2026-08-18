@@ -6,6 +6,7 @@ import { useAuth } from "@/providers/use-auth"
 import { StatusBadge } from "@/components/ui/StatusBadge"
 import { Badge } from "@/components/ui/badge"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { RichText } from "@/components/shared/RichText"
 
 type ScoreLike = { criterion?: { description?: string; maxPoints?: number } }
 
@@ -148,13 +149,13 @@ export function SubmissionStatusPage() {
           {score.aiFeedback && (
            <div className="mt-2 pt-2 border-t border-border">
             <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">AI Feedback</p>
-            <p className="font-body-md text-body-md text-on-surface">{score.aiFeedback}</p>
+            <RichText text={score.aiFeedback} className="text-body-md text-on-surface" />
            </div>
           )}
           {score.teacherNotes && (
            <div className="mt-2 pt-2 border-t border-border">
             <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">Teacher Notes</p>
-            <p className="font-body-md text-body-md text-on-surface">{score.teacherNotes}</p>
+            <RichText text={score.teacherNotes} className="text-body-md text-on-surface" />
            </div>
           )}
          </div>

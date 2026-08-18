@@ -83,7 +83,7 @@ export function SubmissionDetailPage() {
 
    {/* Status-specific banner */}
    {(sub.status === "SUBMITTED" || sub.status === "GRADING_IN_PROGRESS") && (
-    <div className="bg-primary-fixed/20 rounded-lg p-xl mb-xl border border-primary-fixed/30 flex items-center gap-md">
+    <div className="bg-primary-fixed/20 rounded-lg p-lg mb-lg border border-primary-fixed/30 flex items-center gap-md">
      <span className="material-symbols-outlined text-[32px] text-primary">hourglass_top</span>
      <div>
       <h2 className="font-headline-md text-headline-md text-primary mb-xs">Grading in Progress</h2>
@@ -97,7 +97,7 @@ export function SubmissionDetailPage() {
    )}
 
    {sub.status === "REVIEW_READY" && (
-    <div className="bg-secondary-fixed/20 rounded-lg p-xl mb-xl border border-secondary-fixed/30 flex items-center gap-md">
+    <div className="bg-secondary-fixed/20 rounded-lg p-lg mb-lg border border-secondary-fixed/30 flex items-center gap-md">
      <span className="material-symbols-outlined text-[32px] text-secondary">rate_review</span>
      <div>
       <h2 className="font-headline-md text-headline-md text-secondary mb-xs">Ready for Review</h2>
@@ -107,7 +107,7 @@ export function SubmissionDetailPage() {
    )}
 
    {sub.status === "CONFIRMED" && (
-    <div className="bg-primary-container/20 rounded-lg p-xl mb-xl border border-primary-container/30 flex items-center gap-md">
+    <div className="bg-primary-container/20 rounded-lg p-lg mb-lg border border-primary-container/30 flex items-center gap-md">
      <span className="material-symbols-outlined text-[32px] text-primary">check_circle</span>
      <div>
       <h2 className="font-headline-md text-headline-md text-primary mb-xs">Confirmed</h2>
@@ -116,10 +116,10 @@ export function SubmissionDetailPage() {
     </div>
    )}
 
-   <div className="grid grid-cols-1 lg:grid-cols-5 gap-xl">
+   <div className="grid grid-cols-1 lg:grid-cols-5 gap-lg">
     {/* Left panel — Student & Content */}
-    <div className="stagger-enter lg:col-span-3 space-y-md">
-     <div className="bg-surface-container-lowest rounded-lg p-xl ">
+    <div className="stagger-enter lg:col-span-2 space-y-md">
+     <div className="bg-surface-container-lowest rounded-lg p-lg ">
       <div className="flex items-center gap-md mb-lg">
        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
        <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-semibold font-label-md">{(sub as any).student?.name?.[0] ?? "S"}</div>
@@ -163,8 +163,8 @@ export function SubmissionDetailPage() {
     </div>
 
     {/* Right panel — Scores */}
-    <div className="lg:col-span-2 space-y-md">
-     <div className="bg-surface-container-lowest rounded-lg p-xl ">
+    <div className="lg:col-span-3 space-y-md">
+     <div className="bg-surface-container-lowest rounded-lg p-lg ">
       <h3 className="font-headline-md text-headline-md text-primary mb-lg">Scores</h3>
 
       {(sub.status === "SUBMITTED" || sub.status === "GRADING_IN_PROGRESS") && (
@@ -195,9 +195,9 @@ export function SubmissionDetailPage() {
           </div>
 
           {score.aiFeedback && (
-           <div className="bg-primary-fixed/10 rounded-lg p-sm">
-            <p className="font-label-sm text-label-sm text-primary mb-xs">AI Feedback</p>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">{score.aiFeedback}</p>
+           <div className="bg-primary-fixed/10 rounded-lg p-md border border-primary-fixed/20">
+            <p className="font-label-sm text-label-sm text-primary mb-1">AI Feedback</p>
+            <RichText text={score.aiFeedback} className="text-body-md text-on-surface" />
            </div>
           )}
 

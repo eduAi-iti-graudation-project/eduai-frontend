@@ -1,4 +1,5 @@
 import type { DiagnosisPayload } from "@/lib/api"
+import { RichText } from "@/components/shared/RichText"
 
 const severityConfig: Record<string, { icon: string; label: string; class: string }> = {
  HIGH: { icon: "error", label: "High", class: "bg-primary text-primary-foreground" },
@@ -32,12 +33,13 @@ export function AlertDetailDiagnosis({ diagnosis }: AlertDetailDiagnosisProps) {
     </div>
 
     {summary && (
-     <p className="font-body-md text-body-md text-on-surface mb-2">{summary}</p>
+     <RichText text={summary} className="text-body-md text-on-surface mb-2" />
     )}
     {classContext && (
-     <p className="font-body-sm text-body-sm text-on-surface-variant bg-surface-container-low rounded-lg p-3">
-      {classContext}
-     </p>
+     <RichText
+      text={classContext}
+      className="text-body-md text-on-surface-variant bg-surface-container-low rounded-lg p-3"
+     />
     )}
    </div>
   )
