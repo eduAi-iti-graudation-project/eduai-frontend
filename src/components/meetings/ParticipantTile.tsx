@@ -144,6 +144,7 @@ export function ParticipantTile({
 
   return (
     <div
+      data-participant-identity={participant.identity}
       className={cn(
         "relative rounded-2xl overflow-hidden bg-[#1a1a2e] aspect-video flex items-center justify-center transition-all duration-200",
         // Speaking ring — pulsing colored border like Google Meet

@@ -90,14 +90,19 @@ const [session, setSession] = useState<JoinSession | null>(null)
  )
 
   const participants = useMemo<Participant[]>(() => {
-   if (!call.localParticipant) return call.participants
-   const remotes = call.participants.filter(
-    // A remote with our own identity is a stale echo/ghost from a previous
-    // connection — never render it as a separate tile.
-    (p) => p.identity !== call.localParticipant?.identity,
-   )
-   return [call.localParticipant, ...remotes]
+    if (!call.localParticipant) return call.participants
+    const remotes = call.participants.filter(
+      // A remote with our own identity is a stale echo/ghost from a previous
+      // connection — never render it as a separate tile.
+      (p) => p.identity !== call.localParticipant?.identity,
+    )
+    return [call.localParticipant, ...remotes]
   }, [call.localParticipant, call.participants])
+
+  const participantsRef = useRef<Participant[]>([])
+  useEffect(() => {
+    participantsRef.current = participants
+  }, [participants])
 
  const handleJoin = async ({ cameraId, micId }: { cameraId?: string; micId?: string }) => {
   if (!id || joining) return
@@ -151,11 +156,9 @@ const [session, setSession] = useState<JoinSession | null>(null)
       ctx.fillStyle = "#0f172a"
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      const videos = Array.from(containerEl.querySelectorAll<HTMLVideoElement>("video")).filter(
-        (v) => v.readyState >= 2 && !v.paused && v.videoWidth > 0,
-      )
+      const activeParticipants = participantsRef.current.length > 0 ? participantsRef.current : []
 
-      if (videos.length === 0) {
+      if (activeParticipants.length === 0) {
         ctx.fillStyle = "#ffffff"
         ctx.font = "bold 32px sans-serif"
         ctx.textAlign = "center"
@@ -163,20 +166,87 @@ const [session, setSession] = useState<JoinSession | null>(null)
         ctx.fillStyle = "#94a3b8"
         ctx.font = "20px sans-serif"
         ctx.fillText(meeting.title || "EduAI Meeting", canvas.width / 2, canvas.height / 2 + 20)
-      } else if (videos.length === 1) {
-        ctx.drawImage(videos[0], 0, 0, canvas.width, canvas.height)
       } else {
-        const cols = videos.length > 2 ? 2 : videos.length
-        const rows = Math.ceil(videos.length / cols)
+        const count = activeParticipants.length
+        const cols = count > 2 ? 2 : count
+        const rows = Math.ceil(count / cols)
         const cellW = canvas.width / cols
         const cellH = canvas.height / rows
 
-        videos.forEach((v, idx) => {
+        activeParticipants.forEach((p, idx) => {
           const col = idx % cols
           const row = Math.floor(idx / cols)
           const x = col * cellW
           const y = row * cellH
-          ctx.drawImage(v, x, y, cellW, cellH)
+
+          // 1. Tile Background
+          ctx.fillStyle = "#1e293b"
+          ctx.fillRect(x + 4, y + 4, cellW - 8, cellH - 8)
+
+          // 2. Find video element for this participant
+          const tileElements = Array.from(containerEl.querySelectorAll("[data-participant-identity]"))
+          const tileEl = tileElements.find(
+            (el) => el.getAttribute("data-participant-identity") === p.identity,
+          ) || containerEl
+          const videoEl = tileEl.querySelector<HTMLVideoElement>("video")
+
+          let hasDrawnVideo = false
+          if (videoEl && videoEl.readyState >= 2 && !videoEl.paused && videoEl.videoWidth > 0) {
+            try {
+              ctx.drawImage(videoEl, x + 4, y + 4, cellW - 8, cellH - 8)
+              hasDrawnVideo = true
+            } catch {}
+          }
+
+          if (!hasDrawnVideo) {
+            // Draw Avatar & Initials
+            const name = p.name || p.identity || "Participant"
+            const initials = name
+              .split(" ")
+              .map((w) => w[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2)
+
+            const avatarRadius = Math.min(cellW, cellH) * 0.18
+            const centerX = x + cellW / 2
+            const centerY = y + cellH / 2 - 10
+
+            // Draw Avatar Circle
+            ctx.beginPath()
+            ctx.arc(centerX, centerY, avatarRadius, 0, Math.PI * 2)
+            ctx.fillStyle = "#4f46e5"
+            ctx.fill()
+
+            // Draw Initials
+            ctx.fillStyle = "#ffffff"
+            ctx.font = `bold ${Math.max(16, avatarRadius * 0.7)}px sans-serif`
+            ctx.textAlign = "center"
+            ctx.textBaseline = "middle"
+            ctx.fillText(initials, centerX, centerY)
+
+            // Camera off text
+            ctx.fillStyle = "#94a3b8"
+            ctx.font = "14px sans-serif"
+            ctx.textBaseline = "alphabetic"
+            ctx.fillText("Camera off", centerX, centerY + avatarRadius + 22)
+          }
+
+          // 3. Name Badge Overlay
+          const pName = p.name || p.identity || "Participant"
+          ctx.fillStyle = "rgba(15, 23, 42, 0.75)"
+          ctx.font = "bold 14px sans-serif"
+          ctx.textAlign = "left"
+          ctx.textBaseline = "alphabetic"
+          const textMetrics = ctx.measureText(pName)
+          const badgeW = textMetrics.width + 20
+          const badgeH = 26
+          const badgeX = x + 12
+          const badgeY = y + cellH - badgeH - 12
+
+          ctx.fillRect(badgeX, badgeY, badgeW, badgeH)
+          ctx.fillStyle = "#ffffff"
+          ctx.fillText(pName, badgeX + 10, badgeY + 18)
         })
       }
 
