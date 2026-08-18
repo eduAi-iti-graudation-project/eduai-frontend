@@ -178,27 +178,34 @@ describe("LabsPage", () => {
     renderPage()
     await screen.findByText("Grade 9")
 
-    screen.getByRole("button", { name: "New lab" }).click()
-
-    // Default selection: the section the top bar is filtered to (9-A).
-    expect(await screen.findByText(/1 section selected/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole("button", { name: "New lab" }))
     const dialog = await screen.findByRole("dialog")
+
+    // Step 1 — Class: grade/course are pre-selected from the top bar.
+    const classCombos = within(dialog).getAllByRole("combobox")
+    expect(classCombos[0].textContent).toContain("Grade 9")
+    expect(classCombos[1].textContent).toContain("Physics")
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
+
+    // Step 2 — Unit.
+    fireEvent.click(within(dialog).getAllByRole("combobox")[0])
+    const unitListbox = await screen.findByRole("listbox")
+    fireEvent.click(within(unitListbox).getByText(/Unit 1 — Kinematics/))
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
+
+    // Step 3 — Sections: default selection is the top-bar section (9-A).
+    expect(await screen.findByText(/1 section selected/)).toBeInTheDocument()
     expect(within(dialog).getByText("9-A")).toBeInTheDocument()
     expect(within(dialog).getByText("9-B")).toBeInTheDocument()
-
-    // Add a second section, pick a unit, type a prompt, and generate.
     fireEvent.click(within(dialog).getByRole("checkbox", { name: "9-B" }))
     expect(screen.getByText(/2 sections selected/)).toBeInTheDocument()
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
 
-    const dialogCombos = within(dialog).getAllByRole("combobox")
-    dialogCombos[2].click()
-    const unitListbox = await screen.findByRole("listbox")
-    within(unitListbox).getByText(/Unit 1 — Kinematics/).click()
-
+    // Step 4 — Prompt.
     const promptInput = screen.getByPlaceholderText(/Build a game where students construct a plant cell/)
     fireEvent.change(promptInput, { target: { value: "pendulum period" } })
 
-    screen.getByRole("button", { name: "Generate lab" }).click()
+    fireEvent.click(screen.getByRole("button", { name: "Generate lab" }))
 
     expect(mutateLab).toHaveBeenCalledWith(
       {
@@ -215,36 +222,59 @@ describe("LabsPage", () => {
     renderPage()
     await screen.findByText("Grade 9")
 
-    screen.getByRole("button", { name: "New lab" }).click()
-    await screen.findByText(/1 section selected/)
-
-    // Switch to grade 10 → Chemistry in the dialog.
+    fireEvent.click(screen.getByRole("button", { name: "New lab" }))
     const dialog = await screen.findByRole("dialog")
-    within(dialog).getAllByRole("combobox")[0].click()
+
+    // Step 1 — switch to Grade 10, then Chemistry.
+    fireEvent.click(within(dialog).getAllByRole("combobox")[0])
     const gradeListbox = await screen.findByRole("listbox")
-    within(gradeListbox).getByText("Grade 10").click()
+    fireEvent.click(within(gradeListbox).getByText("Grade 10"))
 
-    // Re-query the dialog after the grade re-render, then open the course
-    // select via its placeholder text.
-    const dialogAfterGrade = await screen.findByRole("dialog")
-    within(dialogAfterGrade).getByText("Choose a course…").click()
+    fireEvent.click(await within(dialog).findByText("Choose a course…"))
     const courseListbox = await screen.findByRole("listbox")
-    within(courseListbox).getByText("Chemistry").click()
+    fireEvent.click(within(courseListbox).getByText("Chemistry"))
 
-    // Only 10-A exists for Chemistry → exactly one section, pre-selected.
+    // Step 2 — pick a unit to unlock the sections step.
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
+    fireEvent.click(within(dialog).getAllByRole("combobox")[0])
+    const unitListbox = await screen.findByRole("listbox")
+    fireEvent.click(within(unitListbox).getByText(/Unit 1 — Kinematics/))
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
+
+    // Step 3 — only 10-A exists for Chemistry → exactly one section, pre-selected.
     expect(await screen.findByText(/1 section selected/)).toBeInTheDocument()
     expect(screen.getByText("10-A")).toBeInTheDocument()
     expect(screen.queryByText("9-B")).not.toBeInTheDocument()
   })
 
-  it("keeps Generate disabled until a unit and prompt are chosen", async () => {
+  it("gates each step until it's complete", async () => {
     renderPage()
     await screen.findByText("Grade 9")
 
-    screen.getByRole("button", { name: "New lab" }).click()
-    await screen.findByText(/1 section selected/)
+    fireEvent.click(screen.getByRole("button", { name: "New lab" }))
+    const dialog = await screen.findByRole("dialog")
 
+    // Step 1 is pre-filled from the top bar → Next is available.
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
+
+    // Step 2 — Next stays disabled until a unit is chosen.
+    expect(within(dialog).getByRole("button", { name: "Next" })).toBeDisabled()
+    fireEvent.click(within(dialog).getAllByRole("combobox")[0])
+    const unitListbox = await screen.findByRole("listbox")
+    fireEvent.click(within(unitListbox).getByText(/Unit 1 — Kinematics/))
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
+
+    // Step 3 — Next stays disabled until at least one section is checked.
+    fireEvent.click(within(dialog).getByRole("checkbox", { name: "9-A" }))
+    expect(within(dialog).getByRole("button", { name: "Next" })).toBeDisabled()
+    fireEvent.click(within(dialog).getByRole("checkbox", { name: "9-A" }))
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
+
+    // Step 4 — Generate stays disabled until a prompt is typed.
     expect(screen.getByRole("button", { name: "Generate lab" })).toBeDisabled()
+    const promptInput = screen.getByPlaceholderText(/Build a game where students construct a plant cell/)
+    fireEvent.change(promptInput, { target: { value: "pendulum period" } })
+    expect(screen.getByRole("button", { name: "Generate lab" })).toBeEnabled()
   })
 
   it("deletes a lab from the list after confirmation", async () => {
@@ -386,14 +416,16 @@ describe("LabsPage", () => {
     renderPage()
     await screen.findByText("Grade 9")
 
-    screen.getByRole("button", { name: "New lab" }).click()
-    await screen.findByText(/1 section selected/)
-
+    fireEvent.click(screen.getByRole("button", { name: "New lab" }))
     const dialog = await screen.findByRole("dialog")
-    const dialogCombos = within(dialog).getAllByRole("combobox")
-    dialogCombos[2].click()
+
+    // Walk through Class → Unit → Sections (defaults are pre-filled).
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
+    fireEvent.click(within(dialog).getAllByRole("combobox")[0])
     const unitListbox = await screen.findByRole("listbox")
-    within(unitListbox).getByText(/Unit 1 — Kinematics/).click()
+    fireEvent.click(within(unitListbox).getByText(/Unit 1 — Kinematics/))
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }))
 
     const promptInput = screen.getByPlaceholderText(/Build a game where students construct a plant cell/)
     fireEvent.change(promptInput, { target: { value: "pendulum period" } })

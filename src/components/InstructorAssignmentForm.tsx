@@ -5,6 +5,7 @@ import { z } from "zod"
 import { useForm, type SubmitErrorHandler, type SubmitHandler } from "react-hook-form"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { Stepper } from "@/components/ui/Stepper"
 import * as api from "@/lib/api"
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -348,59 +349,11 @@ export function InstructorAssignmentForm() {
 
      {/* Timeline */}
      <div className="mb-8">
-      <div className="flex items-center">
-       {FORM_STEPS.map((step, index) => {
-        const completed = step.key < currentStep
-        const active = step.key === currentStep
-        return (
-         <div key={step.key} className="flex items-center flex-1 last:flex-none">
-          <button
-           type="button"
-           onClick={() => {
-            if (completed) setCurrentStep(step.key as 1 | 2)
-           }}
-           disabled={!completed}
-           className={`flex flex-col items-center gap-1.5 group ${
-            completed ? "cursor-pointer" : "cursor-default"
-           }`}
-          >
-           <span
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-             completed
-              ? "bg-primary text-primary-foreground"
-              : active
-               ? "border-2 border-primary text-primary bg-primary-container/30"
-               : "bg-surface-container text-on-surface-variant"
-            }`}
-           >
-            {completed ? (
-             <span className="material-symbols-outlined text-[18px]">check</span>
-            ) : (
-             <span className="font-label-lg text-label-lg">{step.key}</span>
-            )}
-           </span>
-           <span
-            className={`font-label-md text-label-md whitespace-nowrap ${
-             active || completed ? "text-primary" : "text-on-surface-variant"
-            }`}
-           >
-            {step.label}
-           </span>
-           <span className="font-label-sm text-label-sm text-on-surface-variant/70 whitespace-nowrap hidden sm:block">
-            {step.caption}
-           </span>
-          </button>
-          {index < FORM_STEPS.length - 1 && (
-           <div
-            className={`flex-1 h-0.5 mx-3 mb-md rounded-full transition-colors ${
-             completed ? "bg-primary" : "bg-outline-variant"
-            }`}
-           />
-          )}
-         </div>
-        )
-       })}
-      </div>
+      <Stepper
+       steps={FORM_STEPS}
+       currentStep={currentStep}
+       onStepClick={(key) => setCurrentStep(key as 1 | 2)}
+      />
      </div>
 
      {/* Form */}

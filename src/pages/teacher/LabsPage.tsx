@@ -14,11 +14,19 @@ import { useGenerateLab, useLabs, useDeleteLab, useDeleteLabs } from "@/hooks/us
 import { useCourseMaterialChapters } from "@/hooks/use-materials"
 import { LabAgentGraph } from "@/components/labs/LabAgentGraph"
 import { LabStatusChip } from "@/components/labs/LabStatusChip"
+import { Stepper } from "@/components/ui/Stepper"
 import * as api from "@/lib/api"
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
 }
+
+const LAB_STEPS = [
+  { key: 1, label: "Class", caption: "Grade & course" },
+  { key: 2, label: "Unit", caption: "Grounding material" },
+  { key: 3, label: "Sections", caption: "Where to publish" },
+  { key: 4, label: "Prompt", caption: "Describe the lab" },
+] as const
 
 export function LabsPage() {
   const navigate = useNavigate()
@@ -28,6 +36,7 @@ export function LabsPage() {
   const [courseId, setCourseId] = useState("")
   const [offeringId, setOfferingId] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1)
   const [prompt, setPrompt] = useState("")
   const [genUnit, setGenUnit] = useState("")
   const [selectedOfferingIds, setSelectedOfferingIds] = useState<string[]>([])
@@ -114,6 +123,7 @@ export function LabsPage() {
         ? [derivedOfferingId]
         : sectionOptions.map((o) => o.id)
     setSelectedOfferingIds(defaults)
+    setCurrentStep(1)
     setDialogOpen(true)
   }
 
@@ -147,6 +157,24 @@ export function LabsPage() {
   )
 
   const canGenerate = selectedOfferingIds.length > 0 && !!genUnit && prompt.trim().length >= 3 && !generate.isPending
+
+  const stepComplete = (step: number) => {
+    if (step === 1) return Boolean(derivedGradeId && derivedCourseId)
+    if (step === 2) return Boolean(genUnit)
+    if (step === 3) return selectedOfferingIds.length > 0
+    if (step === 4) return prompt.trim().length >= 3
+    return false
+  }
+
+  const goNext = () => {
+    if (currentStep >= 4 || !stepComplete(currentStep)) return
+    setCurrentStep((step) => (step + 1) as 1 | 2 | 3 | 4)
+  }
+
+  const goBack = () => {
+    if (currentStep <= 1) return
+    setCurrentStep((step) => (step - 1) as 1 | 2 | 3 | 4)
+  }
 
   const submit = () => {
     if (!canGenerate) return
@@ -389,9 +417,9 @@ export function LabsPage() {
         )}
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
+      <Dialog  open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="shrink-0">
             <DialogTitle>Generate a lab</DialogTitle>
             <DialogDescription>
               The AI builds an interactive game grounded in the selected unit's material — fast and reliable. Pick the
@@ -400,172 +428,203 @@ export function LabsPage() {
               before you see it.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="block font-label-md text-label-md text-on-surface mb-1.5">Grade</label>
-              <Select
-                value={derivedGradeId}
-                onValueChange={(v) => {
-                  setTouched(true)
-                  setGradeId(v)
-                  setCourseId("")
-                  setOfferingId("")
-                  setSelectedOfferingIds([])
-                }}
-              >
-                <SelectTrigger className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface">
-                  <SelectValue placeholder="Choose a grade…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {grades.map((g) => (
-                    <SelectItem key={g.id} value={g.id}>
-                      Grade {g.level}
-                      {g.name ? ` — ${g.name}` : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block font-label-md text-label-md text-on-surface mb-1.5">Course</label>
-              <Select
-                value={derivedCourseId}
-                onValueChange={(v) => {
-                  setTouched(true)
-                  setCourseId(v)
-                  setOfferingId("")
-                  setGenUnit("")
-                  setSelectedOfferingIds(sectionIdsFor(derivedGradeId, v))
-                }}
-                disabled={!derivedGradeId}
-              >
-                <SelectTrigger className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-50">
-                  <SelectValue placeholder="Choose a course…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {courseOptions.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block font-label-md text-label-md text-on-surface mb-1.5">Unit</label>
-              <Select
-                value={genUnit}
-                onValueChange={setGenUnit}
-                disabled={generate.isPending || !derivedCourseId || genUnitsLoading}
-              >
-                <SelectTrigger className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-50">
-                  <SelectValue placeholder={derivedCourseId ? "Pick a unit…" : "Pick a course first…"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {derivedCourseId && !genUnitsLoading && genUnits.length === 0 && (
-                    <p className="px-3 py-2 text-sm text-on-surface-variant">
-                      No material units in this course yet. Organize material into units first.
-                    </p>
-                  )}
-                  {genUnits.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.title}
-                      {u.materials.length > 0 && ` (${u.materials.length} material${u.materials.length === 1 ? "" : "s"})`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="font-label-sm text-label-sm text-on-surface-variant mt-1.5">
-                The lab is generated from the selected unit's material.
-              </p>
-            </div>
-            <div>
-              <label className="block font-label-md text-label-md text-on-surface mb-1.5">Sections</label>
-              <div className="rounded-lg border border-outline-variant bg-surface divide-y divide-outline-variant/60">
-                {sectionOptions.length === 0 ? (
-                  <p className="px-3 py-2 font-body-sm text-body-sm text-on-surface-variant">
-                    {derivedCourseId
-                      ? "You don't teach this course in any section."
-                      : "Pick a grade and course first."}
-                  </p>
-                ) : (
-                  sectionOptions.map((o) => {
-                    const checked = selectedOfferingIds.includes(o.id)
-                    return (
-                      <div
-                        key={o.id}
-                        className="flex items-center gap-3 px-3 py-2"
-                      >
-                        <Checkbox
-                          id={`lab-section-${o.id}`}
-                          checked={checked}
-                          onCheckedChange={() => toggleOffering(o.id)}
-                        />
-                        <label
-                          htmlFor={`lab-section-${o.id}`}
-                          className="flex-1 cursor-pointer select-none"
-                        >
-                          <span className="block font-label-md text-label-md text-on-surface">
-                            {o.section.name}
-                          </span>
-                        </label>
-                      </div>
-                    )
-                  })
-                )}
+
+          <Stepper
+            className="shrink-0"
+            steps={LAB_STEPS}
+            currentStep={currentStep}
+            onStepClick={(key) => setCurrentStep(key as 1 | 2 | 3 | 4)}
+          />
+
+          <div className="space-y-4 min-h-0 overflow-y-auto  pr-1">
+            {currentStep === 1 && (
+              <>
+                <div>
+                  <label className="block font-label-md text-label-md text-on-surface mb-1.5">Grade</label>
+                  <Select
+                    value={derivedGradeId}
+                    onValueChange={(v) => {
+                      setTouched(true)
+                      setGradeId(v)
+                      setCourseId("")
+                      setOfferingId("")
+                      setSelectedOfferingIds([])
+                    }}
+                  >
+                    <SelectTrigger className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface">
+                      <SelectValue placeholder="Choose a grade…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {grades.map((g) => (
+                        <SelectItem key={g.id} value={g.id}>
+                          Grade {g.level}
+                          {g.name ? ` — ${g.name}` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block font-label-md text-label-md text-on-surface mb-1.5">Course</label>
+                  <Select
+                    value={derivedCourseId}
+                    onValueChange={(v) => {
+                      setTouched(true)
+                      setCourseId(v)
+                      setOfferingId("")
+                      setGenUnit("")
+                      setSelectedOfferingIds(sectionIdsFor(derivedGradeId, v))
+                    }}
+                    disabled={!derivedGradeId}
+                  >
+                    <SelectTrigger className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-50">
+                      <SelectValue placeholder="Choose a course…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {courseOptions.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+            {currentStep === 2 && (
+              <div>
+                <label className="block font-label-md text-label-md text-on-surface mb-1.5">Unit</label>
+                <Select
+                  value={genUnit}
+                  onValueChange={setGenUnit}
+                  disabled={generate.isPending || !derivedCourseId || genUnitsLoading}
+                >
+                  <SelectTrigger className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface disabled:opacity-50">
+                    <SelectValue placeholder={derivedCourseId ? "Pick a unit…" : "Pick a course first…"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {derivedCourseId && !genUnitsLoading && genUnits.length === 0 && (
+                      <p className="px-3 py-2 text-sm text-on-surface-variant">
+                        No material units in this course yet. Organize material into units first.
+                      </p>
+                    )}
+                    {genUnits.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.title}
+                        {u.materials.length > 0 && ` (${u.materials.length} material${u.materials.length === 1 ? "" : "s"})`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="font-label-sm text-label-sm text-on-surface-variant mt-1.5">
+                  The lab is generated from the selected unit's material.
+                </p>
               </div>
-              <p className="font-label-sm text-label-sm text-on-surface-variant mt-1.5">
-                {selectedOfferingIds.length > 0
-                  ? `${selectedOfferingIds.length} section${selectedOfferingIds.length === 1 ? "" : "s"} selected — the lab is published to all of them at once.`
-                  : "Select at least one section."}
-              </p>
-            </div>
-            <div>
-              <label className="block font-label-md text-label-md text-on-surface mb-1.5">Prompt</label>
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit()
-                }}
-                rows={3}
-                placeholder="e.g. Build a game where students construct a plant cell by dragging organelles into the right regions."
-                className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface"
-              />
-              <p className="font-label-sm text-label-sm text-on-surface-variant mt-1.5">
-                Describe the lab you want for this unit. The AI grounds it in the unit's material.
-              </p>
-            </div>
-            <div className="flex items-start gap-3 rounded-lg border border-outline-variant bg-surface p-3">
-              <Checkbox
-                id="lab-advanced-mode"
-                checked={advancedMode}
-                onCheckedChange={(checked) => setAdvancedMode(checked === true)}
-              />
-              <label htmlFor="lab-advanced-mode" className="flex-1 cursor-pointer select-none">
-                <span className="block font-label-md text-label-md text-on-surface">Advanced mode — free-form game</span>
-                <span className="block font-label-sm text-label-sm text-on-surface-variant mt-0.5">
-                  Writes a free-form interactive game/simulation from scratch, checked by the sandbox before it runs. Slower and less
-                  reliable; use only
-                  when a template game can't cover what you need.
-                </span>
-              </label>
-            </div>
+            )}
+            {currentStep === 3 && (
+              <div>
+                <label className="block font-label-md text-label-md text-on-surface mb-1.5">Sections</label>
+                <div className="rounded-lg border border-outline-variant bg-surface divide-y divide-outline-variant/60">
+                  {sectionOptions.length === 0 ? (
+                    <p className="px-3 py-2 font-body-sm text-body-sm text-on-surface-variant">
+                      {derivedCourseId
+                        ? "You don't teach this course in any section."
+                        : "Pick a grade and course first."}
+                    </p>
+                  ) : (
+                    sectionOptions.map((o) => {
+                      const checked = selectedOfferingIds.includes(o.id)
+                      return (
+                        <div
+                          key={o.id}
+                          className="flex items-center gap-3 px-3 py-2"
+                        >
+                          <Checkbox
+                            id={`lab-section-${o.id}`}
+                            checked={checked}
+                            onCheckedChange={() => toggleOffering(o.id)}
+                          />
+                          <label
+                            htmlFor={`lab-section-${o.id}`}
+                            className="flex-1 cursor-pointer select-none"
+                          >
+                            <span className="block font-label-md text-label-md text-on-surface">
+                              {o.section.name}
+                            </span>
+                          </label>
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+                <p className="font-label-sm text-label-sm text-on-surface-variant mt-1.5">
+                  {selectedOfferingIds.length > 0
+                    ? `${selectedOfferingIds.length} section${selectedOfferingIds.length === 1 ? "" : "s"} selected — the lab is published to all of them at once.`
+                    : "Select at least one section."}
+                </p>
+              </div>
+            )}
+            {currentStep === 4 && (
+              <>
+                <div>
+                  <label className="block font-label-md text-label-md text-on-surface mb-1.5">Prompt</label>
+                  <textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit()
+                    }}
+                    rows={3}
+                    placeholder="e.g. Build a game where students construct a plant cell by dragging organelles into the right regions."
+                    className="w-full form-input-focus rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface"
+                  />
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mt-1.5">
+                    Describe the lab you want for this unit. The AI grounds it in the unit's material.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3 rounded-lg border border-outline-variant bg-surface p-3">
+                  <Checkbox
+                    id="lab-advanced-mode"
+                    checked={advancedMode}
+                    onCheckedChange={(checked) => setAdvancedMode(checked === true)}
+                  />
+                  <label htmlFor="lab-advanced-mode" className="flex-1 cursor-pointer select-none">
+                    <span className="block font-label-md text-label-md text-on-surface">Advanced mode — free-form game</span>
+                    <span className="block font-label-sm text-label-sm text-on-surface-variant mt-0.5">
+                      Writes a free-form interactive game/simulation from scratch, checked by the sandbox before it runs. Slower and less
+                      reliable; use only
+                      when a template game can't cover what you need.
+                    </span>
+                  </label>
+                </div>
+              </>
+            )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="shrink-0">
             <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={generate.isPending}>
               Cancel
             </Button>
-            <Button onClick={submit} disabled={!canGenerate}>
-              {generate.isPending ? (
-                <>
-                  <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-                  Generating…
-                </>
-              ) : (
-                "Generate lab"
-              )}
-            </Button>
+            {currentStep > 1 && (
+              <Button variant="outline" onClick={goBack} disabled={generate.isPending}>
+                Back
+              </Button>
+            )}
+            {currentStep < 4 ? (
+              <Button onClick={goNext} disabled={!stepComplete(currentStep)}>
+                Next
+              </Button>
+            ) : (
+              <Button onClick={submit} disabled={!canGenerate}>
+                {generate.isPending ? (
+                  <>
+                    <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+                    Generating…
+                  </>
+                ) : (
+                  "Generate lab"
+                )}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
