@@ -258,6 +258,15 @@ const [session, setSession] = useState<JoinSession | null>(null)
   })
  }
 
+  // Auto-start local meeting recording if the meeting was scheduled with recording enabled
+  const autoRecordStartedRef = useRef(false)
+  useEffect(() => {
+    if (call.connected && meeting?.recordingEnabled && !isLocalRecording && !autoRecordStartedRef.current) {
+      autoRecordStartedRef.current = true
+      void handleStartLocalRecording()
+    }
+  }, [call.connected, meeting?.recordingEnabled, isLocalRecording])
+
  const handleRecord = async () => {
   if (!meeting || recording.isPending) return
   const wantRecording = !meeting.recordingEnabled
