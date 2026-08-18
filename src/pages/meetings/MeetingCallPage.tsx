@@ -1,5 +1,7 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Link, useNavigate, useParams } from "react-router-dom"
+import { toast } from "sonner"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { useAuth } from "@/providers/use-auth"
@@ -16,6 +18,8 @@ import { ControlBar } from "@/components/meetings/ControlBar"
 import { ChatPanel } from "@/components/meetings/ChatPanel"
 import { TranscriptPanel } from "@/components/meetings/TranscriptPanel"
 import { cn } from "@/lib/utils"
+import * as api from "@/lib/api"
+import { saveLocalRecording } from "@/lib/local-recording-cache"
 import type { Participant } from "livekit-client"
 
 interface JoinSession {
@@ -52,6 +56,14 @@ const [session, setSession] = useState<JoinSession | null>(null)
   const [joining, setJoining] = useState(false)
   const [chatOpen, setChatOpen] = useState(true)
   const [transcriptOpen, setTranscriptOpen] = useState(false)
+  const [speechLang, setSpeechLang] = useState<"ar-EG" | "en-US">("ar-EG")
+  const [isLocalRecording, setIsLocalRecording] = useState(false)
+  const localRecorderRef = useRef<MediaRecorder | null>(null)
+  const localChunksRef = useRef<Blob[]>([])
+  const localDisplayStreamRef = useRef<MediaStream | null>(null)
+  const videoContainerRef = useRef<HTMLDivElement>(null)
+  const canvasStopRef = useRef<(() => void) | null>(null)
+  const queryClient = useQueryClient()
 
   // React Router reuses this component across /meetings/:id/call navigations,
   // so a session from a previous meeting would otherwise bleed into the next
@@ -61,6 +73,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
    setPrevId(id)
    setSession(null)
    setJoining(false)
+   queryClient.resetQueries({ queryKey: ["meetings", id] })
   }
 
  const call = useLivekitCall(
@@ -73,17 +86,23 @@ const [session, setSession] = useState<JoinSession | null>(null)
      micId: session.micId && session.micId !== "default" ? session.micId : undefined,
     }
    : undefined,
+   speechLang,
  )
 
   const participants = useMemo<Participant[]>(() => {
-   if (!call.localParticipant) return call.participants
-   const remotes = call.participants.filter(
-    // A remote with our own identity is a stale echo/ghost from a previous
-    // connection — never render it as a separate tile.
-    (p) => p.identity !== call.localParticipant?.identity,
-   )
-   return [call.localParticipant, ...remotes]
+    if (!call.localParticipant) return call.participants
+    const remotes = call.participants.filter(
+      // A remote with our own identity is a stale echo/ghost from a previous
+      // connection — never render it as a separate tile.
+      (p) => p.identity !== call.localParticipant?.identity,
+    )
+    return [call.localParticipant, ...remotes]
   }, [call.localParticipant, call.participants])
+
+  const participantsRef = useRef<Participant[]>([])
+  useEffect(() => {
+    participantsRef.current = participants
+  }, [participants])
 
  const handleJoin = async ({ cameraId, micId }: { cameraId?: string; micId?: string }) => {
   if (!id || joining) return
@@ -96,26 +115,317 @@ const [session, setSession] = useState<JoinSession | null>(null)
   }
  }
 
- const handleRecord = () => {
-  if (!meeting || recording.isPending) return
-  recording.mutate({ id: meeting.id, enabled: !meeting.recordingEnabled })
- }
-
- const handleLeave = async () => {
-  call.disconnect()
-  navigate(`${basePath}/${id}`, { replace: true })
- }
-
- const handleEnd = async () => {
-  if (!meeting) return
-  call.disconnect()
+ const handleStartLocalRecording = async () => {
+  if (!meeting || isLocalRecording) return
   try {
-   await end.mutateAsync(meeting.id)
-  } catch {
-   // still navigate away
+    const containerEl = videoContainerRef.current || document.body
+
+    const audioTracks: MediaStreamTrack[] = []
+    const micPub = call.localParticipant?.getTrackPublication("microphone" as any)
+    if (micPub && !micPub.isMuted) {
+      const micTrack = (micPub as any).track?.mediaStreamTrack
+      if (micTrack) audioTracks.push(micTrack.clone())
+    }
+    call.participants.forEach((p) => {
+      p.audioTrackPublications.forEach((pub) => {
+        if (!pub.isMuted) {
+          const track = (pub as any).track?.mediaStreamTrack
+          if (track) audioTracks.push(track.clone())
+        }
+      })
+    })
+
+    document.querySelectorAll<HTMLMediaElement>("audio, video").forEach((el) => {
+      if (el.srcObject instanceof MediaStream) {
+        el.srcObject.getAudioTracks().forEach((track) => {
+          if (track.enabled && !audioTracks.some((t) => t.id === track.id)) {
+            audioTracks.push(track.clone())
+          }
+        })
+      }
+    })
+
+    const canvas = document.createElement("canvas")
+    canvas.width = 1280
+    canvas.height = 720
+    const ctx = canvas.getContext("2d")!
+
+    let animId: number | null = null
+
+    const drawFrame = () => {
+      ctx.fillStyle = "#0f172a"
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      const activeParticipants = participantsRef.current.length > 0 ? participantsRef.current : []
+
+      if (activeParticipants.length === 0) {
+        ctx.fillStyle = "#ffffff"
+        ctx.font = "bold 32px sans-serif"
+        ctx.textAlign = "center"
+        ctx.fillText("Meeting Recording", canvas.width / 2, canvas.height / 2 - 20)
+        ctx.fillStyle = "#94a3b8"
+        ctx.font = "20px sans-serif"
+        ctx.fillText(meeting.title || "EduAI Meeting", canvas.width / 2, canvas.height / 2 + 20)
+      } else {
+        const count = activeParticipants.length
+        const cols = count > 2 ? 2 : count
+        const rows = Math.ceil(count / cols)
+        const cellW = canvas.width / cols
+        const cellH = canvas.height / rows
+
+        activeParticipants.forEach((p, idx) => {
+          const col = idx % cols
+          const row = Math.floor(idx / cols)
+          const x = col * cellW
+          const y = row * cellH
+
+          // 1. Tile Background
+          ctx.fillStyle = "#1e293b"
+          ctx.fillRect(x + 4, y + 4, cellW - 8, cellH - 8)
+
+          // 2. Find video element for this participant
+          const tileElements = Array.from(containerEl.querySelectorAll("[data-participant-identity]"))
+          const tileEl = tileElements.find(
+            (el) => el.getAttribute("data-participant-identity") === p.identity,
+          ) || containerEl
+          const videoEl = tileEl.querySelector<HTMLVideoElement>("video")
+
+          let hasDrawnVideo = false
+          if (videoEl && videoEl.readyState >= 2 && !videoEl.paused && videoEl.videoWidth > 0) {
+            try {
+              ctx.drawImage(videoEl, x + 4, y + 4, cellW - 8, cellH - 8)
+              hasDrawnVideo = true
+            } catch {}
+          }
+
+          if (!hasDrawnVideo) {
+            // Draw Avatar & Initials
+            const name = p.name || p.identity || "Participant"
+            const initials = name
+              .split(" ")
+              .map((w) => w[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2)
+
+            const avatarRadius = Math.min(cellW, cellH) * 0.18
+            const centerX = x + cellW / 2
+            const centerY = y + cellH / 2 - 10
+
+            // Draw Avatar Circle
+            ctx.beginPath()
+            ctx.arc(centerX, centerY, avatarRadius, 0, Math.PI * 2)
+            ctx.fillStyle = "#4f46e5"
+            ctx.fill()
+
+            // Draw Initials
+            ctx.fillStyle = "#ffffff"
+            ctx.font = `bold ${Math.max(16, avatarRadius * 0.7)}px sans-serif`
+            ctx.textAlign = "center"
+            ctx.textBaseline = "middle"
+            ctx.fillText(initials, centerX, centerY)
+
+            // Camera off text
+            ctx.fillStyle = "#94a3b8"
+            ctx.font = "14px sans-serif"
+            ctx.textBaseline = "alphabetic"
+            ctx.fillText("Camera off", centerX, centerY + avatarRadius + 22)
+          }
+
+          // 3. Name Badge Overlay
+          const pName = p.name || p.identity || "Participant"
+          ctx.fillStyle = "rgba(15, 23, 42, 0.75)"
+          ctx.font = "bold 14px sans-serif"
+          ctx.textAlign = "left"
+          ctx.textBaseline = "alphabetic"
+          const textMetrics = ctx.measureText(pName)
+          const badgeW = textMetrics.width + 20
+          const badgeH = 26
+          const badgeX = x + 12
+          const badgeY = y + cellH - badgeH - 12
+
+          ctx.fillRect(badgeX, badgeY, badgeW, badgeH)
+          ctx.fillStyle = "#ffffff"
+          ctx.fillText(pName, badgeX + 10, badgeY + 18)
+        })
+      }
+
+      animId = requestAnimationFrame(drawFrame)
+    }
+
+    animId = requestAnimationFrame(drawFrame)
+    canvasStopRef.current = () => {
+      if (animId !== null) cancelAnimationFrame(animId)
+    }
+
+    const canvasStream = canvas.captureStream(30)
+    const combinedStream = new MediaStream([
+      ...canvasStream.getVideoTracks(),
+      ...audioTracks,
+    ])
+    localDisplayStreamRef.current = combinedStream
+
+    const mimeTypes = [
+      "video/webm;codecs=vp9,opus",
+      "video/webm;codecs=vp8,opus",
+      "video/webm",
+    ]
+    const mimeType = mimeTypes.find((m) => MediaRecorder.isTypeSupported(m)) || "video/webm"
+
+    localChunksRef.current = []
+    const recorder = new MediaRecorder(combinedStream, { mimeType })
+    recorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) localChunksRef.current.push(e.data)
+    }
+    recorder.onstop = async () => {
+      if (canvasStopRef.current) {
+        canvasStopRef.current()
+        canvasStopRef.current = null
+      }
+      const blob = new Blob(localChunksRef.current, { type: mimeType })
+      if (blob.size > 1000 && meeting?.id) {
+        const cached = await saveLocalRecording(meeting.id, blob)
+        toast.success(`Meeting recording saved (${(cached.sizeBytes / 1024 / 1024).toFixed(1)} MB)`)
+      }
+      localDisplayStreamRef.current?.getTracks().forEach((t) => t.stop())
+      localDisplayStreamRef.current = null
+    }
+    recorder.start(1000)
+    localRecorderRef.current = recorder
+    setIsLocalRecording(true)
+    toast.success("Meeting recording started")
+  } catch (err: any) {
+    console.warn("[local-recording] start failed:", err)
+    toast.error(`Couldn't start meeting recording: ${err?.message ?? "Failed"}`)
   }
-  navigate(`${basePath}/${id}`, { replace: true })
  }
+
+ const handleStopLocalRecording = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const recorder = localRecorderRef.current
+    if (!recorder || recorder.state === "inactive") {
+      localRecorderRef.current = null
+      setIsLocalRecording(false)
+      resolve()
+      return
+    }
+    const origOnStop = recorder.onstop
+    recorder.onstop = async (e) => {
+      if (origOnStop) {
+        try { await (origOnStop as any).call(recorder, e) } catch {}
+      }
+      localRecorderRef.current = null
+      setIsLocalRecording(false)
+      resolve()
+    }
+    try {
+      recorder.stop()
+    } catch {
+      localRecorderRef.current = null
+      setIsLocalRecording(false)
+      resolve()
+    }
+  })
+ }
+
+  // Auto-start local meeting recording if the meeting was scheduled with recording enabled
+  const autoRecordStartedRef = useRef(false)
+  useEffect(() => {
+    if (call.connected && meeting?.recordingEnabled && !isLocalRecording && !autoRecordStartedRef.current) {
+      autoRecordStartedRef.current = true
+      void handleStartLocalRecording()
+    }
+  }, [call.connected, meeting?.recordingEnabled, isLocalRecording])
+
+ const handleRecord = async () => {
+  if (!meeting || recording.isPending) return
+  const wantRecording = !meeting.recordingEnabled
+  try {
+    if (wantRecording && !isLocalRecording) {
+      await handleStartLocalRecording()
+    } else if (!wantRecording && isLocalRecording) {
+      handleStopLocalRecording()
+    }
+    recording.mutate({ id: meeting.id, enabled: wantRecording })
+  } catch {
+    // local start may throw, still attempt server toggle if that's separate
+  }
+ }
+
+  // Real-time continuous auto-save for transcript segments
+  const lastSavedCountRef = useRef(0)
+  const pendingSaveRef = useRef<Promise<any> | null>(null)
+  useEffect(() => {
+    if (!meeting?.id || call.liveTranscripts.length === 0) return
+    if (call.liveTranscripts.length === lastSavedCountRef.current) return
+    const newSegments = call.liveTranscripts.slice(lastSavedCountRef.current)
+    lastSavedCountRef.current = call.liveTranscripts.length
+
+    const run = async () => {
+      if (pendingSaveRef.current) {
+        try { await pendingSaveRef.current } catch {}
+      }
+      pendingSaveRef.current = api.saveMeetingTranscript(
+        meeting.id,
+        newSegments.map((s) => ({
+          startMs: s.timestampMs,
+          text: `${s.speakerName}: ${s.text}`,
+        })),
+        false,
+      )
+      try {
+        await pendingSaveRef.current
+        void queryClient.invalidateQueries({ queryKey: ["meetings", meeting.id, "transcript"] })
+      } catch (err) {
+        console.warn("[transcript] background auto-save failed:", err)
+        lastSavedCountRef.current = Math.max(0, lastSavedCountRef.current - newSegments.length)
+      } finally {
+        pendingSaveRef.current = null
+      }
+    }
+    void run()
+  }, [meeting?.id, call.liveTranscripts, queryClient])
+
+  const saveTranscripts = async () => {
+    if (!meeting || call.liveTranscripts.length === 0) return
+    if (pendingSaveRef.current) {
+      try { await pendingSaveRef.current } catch {}
+    }
+    try {
+      await api.saveMeetingTranscript(
+        meeting.id,
+        call.liveTranscripts.map((s) => ({
+          startMs: s.timestampMs,
+          text: `${s.speakerName}: ${s.text}`,
+        })),
+        true,
+      )
+      lastSavedCountRef.current = call.liveTranscripts.length
+      void queryClient.invalidateQueries({ queryKey: ["meetings", meeting.id, "transcript"] })
+    } catch (err) {
+      console.warn("[transcript] failed to save:", err)
+    }
+  }
+
+  const handleLeave = async () => {
+    if (isLocalRecording) await handleStopLocalRecording()
+    await saveTranscripts()
+    call.disconnect()
+    navigate(`${basePath}/${id}`, { replace: true })
+  }
+
+  const handleEnd = async () => {
+    if (!meeting) return
+    if (isLocalRecording) await handleStopLocalRecording()
+    await saveTranscripts()
+    call.disconnect()
+    try {
+      await end.mutateAsync(meeting.id)
+    } catch {
+      // still navigate away
+    }
+    navigate(`${basePath}/${id}`, { replace: true })
+  }
 
  if (isLoading) return <LoadingState className="flex-1" />
  if (isError) {
@@ -202,7 +512,7 @@ const [session, setSession] = useState<JoinSession | null>(null)
 
    <div className="flex-1 flex overflow-hidden">
     <main className="flex-1 flex flex-col min-w-0">
-     <div className="flex-1 p-md overflow-y-auto">
+      <div ref={videoContainerRef} className="flex-1 p-md overflow-y-auto">
       {call.error ? (
        <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
         <span className="material-symbols-outlined text-[48px] text-danger">error_outline</span>
@@ -231,8 +541,8 @@ const [session, setSession] = useState<JoinSession | null>(null)
      <ControlBar
       call={call}
       isHost={meeting.isHost}
-      recordingEnabled={meeting.recordingEnabled}
-      recordingIndicator={meeting.recordingEnabled && call.connected}
+      recordingEnabled={meeting.recordingEnabled || isLocalRecording}
+      recordingIndicator={(meeting.recordingEnabled || isLocalRecording) && call.connected}
       chatOpen={chatOpen}
       transcriptOpen={transcriptOpen}
       onToggleChat={() => setChatOpen((v) => !v)}
@@ -246,7 +556,15 @@ const [session, setSession] = useState<JoinSession | null>(null)
     {(chatOpen || transcriptOpen) && (
      <aside className="w-[22rem] border-l border-white/5 hidden md:flex flex-col bg-surface-container-lowest">
       {chatOpen && <ChatPanel meetingId={meeting.id} className="flex-1 min-h-0" />}
-      {transcriptOpen && <TranscriptPanel meetingId={meeting.id} className="flex-1 min-h-0" />}
+      {transcriptOpen && (
+        <TranscriptPanel
+          meetingId={meeting.id}
+          liveSegments={call.liveTranscripts}
+          speechLang={speechLang}
+          onLangChange={setSpeechLang}
+          className="flex-1 min-h-0"
+        />
+      )}
      </aside>
     )}
    </div>

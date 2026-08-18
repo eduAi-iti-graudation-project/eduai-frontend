@@ -70,7 +70,22 @@ export function useSetMeetingRecording() {
       api.setMeetingRecording(id, enabled),
     onSuccess: (meeting) => {
       queryClient.setQueryData(meetingQueryKey(meeting.id), meeting)
+      queryClient.invalidateQueries({ queryKey: ["meetings"] })
       toast.success(meeting.recordingEnabled ? "Recording started" : "Recording stopped")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+}
+
+export function useUploadMeetingRecording() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) =>
+      api.uploadMeetingRecording(id, file),
+    onSuccess: (meeting) => {
+      queryClient.setQueryData(meetingQueryKey(meeting.id), meeting)
+      queryClient.invalidateQueries({ queryKey: ["meetings"] })
+      toast.success("Recording video uploaded successfully")
     },
     onError: (err: Error) => toast.error(err.message),
   })

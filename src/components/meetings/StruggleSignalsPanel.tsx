@@ -124,29 +124,68 @@ export function StruggleSignalsPanel({
  const history = data?.history ?? []
  const totalPending = pendingClassWide.length + pendingIndividual.length
 
+ const extract = useMutation({
+  mutationFn: () => api.triggerStruggleSignalExtraction(meetingId),
+  onSuccess: (res: any) => {
+    toast.success("AI analysis completed", {
+      description: res?.count ? `Found ${res.count} follow-up suggestions!` : "Checked transcript for confusion signals.",
+    })
+    refresh()
+  },
+  onError: (err: any) => {
+    toast.error("Analysis failed", { description: err?.message ?? "Could not analyze transcript" })
+  },
+})
+
  return (
   <div className={cn("bg-surface-container-lowest h-[26rem] overflow-y-auto", className)}>
-   {isLoading && <LoadingState />}
-   {isError && (
-    <ErrorState
-     title="Failed to load follow-up suggestions"
-     message={error?.message ?? "Something went wrong"}
-     onRetry={() => refetch()}
-    />
-   )}
-   {!isLoading && !isError && (
+    {extract.isPending && (
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center space-y-3">
+        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+          <span className="material-symbols-outlined text-[32px] text-primary animate-spin">psychology</span>
+        </div>
+        <div>
+          <h3 className="font-label-lg text-label-lg text-on-surface">Analyzing transcript with AI...</h3>
+          <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm mt-1">
+            Scanning transcript lines to extract educational concepts and questions.
+          </p>
+        </div>
+      </div>
+    )}
+
+    {!extract.isPending && isLoading && <LoadingState />}
+    {!extract.isPending && isError && (
+      <ErrorState
+        title="Failed to load follow-up suggestions"
+        message={error?.message ?? "Something went wrong"}
+        onRetry={() => refetch()}
+      />
+    )}
+   {!extract.isPending && !isLoading && !isError && (
     <div className="p-md space-y-4">
      <div>
-      <div className="flex items-center gap-2 mb-1">
-       <span className="material-symbols-outlined text-[18px] text-primary">school</span>
-       <h2 className="font-label-lg text-label-lg text-primary">
-        Follow-up suggestions
-       </h2>
-       {totalPending > 0 && (
-        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm">
-         {totalPending} pending
-        </span>
-       )}
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
+       <div className="flex items-center gap-2">
+        <span className="material-symbols-outlined text-[18px] text-primary">school</span>
+        <h2 className="font-label-lg text-label-lg text-primary">
+         Follow-up suggestions
+        </h2>
+        {totalPending > 0 && (
+         <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm">
+          {totalPending} pending
+         </span>
+        )}
+       </div>
+       <Button
+        variant="outline"
+        size="sm"
+        className="h-8 text-xs"
+        disabled={extract.isPending}
+        onClick={() => extract.mutate()}
+       >
+        <span className="material-symbols-outlined text-[16px] mr-1">psychology</span>
+        {extract.isPending ? "Analyzing..." : "Analyze Transcript"}
+       </Button>
       </div>
       <p className="font-body-sm text-body-sm text-on-surface-variant">
        Post-meeting notes on concepts students seemed unsure about. Review
@@ -158,7 +197,7 @@ export function StruggleSignalsPanel({
       <EmptyState
        icon="auto_awesome"
        title="No suggestions yet"
-       description="Suggestions appear after a recorded class meeting has been fully processed."
+       description="Suggestions appear automatically after a meeting ends, or click 'Analyze Transcript' above to scan now."
       />
      )}
 

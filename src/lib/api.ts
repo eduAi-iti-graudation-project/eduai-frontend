@@ -3827,6 +3827,15 @@ export async function getMeetingRecording(id: string): Promise<{ recordingUrl: s
   return res.data
 }
 
+export async function uploadMeetingRecording(id: string, file: File): Promise<MeetingDetail> {
+  const formData = new FormData()
+  formData.append("file", file)
+  const res = await api.post<MeetingDetail>(`/meetings/${id}/recording/upload`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  })
+  return res.data
+}
+
 export async function getMeetingMessages(id: string): Promise<{ messages: MeetingMessage[] }> {
   const res = await api.get<{ messages: MeetingMessage[] }>(`/meetings/${id}/messages`)
   return res.data
@@ -3839,6 +3848,15 @@ export async function sendMeetingMessage(id: string, text: string): Promise<Meet
 
 export async function getMeetingTranscript(id: string): Promise<MeetingTranscript> {
   const res = await api.get<MeetingTranscript>(`/meetings/${id}/transcript`)
+  return res.data
+}
+
+export async function saveMeetingTranscript(
+  id: string,
+  segments: { startMs: number; text: string }[],
+  replace = false,
+): Promise<{ status: string }> {
+  const res = await api.post<{ status: string }>(`/meetings/${id}/transcript`, { segments, replace })
   return res.data
 }
 
@@ -3865,6 +3883,15 @@ export async function dismissStruggleSignal(
 ): Promise<{ id: string; status: 'DISMISSED' }> {
   const res = await api.post<{ id: string; status: 'DISMISSED' }>(
     `/struggle-signals/${signalId}/dismiss`,
+  )
+  return res.data
+}
+
+export async function triggerStruggleSignalExtraction(
+  meetingId: string,
+): Promise<{ status: string }> {
+  const res = await api.post<{ status: string }>(
+    `/meetings/${meetingId}/struggle-signals/extract`,
   )
   return res.data
 }

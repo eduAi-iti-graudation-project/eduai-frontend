@@ -17,10 +17,19 @@ export interface Reaction {
   emoji: string
 }
 
+export interface LiveTranscriptSegment {
+  id: string
+  speakerName: string
+  text: string
+  timestampMs: number
+}
+
 export interface DataPayload {
-  type: "emoji" | "hand" | "hand-cancel"
+  type: "emoji" | "hand" | "hand-cancel" | "transcript"
   emoji?: string
   name?: string
+  text?: string
+  timestampMs?: number
 }
 
 export interface LivekitCall {
@@ -34,6 +43,7 @@ export interface LivekitCall {
   trackStates: { camera: boolean; mic: boolean; screen: boolean }
   raisedHands: Record<string, boolean>
   reactions: Reaction[]
+  liveTranscripts: LiveTranscriptSegment[]
   toggleMic: () => void
   toggleCam: () => void
   toggleScreenShare: () => void
@@ -94,6 +104,7 @@ export function useLivekitCall(
   token: string | undefined,
   roomName: string | undefined,
   devices?: { cameraId?: string; micId?: string },
+  speechLang?: "ar-EG" | "en-US",
 ): LivekitCall {
   const roomRef = useRef<Room | null>(null)
   const [connected, setConnected] = useState(false)
@@ -103,6 +114,7 @@ export function useLivekitCall(
   const [localParticipant, setLocalParticipant] = useState<LocalParticipant | null>(null)
   const [raisedHands, setRaisedHands] = useState<Record<string, boolean>>({})
   const [reactions, setReactions] = useState<Reaction[]>([])
+  const [liveTranscripts, setLiveTranscripts] = useState<LiveTranscriptSegment[]>([])
   // Bump on any track/mute event so tiles re-read participant state.
   const [, setVersion] = useState(0)
   const bump = useCallback(() => setVersion((v) => v + 1), [])
@@ -248,6 +260,7 @@ export function useLivekitCall(
       setParticipants([])
       setRaisedHands({})
       setReactions([])
+      setLiveTranscripts([])
       setMediaError(null)
       setError(null)
     }
@@ -271,25 +284,16 @@ export function useLivekitCall(
       console.info(
         `[livekit] connected sid=${room.localParticipant?.sid} camPub=${Boolean(room.localParticipant?.getTrackPublication(Track.Source.Camera))} isCamEnabled=${room.localParticipant?.isCameraEnabled}`,
       )
-      // Join with mic + camera already on, like a normal meeting app — using
-      // the devices picked in the lobby. Failures are surfaced (not silently
-      // swallowed) so the caller can see why the camera is off.
       const local = room.localParticipant
       if (!local) return
       const camId = preferredDevices.current.cameraId
       const micId = preferredDevices.current.micId
       const enableMedia = async () => {
-        // Judge by the actual publications, not participant.isCameraEnabled —
-        // that flag can be stale-true after a previous meeting left a room
-        // mid-state, which would make us skip enabling the camera entirely.
         const camPub = local.getTrackPublication(Track.Source.Camera)
         const micPub = local.getTrackPublication(Track.Source.Microphone)
         const wantCam = !(camPub && !camPub.isMuted)
         const wantMic = !(micPub && !micPub.isMuted)
         if (!wantCam && !wantMic) return
-        // Sequential, not concurrent: a concurrent pair of setXEnabled(true)
-        // calls can race inside LiveKit's pending-publish bookkeeping and one
-        // of them can silently no-op.
         if (wantCam) await local.setCameraEnabled(true, camId ? { deviceId: camId } : undefined)
         if (wantMic) await local.setMicrophoneEnabled(true, micId ? { deviceId: micId } : undefined)
       }
@@ -334,6 +338,14 @@ export function useLivekitCall(
         window.setTimeout(() => {
           setReactions((prev) => prev.filter((r) => r.id !== reaction.id))
         }, 3200)
+      } else if (data.type === "transcript" && data.text) {
+        const segment: LiveTranscriptSegment = {
+          id: `${participant.identity}-${Date.now()}`,
+          speakerName: data.name || participant.name || "Guest",
+          text: data.text,
+          timestampMs: data.timestampMs || Date.now(),
+        }
+        setLiveTranscripts((prev) => [...prev, segment])
       }
     }
 
@@ -468,6 +480,80 @@ export function useLivekitCall(
     screen: trackOn(Track.Source.ScreenShare),
   }
 
+  // Real-time Web Speech Recognition (Live Captions & Live Transcript)
+  useEffect(() => {
+    if (!connected || !trackStates.mic) return
+    const SpeechRecognition =
+      (window as unknown as { SpeechRecognition?: any; webkitSpeechRecognition?: any })
+        .SpeechRecognition ||
+      (window as unknown as { SpeechRecognition?: any; webkitSpeechRecognition?: any })
+        .webkitSpeechRecognition
+
+    if (!SpeechRecognition) return
+
+    // Resolve the actual BCP-47 language tag (default ar-EG)
+    const resolvedLang = speechLang || "ar-EG"
+
+    let recognition: any = null
+    try {
+      recognition = new SpeechRecognition()
+      recognition.continuous = true
+      recognition.interimResults = true // Show intermediate results for better UX
+      recognition.lang = resolvedLang
+
+      recognition.onresult = (event: any) => {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            const text = event.results[i][0].transcript.trim()
+            if (text) {
+              const speakerName = roomRef.current?.localParticipant?.name || "You"
+              const segment: LiveTranscriptSegment = {
+                id: `${roomRef.current?.localParticipant?.identity || "me"}-${Date.now()}`,
+                speakerName,
+                text,
+                timestampMs: Date.now(),
+              }
+              setLiveTranscripts((prev) => [...prev, segment])
+              void publish({
+                type: "transcript",
+                text,
+                name: speakerName,
+                timestampMs: segment.timestampMs,
+              })
+            }
+          }
+        }
+      }
+
+      recognition.onerror = (ev: any) => {
+        // "no-speech" is normal in quiet periods — just restart
+        if (ev.error === "no-speech" || ev.error === "audio-capture") return
+        console.warn(`[speech] recognition error: ${ev.error as string}`)
+      }
+
+      // Auto-restart when the session ends (browser stops after ~60s of silence)
+      recognition.onend = () => {
+        if (recognition._stopped) return
+        try { recognition.start() } catch { /* already restarting */ }
+      }
+
+      recognition.start()
+    } catch {
+      // SpeechRecognition already active or unavailable
+    }
+
+    return () => {
+      if (recognition) {
+        recognition._stopped = true
+        try {
+          recognition.stop()
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }, [connected, trackStates.mic, publish, speechLang])
+
   return {
     connecting,
     connected,
@@ -478,6 +564,7 @@ export function useLivekitCall(
     trackStates,
     raisedHands,
     reactions,
+    liveTranscripts,
     toggleMic,
     toggleCam,
     toggleScreenShare,
