@@ -121,8 +121,8 @@ export function StudentAssignmentsPage() {
          <h2 className="font-headline-md text-headline-md text-primary">{cls.name}</h2>
          <span className="font-label-sm text-label-sm text-on-surface-variant">&middot; {cls.teacherName}</span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-         {classAssignments.map((a) => {
+<div className="space-y-3">
+          {classAssignments.map((a) => {
           const sub = submissionMap.get(a.id)
           const isSubmitted = !!sub
           return (

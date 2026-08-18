@@ -4038,6 +4038,7 @@ export interface components {
             readAt: string | null;
             /** Format: date-time */
             createdAt: string;
+            data: { [key: string]: unknown } | null;
         };
         ReportDto: {
             /** Format: uuid */

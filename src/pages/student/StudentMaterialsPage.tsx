@@ -7,6 +7,7 @@ import { useMaterialChapters } from "@/hooks/use-materials"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
  Dialog,
  DialogContent,
@@ -98,33 +99,81 @@ export function StudentMaterialsPage() {
   )
  }
 
- const renderMaterialRow = (m: api.Material) => (
-  <div
-   key={m.id}
-   className="w-full flex items-center gap-3 rounded-lg bg-surface-container-low p-md border border-border hover:border-primary/40 hover:shadow-card-hover transition-all"
-  >
-   <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0">
-    <span className="material-symbols-outlined text-primary">
-     {isPdf(m) ? "picture_as_pdf" : "description"}
-    </span>
+ const estimateStudyMinutes = (m: api.Material): number | null => {
+  const chunks = m._count?.chunks ?? 0
+  if (!chunks) return null
+  return Math.max(1, Math.round(chunks * 2))
+ }
+
+ const renderMaterialCard = (m: api.Material, chapterTitle?: string) => {
+  const chunkCount = m._count?.chunks ?? 0
+  const minutes = estimateStudyMinutes(m)
+
+  return (
+   <div
+    key={m.id}
+    className="w-full rounded-xl bg-surface-container-lowest p-lg border border-border hover:border-primary/40 hover:shadow-card-hover transition-all flex flex-col sm:flex-row sm:items-center gap-4"
+   >
+    <div className="w-12 h-12 rounded-xl bg-primary-fixed/30 flex items-center justify-center shrink-0">
+     <span className="material-symbols-outlined text-[24px] text-primary">
+      {isPdf(m) ? "picture_as_pdf" : "description"}
+     </span>
+    </div>
+
+    <div className="flex-1 min-w-0">
+     <p className="font-body-lg text-body-lg font-medium text-on-surface leading-snug">
+      {m.title}
+     </p>
+     <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2">
+      <Badge
+       variant="outline"
+       className="rounded-lg px-2 py-0.5 font-label-sm text-label-sm text-primary border-primary/30 bg-primary-fixed/20"
+      >
+       {isPdf(m) ? "PDF" : "Text file"}
+      </Badge>
+      {chapterTitle && (
+       <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant">
+        <span className="material-symbols-outlined text-[16px]">menu_book</span>
+        {chapterTitle}
+       </span>
+      )}
+      <span className="font-label-sm text-label-sm text-on-surface-variant">
+       Uploaded {new Date(m.createdAt).toLocaleDateString()}
+      </span>
+      {chunkCount > 0 && (
+       <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant">
+        <span className="material-symbols-outlined text-[16px]">segment</span>
+        {chunkCount} content section{chunkCount !== 1 ? "s" : ""}
+       </span>
+      )}
+      {minutes !== null && (
+       <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant">
+        <span className="material-symbols-outlined text-[16px]">schedule</span>
+        ~{minutes} min to study
+       </span>
+      )}
+      {m.assignmentId && (
+       <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary">
+        <span className="material-symbols-outlined text-[16px]">assignment</span>
+        attached to assignment
+       </span>
+      )}
+     </div>
+    </div>
+
+    <div className="flex items-center gap-2 shrink-0">
+     <Button variant="ghost" className="rounded-lg" onClick={() => view(m)}>
+      <span className="material-symbols-outlined text-[18px]">visibility</span>
+      View
+     </Button>
+     <Button variant="outline" className="rounded-lg" onClick={() => download(m)}>
+      <span className="material-symbols-outlined text-[18px]">download</span>
+      Download
+     </Button>
+    </div>
    </div>
-   <div className="flex-1 min-w-0">
-    <p className="font-body-medium text-label-md text-on-surface truncate">{m.title}</p>
-    <p className="font-label-sm text-label-sm text-on-surface-variant">
-     {isPdf(m) ? "PDF" : "Text"} · {new Date(m.createdAt).toLocaleDateString()}
-     {m.assignmentId ? " · attached to assignment" : ""}
-    </p>
-   </div>
-   <Button variant="ghost" className="shrink-0 rounded-lg" onClick={() => view(m)}>
-    <span className="material-symbols-outlined text-[18px]">visibility</span>
-    View
-   </Button>
-   <Button variant="outline" className="shrink-0 rounded-lg" onClick={() => download(m)}>
-    <span className="material-symbols-outlined text-[18px]">download</span>
-    Download
-   </Button>
-  </div>
- )
+  )
+ }
 
  return (
   <div className="flex-1 p-margin-desktop max-w-5xl mx-auto w-full">
@@ -173,8 +222,8 @@ export function StudentMaterialsPage() {
          No files in this chapter yet.
         </p>
        ) : (
-        <div className="grid gap-2">
-         {chapter.materials.map(renderMaterialRow)}
+        <div className="grid gap-3">
+         {chapter.materials.map((m) => renderMaterialCard(m, chapter.title))}
         </div>
        )}
       </section>
@@ -192,8 +241,8 @@ export function StudentMaterialsPage() {
          General
         </span>
        </h2>
-       <div className="grid gap-2">
-        {unassigned.map(renderMaterialRow)}
+       <div className="grid gap-3">
+        {unassigned.map((m) => renderMaterialCard(m))}
        </div>
       </section>
      )}

@@ -154,7 +154,7 @@ export function AlertsPage() {
       />
      </div>
     ) : (
-     <div className="space-y-3 max-w-4xl mx-auto">
+     <div className="space-y-3">
       {visibleAlerts.map((alert) => (
        <AlertCard
         key={alert.id}

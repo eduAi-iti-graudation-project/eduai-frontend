@@ -1,5 +1,6 @@
 import { useState } from "react"
 import type { TeacherFeedbackPayload } from "@/lib/api"
+import { RichText } from "@/components/shared/RichText"
 
 interface TeacherFeedbackSectionProps {
  content: TeacherFeedbackPayload
@@ -29,14 +30,14 @@ export function TeacherFeedbackSection({ content }: TeacherFeedbackSectionProps)
     <div className="px-md pb-md space-y-4">
      {content.feedback && (
       <div className="bg-surface-container-low rounded-lg p-3">
-       <p className="font-body-md text-body-md text-on-surface">{content.feedback}</p>
+       <RichText text={content.feedback} className="text-body-md text-on-surface" />
       </div>
      )}
 
      {content.patternAnalysis && (
       <div>
        <h4 className="font-label-md text-label-md text-primary mb-2">Pattern Analysis</h4>
-       <p className="font-body-sm text-body-sm text-on-surface-variant">{content.patternAnalysis}</p>
+       <RichText text={content.patternAnalysis} className="text-body-sm text-on-surface-variant" />
       </div>
      )}
 

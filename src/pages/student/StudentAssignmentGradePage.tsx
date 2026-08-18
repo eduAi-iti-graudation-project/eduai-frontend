@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { FileDropzone } from "@/components/ui/FileDropzone"
 import { LoadingState } from "@/components/shared/LoadingState"
+import { RichText } from "@/components/shared/RichText"
 import {
  Dialog,
  DialogContent,
@@ -255,7 +256,7 @@ export function StudentAssignmentGradePage() {
          {g.aiFeedback ? (
           <div className="mt-2 pt-2 border-t border-border">
            <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">AI Feedback</p>
-           <p className="font-body-md text-body-md text-on-surface">{g.aiFeedback}</p>
+           <RichText text={g.aiFeedback} className="text-body-md text-on-surface" />
           </div>
          ) : needsFeedback ? (
           <div className="mt-2 pt-2 border-t border-border flex items-center gap-2">
@@ -266,7 +267,7 @@ export function StudentAssignmentGradePage() {
          {g.teacherNotes && (
           <div className="mt-2 pt-2 border-t border-border">
            <p className="font-label-sm text-label-sm text-primary mb-1">Teacher Notes</p>
-           <p className="font-body-md text-body-md text-on-surface">{g.teacherNotes}</p>
+           <RichText text={g.teacherNotes} className="text-body-md text-on-surface" />
           </div>
          )}
         </div>

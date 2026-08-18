@@ -1,4 +1,5 @@
 import type { ManagementSummaryPayload } from "@/lib/api"
+import { RichText } from "@/components/shared/RichText"
 
 interface ManagementSummarySectionProps {
  summary: ManagementSummaryPayload
@@ -17,7 +18,7 @@ export function ManagementSummarySection({ summary }: ManagementSummarySectionPr
    <div className="space-y-3">
     {summary.summary && (
      <div className="bg-surface-container-low rounded-lg p-3">
-      <p className="font-body-md text-body-md text-on-surface">{summary.summary}</p>
+      <RichText text={summary.summary} className="text-body-md text-on-surface" />
      </div>
     )}
 
@@ -26,7 +27,7 @@ export function ManagementSummarySection({ summary }: ManagementSummarySectionPr
       <span className="material-symbols-outlined text-[18px] text-primary mt-0.5">trending_up</span>
       <div>
        <p className="font-label-sm text-label-sm text-on-surface-variant">Class Trend</p>
-       <p className="font-body-md text-body-md text-on-surface">{summary.classTrend}</p>
+       <RichText text={summary.classTrend} className="text-body-md text-on-surface" />
       </div>
      </div>
     )}
@@ -36,7 +37,7 @@ export function ManagementSummarySection({ summary }: ManagementSummarySectionPr
       <span className="material-symbols-outlined text-[18px] text-secondary mt-0.5">recommend</span>
       <div>
        <p className="font-label-sm text-label-sm text-on-surface-variant">Recommendation</p>
-       <p className="font-body-md text-body-md text-on-surface">{summary.recommendation}</p>
+       <RichText text={summary.recommendation} className="text-body-md text-on-surface" />
       </div>
      </div>
     )}

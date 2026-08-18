@@ -7,6 +7,7 @@ import { SubscriptionBanner } from "@/components/billing/SubscriptionBanner"
 const navItems = [
  { icon: "dashboard", label: "Dashboard", id: "dashboard", href: "/admin" },
  { icon: "calendar_month", label: "Timetable", id: "timetable", href: "/admin/timetable" },
+ { icon: "how_to_reg", label: "Attendance", id: "attendance", href: "/admin/attendance" },
  { icon: "notifications_active", label: "Alerts", id: "alerts", href: "/admin/alerts" },
  { icon: "school", label: "Grades", id: "grades", href: "/admin/grades" },
 { icon: "group", label: "Students", id: "students", href: "/admin/students" },
@@ -28,6 +29,7 @@ export function AdminLayout() {
 
  const activeItem = path === "/admin" ? "dashboard"
   : path.startsWith("/admin/timetable") ? "timetable"
+  : path.startsWith("/admin/attendance") ? "attendance"
   : path.startsWith("/admin/alerts") ? "alerts"
   : path.startsWith("/admin/grades") ? "grades"
   : path.startsWith("/admin/students") ? "students"

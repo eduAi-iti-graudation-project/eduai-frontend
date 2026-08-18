@@ -221,7 +221,7 @@ export interface ChatResponse {
 
 export interface ImportAttendanceRecord {
   studentId: string
-  classId: string
+  courseOfferingId: string
   date: string
   status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED"
 }
@@ -549,6 +549,25 @@ export interface GuardianAlertSummary {
 
 export async function getGuardianAlerts(): Promise<GuardianAlertSummary[]> {
   const res = await api.get<GuardianAlertSummary[]>("/alerts/guardian")
+  return res.data
+}
+
+export interface StudentAlertSummary {
+  id: string
+  type: string
+  reason: string
+  status: string
+  studentId: string
+  createdAt: string
+  studentName: string
+  className: string | null
+  grade: { id: string; level: string; name: string } | null
+  teacherName: string | null
+  severity: string | null
+}
+
+export async function getStudentAlerts(): Promise<StudentAlertSummary[]> {
+  const res = await api.get<StudentAlertSummary[]>("/alerts/student")
   return res.data
 }
 
@@ -1434,6 +1453,60 @@ export async function getReport(id: string): Promise<components["schemas"]["Repo
   return res.data
 }
 
+/** URL of the standalone, print-ready HTML version of a report. */
+export function reportHtmlUrl(id: string, download = false): string {
+  const params = new URLSearchParams()
+  if (download) params.set("download", "true")
+  const qs = params.toString()
+  return `${API_URL}/reports/${id}/html${qs ? `?${qs}` : ""}`
+}
+
+/** Fetch a report's HTML document with the authenticated client (Blob). */
+export async function fetchReportHtml(
+  id: string,
+  download = false,
+): Promise<{ blob: Blob; filename: string }> {
+  const url = `${API_URL}/reports/${id}/html${download ? "?download=true" : ""}`
+  const res = await api.get<Blob>(url, { responseType: "blob" })
+  const disposition = res.headers["content-disposition"] as string | undefined
+  const match = disposition?.match(/filename="?([^";]+)"?/)
+  const filename = match?.[1] ?? `report-${id}.html`
+  return { blob: res.data, filename }
+}
+
+/** Open the print-ready HTML report in a new tab (auth preserved via Blob). */
+export async function openReportHtml(id: string): Promise<void> {
+  const { blob } = await fetchReportHtml(id)
+  const objectUrl = URL.createObjectURL(blob)
+  window.open(objectUrl, "_blank", "noopener")
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+}
+
+/** Download the report as an .html file (auth preserved via Blob). */
+export async function downloadReportHtml(id: string): Promise<void> {
+  const { blob, filename } = await fetchReportHtml(id, true)
+  const objectUrl = URL.createObjectURL(blob)
+  const anchor = document.createElement("a")
+  anchor.href = objectUrl
+  anchor.download = filename
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+}
+
+export async function uploadOrgLogo(file: File): Promise<{ logoUrl: string }> {
+  const form = new FormData()
+  form.append("photo", file)
+  const res = await api.post<{ logoUrl: string }>("/organizations/me/logo", form)
+  return res.data
+}
+
+/** URL of a school logo (public endpoint, works without auth for reports). */
+export function orgLogoUrl(organizationId: string): string {
+  return `${API_URL}/organizations/${organizationId}/logo`
+}
+
 // ── Materials ─────────────────────────────────────────────────────
 
 export async function getMaterials(classId: string): Promise<Material[]> {
@@ -1563,19 +1636,172 @@ export async function deleteMaterial(id: string): Promise<void> {
 
 // ── Attendance ────────────────────────────────────────────────────
 
-export async function importAttendance(records: ImportAttendanceRecord[]): Promise<components["schemas"]["AttendanceResponseDto"][]> {
-  const res = await api.post<components["schemas"]["AttendanceResponseDto"][]>("/attendance/import", { records })
+export type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED"
+
+export interface AttendanceRecord {
+  id: string
+  studentId: string
+  sectionId: string
+  courseOfferingId: string | null
+  date: string
+  status: AttendanceStatus
+  createdAt: string
+  updatedAt: string
+  student?: { id: string; name: string }
+  section?: { id: string; name: string; gradeLevel?: { id: string; level: number; name?: string | null } }
+  courseOffering?: { id: string; course?: { id: string; name: string } }
+}
+
+export interface AttendanceSession {
+  id: string
+  courseOfferingId: string
+  teacherId: string
+  date: string
+  token: string
+  status: "OPEN" | "CLOSED" | "EXPIRED"
+  openedAt: string
+  expiresAt: string
+  closedAt: string | null
+  courseName?: string
+  sectionName?: string
+}
+
+export interface CheckInResult {
+  alreadyCheckedIn: boolean
+  status: AttendanceStatus
+  date: string
+  courseName: string
+  sectionName: string
+  teacherName: string
+}
+
+export interface TeacherAttendanceRecord {
+  id: string
+  teacherId: string
+  courseOfferingId: string
+  date: string
+  status: AttendanceStatus
+  source: "SELF" | "ADMIN"
+  sessionId: string | null
+  checkedInAt: string
+  createdAt: string
+  updatedAt: string
+  teacher?: { id: string; name: string }
+  courseOffering?: { id: string; course?: { id: string; name: string }; section?: { id: string; name: string } }
+}
+
+export type FineStatus = "PAID" | "PARTIAL" | "POSTPONED" | "UNPAID"
+export type FineType = "ATTENDANCE" | "LATE" | "OTHER"
+
+export interface TeacherFine {
+  id: string
+  teacherId: string
+  amount: number | string
+  reason: string
+  type: FineType
+  status: FineStatus
+  amountPaid: number | string | null
+  dueDate: string | null
+  issuedById: string
+  paidAt: string | null
+  createdAt: string
+  updatedAt: string
+  issuedBy?: { id: string; name: string }
+}
+
+export interface TeacherFineInput {
+  amount: number
+  reason: string
+  type?: FineType
+  status?: FineStatus
+  amountPaid?: number
+  dueDate?: string
+}
+
+export interface TeacherAttendanceLedgerQuery {
+  teacherId?: string
+  from?: string
+  to?: string
+  status?: AttendanceStatus
+}
+
+export async function importAttendance(records: ImportAttendanceRecord[]): Promise<AttendanceRecord[]> {
+  const res = await api.post<AttendanceRecord[]>("/attendance/import", { records })
   return res.data
 }
 
-export async function getStudentAttendance(studentId: string): Promise<components["schemas"]["AttendanceResponseDto"][]> {
-  const res = await api.get<components["schemas"]["AttendanceResponseDto"][]>(`/students/${studentId}/attendance`)
+export async function getStudentAttendance(studentId: string): Promise<AttendanceRecord[]> {
+  const res = await api.get<AttendanceRecord[]>(`/students/${studentId}/attendance`)
   return res.data
 }
 
-export async function getClassAttendance(classId: string): Promise<components["schemas"]["AttendanceResponseDto"][]> {
-  const res = await api.get<components["schemas"]["AttendanceResponseDto"][]>(`/classes/${classId}/attendance`)
+export async function getClassAttendance(classId: string): Promise<AttendanceRecord[]> {
+  const res = await api.get<AttendanceRecord[]>(`/classes/${classId}/attendance`)
   return res.data
+}
+
+export async function getOfferingAttendance(offeringId: string): Promise<AttendanceRecord[]> {
+  const res = await api.get<AttendanceRecord[]>(`/offerings/${offeringId}/attendance`)
+  return res.data
+}
+
+export async function openAttendanceSession(courseOfferingId: string): Promise<AttendanceSession> {
+  const res = await api.post<AttendanceSession>("/attendance/sessions", { courseOfferingId })
+  return res.data
+}
+
+export async function getAttendanceSession(id: string): Promise<AttendanceSession> {
+  const res = await api.get<AttendanceSession>(`/attendance/sessions/${id}`)
+  return res.data
+}
+
+export async function closeAttendanceSession(id: string): Promise<AttendanceSession> {
+  const res = await api.post<AttendanceSession>(`/attendance/sessions/${id}/close`)
+  return res.data
+}
+
+export async function checkInAttendance(token: string): Promise<CheckInResult> {
+  const res = await api.post<CheckInResult>("/attendance/check-in", { token })
+  return res.data
+}
+
+export async function getMyTeacherAttendance(): Promise<TeacherAttendanceRecord[]> {
+  const res = await api.get<TeacherAttendanceRecord[]>("/attendance/teacher/my")
+  return res.data
+}
+
+export async function getMyTeacherFines(): Promise<TeacherFine[]> {
+  const res = await api.get<TeacherFine[]>("/attendance/teacher/my-fines")
+  return res.data
+}
+
+export async function getTeacherAttendanceLedger(query: TeacherAttendanceLedgerQuery = {}): Promise<TeacherAttendanceRecord[]> {
+  const res = await api.get<TeacherAttendanceRecord[]>("/attendance/teachers", { params: query })
+  return res.data
+}
+
+export async function getTeacherAttendanceById(teacherId: string): Promise<TeacherAttendanceRecord[]> {
+  const res = await api.get<TeacherAttendanceRecord[]>(`/teachers/${teacherId}/attendance`)
+  return res.data
+}
+
+export async function getTeacherFines(teacherId: string): Promise<TeacherFine[]> {
+  const res = await api.get<TeacherFine[]>(`/teachers/${teacherId}/fines`)
+  return res.data
+}
+
+export async function createTeacherFine(teacherId: string, payload: TeacherFineInput): Promise<TeacherFine> {
+  const res = await api.post<TeacherFine>(`/teachers/${teacherId}/fines`, payload)
+  return res.data
+}
+
+export async function updateTeacherFine(fineId: string, payload: Partial<TeacherFineInput>): Promise<TeacherFine> {
+  const res = await api.patch<TeacherFine>(`/fines/${fineId}`, payload)
+  return res.data
+}
+
+export async function deleteTeacherFine(fineId: string): Promise<void> {
+  await api.delete(`/fines/${fineId}`)
 }
 
 // ── Student Grades ────────────────────────────────────────────────
@@ -2746,6 +2972,7 @@ export interface Organization {
   subscriptionTier: SubscriptionTier
   seatLimit: number | null
   userCount: number
+  logoUrl?: string | null
 }
 
 export interface CheckoutSession {

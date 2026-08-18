@@ -6,7 +6,30 @@ import { cn } from "@/lib/utils"
 
 const PCT_RE = /(\d+(?:\.\d+)?%)/g
 const PCT_FULL = /^\d+(?:\.\d+)?%$/
+const URL_RE = /(https?:\/\/[^\s<>"']+|www\.[^\s<>"']+)/g
+const URL_FULL = /^(https?:\/\/|www\.)[^\s<>"']+$/
+const MARKDOWN_MARKERS_RE =
+  /(?:^|\n)\s*(?:#{1,6}\s|\*\*|[-*+]\s|\d+\.\s|> )|==[^=]+==|!\[|\[[^\]]+\]\(/
 
+/**
+ * Legacy prose generated before the formatting rules produced one dense
+ * paragraph with no markdown at all. Give it a bolded takeaway opener so it
+ * matches the style of newly generated content instead of rendering as a wall
+ * of plain text.
+ */
+function legacyFlair(text: string): string {
+  if (MARKDOWN_MARKERS_RE.test(text)) return text
+  return text
+    .split(/\n{2,}/)
+    .map((block) => {
+      if (/\*\*|==|^#{1,6}\s/.test(block)) return block
+      const match = block.match(/^(.{5,240}?)\.(?=\s|$)/)
+      if (!match) return block
+      const rest = block.slice(match[0].length)
+      return `**${match[1]}.**${rest}`
+    })
+    .join("\n\n")
+}
 function splitLinePct(value: string): Content[] {
   const out: Content[] = []
   for (const seg of value.split(PCT_RE)) {
@@ -15,6 +38,24 @@ function splitLinePct(value: string): Content[] {
       out.push({
         type: "span",
         data: { pct: true },
+        children: [{ type: "text", value: seg }],
+      } as unknown as Content)
+    } else {
+      out.push(...splitLineUrls(seg))
+    }
+  }
+  return out
+}
+
+function splitLineUrls(value: string): Content[] {
+  const out: Content[] = []
+  for (const seg of value.split(URL_RE)) {
+    if (!seg) continue
+    if (URL_FULL.test(seg)) {
+      const href = seg.startsWith("http") ? seg : `https://${seg}`
+      out.push({
+        type: "link",
+        url: href,
         children: [{ type: "text", value: seg }],
       } as unknown as Content)
     } else {
@@ -140,7 +181,7 @@ export function RichText({ text, className }: RichTextProps) {
   return (
     <div className={cn("font-body-md text-body-md text-on-surface leading-relaxed break-words", className)}>
       <ReactMarkdown remarkPlugins={[remarkGfm, highlightPlugin] as Pluggable[]} components={components as Components}>
-        {text}
+        {legacyFlair(text)}
       </ReactMarkdown>
     </div>
   )

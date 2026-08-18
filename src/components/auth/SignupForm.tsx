@@ -5,13 +5,14 @@ import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { useAuth } from "@/providers/use-auth"
 import {
- getErrorCode,
- normalizeJoinCode,
- fetchSchoolByCode,
- signStudentUp,
- signupTeacher,
- signupGuardian,
- type SchoolByCode,
+  getErrorCode,
+  normalizeJoinCode,
+  fetchSchoolByCode,
+  signStudentUp,
+  signupTeacher,
+  signupGuardian,
+  uploadOrgLogo,
+  type SchoolByCode,
 } from "@/lib/api"
 import {
  joinSignupSchema,
@@ -52,6 +53,7 @@ const TEACHER_ERRORS: Record<string, string> = {
 }
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024
+const MAX_LOGO_BYTES = 5 * 1024 * 1024
 
 export function SignupForm() {
  const [showPassword, setShowPassword] = useState(false)
@@ -63,6 +65,9 @@ export function SignupForm() {
  const [photoFile, setPhotoFile] = useState<File | null>(null)
  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
  const [photoError, setPhotoError] = useState<string | null>(null)
+ const [logoFile, setLogoFile] = useState<File | null>(null)
+ const [logoPreview, setLogoPreview] = useState<string | null>(null)
+ const [logoError, setLogoError] = useState<string | null>(null)
  const [guardianSectionOpen, setGuardianSectionOpen] = useState(false)
  const [submitting, setSubmitting] = useState(false)
  const { signup } = useAuth()
@@ -85,31 +90,39 @@ export function SignupForm() {
   ) as unknown as Resolver<SignupFormData>,
  })
 
- const onSuccess = (result: { status: "PENDING"; message: string } | { role: string }) => {
-  if ("status" in result) {
-   setPendingMessage(result.message)
-   return
-  }
-  toast.success("Account created!")
-  const teacherRoles = new Set(["TEACHER", "ADMIN"])
-  navigate(teacherRoles.has(result.role) ? "/dashboard" : "/student")
- }
-
- const submitCreate = (data: JoinSignupFormData) => {
+ const submitCreate = async (data: JoinSignupFormData) => {
   const organizationName = data.organizationName?.trim()
   if (!organizationName) {
    setError("organizationName", { type: "manual", message: "Please enter your school's name." })
    return
   }
-  signup.mutate(
-   {
+  setSubmitting(true)
+  try {
+   const result = await signup.mutateAsync({
     name: data.name,
     email: data.email,
     password: data.password,
     organizationName,
-   },
-   { onSuccess, onError: (error) => toast.error(error.message) },
-  )
+   })
+   if ("status" in result) {
+    setPendingMessage(result.message)
+    return
+   }
+   if (logoFile) {
+    try {
+     await uploadOrgLogo(logoFile)
+    } catch {
+     toast.error("Account created, but the school logo could not be uploaded. You can add it later from school settings.")
+    }
+   }
+   toast.success("Account created!")
+   const teacherRoles = new Set(["TEACHER", "ADMIN"])
+   navigate(teacherRoles.has(result.role) ? "/dashboard" : "/student")
+  } catch (error) {
+   toast.error(error instanceof Error ? error.message : "Sign up failed. Please try again.")
+  } finally {
+   setSubmitting(false)
+  }
  }
 
  const submitStudentJoin = async (data: JoinSignupFormData) => {
@@ -366,6 +379,72 @@ export function SignupForm() {
       {errors.organizationName && (
        <p className="text-error text-label-sm ml-1 mt-1">{errors.organizationName.message}</p>
       )}
+     </div>
+    )}
+
+    {mode === "create" && (
+     <div className="space-y-1.5">
+      <label className="text-body-md font-label-md text-on-background ml-1">School Logo (optional)</label>
+      {logoPreview ? (
+       <div className="flex items-center gap-4 rounded-lg border border-border p-3 bg-background">
+        <img
+         src={logoPreview}
+         alt="School logo preview"
+         className="w-16 h-16 rounded-lg object-contain border border-border bg-white p-1"
+        />
+        <div className="flex-1">
+         <p className="text-label-sm text-on-surface">{logoFile?.name}</p>
+         <p className="text-label-sm text-on-surface-variant mb-2">
+          JPEG or PNG, up to 5MB — this logo appears at the top of your school&apos;s reports.
+         </p>
+         <button
+          type="button"
+          className="text-primary font-label-md text-label-md hover:underline"
+          onClick={() => {
+           setLogoFile(null)
+           setLogoPreview(null)
+           setLogoError(null)
+          }}
+         >
+          Remove and choose again
+         </button>
+        </div>
+       </div>
+      ) : (
+       <label
+        className="flex flex-col items-center justify-center gap-2 px-4 py-8 rounded-lg border-2 border-dashed border-border bg-background cursor-pointer hover:border-primary transition-colors"
+        htmlFor="schoolLogo"
+       >
+        <span className="material-symbols-outlined text-outline text-3xl">image</span>
+        <span className="text-label-md text-on-surface">Click to upload your school logo</span>
+        <span className="text-label-sm text-on-surface-variant">JPEG or PNG, up to 5MB</span>
+       </label>
+      )}
+      <input
+       id="schoolLogo"
+       type="file"
+       accept="image/jpeg,image/png"
+       className="hidden"
+       onChange={(event) => {
+        const file = event.target.files?.[0] ?? null
+        event.target.value = ""
+        setLogoFile(null)
+        setLogoPreview(null)
+        setLogoError(null)
+        if (!file) return
+        if (file.size > MAX_LOGO_BYTES) {
+         setLogoError("The logo must be 5MB or smaller.")
+         return
+        }
+        if (file.type !== "image/jpeg" && file.type !== "image/png") {
+         setLogoError("The logo must be a JPEG or PNG image.")
+         return
+        }
+        setLogoFile(file)
+        setLogoPreview(URL.createObjectURL(file))
+       }}
+      />
+      {logoError && <p className="text-error text-label-sm ml-1 mt-1">{logoError}</p>}
      </div>
     )}
 

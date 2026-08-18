@@ -80,18 +80,18 @@ export function AvailableClassesPage() {
      description="Courses will show up here as soon as they're set up for your section."
     />
    ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md">
+    <div className="space-y-md">
      {enrolledClasses.map((cls) => (
       <Link
        key={cls.id}
        to={`/student/classes/${cls.id}`}
-       className="block rounded-lg bg-surface-container-lowest p-md hover:border-primary transition-colors group"
+       className="block w-full rounded-lg bg-surface-container-lowest p-md hover:border-primary transition-colors group border border-border"
       >
        <div className="flex items-center gap-3 mb-4">
         <div className="w-11 h-11 rounded-md bg-primary-container flex items-center justify-center shrink-0">
          <span className="material-symbols-outlined text-on-primary-container text-[22px]">menu_book</span>
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
          <h2 className="font-headline-md text-headline-md text-primary truncate group-hover:text-primary transition-colors">
           {cls.name}
          </h2>
@@ -99,6 +99,11 @@ export function AvailableClassesPage() {
           <p className="font-body-sm text-body-sm text-on-surface-variant truncate">{cls.description}</p>
          )}
         </div>
+        <span className="hidden md:inline-flex font-label-sm text-label-sm text-on-surface-variant">{cls.teacherName}</span>
+        <span className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 group-hover:text-primary transition-colors shrink-0">
+         Open class
+         <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </span>
        </div>
        <div className="flex flex-wrap gap-sm mb-3">
         <StatChip icon="assignment" value={cls.assignments.length} label={cls.assignments.length === 1 ? "assignment" : "assignments"} />
@@ -106,8 +111,8 @@ export function AvailableClassesPage() {
         <StatChip icon="quiz" value={cls.quizCount} label={cls.quizCount === 1 ? "quiz" : "quizzes"} />
        </div>
        {cls.materialTitles.length > 0 && (
-        <div className="flex items-center gap-1.5 flex-wrap mb-3">
-         {cls.materialTitles.slice(0, 2).map((t) => (
+        <div className="flex items-center gap-1.5 flex-wrap">
+         {cls.materialTitles.slice(0, 3).map((t) => (
           <span
            key={t}
            className="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant"
@@ -115,20 +120,13 @@ export function AvailableClassesPage() {
            {t}
           </span>
          ))}
-         {cls.materialTitles.length > 2 && (
+         {cls.materialTitles.length > 3 && (
           <span className="font-label-sm text-label-sm text-on-surface-variant">
-           +{cls.materialTitles.length - 2} more
+           +{cls.materialTitles.length - 3} more
           </span>
          )}
         </div>
        )}
-       <div className="flex items-center justify-between border-t border-outline-variant pt-3">
-        <span className="font-label-sm text-label-sm text-on-surface-variant">{cls.teacherName}</span>
-        <span className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 group-hover:text-primary transition-colors">
-         Open class
-         <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </span>
-       </div>
       </Link>
      ))}
     </div>

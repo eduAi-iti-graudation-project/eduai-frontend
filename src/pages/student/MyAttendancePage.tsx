@@ -182,6 +182,7 @@ export function MyAttendancePage() {
        <TableHeader>
         <TableRow className="border-b border-border bg-surface-container-low hover:bg-surface-container-low">
          <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant px-xl py-3 h-auto">Date</TableHead>
+         <TableHead className="text-left font-label-sm text-label-sm text-on-surface-variant px-xl py-3 h-auto">Course</TableHead>
          <TableHead className="text-right font-label-sm text-label-sm text-on-surface-variant px-xl py-3 h-auto">Status</TableHead>
         </TableRow>
        </TableHeader>
@@ -205,6 +206,9 @@ export function MyAttendancePage() {
              month: "short",
              day: "numeric",
             })}
+           </TableCell>
+           <TableCell className="px-xl py-3 font-body-md text-body-md text-on-surface">
+            {r.courseOffering?.course?.name ?? "Class"}
            </TableCell>
            <TableCell className="px-xl py-3 text-right">
             <Badge

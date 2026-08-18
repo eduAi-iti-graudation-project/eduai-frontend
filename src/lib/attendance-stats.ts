@@ -85,16 +85,24 @@ export function computeAttendanceStats(records: AttendanceRecordLike[]): Attenda
     }
   }
 
-  const countStatus = (status: AttendanceStatus) =>
-    [...byDay.values()].filter((d) =>
-      status === "PRESENT" ? d.present > 0 : status === "LATE" ? d.late > 0 : status === "ABSENT" ? d.absent > 0 : d.excused > 0,
-    ).length
+  // Each calendar day is classified exactly once so a day with records for several
+  // course offerings never counts twice. Lateness wins over presence for the day.
+  let presentDays = 0
+  let lateDays = 0
+  let excusedDays = 0
+  let absentDays = 0
+  for (const day of byDay.values()) {
+    if (day.late > 0) lateDays++
+    else if (day.present > 0) presentDays++
+    else if (day.excused > 0) excusedDays++
+    else if (day.absent > 0) absentDays++
+  }
 
   const totalDays = byDay.size
-  const presentDays = countStatus("PRESENT")
-  const lateDays = countStatus("LATE")
-  const absentDays = countStatus("ABSENT")
-  const excusedDays = countStatus("EXCUSED")
+  const attendedDays = presentDays + lateDays
+  // Each late day redacts one percentage point from the attendance rate.
+  const presentPercent =
+    totalDays > 0 ? Math.max(0, Math.min(100, Math.round((attendedDays / totalDays) * 100) - lateDays)) : 0
 
   return {
     totalDays,
@@ -102,7 +110,7 @@ export function computeAttendanceStats(records: AttendanceRecordLike[]): Attenda
     lateDays,
     absentDays,
     excusedDays,
-    presentPercent: totalDays > 0 ? Math.round(((presentDays + lateDays) / totalDays) * 100) : 0,
+    presentPercent,
     currentStreak,
     bestStreak,
   }

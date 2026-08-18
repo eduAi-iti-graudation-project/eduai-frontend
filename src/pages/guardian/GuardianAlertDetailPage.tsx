@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { HomeStrategiesList } from "@/components/communication/HomeStrategiesList"
+import { RichText } from "@/components/shared/RichText"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { ErrorState } from "@/components/shared/ErrorState"
 import { LoadingState } from "@/components/shared/LoadingState"
@@ -75,9 +76,7 @@ export function GuardianAlertDetailPage() {
                 <h2 className="font-headline-md text-headline-md text-primary">Message</h2>
               </div>
               <div className="bg-accent rounded-lg p-4 border border-outline-variant">
-                <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap">
-                  {guardianContent.message}
-                </p>
+                <RichText text={guardianContent.message} className="text-body-md text-on-surface" />
               </div>
             </div>
           )}
@@ -90,7 +89,7 @@ export function GuardianAlertDetailPage() {
                 </div>
                 <h2 className="font-headline-md text-headline-md text-primary">Why this happened</h2>
               </div>
-              <p className="font-body-md text-body-md text-on-surface">{diagnosis.summary}</p>
+              <RichText text={diagnosis.summary} className="text-body-md text-on-surface" />
             </div>
           )}
 

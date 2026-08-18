@@ -7,7 +7,6 @@ import { useCreateChatThread } from "@/hooks/use-chat-threads"
 import { useAuth } from "@/providers/use-auth"
 import { ClassMaterialsTab } from "./ClassMaterialsTab"
 import { EmptyState } from "@/components/ui/EmptyState"
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { Button } from "@/components/ui/button"
 
@@ -40,11 +39,10 @@ export function ClassDetailPage() {
  const { id } = useParams<{ id: string }>()
  const navigate = useNavigate()
  const [activeTab, setActiveTab] = useState<TabId>("students")
- const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
  const [studentQuery, setStudentQuery] = useState("")
 
  const { user } = useAuth()
- const { detail, assignments, isLoading, isError, error, deleteClass, removeEnrollment } = useClassDetail(id ?? "")
+ const { detail, assignments, isLoading, isError, error, removeEnrollment } = useClassDetail(id ?? "")
  const attendanceQuery = useClassAttendance(id ?? "")
  const createThread = useCreateChatThread()
 
@@ -87,12 +85,6 @@ export function ClassDetailPage() {
  )
 
  const dates = [...new Set(attendanceRecords.map((r) => r.date))].sort()
-
- const handleDelete = async () => {
-  if (!id) return
-  await deleteClass.mutateAsync()
-  navigate("/classes", { replace: true })
- }
 
  const handleRemoveStudent = async (studentId: string) => {
   if (!id) return
@@ -173,14 +165,14 @@ export function ClassDetailPage() {
             </td>
             <td className="py-3 px-4 text-right whitespace-nowrap">
              <div className="flex items-center justify-end gap-sm">
-              <button
-               type="button"
-               onClick={() => messageStudent(s.id)}
-               disabled={createThread.isPending}
-               className="bg-surface-container-lowest text-primary py-1 px-3 rounded-full text-label-md font-medium hover:bg-surface-container transition-colors disabled:opacity-60"
-              >
-               Message
-              </button>
+<button
+                 type="button"
+                 onClick={() => messageStudent(s.id)}
+                 disabled={createThread.isPending}
+                 className="border border-outline-variant text-primary py-1 px-3 rounded-full text-label-md font-medium hover:bg-primary-fixed/30 hover:border-primary/40 transition-colors disabled:opacity-60"
+                >
+                 Message
+                </button>
               <button
                type="button"
                onClick={() => handleRemoveStudent(s.id)}
@@ -337,14 +329,6 @@ export function ClassDetailPage() {
         AI Assistant
        </Link>
       </Button>
-      <Button
-       type="button"
-       variant="outline"
-       onClick={() => setShowDeleteConfirm(true)}
-       className="h-auto px-md py-2 border border-error text-error font-label-md text-label-m rounded-md hover:bg-error-container/50 transition-colors"
-      >
-       Delete
-      </Button>
      </div>
     </div>
 
@@ -366,17 +350,6 @@ export function ClassDetailPage() {
     </div>
    </div>
 
-   <ConfirmDialog
-    open={showDeleteConfirm}
-    title={`Delete ${cls.name}?`}
-    message="This will permanently delete this class and all associated assignments, submissions, and rubrics."
-    confirmLabel="Delete"
-    cancelLabel="Cancel"
-    variant="danger"
-    isLoading={deleteClass.isPending}
-    onConfirm={handleDelete}
-    onCancel={() => setShowDeleteConfirm(false)}
-   />
-  </div>
- )
+   </div>
+  )
 }

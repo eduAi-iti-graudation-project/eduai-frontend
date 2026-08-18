@@ -1,5 +1,6 @@
 import { useState } from "react"
 import type { GuardianContentPayload } from "@/lib/api"
+import { RichText } from "@/components/shared/RichText"
 
 interface GuardianMessagePreviewProps {
  content: GuardianContentPayload
@@ -27,8 +28,8 @@ export function GuardianMessagePreview({ content }: GuardianMessagePreviewProps)
 
    {open && (
     <div className="px-md pb-md space-y-4">
-     <div className="bg-accent rounded-lg p-4 ">
-      <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap">{content.message}</p>
+     <div className="bg-accent rounded-lg p-4">
+      <RichText text={content.message} className="text-body-md text-on-surface" />
      </div>
 
      {content.homeSupport.length > 0 && (
@@ -36,7 +37,7 @@ export function GuardianMessagePreview({ content }: GuardianMessagePreviewProps)
        <h4 className="font-label-md text-label-md text-primary mb-2">Things You Can Do at Home</h4>
        <ol className="space-y-2 list-decimal list-inside">
         {content.homeSupport.map((strategy, i) => (
-         <li key={i} className="font-body-sm text-body-sm text-on-surface-variant">
+         <li key={i} className="font-body-md text-body-md text-on-surface leading-relaxed">
           {strategy}
          </li>
         ))}

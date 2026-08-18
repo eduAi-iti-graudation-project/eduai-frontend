@@ -52,6 +52,9 @@ export function AdminRequestsPage() {
  const [requestToReject, setRequestToReject] = useState<api.MembershipRequest | null>(null)
  const [regenConfirmOpen, setRegenConfirmOpen] = useState(false)
  const [seatLimitWarning, setSeatLimitWarning] = useState(false)
+ const [logoFile, setLogoFile] = useState<File | null>(null)
+ const [logoPreview, setLogoPreview] = useState<string | null>(null)
+ const [logoError, setLogoError] = useState<string | null>(null)
 
  const orgQuery = useOrganization()
  const requestsQuery = useMembershipRequests(status)
@@ -94,6 +97,18 @@ export function AdminRequestsPage() {
   onSuccess: () => {
    toast.success("Join code regenerated. Share the new code with your school.")
    setRegenConfirmOpen(false)
+   queryClient.invalidateQueries({ queryKey: ["organization"] })
+  },
+  onError: (err: Error) => toast.error(err.message),
+ })
+
+ const logoMutation = useMutation({
+  mutationFn: (file: File) => api.uploadOrgLogo(file),
+  onSuccess: () => {
+   toast.success("School logo updated. It will appear on future reports.")
+   setLogoFile(null)
+   setLogoPreview(null)
+   setLogoError(null)
    queryClient.invalidateQueries({ queryKey: ["organization"] })
   },
   onError: (err: Error) => toast.error(err.message),
@@ -176,6 +191,85 @@ className="rounded-full font-label-md text-label-md border border-border bg-back
        {regenerateMutation.isPending ? "Generating..." : "Generate join code"}
       </Button>
      )}
+    </div>
+   </div>
+
+   {/* School logo card */}
+   <div className="rounded-lg bg-surface-container-lowest border border-border p-md">
+    <div className="flex items-center gap-3 mb-sm">
+     <span className="material-symbols-outlined text-[28px] text-primary">image</span>
+     <div>
+      <h2 className="font-headline-md text-headline-md text-primary">School logo</h2>
+      <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+       Shown at the top of every generated report. JPEG or PNG, up to 5MB.
+      </p>
+     </div>
+    </div>
+    <div className="flex flex-col md:flex-row md:items-center gap-4">
+     <div className="flex items-center gap-4">
+      {logoPreview ? (
+       <img
+        src={logoPreview}
+        alt="New school logo preview"
+        className="w-20 h-20 rounded-xl object-contain border border-border bg-white p-1"
+       />
+      ) : org?.logoUrl ? (
+       <img
+        src={api.orgLogoUrl(org.id)}
+        alt={`${org.name} logo`}
+        className="w-20 h-20 rounded-xl object-contain border border-border bg-white p-1"
+       />
+      ) : (
+       <div className="w-20 h-20 rounded-xl border-2 border-dashed border-border bg-surface flex items-center justify-center">
+        <span className="material-symbols-outlined text-outline text-3xl">image</span>
+       </div>
+      )}
+      <div className="flex flex-col items-start gap-2">
+       <label
+        className="inline-flex items-center gap-2 rounded-full border border-border bg-background text-primary hover:bg-surface-container h-auto px-md py-2 font-label-md text-label-md cursor-pointer"
+        htmlFor="schoolLogoUpload"
+       >
+        <span className="material-symbols-outlined text-[18px]">upload</span>
+        {org?.logoUrl || logoPreview ? "Replace logo" : "Upload logo"}
+       </label>
+       <input
+        id="schoolLogoUpload"
+        type="file"
+        accept="image/jpeg,image/png"
+        className="hidden"
+        onChange={(event) => {
+         const file = event.target.files?.[0] ?? null
+         event.target.value = ""
+         setLogoFile(null)
+         setLogoPreview(null)
+         setLogoError(null)
+         if (!file) return
+         if (file.size > 5 * 1024 * 1024) {
+          setLogoError("The logo must be 5MB or smaller.")
+          return
+         }
+         if (file.type !== "image/jpeg" && file.type !== "image/png") {
+          setLogoError("The logo must be a JPEG or PNG image.")
+          return
+         }
+         setLogoFile(file)
+         setLogoPreview(URL.createObjectURL(file))
+        }}
+       />
+       {logoFile && (
+        <Button
+         variant="outline"
+         className="rounded-full font-label-md text-label-md border border-border bg-background text-primary hover:bg-surface-container h-auto px-md py-2"
+         onClick={() => logoMutation.mutate(logoFile)}
+         disabled={logoMutation.isPending}
+        >
+         <span className="material-symbols-outlined text-[18px]">check</span>
+         {logoMutation.isPending ? "Saving..." : "Save logo"}
+        </Button>
+       )}
+      </div>
+     </div>
+     {logoError && <p className="text-error text-label-sm">{logoError}</p>}
     </div>
    </div>
 

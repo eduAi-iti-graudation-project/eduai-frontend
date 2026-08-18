@@ -11,10 +11,10 @@ export function HomeStrategiesList({ strategies }: HomeStrategiesListProps) {
    <ol className="space-y-3">
     {strategies.map((strategy, i) => (
      <li key={i} className="flex items-start gap-3">
-      <span className="w-6 h-6 rounded-lg bg-primary text-primary-foreground flex items-center justify-center text-label-sm font-bold shrink-0 mt-0.5">
+      <span className="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center text-label-sm font-bold shrink-0 mt-0.5">
        {i + 1}
       </span>
-      <p className="font-body-md text-body-md text-on-surface pt-0.5">{strategy}</p>
+      <p className="font-body-md text-body-md text-on-surface pt-0.5 leading-relaxed">{strategy}</p>
      </li>
     ))}
    </ol>

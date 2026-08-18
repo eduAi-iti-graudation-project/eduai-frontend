@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import type { components } from "@/types/api-schema"
+import { RichText } from "@/components/shared/RichText"
 import {
  Dialog,
  DialogContent,
@@ -54,9 +55,7 @@ export function NotificationDetailDialog({ notification, onClose }: Notification
 
     <div id="notification-detail-body">
      {notification.body ? (
-      <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap mb-lg">
-       {notification.body}
-      </p>
+      <RichText text={notification.body} className="mb-lg" />
      ) : (
       <p className="font-body-md text-body-md text-on-surface-variant italic mb-lg">
        No additional details.
