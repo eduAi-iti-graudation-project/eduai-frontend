@@ -227,45 +227,53 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
         </div>
         <div className="flex flex-wrap gap-2 justify-between items-center">
           <div className="flex gap-2 flex-wrap">
-            <Button
-              disabled={uploadRecording.isPending}
-              onClick={cached ? handleUploadCached : handleUploadPicked}
-            >
-              <span className="material-symbols-outlined text-[18px] mr-1.5">cloud_upload</span>
-              {uploadRecording.isPending ? "Uploading to cloud..." : "Upload Recording to Cloud"}
-            </Button>
+            {meeting.isHost && (
+              <Button
+                disabled={uploadRecording.isPending}
+                onClick={cached ? handleUploadCached : handleUploadPicked}
+              >
+                <span className="material-symbols-outlined text-[18px] mr-1.5">cloud_upload</span>
+                {uploadRecording.isPending ? "Uploading to cloud..." : "Upload Recording to Cloud"}
+              </Button>
+            )}
             {cached && (
               <Button variant="outline" size="sm" onClick={handleDownloadLocal}>
                 <span className="material-symbols-outlined text-[18px] mr-1.5">download</span>
                 Download Copy
               </Button>
             )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="video/mp4,video/webm"
-              onChange={handleFileChange}
-              className="hidden"
-            />
+            {meeting.isHost && (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="video/mp4,video/webm"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={uploadRecording.isPending}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <span className="material-symbols-outlined text-[18px] mr-1.5">folder_open</span>
+                  Pick Different File
+                </Button>
+              </>
+            )}
+          </div>
+          {meeting.isHost && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               disabled={uploadRecording.isPending}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={cached ? handleDiscardCached : handleDiscardPicked}
             >
-              <span className="material-symbols-outlined text-[18px] mr-1.5">folder_open</span>
-              Pick Different File
+              <span className="material-symbols-outlined text-[18px] mr-1">close</span>
+              Discard
             </Button>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={uploadRecording.isPending}
-            onClick={cached ? handleDiscardCached : handleDiscardPicked}
-          >
-            <span className="material-symbols-outlined text-[18px] mr-1">close</span>
-            Discard
-          </Button>
+          )}
         </div>
       </div>
     )
@@ -278,10 +286,12 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
         <div>
           <h3 className="font-label-lg text-label-lg text-on-surface mb-1">No recording video file available</h3>
           <p className="font-body-sm text-body-sm text-on-surface-variant max-w-md">
-            Pick a recorded video file (MP4 or WebM). You will see a preview before uploading it to storage.
+            {meeting.isHost
+              ? "Pick a recorded video file (MP4 or WebM). You will see a preview before uploading it to storage."
+              : "The host has not uploaded a recording for this class meeting yet."}
           </p>
         </div>
-        {(meeting.isHost || true) && (
+        {meeting.isHost && (
           <div>
             <input
               ref={fileInputRef}
@@ -332,7 +342,7 @@ function RecordingTab({ meeting }: { meeting: MeetingDetail }) {
       </div>
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div className="flex gap-2 flex-wrap">
-          {hasLocalPreview && (
+          {meeting.isHost && hasLocalPreview && (
             <Button
               size="sm"
               variant="secondary"
