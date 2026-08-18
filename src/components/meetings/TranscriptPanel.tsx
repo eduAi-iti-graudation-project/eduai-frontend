@@ -112,15 +112,18 @@ export function TranscriptPanel({
             </div>
           )}
 
-          {/* Saved / DB transcript segments */}
-          {dbSegments.map((segment, index) => (
-            <div key={`db-${segment.startMs}-${index}`} className="flex gap-3">
-              <span className="font-label-sm text-label-sm text-on-surface-variant shrink-0 mt-0.5 tabular-nums min-w-[3rem]">
-                {formatTimestamp(segment.startMs)}
-              </span>
-              <p className="font-body-md text-body-md text-on-surface">{segment.text}</p>
-            </div>
-          ))}
+          {/* Saved / DB transcript segments — only shown post-meeting (when
+              there are no live segments), to avoid duplicating the live captions
+              that are auto-saved to the DB in real time. */}
+          {!hasLiveSegments &&
+            dbSegments.map((segment, index) => (
+              <div key={`db-${segment.startMs}-${index}`} className="flex gap-3">
+                <span className="font-label-sm text-label-sm text-on-surface-variant shrink-0 mt-0.5 tabular-nums min-w-[3rem]">
+                  {formatTimestamp(segment.startMs)}
+                </span>
+                <p className="font-body-md text-body-md text-on-surface">{segment.text}</p>
+              </div>
+            ))}
 
           {/* Live speech captions (during meeting) */}
           {hasLiveSegments &&
