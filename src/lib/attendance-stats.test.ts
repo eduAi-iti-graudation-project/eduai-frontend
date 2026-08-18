@@ -89,7 +89,7 @@ describe("computeAttendanceStats", () => {
     expect(stats.bestStreak).toBe(2)
   })
 
-  it("counts late as attended for streaks and rate; an absence on the latest day resets the current streak", () => {
+  it("counts late as attended for streaks and rate; each late day redacts 1 point", () => {
     const stats = computeAttendanceStats([
       record("2026-03-02", "LATE"),
       record("2026-03-03", "PRESENT"),
@@ -97,7 +97,7 @@ describe("computeAttendanceStats", () => {
     ])
     expect(stats.currentStreak).toBe(0)
     expect(stats.bestStreak).toBe(2)
-    expect(stats.presentPercent).toBe(67)
+    expect(stats.presentPercent).toBe(66)
   })
 
   it("returns zeros for empty records", () => {
@@ -143,7 +143,24 @@ describe("computeAttendanceStats", () => {
     expect(stats.lateDays).toBe(1)
     expect(stats.excusedDays).toBe(1)
     expect(stats.absentDays).toBe(1)
-    expect(stats.presentPercent).toBe(87)
+    expect(stats.presentPercent).toBe(86)
+    expect(stats.presentPercent).toBeLessThanOrEqual(100)
+  })
+
+  it("never exceeds 100% when a day has both a PRESENT and a LATE record", () => {
+    const dates = Array.from({ length: 15 }, (_, i) => {
+      const day = String(11 + i).padStart(2, "0")
+      return `2026-05-${day}T00:00:00.000Z`
+    })
+    const stats = computeAttendanceStats([
+      ...dates.map((date) => ({ date, status: "PRESENT" as const })),
+      // The same day also has a late record for another course offering.
+      { date: "2026-05-12T00:00:00.000Z", status: "LATE" as const },
+    ])
+    expect(stats.totalDays).toBe(15)
+    expect(stats.presentDays).toBe(14)
+    expect(stats.lateDays).toBe(1)
+    expect(stats.presentPercent).toBe(99)
     expect(stats.presentPercent).toBeLessThanOrEqual(100)
   })
 })
